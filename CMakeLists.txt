@@ -1,11 +1,11 @@
 ﻿# CMakeList.txt : CMake project for vulkan_guide, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.17)
 
-project ("vulkan_guide")
+project ("VkMod2")
 
-set(CMAKE_CXX_STANDARD 17)
+set(-std=c++20 -v -march=native -mtune=native -fverbose-asm -save-temps -masm=intel -fuse-ld -Wall -Wextra -pthread -lpthread)
 
 find_package(Vulkan REQUIRED)
 
@@ -20,14 +20,14 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(glfw-3.3.6)
 # Add source to this project's executable.
-add_executable(vulkan_guide
+
+add_executable(VkMod2
     src/main.cpp
    )
 
+#set_property(TARGET VkMod2 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
 
-set_property(TARGET vulkan_guide PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
-
-target_include_directories(vulkan_guide PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 #target_link_libraries(vulkan_guide vkbootstrap vma glm tinyobjloader imgui stb_image)
 
 
@@ -35,9 +35,9 @@ target_include_directories(vulkan_guide PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 
 
-target_link_libraries(vulkan_guide Vulkan::Vulkan glfw)
+target_link_libraries(VkMod2 Vulkan::Vulkan glfw)
 
-add_dependencies(vulkan_guide Shaders)
+add_dependencies(VkMod2 Shaders)
 
 
 

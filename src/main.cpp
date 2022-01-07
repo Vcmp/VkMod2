@@ -12,7 +12,9 @@ bool a = true;
 
 //            int i = 0;
 		setupWindow();
-		createInstance();
+        VkUtils2::createInstance();
+        VkUtils2::setupDebugMessenger();
+        VkUtils2::createSurface();
 
         int aa=0;
         while (!glfwWindowShouldClose(window))
@@ -20,10 +22,10 @@ bool a = true;
 
 
             //renderer2.Renderer2.drawFrame();
-			extracted();
+			// extracted();
 
             glfwPollEvents();
-			 std::cout <<aa << "\n";
+			//  std::cout <<aa << "\n";
 			aa++;
 
         }

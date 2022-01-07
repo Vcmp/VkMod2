@@ -34,6 +34,8 @@
 
 /glfw-3.3.6
 /bin
+/out
 /build
 /.vscode
 /assets
+/.vs
