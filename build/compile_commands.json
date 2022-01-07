@@ -1,0 +1,82 @@
+[
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\c++.exe -IC:/Users/CB/GitHub/Newfolder -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -isystem C:/VulkanSDK/1.2.198.1/Include -g -o CMakeFiles\\vulkan_guide.dir\\src\\main.cpp.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\src\\main.cpp",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\src\\main.cpp"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\context.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\context.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\context.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\init.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\init.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\init.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\input.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\input.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\input.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\monitor.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\monitor.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\monitor.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\vulkan.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\vulkan.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\vulkan.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\window.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\window.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\window.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\win32_init.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_init.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_init.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\win32_joystick.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_joystick.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_joystick.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\win32_monitor.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_monitor.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_monitor.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\win32_time.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_time.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_time.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\win32_thread.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_thread.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_thread.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\win32_window.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_window.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\win32_window.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\wgl_context.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\wgl_context.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\wgl_context.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\egl_context.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\egl_context.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\egl_context.c"
+},
+{
+  "directory": "C:/Users/CB/GitHub/Newfolder/build",
+  "command": "C:\\media-autobuild_suite\\msys64\\mingw64\\bin\\cc.exe -DUNICODE -DWINVER=0x0501 -D_GLFW_USE_CONFIG_H -D_UNICODE -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/include -IC:/Users/CB/GitHub/Newfolder/glfw-3.3.6/src -IC:/Users/CB/GitHub/Newfolder/build/glfw-3.3.6/src -g -Wall -std=gnu99 -Wdeclaration-after-statement -o glfw-3.3.6\\src\\CMakeFiles\\glfw.dir\\osmesa_context.c.obj -c C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\osmesa_context.c",
+  "file": "C:\\Users\\CB\\GitHub\\Newfolder\\glfw-3.3.6\\src\\osmesa_context.c"
+}
+]
