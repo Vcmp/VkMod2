@@ -39,3 +39,6 @@
 /.vscode
 /assets
 /.vs
+*.idx
+*.json
+*.json

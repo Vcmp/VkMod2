@@ -28,7 +28,9 @@ add_executable(VkMod2
 #set_property(TARGET VkMod2 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
 
 target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-#target_link_libraries(vulkan_guide vkbootstrap vma glm tinyobjloader imgui stb_image)
+
+# target_include_directories("${PROJECT_SOURCE_DIR}/third_party/stb_image" INTERFACE stb_image)
+# target_link_libraries(VkMod2 stb_image)
 
 
 #set(glfw3_DIR "GLFW_PATH" CACHE PATH "Path to GLFW")

@@ -1,13 +1,22 @@
+#pragma once
+
+#include <stdint.h>
+#include <vulkan/vulkan_core.h>
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <iostream>
-#include <vulkan/vulkan.h>
-#include <GLFW//glfw3.h>
+
+#include <GLFW/glfw3.h>
 #include <vector>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-typedef VkResult (VKAPI_PTR *callPPPPI)(VkDevice device, uint64_t* pStrct, uint64_t* pAllocator, uint64_t* pHndl);
+#include "SwapChainSupportDetails.hpp"
+#include "Queues.hpp"
+#include "Pipeline.hpp"
+
+
+typedef VkResult (VKAPI_PTR *callPPPPI)(VkDevice device, const void* pStrct, const uint64_t* pAllocator/*, const PFN_vkVoidFunction* pHndl*/);
 
 
 static GLFWwindow* window;
@@ -18,14 +27,19 @@ static VkInstance vkInstance;
 };
 constexpr bool ENABLE_VALIDATION_LAYERS = true;
 
-static VkSurfaceKHR surface;
 
-static VkDebugUtilsMessengerEXT debugUtils;
 
-VKAPI_CALL int clPPPI(__int64, __int64, __int64, HANDLE_PTR)
+
+
+
+
+
+const VKAPI_CALL inline void clPPPI(void* pStrct,  const char* a)
 {
     //vkGetDeviceProcAddr()
-
+    auto x =(callPPPPI)vkGetDeviceProcAddr(device, a);
+    x(device, pStrct, nullptr);
+    //  callPPPPI(device, pStrct, nullptr, a)
 };
 
 long permuteMat(long, long);
@@ -47,17 +61,23 @@ struct VkUtils2
 	static void checkCall(VkResult);
     
     static void setupDebugMessenger();
+
+    static void pickPhysicalDevice();
+    static void createLogicalDevice();
+   
     
 private:
     static std::vector<const char*> getRequiredExtensions();
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
    
    static VkResult createDebugUtilsMessengerEXT(VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
-	
+	 
+    static bool isDeviceSuitable(VkPhysicalDevice);
+    static bool checkDeviceExtensionSupport(VkPhysicalDevice);
 };
 
 
-static void setupWindow()
+const static void setupWindow()
 {
 		glfwInit();
 
@@ -84,7 +104,7 @@ static void extracted()
 	 // VkUtils2::createInstance;
 }
 
-void VkUtils2::createInstance()
+inline void VkUtils2::createInstance()
     {
        std::cout <<("Creating Instance") << "\n";
         if (ENABLE_VALIDATION_LAYERS && !VkUtils2::checkValidationLayerSupport())
@@ -97,12 +117,16 @@ void VkUtils2::createInstance()
 
         VkApplicationInfo vkApplInfo = {
                 //memSet(vkApplInfo, 0,VkApplicationInfo.SIZEOF);
+                
                 .sType=VK_STRUCTURE_TYPE_APPLICATION_INFO,
-				 .pApplicationName="VKMod",
+				 .pNext=nullptr,
+                 .pApplicationName="VKMod",
                  .applicationVersion=VK_MAKE_VERSION(1, 0, 0),
                  .pEngineName="No Engine",
                  .engineVersion=VK_MAKE_VERSION(1, 0, 0),
-                 .apiVersion=VK_API_VERSION_1_2
+                 
+                 .apiVersion=VK_API_VERSION_1_2,
+                 
 		};
 //        MemSysm.Memsys2.free(a);
         // MemSysm.Memsys2.free(vkApplInfo);
@@ -110,13 +134,13 @@ void VkUtils2::createInstance()
 
 		// uint32_t glfwExtensionCount = 0;
 		// const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-         auto extensions=getRequiredExtensions();
-         VkInstanceCreateInfo InstCreateInfo = {};
-//                InstCreateInfo.sType(VK10.VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO);
+         
+         VkInstanceCreateInfo InstCreateInfo;
+        InstCreateInfo.sType =VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         InstCreateInfo.pApplicationInfo=&vkApplInfo;
 		//InstCreateInfo.enabledLayerCount = 0;
         // PointerBuffer glfwExtensions = getRequiredExtensions();
-       
+       auto extensions=getRequiredExtensions();
         InstCreateInfo.ppEnabledExtensionNames=extensions.data();
         // InstCreateInfo.pNext(extValidationFeatures.address());
 
@@ -136,10 +160,10 @@ void VkUtils2::createInstance()
         // getVersion();
     }
 
-void VkUtils2::createSurface()
+inline void VkUtils2::createSurface()
     {
         std::cout <<("Creating Surface") << "\n";
-        VkWin32SurfaceCreateInfoKHR createSurfaceInfo = {};
+        VkWin32SurfaceCreateInfoKHR createSurfaceInfo;
         createSurfaceInfo.sType=VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
         createSurfaceInfo.hwnd= glfwGetWin32Window(window);
         createSurfaceInfo.hinstance = GetModuleHandle(nullptr);
@@ -151,7 +175,7 @@ void VkUtils2::createSurface()
     }
 
 
-    bool VkUtils2::checkValidationLayerSupport()
+    inline bool VkUtils2::checkValidationLayerSupport()
     {
         uint32_t layerCount;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -163,7 +187,7 @@ void VkUtils2::createSurface()
     }
 
 
-void VkUtils2::checkCall(VkResult callPPPPI)
+inline void VkUtils2::checkCall(VkResult callPPPPI)
         {
             switch (callPPPPI)
             {
@@ -179,7 +203,7 @@ void VkUtils2::checkCall(VkResult callPPPPI)
             }
         }
 
-std::vector<const char*> VkUtils2::getRequiredExtensions()
+inline std::vector<const char*> VkUtils2::getRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -191,7 +215,7 @@ std::vector<const char*> VkUtils2::getRequiredExtensions()
      return extensions;
 }
 
-VKAPI_ATTR VkBool32 VKAPI_CALL VkUtils2::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+VKAPI_ATTR inline VkBool32 VKAPI_CALL VkUtils2::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
     void* pUserData)
@@ -201,13 +225,13 @@ VKAPI_ATTR VkBool32 VKAPI_CALL VkUtils2::debugCallback(VkDebugUtilsMessageSeveri
         return VK_FALSE;
     }
 
-void VkUtils2::setupDebugMessenger()
+inline void VkUtils2::setupDebugMessenger()
     {
         if(!ENABLE_VALIDATION_LAYERS) {
             return;
         }
 
-        VkDebugUtilsMessengerCreateInfoEXT createInfo = {};
+        VkDebugUtilsMessengerCreateInfoEXT createInfo{};
         createInfo.sType=VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         createInfo.messageSeverity=VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
         createInfo.messageType=VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
@@ -218,8 +242,9 @@ void VkUtils2::setupDebugMessenger()
         //debugMessenger = pDebugMessenger[0];
     }
     
-VkResult VkUtils2::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo) 
+inline VkResult VkUtils2::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo) 
 {
+    static VkDebugUtilsMessengerEXT debugUtils;
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != nullptr) {
         return func(instance, pCreateInfo, nullptr, &debugUtils);
@@ -227,3 +252,146 @@ VkResult VkUtils2::createDebugUtilsMessengerEXT(VkInstance instance, const VkDeb
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 }
+
+
+
+
+
+
+
+
+inline void VkUtils2::pickPhysicalDevice()
+{
+    std::cout <<("Picking Physical Device")<<"\n";
+    uint32_t deviceCount;
+    checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr));
+    if(deviceCount == 0) std::runtime_error("Failed to find GPUs with Vulkan support");
+    std::vector<VkPhysicalDevice> ppPhysicalDevices(deviceCount);
+
+    VkPhysicalDevice device;
+    std::cout <<("Enumerate Physical Device") << "\n";
+   checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, ppPhysicalDevices.data()));
+     for(const VkPhysicalDevice& d : ppPhysicalDevices)
+        {  
+            std::cout <<("Check Device:") << d << "\n";
+            if(isDeviceSuitable(d)) {
+                std::cout <<("Device Suitable:") << d << "\n";
+                physicalDevice = d;
+                break;
+            }
+             std::cout <<("Device Not Suitable:") << d << "\n";
+           
+        }
+        if (physicalDevice == VK_NULL_HANDLE) {
+            std::runtime_error("Failed to find a suitable GPU");
+        }
+
+
+}
+//Use VK Tutorial refernce as that sems to be far m re replable that the prior java approach used
+inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
+ {
+
+      VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+    Queues::enumerateDetermineQueueFamilies(device);    
+    
+
+    return  Queues::isComplete();/*deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+           deviceFeatures.geometryShader;*/
+
+        // bool extensionsSupported = checkDeviceExtensionSupport(device);
+        // bool swapChainAdequate = false;
+        // std::cout << extensionsSupported << "\n";
+        // if(extensionsSupported) {
+		// 	std::cout << "Verifying querySwapChainSupport" << "\n";
+        //     SwapChainSupportDetails::querySwapChainSupport(device);
+        //     swapChainAdequate = formats.format && presentModes;
+        // }
+		
+		// std::cout << "Enumerating Queuefamilies" << "\n";
+        // Queues::enumerateDetermineQueueFamilies(device);
+		// return /* Queues.isComplete() && */ extensionsSupported && swapChainAdequate;
+}
+
+//  inline bool  VkUtils2::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+//      std::cout << "Verifying checkDeviceExtensionSupport" << "\n";
+//         uint32_t extensionCount;
+//         vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
+//         VkExtensionProperties availableExtensions;
+//         vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, &availableExtensions);
+        
+        
+        
+//         return sizeof(availableExtensions.extensionName)!=NULL;
+//     }
+
+
+    inline void VkUtils2::createLogicalDevice() {
+
+        
+            uint32_t uniqueQueueFamilies[] = {graphicsFamily};
+
+
+//                Queues.findQueueFamilies(Queues.physicalDevice);
+            //TODO: Fix bug with NULL/Missing.Invalid Queues
+            VkDeviceQueueCreateInfo queueCreateInfos;
+            const float priority = 1.0f;
+            // for(int i = 0; i < 1; i++) {
+                queueCreateInfos.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+                queueCreateInfos.queueFamilyIndex=uniqueQueueFamilies[0];
+                queueCreateInfos.pQueuePriorities=&priority;
+            
+            VkPhysicalDeviceVulkan12Features deviceVulkan12Features;
+                    deviceVulkan12Features.descriptorBindingPartiallyBound=true,
+                    deviceVulkan12Features.imagelessFramebuffer=true;
+                    
+         
+
+            VkPhysicalDeviceFeatures deviceFeatures;
+
+            VkPhysicalDeviceFeatures2 deviceFeatures2;
+                    deviceFeatures2.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+                    deviceFeatures2.pNext=&deviceVulkan12Features;
+                    deviceFeatures2.features=deviceFeatures;
+
+
+
+            //.fillModeNonSolid(true) //dneeded to adres valditaion errors when using VK_POLIGYON_MODE_LINE or POINT
+            //.robustBufferAccess(true);
+//                        .geometryShader(true);
+//                        .pipelineStatisticsQuery(true)
+//                        .alphaToOne(false);
+            vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
+            VkDeviceCreateInfo createInfo;
+                    createInfo.sType=VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+                    createInfo.pNext=&deviceFeatures2;
+                    createInfo.pQueueCreateInfos=&queueCreateInfos;
+
+
+            // PointerBuffer value = asPointerBuffer(DEVICE_EXTENSIONS);
+            // memPutLong(createInfo.address() + VkDeviceCreateInfo.PPENABLEDEXTENSIONNAMES, value.address0());
+            // memPutInt(createInfo.address() + VkDeviceCreateInfo.ENABLEDEXTENSIONCOUNT, value.remaining());
+
+            // if(ENABLE_VALIDATION_LAYERS) {
+            //     createInfo.ppEnabledLayerNames(asPointerBuffer(VALIDATION_LAYERS));
+            // }
+            vkCreateDevice(physicalDevice, &createInfo, nullptr, &device );
+
+
+              vkGetDeviceQueue(device, graphicsFamily, 0, &GraphicsQueue);
+       
+    }
+
+    //  static void setupQueues()
+    // {
+
+    //     nvkGetDeviceQueue(device, Queues.graphicsFamily, 0,MemSysm.address);
+    //     Queues.graphicsQueue = new VkQueue(memGetLong(MemSysm.address), device);
+
+    //     nvkGetDeviceQueue(device, Queues.presentFamily, 0,MemSysm.address);
+    //     Queues.presentQueue = new VkQueue(memGetLong(MemSysm.address), device);
+
+    // }
