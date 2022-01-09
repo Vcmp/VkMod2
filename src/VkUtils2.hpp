@@ -1,16 +1,11 @@
 #pragma once
-
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #include <stdint.h>
 #include <vulkan/vulkan_core.h>
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_INCLUDE_VULKAN
 #include <iostream>
-
-#include <GLFW/glfw3.h>
-#include <vector>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-
 #include "SwapChainSupportDetails.hpp"
 #include "Queues.hpp"
 #include "Pipeline.hpp"
@@ -19,7 +14,7 @@
 typedef VkResult (VKAPI_PTR *callPPPPI)(VkDevice device, const void* pStrct, const uint64_t* pAllocator/*, const PFN_vkVoidFunction* pHndl*/);
 
 
-static GLFWwindow* window;
+const static GLFWwindow* window;
 static GLFWmonitor* monitor;
 static VkInstance vkInstance;
  const static std::vector<const char*> validationLayers = {
@@ -68,7 +63,7 @@ struct VkUtils2
     static void createLogicalDevice();
    
     
-private:
+
     static std::vector<const char*> getRequiredExtensions();
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
    
@@ -95,8 +90,8 @@ const inline void VkUtils2::setupWindow()
 
         if(window == NULL) exit(1);
 
-        glfwSetWindowShouldClose(window, false);
-        glfwMakeContextCurrent(window);
+        glfwSetWindowShouldClose(const_cast<GLFWwindow*>(window), false);
+        glfwMakeContextCurrent(const_cast<GLFWwindow*>(window));
 }
 
 
@@ -117,19 +112,19 @@ inline void VkUtils2::createInstance()
         // VkValidationFeaturesEXT extValidationFeatures = VkValidationFeaturesEXT.create(MemSysm.calloc(VkValidationFeaturesEXT.SIZEOF)).sType$Default()
                 // .pEnabledValidationFeatures(a);
 
-        VkApplicationInfo vkApplInfo = {
+        VkApplicationInfo vkApplInfo = {};
                 //memSet(vkApplInfo, 0,VkApplicationInfo.SIZEOF);
                 
-                .sType=VK_STRUCTURE_TYPE_APPLICATION_INFO,
-				 .pNext=nullptr,
-                 .pApplicationName="VKMod",
-                 .applicationVersion=VK_MAKE_VERSION(1, 0, 0),
-                 .pEngineName="No Engine",
-                 .engineVersion=VK_MAKE_VERSION(1, 0, 0),
+                vkApplInfo.sType=VK_STRUCTURE_TYPE_APPLICATION_INFO;
+				 vkApplInfo.pNext=nullptr;
+                 vkApplInfo.pApplicationName="VKMod";
+                 vkApplInfo.applicationVersion=VK_MAKE_VERSION(1, 0, 0);
+                 vkApplInfo.pEngineName="No Engine";
+                vkApplInfo .engineVersion=VK_MAKE_VERSION(1, 0, 0);
                  
-                 .apiVersion=VK_API_VERSION_1_2,
+                 vkApplInfo.apiVersion=VK_API_VERSION_1_2;
                  
-		};
+		
 //        MemSysm.Memsys2.free(a);
         // MemSysm.Memsys2.free(vkApplInfo);
         //nmemFree(vkApplInfo);
@@ -137,7 +132,7 @@ inline void VkUtils2::createInstance()
 		// uint32_t glfwExtensionCount = 0;
 		// const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
          
-         VkInstanceCreateInfo InstCreateInfo;
+         VkInstanceCreateInfo InstCreateInfo={};
         InstCreateInfo.sType =VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         InstCreateInfo.pApplicationInfo=&vkApplInfo;
 		//InstCreateInfo.enabledLayerCount = 0;
@@ -165,9 +160,9 @@ inline void VkUtils2::createInstance()
 inline void VkUtils2::createSurface()
     {
         std::cout <<("Creating Surface") << "\n";
-        VkWin32SurfaceCreateInfoKHR createSurfaceInfo;
+        VkWin32SurfaceCreateInfoKHR createSurfaceInfo={};
         createSurfaceInfo.sType=VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-        createSurfaceInfo.hwnd= glfwGetWin32Window(window);
+        createSurfaceInfo.hwnd= glfwGetWin32Window(const_cast<GLFWwindow*>(window));
         createSurfaceInfo.hinstance = GetModuleHandle(nullptr);
         createSurfaceInfo.pNext=nullptr;
 
@@ -246,7 +241,7 @@ inline void VkUtils2::setupDebugMessenger()
     
 inline VkResult VkUtils2::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo) 
 {
-    static VkDebugUtilsMessengerEXT debugUtils;
+    VkDebugUtilsMessengerEXT debugUtils={};
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != nullptr) {
         return func(instance, pCreateInfo, nullptr, &debugUtils);
@@ -268,11 +263,11 @@ inline void VkUtils2::pickPhysicalDevice()
     uint32_t deviceCount;
     checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr));
     if(deviceCount == 0) std::runtime_error("Failed to find GPUs with Vulkan support");
-    std::vector<VkPhysicalDevice> ppPhysicalDevices(deviceCount);
+    VkPhysicalDevice ppPhysicalDevices[deviceCount];
 
     VkPhysicalDevice device;
     std::cout <<("Enumerate Physical Device") << "\n";
-   checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, ppPhysicalDevices.data()));
+   checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, ppPhysicalDevices));
      for(const VkPhysicalDevice& d : ppPhysicalDevices)
         {  
             std::cout <<("Check Device:") << d << "\n";
@@ -332,9 +327,9 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
 
     inline void VkUtils2::createLogicalDevice() {
-
+            std::cout <<("Creating Logical Device")<<"\n";
         
-            uint32_t uniqueQueueFamilies[] = {graphicsFamily};
+            //uint32_t uniqueQueueFamilies[] = {graphicsFamily};
 
 
 //                Queues.findQueueFamilies(Queues.physicalDevice);
@@ -343,7 +338,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             const float priority = 1.0f;
             // for(int i = 0; i < 1; i++) {
                 queueCreateInfos.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                queueCreateInfos.queueFamilyIndex=uniqueQueueFamilies[0];
+                queueCreateInfos.queueFamilyIndex=graphicsFamily;
                 queueCreateInfos.pQueuePriorities=&priority;
             
             VkPhysicalDeviceVulkan12Features deviceVulkan12Features;

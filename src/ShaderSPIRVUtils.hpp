@@ -47,7 +47,7 @@ inline const char ShaderSPIRVUtils::compileShaderFile(const char* shaderNamePath
 
 inline const VkShaderModule ShaderSPIRVUtils::createShaderModule(const char* shadr, size_t ax)
 {
-    VkShaderModuleCreateInfo a;
+    VkShaderModuleCreateInfo a={};
     {
         a.codeSize=ax,
         a.pCode=reinterpret_cast<const uint32_t*>(shadr);

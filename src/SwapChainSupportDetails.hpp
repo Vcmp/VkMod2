@@ -13,7 +13,7 @@ static VkSurfaceFormatKHR formats;
    static VkSurfaceFormatKHR swapChainImageFormat;
    static VkExtent2D swapChainExtent;
 
-    static VkImageView swapChainImagesViews[3];
+    static VkImageView swapChainImageViews[3];
     static VkRenderPass renderPass;
 
 struct SwapChainSupportDetails
@@ -55,7 +55,7 @@ inline void SwapChainSupportDetails::querySwapChainSupport(VkPhysicalDevice devi
                     return capabilities.currentExtent;
                 }
 
-                VkExtent2D actualExtent;
+                VkExtent2D actualExtent={};
 
                 VkExtent2D minExtent = capabilities.minImageExtent;
                 VkExtent2D maxExtent = capabilities.maxImageExtent;
@@ -89,6 +89,7 @@ inline void SwapChainSupportDetails::querySwapChainSupport(VkPhysicalDevice devi
     
 inline void SwapChainSupportDetails::createSwapChain()
 {
+    std::cout << "Creating: SwapChain";
     {
 
             querySwapChainSupport(physicalDevice);
@@ -172,7 +173,7 @@ inline void SwapChainSupportDetails::createImageViews()
                 createInfo.subresourceRange.layerCount=1;
         
         
-        vkCreateImageView(device, &createInfo, nullptr, swapChainImagesViews); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+        vkCreateImageView(device, &createInfo, nullptr, swapChainImageViews); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
 
         
 

@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <vulkan/vulkan.h>
 #include <iostream>
 
@@ -31,13 +30,13 @@ inline void Queues::enumerateDetermineQueueFamilies(const VkPhysicalDevice &devi
 
             uint32_t pQueueFamilyPropertyCount=0;
             vkGetPhysicalDeviceQueueFamilyProperties(device, &pQueueFamilyPropertyCount, nullptr);
-            std::vector<VkQueueFamilyProperties> queueFamilies(pQueueFamilyPropertyCount);
-            vkGetPhysicalDeviceQueueFamilyProperties(device, &pQueueFamilyPropertyCount, queueFamilies.data());
+            VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
+            vkGetPhysicalDeviceQueueFamilyProperties(device, &pQueueFamilyPropertyCount, queueFamilies);
 
             //VkBool32 presentSupport = (VK_FALSE);
             uint32_t i = 0;
             
-            for (const  VkQueueFamilyProperties a : queueFamilies) {
+            for (const  VkQueueFamilyProperties &a : queueFamilies) {
                 // std::cout <<(a.queueCount())<< "\n";
                 if ((a.queueFlags & VK_QUEUE_GRAPHICS_BIT)==0) {
                     graphicsFamily = i;

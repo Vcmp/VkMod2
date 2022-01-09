@@ -89,7 +89,7 @@ inline void Pipeline::createRenderPasses()
         };
 
 
-        VkRenderPassCreateInfo vkRenderPassCreateInfo1;
+        VkRenderPassCreateInfo vkRenderPassCreateInfo1={};
         vkRenderPassCreateInfo1.sType=VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
                 vkRenderPassCreateInfo1.pAttachments=attachments;
                 vkRenderPassCreateInfo1.pSubpasses=&vkSubpassDescriptions;
@@ -176,14 +176,14 @@ inline void Pipeline::createRenderPasses()
         };
 
 
-        VkPipelineVertexInputStateCreateInfo vkPipelineVertexInputStateCreateInfo;
+        VkPipelineVertexInputStateCreateInfo vkPipelineVertexInputStateCreateInfo={};
                    vkPipelineVertexInputStateCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
                 vkPipelineVertexInputStateCreateInfo.pVertexBindingDescriptions=getVertexInputBindingDescription();
         // vkPipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions= getAttributeDescriptions();
         // VkPipelineVertexInputStateCreateInfo.nvertexAttributeDescriptionCount=3;
 
 
-        VkPipelineInputAssemblyStateCreateInfo inputAssembly;
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly={};
                    inputAssembly.sType=VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
                 inputAssembly.topology=VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
                 inputAssembly.primitiveRestartEnable=false;
@@ -207,14 +207,14 @@ inline void Pipeline::createRenderPasses()
                 .extent=swapChainExtent
         };
 
-        VkPipelineViewportStateCreateInfo vkViewPortState;
+        VkPipelineViewportStateCreateInfo vkViewPortState={};
                    vkViewPortState.sType=VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
                 vkViewPortState.pViewports=&vkViewport;
 //                    .pScissors(vkrect2DBuffer);
                 vkViewPortState.pScissors=&scissor;
 
 
-        VkPipelineRasterizationStateCreateInfo VkPipeLineRasterization;
+        VkPipelineRasterizationStateCreateInfo VkPipeLineRasterization={};
                    VkPipeLineRasterization.sType=VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
                 VkPipeLineRasterization.depthClampEnable=false;
                 VkPipeLineRasterization.rasterizerDiscardEnable=false;
@@ -225,7 +225,7 @@ inline void Pipeline::createRenderPasses()
                 VkPipeLineRasterization.depthBiasEnable=false;
 
         //todo: actuall need multismapling to Compleet.Initialsie.Construct.Substanciate the renderPipeline corretcly even if Antialsing /AF/MMs are not neeeded......
-        VkPipelineMultisampleStateCreateInfo multisampling;
+        VkPipelineMultisampleStateCreateInfo multisampling={};
                    multisampling.sType=VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
                 multisampling.sampleShadingEnable=false;
                 multisampling.rasterizationSamples=VK_SAMPLE_COUNT_1_BIT;
@@ -233,7 +233,7 @@ inline void Pipeline::createRenderPasses()
 //                    .alphaToCoverageEnable(false);
 
 
-        VkPipelineDepthStencilStateCreateInfo depthStencil;
+        VkPipelineDepthStencilStateCreateInfo depthStencil={};
                    depthStencil.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
                 depthStencil.depthTestEnable=true;
                 depthStencil.depthWriteEnable=true;
@@ -244,7 +244,7 @@ inline void Pipeline::createRenderPasses()
                 depthStencil.stencilTestEnable=false;
 
 
-        VkPipelineColorBlendAttachmentState colorBlendAttachment;
+        VkPipelineColorBlendAttachmentState colorBlendAttachment={};
                 colorBlendAttachment.colorWriteMask=VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
                 //(Actually)Add blending?transparency to be suproted
                 colorBlendAttachment.blendEnable=true;
@@ -258,7 +258,7 @@ inline void Pipeline::createRenderPasses()
 //                    .alphaBlendOp(VK_BLEND_OP_ADD);
 
         // float blendConstants[]={0.0f, 0.0f, 0.0f, 0.0f};
-        VkPipelineColorBlendStateCreateInfo colorBlending;
+        VkPipelineColorBlendStateCreateInfo colorBlending={};
                    colorBlending.sType=VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
                 colorBlending.logicOpEnable=false;
                 colorBlending.logicOp=VK_LOGIC_OP_COPY;
@@ -269,7 +269,7 @@ inline void Pipeline::createRenderPasses()
                 colorBlending.blendConstants[3]=0.0f;
 //            memFree(colorBlendAttachment);
 
-        VkPushConstantRange vkPushConstantRange;
+        VkPushConstantRange vkPushConstantRange={};
                 vkPushConstantRange.offset=0;
                 vkPushConstantRange.size=16 * sizeof(float);
                 vkPushConstantRange.stageFlags=VK_SHADER_STAGE_VERTEX_BIT;
@@ -281,7 +281,7 @@ inline void Pipeline::createRenderPasses()
        
 
 
-        std::cout << ("using pipeLine with Length: ") << sizeof(swapChainImagesViews);
+        std::cout << ("using pipeLine with Length: ") << sizeof(swapChainImageViews);
         //nmemFree(vkPipelineLayoutCreateInfo1.address());
         vkCreatePipelineLayout(device, &vkPipelineLayoutCreateInfo, nullptr, &vkLayout);
         //MemSysm.Memsys2.doPointerAllocSafeX(vkPipelineLayoutCreateInfo, Buffers.capabilities.vkCreatePipelineLayout, Buffers.vkLayout);
