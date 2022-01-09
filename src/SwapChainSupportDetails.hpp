@@ -55,7 +55,7 @@ inline void SwapChainSupportDetails::querySwapChainSupport(VkPhysicalDevice devi
                     return capabilities.currentExtent;
                 }
 
-                VkExtent2D actualExtent={};
+                VkExtent2D actualExtent;
 
                 VkExtent2D minExtent = capabilities.minImageExtent;
                 VkExtent2D maxExtent = capabilities.maxImageExtent;

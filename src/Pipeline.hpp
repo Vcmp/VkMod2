@@ -10,10 +10,9 @@
 #include "src/UniformBufferObject.hpp"
 #include "src/ShaderSPIRVUtils.hpp"
 #include <stdint.h>
-#include <vulkan/vulkan_core.h>
 
-VkPipeline graphicsPipeline;
-VkCommandPool commandPool;
+static VkPipeline graphicsPipeline;
+static VkCommandPool commandPool;
 
 struct Pipeline
 {

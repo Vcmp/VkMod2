@@ -7,8 +7,12 @@
 #include <vulkan/vulkan_core.h>
 #include <iostream>
 #include "SwapChainSupportDetails.hpp"
-#include "Queues.hpp"
+
 #include "Pipeline.hpp"
+#include "Texture.hpp"
+#include "Buffers.hpp"
+#include "UniformBufferObject.hpp"
+#include "ShaderSPIRVUtils.hpp"
 
 
 typedef VkResult (VKAPI_PTR *callPPPPI)(VkDevice device, const void* pStrct, const uint64_t* pAllocator/*, const PFN_vkVoidFunction* pHndl*/);

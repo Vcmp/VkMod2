@@ -1,9 +1,8 @@
 #pragma once
 
 
-#include "src/Queues.hpp"
+#include "src/VkUtils2.hpp"
 #include <stdexcept>
-#include <vulkan/vulkan_core.h>
 struct Texture
 {
     static void createTextureImage();

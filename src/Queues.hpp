@@ -1,6 +1,5 @@
 #pragma once
-#include <vulkan/vulkan.h>
-#include <iostream>
+#include "VkUtils2.hpp"
 
 static VkPhysicalDevice physicalDevice;
 static VkDevice device;
