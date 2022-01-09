@@ -39,7 +39,7 @@ inline void Queues::enumerateDetermineQueueFamilies(const VkPhysicalDevice &devi
             
             for (const  VkQueueFamilyProperties a : queueFamilies) {
                 // std::cout <<(a.queueCount())<< "\n";
-                if ((a.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+                if ((a.queueFlags & VK_QUEUE_GRAPHICS_BIT)==0) {
                     graphicsFamily = i;
                 }
                 if (isComplete())

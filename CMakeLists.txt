@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.17)
 
 project ("VkMod2")
 
-set(-std=c++20 -v -march=native -mtune=native -fverbose-asm -save-temps -masm=intel -fuse-ld -Wall -Wextra -pthread -lpthread)
+set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread")
 
 find_package(Vulkan REQUIRED)
 

@@ -55,6 +55,8 @@ struct VkUtils2
     static boolean debug;
     static boolean checks;
 	 static void extracted();
+	 const static void setupWindow();
+
 	 static void createInstance();
 	 static void createSurface();
 	static bool checkValidationLayerSupport();
@@ -77,7 +79,7 @@ private:
 };
 
 
-const static void setupWindow()
+const inline void VkUtils2::setupWindow()
 {
 		glfwInit();
 

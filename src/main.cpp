@@ -12,7 +12,7 @@ bool a = true;
         //System.gc();
 
 //            int i = 0;
-		setupWindow();
+		VkUtils2::setupWindow();
         VkUtils2::createInstance();
         VkUtils2::setupDebugMessenger();
         VkUtils2::createSurface();
