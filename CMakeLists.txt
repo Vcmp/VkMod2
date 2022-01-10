@@ -5,7 +5,15 @@ cmake_minimum_required (VERSION 3.17)
 
 project ("VkMod2")
 
-set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread")
+# set(CMAKE_C_COMPILER_TARGET x86_64-windows-gnu)
+# set(CMAKE_CXX_COMPILER_TARGET x86_64-windows-gnu)
+# set(CLANG_DEFAULT_CXX_STDLIB=libc++)
+# set(CLANG_DEFAULT_RTLIB=compiler-rt)
+# set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld")
+# set(CMAKE_MODULE_LINKER_FLAGS_INIT "-fuse-ld=lld")
+# set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld")
+
+set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 
 find_package(Vulkan REQUIRED)
 

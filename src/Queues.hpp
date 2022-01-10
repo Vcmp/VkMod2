@@ -1,5 +1,4 @@
-#pragma once
-#include "VkUtils2.hpp"
+#include <vulkan/vulkan.h>
 
 static VkPhysicalDevice physicalDevice;
 static VkDevice device;
@@ -25,7 +24,7 @@ struct Queues
 
 inline void Queues::enumerateDetermineQueueFamilies(const VkPhysicalDevice &device)
 {
-            std::cout <<("Checking Available Queue families") << "\n";
+            //std::cout <<("Checking Available Queue families") << "\n";
 
             uint32_t pQueueFamilyPropertyCount=0;
             vkGetPhysicalDeviceQueueFamilyProperties(device, &pQueueFamilyPropertyCount, nullptr);

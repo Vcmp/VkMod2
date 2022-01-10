@@ -1,5 +1,4 @@
 #include "VkUtils2.hpp"
-#include "src/SwapChainSupportDetails.hpp"
 
 
 bool a = true;
@@ -12,12 +11,7 @@ bool a = true;
         //System.gc();
 
 //            int i = 0;
-		VkUtils2::setupWindow();
-        VkUtils2::createInstance();
-        VkUtils2::setupDebugMessenger();
-        VkUtils2::createSurface();
-        VkUtils2::pickPhysicalDevice();
-        // VkUtils2::createLogicalDevice();
+		VkUtils2::extracted();
         // SwapChainSupportDetails::createSwapChain();
         // SwapChainSupportDetails::createImageViews();
         // Pipeline::createRenderPasses();
