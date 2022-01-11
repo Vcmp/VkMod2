@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <vector>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
 
 
 // static VkSurfaceFormatKHR formats={};
@@ -39,18 +38,22 @@ struct SwapChainSupportDetails
                 return  (min > a ? min : a);
             }
         inline VkExtent2D SwapChainSupportDetails::chooseSwapExtent()
+            
             {
-                if (capabilities.currentExtent.width != 0xFFFFFFFF) {
-                    return capabilities.currentExtent;
-                }
+                std::cout << "Creating: chooseSwapExtent"<<"\n";
+                // if (capabilities.currentExtent.width != 0xFFFFFFFF) {
+                //     return capabilities.currentExtent;
+                // }
 
                 VkExtent2D actualExtent={};
 
                 VkExtent2D minExtent = capabilities.minImageExtent;
                 VkExtent2D maxExtent = capabilities.maxImageExtent;
-
-                actualExtent.width= SwapChainSupportDetails::clamp(minExtent.width, maxExtent.width, actualExtent.width);
-                actualExtent.height= SwapChainSupportDetails::clamp(minExtent.height, maxExtent.height, actualExtent.height);
+                uint32_t xn=SwapChainSupportDetails::clamp(minExtent.width, maxExtent.width, actualExtent.width);
+                uint32_t yn=SwapChainSupportDetails::clamp(minExtent.height, maxExtent.height, actualExtent.height);
+            std::cout<<xn <<"-"<<yn<<"\n";
+                actualExtent.width= xn;
+                actualExtent.height= yn;
 
 
                 return actualExtent;

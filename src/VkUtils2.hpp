@@ -1,6 +1,8 @@
 #include <stdexcept>
+#include <vulkan/vulkan_core.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
+#define VK_USE_64_BIT_PTR_DEFINES 1
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <stdint.h>
@@ -21,7 +23,7 @@ static VkInstance vkInstance;
     "VK_LAYER_KHRONOS_validation"
 };
 
-    constexpr bool debug=false;
+    constexpr bool debug=true;
     constexpr bool checks=true;
     constexpr bool ENABLE_VALIDATION_LAYERS=debug;
     
@@ -58,8 +60,8 @@ class VkUtils2
       VkUtils2::createSurface();
       VkUtils2::pickPhysicalDevice();
       VkUtils2::createLogicalDevice();
-    //   VkUtils2::createSwapChain();
-    //   VkUtils2::createImageViews();
+      VkUtils2::createSwapChain();
+      VkUtils2::createImageViews();
       // VkUtils2::createInstance;
     }
          static void setupWindow();
@@ -86,7 +88,7 @@ private:
     static bool isDeviceSuitable(VkPhysicalDevice);
     static bool checkDeviceExtensionSupport(VkPhysicalDevice);
 
-    static VkSurfaceFormatKHR& querySwapChainSupport(VkPhysicalDevice);
+    static VkSurfaceFormatKHR querySwapChainSupport(VkPhysicalDevice);
 };
 
 
@@ -402,17 +404,18 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
     // }
 
-    inline VkSurfaceFormatKHR& VkUtils2::querySwapChainSupport(VkPhysicalDevice device)
+    inline VkSurfaceFormatKHR VkUtils2::querySwapChainSupport(VkPhysicalDevice device)
 {
      std::cout << "Query: SwapChain"<<"\n";
 
-        VkSurfaceFormatKHR formats[]={};
+        
         checkCall(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &capabilities));
 
         uint32_t count;
-
+       
         checkCall(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &count, NULL));
-
+        std::cout << "Found: " << count << " Formats -------|^>" << "\n";
+        VkSurfaceFormatKHR formats[count];
         if (count != 0) {
             // formats = VkSurfaceFormatKHR{};
             checkCall(vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &count, formats));
@@ -424,7 +427,15 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             // presentModes = {};
             checkCall(vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &count, &presentModes));
         }
-        return *formats;
+        for(const VkSurfaceFormatKHR  &formats : formats)
+                {
+                    if(formats.format==VK_FORMAT_B8G8R8A8_SRGB  && formats.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) 
+                    {
+                            return formats;
+                    }
+                    
+                }
+                 throw std::runtime_error("No Valid SwapChain Format Found");
 } 
 
 
@@ -435,14 +446,14 @@ inline void VkUtils2::createSwapChain()
     {
     
         //const  std::vector<VkSurfaceFormatKHR*> x = {querySwapChainSupport(physicalDevice)};
-            VkSurfaceFormatKHR surfaceFormat = SwapChainSupportDetails::chooseSwapSurfaceFormat(std::vector<VkSurfaceFormatKHR>{querySwapChainSupport(physicalDevice)});
+            VkSurfaceFormatKHR surfaceFormat = querySwapChainSupport(physicalDevice);
 
             if (!surfaceFormat.format)
             {
                 std::runtime_error("------------");
             }
         //These May be Broken
-            //VkPresentModeKHR presentMode ={};// chooseSwapPresentMode(presentModes);
+           VkPresentModeKHR presentMode ={};// chooseSwapPresentMode(presentModes);
             VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent();
 
             uint32_t imageCount = (capabilities.minImageCount + 1);
@@ -462,8 +473,8 @@ inline void VkUtils2::createSwapChain()
                     createInfo.imageFormat=surfaceFormat.format;//=&surfaceFormat; //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
                     createInfo.imageColorSpace=surfaceFormat.colorSpace;
                     createInfo.imageExtent=extent;
-                    createInfo.imageArrayLayers=1;
-                    createInfo.imageUsage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+                    createInfo.imageArrayLayers=imageCount;
+                    createInfo.imageUsage=capabilities.supportedUsageFlags;
 
 //                Queues.findQueueFamilies(Queues.physicalDevice);
 

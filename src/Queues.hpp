@@ -1,4 +1,5 @@
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
 
 static VkPhysicalDevice physicalDevice;
 static VkDevice device;
