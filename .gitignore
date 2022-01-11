@@ -44,3 +44,4 @@
 *.json
 /third_party
 /bin
+/assets
