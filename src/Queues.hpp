@@ -1,3 +1,5 @@
+#include <iostream>
+#include <stdint.h>
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
@@ -19,32 +21,34 @@ struct Queues
    
     
 
-    static void enumerateDetermineQueueFamilies(const VkPhysicalDevice&);
+    static VkQueueFamilyProperties enumerateDetermineQueueFamilies(const VkPhysicalDevice&, uint32_t, VkQueueFamilyProperties[]);
     const static bool isComplete();
 };
 
-inline void Queues::enumerateDetermineQueueFamilies(const VkPhysicalDevice &device)
+inline VkQueueFamilyProperties Queues::enumerateDetermineQueueFamilies(const VkPhysicalDevice &device, uint32_t VkQueueFamilyProperties, struct VkQueueFamilyProperties *queueFamilies)
 {
             //std::cout <<("Checking Available Queue families") << "\n";
 
-            uint32_t pQueueFamilyPropertyCount=0;
-            vkGetPhysicalDeviceQueueFamilyProperties(device, &pQueueFamilyPropertyCount, nullptr);
-            VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
-            vkGetPhysicalDeviceQueueFamilyProperties(device, &pQueueFamilyPropertyCount, queueFamilies);
+            // uint32_t pQueueFamilyPropertyCount=0;
+            // vkGetPhysicalDeviceQueueFamilyProperties(device, &pQueueFamilyPropertyCount, nullptr);
+            //VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
+            vkGetPhysicalDeviceQueueFamilyProperties(device, &VkQueueFamilyProperties, queueFamilies);
 
             //VkBool32 presentSupport = (VK_FALSE);
+           // std::cout << queueFamilies << "\n";
             uint32_t i = 0;
             
-            for (const  VkQueueFamilyProperties &a : queueFamilies) {
-                // std::cout <<(a.queueCount())<< "\n";
-                if ((a.queueFlags & VK_QUEUE_GRAPHICS_BIT)==0) {
+            for (;i<VkQueueFamilyProperties;i++) {
+                std::cout <<(queueFamilies[i].queueCount)<< "\n";
+                if ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)!=0) {
                     graphicsFamily = i;
                 }
-                if (isComplete())
-                    break;
+                // if (isComplete())
+                //     break;
             
-                i++;
+                //i++;
             }
+            return *queueFamilies;
 
 //
 //                while (i <queueFamilyCount.limit() /*&& !isComplete()*/) {
@@ -55,5 +59,5 @@ inline void Queues::enumerateDetermineQueueFamilies(const VkPhysicalDevice &devi
 
 const inline bool Queues::isComplete()
 {
-    return graphicsFamily!= NULL;
+    return graphicsFamily== 0;
 }

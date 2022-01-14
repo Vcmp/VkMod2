@@ -1,17 +1,23 @@
 #include <stdexcept>
+// #include <vcruntime.h>
 #include <vulkan/vulkan_core.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_64_BIT_PTR_DEFINES 1
+#define __AVX2__ 1
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <stdint.h>
 #include <vulkan/vulkan.h>
 #include <iostream>
 #include <vector>
-
+#include <immintrin.h>
+#include <avx2intrin.h>
 #include "SwapChainSupportDetails.hpp"
 //#include "Queues.hpp"
+uint32_t xa[32];
+__m256i x = _mm256_load_si256((__m256i*)(&xa));
+
 
 typedef VkResult (VKAPI_PTR *callPPPPI)(VkDevice device, const void* pStrct, const uint64_t* pAllocator/*, const PFN_vkVoidFunction* pHndl*/);
 
@@ -286,7 +292,7 @@ inline void VkUtils2::pickPhysicalDevice()
             if(isDeviceSuitable(d)) {
                 std::cout <<("Device Suitable:") << d << "\n";
                 physicalDevice = d;
-                break;
+                return;
             }
              std::cout <<("Device Not Suitable:") << d << "\n";
            
@@ -305,10 +311,11 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
     VkPhysicalDeviceFeatures deviceFeatures;
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-    Queues::enumerateDetermineQueueFamilies(device);    
+   
+    
     
 
-    return  Queues::isComplete();/*deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+    return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU; /*&&
            deviceFeatures.geometryShader;*/
 
         // bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -341,17 +348,32 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
     inline void VkUtils2::createLogicalDevice() {
             std::cout <<("Creating Logical Device")<<"\n";
         
-            //uint32_t uniqueQueueFamilies[] = {graphicsFamily};
+         uint32_t pQueueFamilyPropertyCount=0;
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, nullptr);
 
+
+            VkQueueFamilyProperties uniqueQueueFamilies[3] ;
+                Queues::enumerateDetermineQueueFamilies(physicalDevice, pQueueFamilyPropertyCount, uniqueQueueFamilies);   
+                constexpr size_t queuea=sizeof(uniqueQueueFamilies)/sizeof(VkQueueFamilyProperties);
+                if(queuea!=3)
+                {
+                std::cout<<queuea<<"\n";
+                throw std::runtime_error("Bad QueueFAllocation!") ;
+                }
 
 //                Queues.findQueueFamilies(Queues.physicalDevice);
             //TODO: Fix bug with NULL/Missing.Invalid Queues
-            VkDeviceQueueCreateInfo queueCreateInfos={};
+            VkDeviceQueueCreateInfo queueCreateInfos[queuea];
             constexpr float priority = 1.0f;
-            // for(int i = 0; i < 1; i++) {
-                queueCreateInfos.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                queueCreateInfos.queueFamilyIndex=graphicsFamily;
-                queueCreateInfos.pQueuePriorities=&priority;
+             int pIx = 0;
+            for( VkDeviceQueueCreateInfo queueCreateInfo : queueCreateInfos/*; VkQueueFamilyProperties uniqueQueueFamiliy : uniqueQueueFamilies*/) {
+                queueCreateInfo.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+                queueCreateInfo.queueFamilyIndex=pIx;
+                queueCreateInfo.queueCount=uniqueQueueFamilies[pIx].queueCount;
+                queueCreateInfo.pQueuePriorities=&priority;
+                queueCreateInfo.flags=0;
+                pIx++;
+            }
             
             VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
                     deviceVulkan12Features.descriptorBindingPartiallyBound=true,
@@ -377,7 +399,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             VkDeviceCreateInfo createInfo={};
                     createInfo.sType=VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
                     createInfo.pNext=&deviceFeatures2;
-                    createInfo.pQueueCreateInfos=&queueCreateInfos;
+                    createInfo.pQueueCreateInfos=queueCreateInfos;
 
 
             // PointerBuffer value = asPointerBuffer(DEVICE_EXTENSIONS);
@@ -389,7 +411,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             // }
             checkCall(vkCreateDevice(physicalDevice, &createInfo, nullptr, &device ));
 
-              vkGetDeviceQueue(device, graphicsFamily, 0, &GraphicsQueue);
+              vkGetDeviceQueue(device, graphicsFamily, createInfo.pQueueCreateInfos->queueFamilyIndex, &GraphicsQueue);
        
     }
 
