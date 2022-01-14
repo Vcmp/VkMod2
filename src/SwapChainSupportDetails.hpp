@@ -11,7 +11,7 @@
 // static VkSurfaceFormatKHR formats={};
    static VkPresentModeKHR presentModes={};
    static VkSurfaceCapabilitiesKHR capabilities{};
-   static VkSwapchainKHR swapChain={};
+   
    
 //    static VkSurfaceFormatKHR* formats;
    static VkExtent2D swapChainExtent{};

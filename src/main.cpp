@@ -18,7 +18,8 @@ bool a = true;
         //System.gc();
 
 //            int i = 0;
-		VkU2::extracted();
+		VkUtils2 Vk2; 
+        Vk2.extracted();
         // SwapChainSupportDetails::createSwapChain();
         // SwapChainSupportDetails::createImageViews();
         // Pipeline::createRenderPasses();
@@ -34,7 +35,7 @@ bool a = true;
 			// extracted();
 
             glfwPollEvents();
-			//  std::cout <<aa << "\n";
+			printf("%i \n", aa);
 			aa++;
 
         }
@@ -47,4 +48,55 @@ bool a = true;
     //todo: Wake from callBack...
     
 
+inline void VkUtils2::createSwapChain()
+{
+            VkSurfaceFormatKHR surfaceFormat = querySwapChainSupport(physicalDevice);
+        
+            VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent(*window);
+            uint32_t imageCount= (capabilities.minImageCount + 1);
 
+            if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
+                imageCount = capabilities.maxImageCount;
+            }
+
+            std::cout<<"ImageCount: "<<imageCount<<"\n";
+
+            VkSwapchainCreateInfoKHR createInfo={};
+
+                    createInfo.sType=VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+                    createInfo.surface=surface;
+
+                    // Image settings
+                    createInfo.minImageCount=imageCount;
+                    createInfo.imageFormat=surfaceFormat.format;//=&surfaceFormat; //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+                    createInfo.imageColorSpace=surfaceFormat.colorSpace;
+                    createInfo.imageExtent=extent;
+                    createInfo.imageArrayLayers=1;
+                    createInfo.imageUsage=capabilities.supportedUsageFlags;
+                    createInfo.pNext=nullptr;
+
+                    createInfo.imageSharingMode=VK_SHARING_MODE_EXCLUSIVE;
+                    // createInfo.queueFamilyIndexCount=0;
+                    // createInfo.pQueueFamilyIndices= nullptr;
+        
+                    createInfo.preTransform=capabilities.currentTransform;
+                    createInfo.compositeAlpha=VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+                    createInfo.presentMode=VK_PRESENT_MODE_IMMEDIATE_KHR;
+                    createInfo.clipped=true;
+
+                    createInfo.oldSwapchain=VK_NULL_HANDLE;
+                    std::cout << device<<"\n";
+
+            vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
+            // auto xx=PFN_vkVoidFunction(swapChain);
+            // clPPPI(&createInfo, "vkCreateSwapchainKHR", &xx); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+
+            VkImage pSwapchainImages[3];
+
+
+            checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, pSwapchainImages));
+
+            swapChainImageFormat =surfaceFormat;
+            swapChainExtent = extent;
+        
+}

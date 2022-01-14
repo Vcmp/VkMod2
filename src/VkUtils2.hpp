@@ -1,5 +1,6 @@
 #include <stdexcept>
 // #include <vcruntime.h>
+#include <string>
 #include <vulkan/vulkan_core.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -27,6 +28,10 @@ static GLFWmonitor* monitor;
 static VkInstance vkInstance;
  const static std::vector<const char*> validationLayers = {
     "VK_LAYER_KHRONOS_validation"
+};
+
+const static std::vector<const char*> deviceExtensions = {
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
     constexpr bool debug=true;
@@ -74,25 +79,9 @@ class VkUtils2
 
     static void pickPhysicalDevice();
     static void createLogicalDevice();
-    static void createSwapChain();
+    void createSwapChain();
     static void createImageViews();
-   
-private:
-    static void checkCall(VkResult);
-    static std::vector<const char*> getRequiredExtensions();
-    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
-   
-   static VkResult createDebugUtilsMessengerEXT(VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
-	 
-    static bool isDeviceSuitable(VkPhysicalDevice);
-    static bool checkDeviceExtensionSupport(VkPhysicalDevice);
-
-    static const VkSurfaceFormatKHR querySwapChainSupport(VkPhysicalDevice);
-};
-
-
-namespace VkU2 {
-    static void extracted() {
+    void extracted() {
       VkUtils2::setupWindow();
       VkUtils2::createInstance();
       VkUtils2::setupDebugMessenger();
@@ -103,6 +92,35 @@ namespace VkU2 {
     //   VkUtils2::createImageViews();
       // VkUtils2::createInstance;
     }
+   
+private:
+    static void checkCall(VkResult);
+    static std::vector<const char*> getRequiredExtensions();
+    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
+   
+   static VkResult createDebugUtilsMessengerEXT(VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
+	 
+    static bool isDeviceSuitable(VkPhysicalDevice);
+    static void checkDeviceExtensionSupport(VkPhysicalDevice);
+
+    static const VkSurfaceFormatKHR querySwapChainSupport(VkPhysicalDevice);
+
+    VkSwapchainKHR swapChain;
+};
+
+
+namespace VkU2 {
+    // void extracted() {
+    //   VkUtils2::setupWindow();
+    //   VkUtils2::createInstance();
+    //   VkUtils2::setupDebugMessenger();
+    //   VkUtils2::createSurface();
+    //   VkUtils2::pickPhysicalDevice();
+    //   VkUtils2::createLogicalDevice();
+    //   VkUtils2::createSwapChain();
+    // //   VkUtils2::createImageViews();
+    //   // VkUtils2::createInstance;
+    // }
 };
 
 
@@ -117,7 +135,7 @@ inline void VkUtils2::setupWindow()
         glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
 
 
-        window = glfwCreateWindow(854, 480, "VKMod2", nullptr, 0);
+        window = glfwCreateWindow(854, 480, "VKMod", nullptr, 0);
 
 
         if(window == NULL) exit(1);
@@ -319,7 +337,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
     VkPhysicalDeviceFeatures deviceFeatures;
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-   
+    checkDeviceExtensionSupport(device);
     
     
 
@@ -340,17 +358,16 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 		// return /* Queues.isComplete() && */ extensionsSupported && swapChainAdequate;
 }
 
-//  inline bool  VkUtils2::checkDeviceExtensionSupport(VkPhysicalDevice device) {
-//      std::cout << "Verifying checkDeviceExtensionSupport" << "\n";
-//         uint32_t extensionCount;
-//         vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
-//         VkExtensionProperties availableExtensions;
-//         vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, &availableExtensions);
-        
-        
-        
-//         return sizeof(availableExtensions.extensionName)!=NULL;
-//     }
+ inline void  VkUtils2::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+     std::cout << "Verifying checkDeviceExtensionSupport" << "\n";
+        uint32_t extensionCount;
+        vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
+         VkExtensionProperties availableExtensions[extensionCount]; //todo: May MEMory Leak
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions);
+        std::cout << extensionCount<< "->Extensions"<<"\n";
+        // delete[] &availableExtensions;
+        // return requiredExtensions.;
+    }
 
 
     inline void VkUtils2::createLogicalDevice() {
@@ -402,6 +419,9 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                     createInfo.pNext=&deviceFeatures2;
                     createInfo.queueCreateInfoCount=1;
                     createInfo.pQueueCreateInfos=&queueCreateInfos;
+                    createInfo.ppEnabledExtensionNames=(deviceExtensions.data());
+                    createInfo.enabledExtensionCount=static_cast<uint32_t>(validationLayers.size());
+                    createInfo.ppEnabledLayerNames=(validationLayers.data());
 
 
             // PointerBuffer value = asPointerBuffer(DEVICE_EXTENSIONS);
@@ -468,58 +488,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
 
 //This is horribly Ported from Java so May Suffer.Incur Considerable Breakage
-inline void VkUtils2::createSwapChain()
-{
-            VkSurfaceFormatKHR surfaceFormat = querySwapChainSupport(physicalDevice);
-        
-            VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent(*window);
-            uint32_t imageCount= (capabilities.minImageCount + 1);
 
-            if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
-                imageCount = capabilities.maxImageCount;
-            }
-
-            std::cout<<"ImageCount: "<<imageCount<<"\n";
-
-            VkSwapchainCreateInfoKHR createInfo={};
-
-                    createInfo.sType=VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-                    createInfo.surface=surface;
-
-                    // Image settings
-                    createInfo.minImageCount=imageCount;
-                    createInfo.imageFormat=surfaceFormat.format;//=&surfaceFormat; //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
-                    createInfo.imageColorSpace=surfaceFormat.colorSpace;
-                    createInfo.imageExtent=extent;
-                    createInfo.imageArrayLayers=1;
-                    createInfo.imageUsage=capabilities.supportedUsageFlags;
-                    createInfo.pNext=nullptr;
-
-                    createInfo.imageSharingMode=VK_SHARING_MODE_EXCLUSIVE;
-                    // createInfo.queueFamilyIndexCount=0;
-                    // createInfo.pQueueFamilyIndices= nullptr;
-        
-                    createInfo.preTransform=capabilities.currentTransform;
-                    createInfo.compositeAlpha=VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-                    createInfo.presentMode=VK_PRESENT_MODE_IMMEDIATE_KHR;
-                    createInfo.clipped=true;
-
-                    createInfo.oldSwapchain=VK_NULL_HANDLE;
-                    std::cout << device<<"\n";
-
-            // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
-            auto xx=PFN_vkVoidFunction(swapChain);
-            clPPPI(&createInfo, "vkCreateSwapchainKHR", &xx); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
-
-            VkImage pSwapchainImages[3];
-
-
-            checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, pSwapchainImages));
-
-            swapChainImageFormat =surfaceFormat;
-            swapChainExtent = extent;
-        
-}
 
 
 
