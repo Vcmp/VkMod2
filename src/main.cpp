@@ -2,23 +2,23 @@
 #include "VkUtils2.hpp"
 
 
-
+using namespace VkU2;
 bool a = true;
 //    private static boolean aa;
 
     int main()
     {
-        float laa[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        mat4 m4;
-         float laaa[16]={1};
-        mat4 m45;
-        m45.loadAligned(laaa);
-        m4.identity()->domatFMA(&m45);
+        // float laa[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        // mat4 m4;
+        //  float laaa[16]={1};
+        // mat4 m45;
+        // m45.loadAligned(laaa);
+        // m4.identity()->domatFMA(&m45);
       //  VkUtils2.extracted();
         //System.gc();
 
 //            int i = 0;
-		VkUtils2::extracted();
+		VkU2::extracted();
         // SwapChainSupportDetails::createSwapChain();
         // SwapChainSupportDetails::createImageViews();
         // Pipeline::createRenderPasses();

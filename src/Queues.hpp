@@ -8,7 +8,7 @@ static VkDevice device;
 
     static uint32_t graphicsFamily;
     static uint32_t presentFamily;
-    static VkSurfaceKHR surface;
+    static VkSurfaceKHR surface={};
 
     static VkQueue GraphicsQueue;
     static VkQueue PresentQueue;

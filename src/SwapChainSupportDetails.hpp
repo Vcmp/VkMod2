@@ -1,4 +1,5 @@
 
+#include "GLFW/glfw3.h"
 #include "src/Queues.hpp"
 #include <iostream>
 #include <stdexcept>
@@ -9,14 +10,15 @@
 
 // static VkSurfaceFormatKHR formats={};
    static VkPresentModeKHR presentModes={};
-   static VkSurfaceCapabilitiesKHR capabilities;
-   static VkSwapchainKHR swapChain;
+   static VkSurfaceCapabilitiesKHR capabilities{};
+   static VkSwapchainKHR swapChain={};
    
-   static VkSurfaceFormatKHR swapChainImageFormat;
-   static VkExtent2D swapChainExtent;
+//    static VkSurfaceFormatKHR* formats;
+   static VkExtent2D swapChainExtent{};
 
-    static VkImageView swapChainImageViews[3];
-    static VkRenderPass renderPass;
+    static VkSurfaceFormatKHR swapChainImageFormat={};
+    static VkImageView swapChainImageViews={};
+    static VkRenderPass renderPass{};
 
 struct SwapChainSupportDetails
 {
@@ -24,7 +26,7 @@ struct SwapChainSupportDetails
     static void createSwapChain();
     static void createImageViews();
     static uint32_t clamp(uint32_t,uint32_t,uint32_t);
-    static VkExtent2D chooseSwapExtent();
+    static VkExtent2D chooseSwapExtent(GLFWwindow&);
     static VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR&);
     static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>);
    
@@ -37,23 +39,27 @@ struct SwapChainSupportDetails
                 const uint32_t a =  (max < value ? max : value);
                 return  (min > a ? min : a);
             }
-        inline VkExtent2D SwapChainSupportDetails::chooseSwapExtent()
+        inline VkExtent2D SwapChainSupportDetails::chooseSwapExtent(GLFWwindow &window)
             
             {
                 std::cout << "Creating: chooseSwapExtent"<<"\n";
-                // if (capabilities.currentExtent.width != 0xFFFFFFFF) {
-                //     return capabilities.currentExtent;
-                // }
+                if (capabilities.currentExtent.width != 0xFFFFFFFF) {
+                    return capabilities.currentExtent;
+                }
+                int width, height;
+                glfwGetFramebufferSize(&window, &width, &height);
 
-                VkExtent2D actualExtent={};
-
+                VkExtent2D actualExtent={
+                    static_cast<uint32_t>(width),
+                    static_cast<uint32_t>(height)
+                    };
                 VkExtent2D minExtent = capabilities.minImageExtent;
                 VkExtent2D maxExtent = capabilities.maxImageExtent;
-                uint32_t xn=SwapChainSupportDetails::clamp(minExtent.width, maxExtent.width, actualExtent.width);
-                uint32_t yn=SwapChainSupportDetails::clamp(minExtent.height, maxExtent.height, actualExtent.height);
-            std::cout<<xn <<"-"<<yn<<"\n";
-                actualExtent.width= xn;
-                actualExtent.height= yn;
+            //     uint32_t xn=SwapChainSupportDetails::clamp(minExtent.width, maxExtent.width, actualExtent.width);
+            //     uint32_t yn=SwapChainSupportDetails::clamp(minExtent.height, maxExtent.height, actualExtent.height);
+            // std::cout<<xn <<"-"<<yn<<"\n";
+                actualExtent.width= SwapChainSupportDetails::clamp(actualExtent.width, maxExtent.width, actualExtent.width);
+                actualExtent.height= SwapChainSupportDetails::clamp(actualExtent.height, maxExtent.height, actualExtent.height);
 
 
                 return actualExtent;
