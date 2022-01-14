@@ -353,31 +353,42 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
 
             VkQueueFamilyProperties uniqueQueueFamilies[3] ;
-                Queues::enumerateDetermineQueueFamilies(physicalDevice, pQueueFamilyPropertyCount, uniqueQueueFamilies);   
-                constexpr size_t queuea=sizeof(uniqueQueueFamilies)/sizeof(VkQueueFamilyProperties);
-                if(queuea!=3)
-                {
-                std::cout<<queuea<<"\n";
-                throw std::runtime_error("Bad QueueFAllocation!") ;
+               // Queues::enumerateDetermineQueueFamilies(physicalDevice, pQueueFamilyPropertyCount, uniqueQueueFamilies);   
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies);
+
+            //VkBool32 presentSupport = (VK_FALSE);
+           // std::cout << queueFamilies << "\n";
+            uint32_t i = 0;
+            
+             {
+                std::cout <<(uniqueQueueFamilies[i].queueCount)<< "\n";
+                if ((uniqueQueueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+                    graphicsFamily = i;
                 }
+                // if (isComplete())
+                //     break;
+            
+                //i++;
+            }
 
 //                Queues.findQueueFamilies(Queues.physicalDevice);
             //TODO: Fix bug with NULL/Missing.Invalid Queues
-            VkDeviceQueueCreateInfo queueCreateInfos[queuea];
+            VkDeviceQueueCreateInfo queueCreateInfos={};
             constexpr float priority = 1.0f;
-             int pIx = 0;
-            for( VkDeviceQueueCreateInfo queueCreateInfo : queueCreateInfos/*; VkQueueFamilyProperties uniqueQueueFamiliy : uniqueQueueFamilies*/) {
-                queueCreateInfo.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                queueCreateInfo.queueFamilyIndex=pIx;
-                queueCreateInfo.queueCount=uniqueQueueFamilies[pIx].queueCount;
-                queueCreateInfo.pQueuePriorities=&priority;
-                queueCreateInfo.flags=0;
-                pIx++;
-            }
+             //uint32_t pIx = 0;
+            // for(;pIx<queuea;pIx++)*/ {
+                queueCreateInfos.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+                queueCreateInfos.queueFamilyIndex=graphicsFamily;
+                queueCreateInfos.queueCount=uniqueQueueFamilies[0].queueCount;
+                queueCreateInfos.pQueuePriorities=&priority;
+                queueCreateInfos.flags=0;
+                queueCreateInfos.pNext=nullptr;
+            //}
             
             VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
                     deviceVulkan12Features.descriptorBindingPartiallyBound=true,
                     deviceVulkan12Features.imagelessFramebuffer=true;
+                    deviceVulkan12Features.pNext=nullptr;
                     
          
 
@@ -399,7 +410,8 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             VkDeviceCreateInfo createInfo={};
                     createInfo.sType=VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
                     createInfo.pNext=&deviceFeatures2;
-                    createInfo.pQueueCreateInfos=queueCreateInfos;
+                    createInfo.queueCreateInfoCount=1;
+                    createInfo.pQueueCreateInfos=&queueCreateInfos;
 
 
             // PointerBuffer value = asPointerBuffer(DEVICE_EXTENSIONS);
@@ -411,7 +423,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             // }
             checkCall(vkCreateDevice(physicalDevice, &createInfo, nullptr, &device ));
 
-              vkGetDeviceQueue(device, graphicsFamily, createInfo.pQueueCreateInfos->queueFamilyIndex, &GraphicsQueue);
+              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos->queueFamilyIndex, 0,  &GraphicsQueue);
        
     }
 

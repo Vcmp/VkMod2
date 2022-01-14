@@ -13,7 +13,7 @@ bool a = true;
          float laaa[16]={1};
         mat4 m45;
         m45.loadAligned(laaa);
-        m4.domatFMA(&m45, nullptr);
+        m4.identity()->domatFMA(&m45);
       //  VkUtils2.extracted();
         //System.gc();
 

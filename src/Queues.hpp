@@ -40,7 +40,7 @@ inline VkQueueFamilyProperties Queues::enumerateDetermineQueueFamilies(const VkP
             
             for (;i<VkQueueFamilyProperties;i++) {
                 std::cout <<(queueFamilies[i].queueCount)<< "\n";
-                if ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)!=0) {
+                if ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
                     graphicsFamily = i;
                 }
                 // if (isComplete())
