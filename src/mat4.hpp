@@ -17,40 +17,64 @@
 //typedef __builtin_ia32_vfmaddps256 _mm256_fmadd_ps  ;
 
 //too lazy to do an SSE version as AVX in many cases can allow for the abilkity to the same steps in half as many stages.steps/procedures/Instructions/Operations e.g. .etc i.e..Misc Visa. versa.
+//Might be able to get away withput using amore explict construct arg sets and isntead just implicitly and Automatically intialise the struct iwth a constexpr Identify Maxtrix Struct.Blob/StandIn Instead
+
 struct mat4
 {
-    explicit mat4(float a[16])
+private:
+    static inline constexpr float ax[16] =
     {
-         mat4::__a=_mm256_castsi256_ps(_mm256_load_si256((__m256i*)a));
-         mat4::__b=_mm256_castsi256_ps(_mm256_load_si256((__m256i*)a+8));
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1
+     };
+    explicit mat4()
+    {
+         mat4::__a=_mm256_castsi256_ps(lud(&ax));
+         mat4::__b=_mm256_castsi256_ps(lud(&ax+8));
     }
-float a[2][8];
- __m256 __a;
- __m256 __b;
- __m256 __c;
-inline void domatFMA(mat4*);
+public:
+    float a[2][8];
+    __m256 __a;
+    __m256 __b;
+    __m256 __c;
+    inline const __m256 lud(const void* a);
+    inline void domatFMA(mat4*, __m256);
     
     inline void loadAligned(float a[16]);
-    inline void loadAligned(mat4* a);
+    inline void loadAligned(const void* a);
+    inline constexpr void identity();
 };
 
 inline void mat4::loadAligned(float a[16])
 {
     //_mm_storeu_si128((__m128*)aa, mat4::a);
-    mat4::__a=_mm256_castsi256_ps(_mm256_load_si256((__m256i*)a));
-    mat4::__b=_mm256_castsi256_ps(_mm256_load_si256((__m256i*)a+8));
+    mat4::__a=_mm256_castsi256_ps(lud(a));
+    mat4::__b=_mm256_castsi256_ps(lud(&a+8));
+
 }
-inline void mat4::loadAligned(mat4* a)
+inline void mat4::loadAligned(const void* a)
 {
     //_mm_storeu_si128((__m128*)aa, mat4::a);
-    mat4::__a=_mm256_castsi256_ps(_mm256_load_si256((__m256i*)a));
-    mat4::__b=_mm256_castsi256_ps(_mm256_load_si256((__m256i*)a+8));
+    mat4::__a=_mm256_castsi256_ps(lud(&a));
+    mat4::__b=_mm256_castsi256_ps(lud(&a+8));
 }
-
-inline void mat4::domatFMA(mat4 *b)
+//Try to add a translation before Multiplying the matrix as an attempted Optimisation
+inline void mat4::domatFMA(mat4 *b, __m256 __Trans)
 {
 // _mm256_fmadd_ps
-    b->__a=__builtin_ia32_vfmaddps256(mat4::__a, b->__a, mat4::__c);
-    b->__b=__builtin_ia32_vfmaddps256(mat4::__b, b->__b, mat4::__c);
+    b->__a=__builtin_ia32_vfmaddps256(mat4::__a, b->__a, __Trans);
+    b->__b=__builtin_ia32_vfmaddps256(mat4::__b, b->__b, __Trans);
 
+}
+//Hide ugly casting syntax for aligned load as un;ike the AVX512 intrinsics provided by intel, man Load/many intrisics Functions do not include Void* by default as an Argument
+inline const __m256 mat4::lud(const void* a)
+{
+    return _mm256_load_si256(reinterpret_cast<const __m256i*>(a));
+}
+
+inline constexpr void mat4::identity()
+{
+    loadAligned(ax);
 }

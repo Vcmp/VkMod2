@@ -1,5 +1,6 @@
-#include "VkUtils2.hpp"
 #include "mat4.hpp"
+#include "VkUtils2.hpp"
+
 
 
 bool a = true;
@@ -8,10 +9,11 @@ bool a = true;
     int main()
     {
         float laa[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        mat4 m4(laa);
+        mat4 m4;
          float laaa[16]={1};
-        mat4 m45(laaa);
-        m4.domatFMA(&m45);
+        mat4 m45;
+        m45.loadAligned(laaa);
+        m4.domatFMA(&m45, nullptr);
       //  VkUtils2.extracted();
         //System.gc();
 
