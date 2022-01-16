@@ -584,10 +584,7 @@ VkAttachmentReference attachmentsRefs = {};
                  attachments.stencilStoreOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
                  attachments.initialLayout=VK_IMAGE_LAYOUT_UNDEFINED;
                  attachments.finalLayout=VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        VkSubpassDescription vkSubpassDescriptions{};
-                vkSubpassDescriptions.pipelineBindPoint=VK_PIPELINE_BIND_POINT_GRAPHICS;
-                vkSubpassDescriptions.colorAttachmentCount=1;
-                vkSubpassDescriptions.pColorAttachments=&attachmentsRefs;
+     
 
 
         VkAttachmentDescription depthAttachment ={};
@@ -603,9 +600,15 @@ VkAttachmentReference attachmentsRefs = {};
 
         VkAttachmentReference depthAttachmentRef ={};
                 attachmentsRefs.attachment=1;
-                attachmentsRefs.layout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+                attachmentsRefs.layout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;   
+        
+        VkSubpassDescription vkSubpassDescriptions{};
+                vkSubpassDescriptions.pipelineBindPoint=VK_PIPELINE_BIND_POINT_GRAPHICS;
+                vkSubpassDescriptions.colorAttachmentCount=0;
+                vkSubpassDescriptions.pColorAttachments=&attachmentsRefs;
                 vkSubpassDescriptions.pDepthStencilAttachment=&depthAttachmentRef;
 
+const VkAttachmentDescription attDesc[]={attachments, depthAttachment};
 
         VkSubpassDependency dependency = {};
                 dependency.srcSubpass=abs;
@@ -619,8 +622,7 @@ VkAttachmentReference attachmentsRefs = {};
 
         VkRenderPassCreateInfo vkRenderPassCreateInfo1 = {};
                 vkRenderPassCreateInfo1.sType=VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-                vkRenderPassCreateInfo1.pAttachments=&attachments;
-                vkRenderPassCreateInfo1.pAttachments=&depthAttachment;
+                vkRenderPassCreateInfo1.pAttachments=attDesc;
                 vkRenderPassCreateInfo1.attachmentCount=2;
                 vkRenderPassCreateInfo1.pSubpasses=&vkSubpassDescriptions;
                 vkRenderPassCreateInfo1.subpassCount=1;
@@ -640,38 +642,42 @@ VkAttachmentReference attachmentsRefs = {};
         //Thankfully Dont; need to worry about compiling the Shader Files AnyMore due to
         std::cout<<("Setting up PipeLine")<< "\n";
 
-        const auto vertShaderSPIRV = ShaderSPIRVUtils::compileShaderFile("shaders/21_shader_ubo.vert.spv", nullptr);
-         const char fragShaderSPIRV = ShaderSPIRVUtils::compileShaderFile("shaders/21_shader_ubo.frag.spv", nullptr);
+        const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile(device, "shaders/21_shader_ubo.vert.spv");
+        const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile(device, "shaders/21_shader_ubo.frag.spv");
 
-        const VkShaderModule vertShaderModule = ShaderSPIRVUtils::createShaderModule(device, &vertShaderSPIRV, sizeof(vertShaderSPIRV));
-        const VkShaderModule fragShaderModule = ShaderSPIRVUtils::createShaderModule(device, &fragShaderSPIRV, sizeof(fragShaderSPIRV));
+        // constexpr char entryPoint[]={"main"};
 
-        constexpr char entryPoint[]={"main"};
-
-        VkPipelineShaderStageCreateInfo shaderStages[2];
-
-        shaderStages[0]={
+        VkPipelineShaderStageCreateInfo vertexStage={
             .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, 
             .pNext=nullptr,
 //                    .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
                 .stage=VK_SHADER_STAGE_VERTEX_BIT,
                 .module=vertShaderModule,
-                .pName=entryPoint
+                .pName="main"
                 
         };
 
-        shaderStages[1]={
+        VkPipelineShaderStageCreateInfo fragStage={
                 .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                 .pNext=nullptr,
                 .stage=VK_SHADER_STAGE_FRAGMENT_BIT,
                 .module=fragShaderModule,
-                .pName=entryPoint
+                .pName="main"
         };
 
+        VkPipelineShaderStageCreateInfo shaderStages[] = {vertexStage, fragStage};
+
+        VkVertexInputBindingDescription a {
+                        .binding=0,
+        //                    .stride(vertices.length/2)
+        //                    .stride(vertices.length/VERT_SIZE+1)
+                        .stride=32,
+                        .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
+                };
 
         VkPipelineVertexInputStateCreateInfo vkPipelineVertexInputStateCreateInfo={};
                    vkPipelineVertexInputStateCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                vkPipelineVertexInputStateCreateInfo.pVertexBindingDescriptions=getVertexInputBindingDescription();
+                vkPipelineVertexInputStateCreateInfo.pVertexBindingDescriptions=&a;
         // vkPipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions= getAttributeDescriptions();
         // VkPipelineVertexInputStateCreateInfo.nvertexAttributeDescriptionCount=3;
 
@@ -679,7 +685,7 @@ VkAttachmentReference attachmentsRefs = {};
         VkPipelineInputAssemblyStateCreateInfo inputAssembly={};
                    inputAssembly.sType=VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
                 inputAssembly.topology=VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-                inputAssembly.primitiveRestartEnable=false;
+                inputAssembly.primitiveRestartEnable=VK_FALSE;
         /*todo: Fixed Viewport COnstruction/Initilaistaion?Configration: ([Had use wrong Function?method Veowpprt/Stagong function Calls/cfongurations e.g.])
          *(had also used vkViewport instead of VkViewport of Type Buffer which is the atcual correct Obejct/Stage/Steup.veiwport conponnat.consituent
          *
@@ -696,31 +702,33 @@ VkAttachmentReference attachmentsRefs = {};
 
         VkRect2D scissor{
 //                    .offset(vkOffset2D ->vkViewport.y()) //todo: not sure if correct Offset
-                .offset=0,
+                .offset={0, 0},
                 .extent=swapChainExtent
         };
 
         VkPipelineViewportStateCreateInfo vkViewPortState={};
                    vkViewPortState.sType=VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+                vkViewPortState.viewportCount=1;
                 vkViewPortState.pViewports=&vkViewport;
 //                    .pScissors(vkrect2DBuffer);
+                vkViewPortState.scissorCount=1;
                 vkViewPortState.pScissors=&scissor;
 
 
         VkPipelineRasterizationStateCreateInfo VkPipeLineRasterization={};
                    VkPipeLineRasterization.sType=VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-                VkPipeLineRasterization.depthClampEnable=false;
-                VkPipeLineRasterization.rasterizerDiscardEnable=false;
+                VkPipeLineRasterization.depthClampEnable=VK_FALSE;
+                VkPipeLineRasterization.rasterizerDiscardEnable=VK_FALSE;
                 VkPipeLineRasterization.polygonMode=VK_POLYGON_MODE_FILL;
                 VkPipeLineRasterization.lineWidth=1.0f;
 //                   .cullMode(VK_CULL_MODE_BACK_BIT)
 //                   .frontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE)
-                VkPipeLineRasterization.depthBiasEnable=false;
+                VkPipeLineRasterization.depthBiasEnable=VK_FALSE;
 
         //todo: actuall need multismapling to Compleet.Initialsie.Construct.Substanciate the renderPipeline corretcly even if Antialsing /AF/MMs are not neeeded......
         VkPipelineMultisampleStateCreateInfo multisampling={};
                    multisampling.sType=VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-                multisampling.sampleShadingEnable=false;
+                multisampling.sampleShadingEnable=VK_FALSE;
                 multisampling.rasterizationSamples=VK_SAMPLE_COUNT_1_BIT;
 //                    .alphaToOneEnable(false)
 //                    .alphaToCoverageEnable(false);
@@ -728,19 +736,19 @@ VkAttachmentReference attachmentsRefs = {};
 
         VkPipelineDepthStencilStateCreateInfo depthStencil={};
                    depthStencil.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-                depthStencil.depthTestEnable=true;
-                depthStencil.depthWriteEnable=true;
+                depthStencil.depthTestEnable=VK_TRUE;
+                depthStencil.depthWriteEnable=VK_TRUE;
                 depthStencil.depthCompareOp=VK_COMPARE_OP_LESS;
-                depthStencil.depthBoundsTestEnable=false;
+                depthStencil.depthBoundsTestEnable=VK_FALSE;
 //                    .minDepthBounds(0) //Optional
 //                    .maxDepthBounds(1) //Optional
-                depthStencil.stencilTestEnable=false;
+                depthStencil.stencilTestEnable=VK_FALSE;
 
 
         VkPipelineColorBlendAttachmentState colorBlendAttachment={};
                 colorBlendAttachment.colorWriteMask=VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
                 //(Actually)Add blending?transparency to be suproted
-                colorBlendAttachment.blendEnable=true;
+                colorBlendAttachment.blendEnable=VK_TRUE;
                 colorBlendAttachment.srcColorBlendFactor=VK_BLEND_FACTOR_SRC_ALPHA;
 //                    .dstColorBlendFactor(VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
                 colorBlendAttachment.dstColorBlendFactor=VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
@@ -753,7 +761,7 @@ VkAttachmentReference attachmentsRefs = {};
         // float blendConstants[]={0.0f, 0.0f, 0.0f, 0.0f};
         VkPipelineColorBlendStateCreateInfo colorBlending={};
                    colorBlending.sType=VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-                colorBlending.logicOpEnable=false;
+                colorBlending.logicOpEnable=VK_FALSE;
                 colorBlending.logicOp=VK_LOGIC_OP_COPY;
                 colorBlending.pAttachments=&colorBlendAttachment;
                 colorBlending.blendConstants[0]=0.0f;
@@ -781,8 +789,9 @@ VkAttachmentReference attachmentsRefs = {};
 
 
         VkGraphicsPipelineCreateInfo pipelineInfo{
-//                    .sType(VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO)
+                .sType=VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
                 .pStages=shaderStages,
+                .stageCount=2,
                 .pVertexInputState=&vkPipelineVertexInputStateCreateInfo,
                 .pInputAssemblyState=&inputAssembly,
                 .pViewportState=&vkViewPortState,

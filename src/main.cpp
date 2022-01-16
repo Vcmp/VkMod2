@@ -1,3 +1,4 @@
+#include "GLFW/glfw3.h"
 #include "mat4.hpp"
 #include "VkUtils2.hpp"
 
@@ -41,6 +42,7 @@ bool a = true;
         a=false;
 
         //VkUtils2.cleanup();
+        glfwDestroyWindow(window);
         glfwTerminate();
     }
 
