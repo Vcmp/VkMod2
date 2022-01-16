@@ -3,6 +3,12 @@
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
+
+
+
+inline namespace Queues
+{
+    
 static VkPhysicalDevice physicalDevice;
 static VkDevice device;
 
@@ -12,12 +18,6 @@ static VkDevice device;
 
     static VkQueue GraphicsQueue;
     static VkQueue PresentQueue;
-
-
-struct Queues
-{
-    
-
    
     
 

@@ -1,7 +1,9 @@
 
 #pragma once
+
+#include <stdexcept>
 #define _CRT_SECURE_NO_WARNINGS
-#include "src/Queues.hpp"
+
 
 #include <stdint.h>
 
@@ -9,7 +11,7 @@
 
 #include <stdio.h>
 #include <vulkan/vulkan_core.h>
-struct ShaderSPIRVUtils
+namespace ShaderSPIRVUtils
 {
     char shaderNamePath;
     
@@ -18,20 +20,20 @@ struct ShaderSPIRVUtils
         VERTEX_SHADER=0,
         FRAGMENT_SHADER=1
     };
-    static const char compileShaderFile(const char*,VkShaderModule*);
-    static const VkShaderModule createShaderModule(const char*, size_t);
+    static const char& compileShaderFile(const char*,VkShaderModule*);
+    static const VkShaderModule createShaderModule(VkDevice, const char*, size_t);
 } ;
 //typedef ShaderSPIRVUtils SPRIV;
 
 
-inline const char ShaderSPIRVUtils::compileShaderFile(const char* shaderNamePath1, VkShaderModule* a)
+inline const char& ShaderSPIRVUtils::compileShaderFile(const char* shaderNamePath1, VkShaderModule* a)
 {
    FILE* file = fopen(shaderNamePath1, "rb");
     if(!file)
     {
         std::runtime_error("Fail:Bad or No ShaderFile!");
     }
-   size_t size = ftell(file);
+   const size_t size = ftell(file);
    rewind(file);
 
    if(size==0)
@@ -45,7 +47,7 @@ inline const char ShaderSPIRVUtils::compileShaderFile(const char* shaderNamePath
    return *x;
 }
 
-inline const VkShaderModule ShaderSPIRVUtils::createShaderModule(const char* shadr, size_t ax)
+inline const VkShaderModule ShaderSPIRVUtils::createShaderModule(VkDevice device,const char* shadr, size_t ax)
 {
     VkShaderModuleCreateInfo a={};
     {

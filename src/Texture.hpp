@@ -1,33 +1,16 @@
 #pragma once
 
 
-#include "src/VkUtils2.hpp"
 #include <stdexcept>
 struct Texture
 {
     static void createTextureImage();
+    static VkFormat findDepthFormat();
 };
 
 
 
-static VkFormat findDepthFormat()
-    {
-        VkFormat formatCandidates[3]={VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT};
-        VkFormatProperties props;
 
-        for (VkFormat format : formatCandidates) {
-
-           
-            vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
-
-            const int i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
-            if (i2 == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT/* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/) {
-                return format;
-            }
-        }
-
-        std::runtime_error("failed to find supported format!");
-    }
 
 
     // inline void createTextureImage()

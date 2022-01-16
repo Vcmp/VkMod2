@@ -2,7 +2,7 @@
 #include "VkUtils2.hpp"
 
 
-using namespace VkU2;
+// using namespace VkU2;
 bool a = true;
 //    private static boolean aa;
 
@@ -18,8 +18,7 @@ bool a = true;
         //System.gc();
 
 //            int i = 0;
-		VkUtils2 Vk2; 
-        Vk2.extracted();
+		VkUtils2::extracted();
         // SwapChainSupportDetails::createSwapChain();
         // SwapChainSupportDetails::createImageViews();
         // Pipeline::createRenderPasses();
@@ -27,7 +26,7 @@ bool a = true;
         // Pipeline::createCommandPool();
 
         int aa=0;
-        while (!glfwWindowShouldClose(const_cast<GLFWwindow*>(window)))
+        while (!glfwWindowShouldClose((window)))
         {
 
 
@@ -50,7 +49,7 @@ bool a = true;
 
 inline void VkUtils2::createSwapChain()
 {
-            VkSurfaceFormatKHR surfaceFormat = querySwapChainSupport(physicalDevice);
+            VkSurfaceFormatKHR surfaceFormat = querySwapChainSupport(Queues::physicalDevice);
         
             VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent(*window);
             uint32_t imageCount= (capabilities.minImageCount + 1);
@@ -64,7 +63,7 @@ inline void VkUtils2::createSwapChain()
             VkSwapchainCreateInfoKHR createInfo={};
 
                     createInfo.sType=VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-                    createInfo.surface=surface;
+                    createInfo.surface=Queues::surface;
 
                     // Image settings
                     createInfo.minImageCount=imageCount;
@@ -85,16 +84,15 @@ inline void VkUtils2::createSwapChain()
                     createInfo.clipped=true;
 
                     createInfo.oldSwapchain=VK_NULL_HANDLE;
-                    std::cout << device<<"\n";
+                    std::cout << Queues::device<<"\n";
 
-            vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
+            // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
             // auto xx=PFN_vkVoidFunction(swapChain);
-            // clPPPI(&createInfo, "vkCreateSwapchainKHR", &xx); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+            clPPPI(&createInfo, "vkCreateSwapchainKHR", &swapChain); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+           ;
 
-            VkImage pSwapchainImages[3];
 
-
-            checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, pSwapchainImages));
+            checkCall(vkGetSwapchainImagesKHR(Queues::device, swapChain, &imageCount, pSwapchainImages));
 
             swapChainImageFormat =surfaceFormat;
             swapChainExtent = extent;
