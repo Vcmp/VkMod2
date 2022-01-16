@@ -6,12 +6,14 @@
 
 
 #include <stdint.h>
+#include <vulkan/vulkan_core.h>
 
-static VkPipeline graphicsPipeline;
-static VkCommandPool commandPool;
+
 
 namespace Pipeline
-{
+{   
+    static VkPipeline graphicsPipeline;
+    static VkCommandPool commandPool;
     static void createRenderPasses();
     static void createGraphicsPipelineLayout();
     static void createCommandPool();

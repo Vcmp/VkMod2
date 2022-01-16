@@ -1,4 +1,5 @@
 
+#pragma once
 #include "GLFW/glfw3.h"
 
 #include <iostream>
@@ -9,19 +10,21 @@
 
 
 // static VkSurfaceFormatKHR formats={};
-   static VkPresentModeKHR presentModes={};
+   
+
+inline namespace SwapChainSupportDetails
+{
+    static VkPresentModeKHR presentModes={};
    static VkSurfaceCapabilitiesKHR capabilities{};
    
    
 //    static VkSurfaceFormatKHR* formats;
-   static VkExtent2D swapChainExtent{};
+   
 
     static VkSurfaceFormatKHR swapChainImageFormat={};
     static VkImageView swapChainImageViews={};
     static VkRenderPass renderPass{};
-
-struct SwapChainSupportDetails
-{
+    static VkExtent2D swapChainExtent{};
     static void querySwapChainSupport(VkPhysicalDevice);
     static void createSwapChain();
     static void createImageViews();

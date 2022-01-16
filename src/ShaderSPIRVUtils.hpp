@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <stdio.h>
+#include <vector>
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <stdexcept>
@@ -17,7 +19,7 @@
 #include <vulkan/vulkan_core.h>
 inline namespace ShaderSPIRVUtils
 {
-    char shaderNamePath;
+    // char shaderNamePath;
     
     // enum ShaderKind
     // {
@@ -40,24 +42,25 @@ inline const VkShaderModuleCreateInfo doRead(const char* shaderNamePath1)
    const size_t size = _tell(fhndl);
    _lseek(fhndl, 0, SEEK_END);
 
-const char* x[size];
+std::vector<char> x(size);
 
 std::cout<< size << "\n";
-   if(size<=0||size>=0xFFFF)
+   if(_eof(fhndl)==-1)
     {
       
        throw std::runtime_error("Fail:Bad or No ShaderFile!");
     }
-     _read(fhndl, x, size);
+     _read(fhndl, x.data(), size);
+     std::cout<< x.size() << "\n";
     _flushall();
     _close(fhndl);
 
     VkShaderModuleCreateInfo VsMCI={};
     {
         VsMCI.codeSize=size,
-        VsMCI.pCode=reinterpret_cast<const uint32_t*>(x);
+        VsMCI.pCode=reinterpret_cast<const uint32_t*>(x.data());
         VsMCI.sType=VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-        VsMCI.pNext=nullptr;
+        VsMCI.pNext=VK_NULL_HANDLE ;
     }
     return VsMCI;
 }
@@ -70,8 +73,12 @@ inline const VkShaderModule ShaderSPIRVUtils::compileShaderFile(const VkDevice &
     
     VkShaderModule axx;
     VkShaderModuleCreateInfo axl =doRead(shaderNamePath1);
-    if (vkCreateShaderModule(device, &axl, nullptr, &axx)!=VK_SUCCESS)
+    VkResult a=vkCreateShaderModule(device, &axl, nullptr, &axx);
+    if (a!=VK_SUCCESS)
+    {
+        std::cout <<a<<"\n";
         throw std::runtime_error("Fail: Bad Shader Module");
+    }
     return axx;
 }
 

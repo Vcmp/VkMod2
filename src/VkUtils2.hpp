@@ -1,20 +1,19 @@
 #pragma once
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#define VK_USE_64_BIT_PTR_DEFINES 1
+
 #include <stdexcept>
 // #include <vcruntime.h>
 #include <string>
 #include <vulkan/vulkan_core.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define VK_USE_PLATFORM_WIN32_KHR
-#define VK_USE_64_BIT_PTR_DEFINES 1
-#define __AVX2__ 1
+
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <stdint.h>
 
 #include <iostream>
 #include <vector>
-#include <immintrin.h>
-#include <avx2intrin.h>
 
 #include "SwapChainSupportDetails.hpp"
 #include "Queues.hpp"
@@ -26,51 +25,58 @@
 #include "UniformBufferObject.hpp"
 
 
- const static std::vector<const char*> validationLayers = {
-    "VK_LAYER_KHRONOS_validation"
-};
-
-const static std::vector<const char*> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME
-};
+ 
 
     constexpr bool debug=true;
     constexpr bool checks=true;
     constexpr bool ENABLE_VALIDATION_LAYERS=debug;
-    
+    const std::vector<const char*>   validationLayers = {
+    "VK_LAYER_KHRONOS_validation"};
+    constexpr  char* deviceExtensions[] = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
 
-using Queues::device;
-using Queues::physicalDevice;
 
 
-inline namespace
-{
-    namespace {
+inline namespace VkUtils2
+{static GLFWwindow* window;
+static GLFWmonitor* monitor;
+static VkInstance vkInstance;
+static VkSwapchainKHR swapChain;
+static VkImage pSwapchainImages[3];
+    inline namespace {
+
     typedef const VkResult (__vectorcall *callPPPPI) (VkDevice device, const void* pStrct, const VkAllocationCallbacks* pAllocator, const void* hndl/*, const PFN_vkVoidFunction* pHndl*/);
 
 typedef VkResult  (VKAPI_CALL *vkk)(void);
 
-static GLFWwindow* window;
-static GLFWmonitor* monitor;
-static VkInstance vkInstance;
+static const void checkCall(VkResult);
 const static inline VkResult clPPPI(const void* pStrct,  const char* a, const void *object)
 {
     //vkGetDeviceProcAddr()
     // auto xx=PFN_vkVoidFunction(swapChain);
-    const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(Queues::device, a));
+    
+    const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device, a));
     std::cout << &x << "\n";
     std::cout << &pStrct << &object<<&a<<"\n";
-    std::cout << &a<<"\n";
-    std::cout << &object<<"\n";
-    const VkResult VkR =x(Queues::device, pStrct, nullptr, object);
+    std::cout << a<<"\n";
+    std::cout << object<<"\n";
+    const VkResult VkR =x(device, pStrct, nullptr, object);
+    checkCall(VkR);
     return VkR;
     //  callPPPPI(device, pStrct, nullptr, a)
-};
+};static std::vector<const char*> getRequiredExtensions();static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
+   
+   static VkResult createDebugUtilsMessengerEXT(VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
+	 
+    static bool isDeviceSuitable(VkPhysicalDevice);
+    static void checkDeviceExtensionSupport(VkPhysicalDevice);
+
+    static const VkSurfaceFormatKHR querySwapChainSupport(VkPhysicalDevice);
     }
-static VkSwapchainKHR swapChain;
-static VkImage pSwapchainImages[3];
-const static struct VkUtils2
-{
+
+
+
 	
 //    private static final long[] pDebugMessenger = new long[1];
     //    X(),
@@ -92,7 +98,7 @@ const static struct VkUtils2
     static void createLogicalDevice();
     static void createSwapChain();
     static void createImageViews();
-    static void createPipeLine();
+    // static void createPipeLine();
     static void extracted() {
       VkUtils2::setupWindow();
       VkUtils2::createInstance();
@@ -101,27 +107,22 @@ const static struct VkUtils2
       VkUtils2::pickPhysicalDevice();
       VkUtils2::createLogicalDevice();
       VkUtils2::createSwapChain();
-      VkUtils2::createImageViews();
+      VkUtils2::createImageViews();    
       Pipeline::createRenderPasses();
-      Pipeline::createGraphicsPipelineLayout();
+      UniformBufferObject::createDescriptorSetLayout();
+    //   Pipeline::createGraphicsPipelineLayout();
+    //   Pipeline::createCommandPool();
+    //   Texture::createDepthResources();
     
       // VkUtils2::createInstance;
     }
    
-private:
-    static void checkCall(VkResult);
-    static std::vector<const char*> getRequiredExtensions();
-    static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
-   
-   static VkResult createDebugUtilsMessengerEXT(VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
-	 
-    static bool isDeviceSuitable(VkPhysicalDevice);
-    static void checkDeviceExtensionSupport(VkPhysicalDevice);
-
-    static const VkSurfaceFormatKHR querySwapChainSupport(VkPhysicalDevice);
 
     
-};
+    
+
+    
+
 };
 
 long permuteMat(long, long);
@@ -209,7 +210,7 @@ inline void VkUtils2::createInstance()
         InstCreateInfo.enabledExtensionCount=static_cast<uint32_t>(extensions.size());
         
         if(ENABLE_VALIDATION_LAYERS) {
-           InstCreateInfo.ppEnabledLayerNames=validationLayers.data();
+           InstCreateInfo.ppEnabledLayerNames=(validationLayers.data());
            InstCreateInfo.enabledLayerCount=static_cast<uint32_t>(validationLayers.size());
         }
         else InstCreateInfo.enabledLayerCount=0;
@@ -218,7 +219,7 @@ inline void VkUtils2::createInstance()
         // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
 
 
-        VkUtils2::checkCall(vkCreateInstance(&InstCreateInfo, nullptr, &vkInstance));
+        VkUtils2::checkCall(vkCreateInstance(&InstCreateInfo, VK_NULL_HANDLE, &vkInstance));
         // getVersion();
     }
 
@@ -229,7 +230,7 @@ inline void VkUtils2::createSurface()
         createSurfaceInfo.sType=VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
         createSurfaceInfo.hwnd= glfwGetWin32Window(const_cast<GLFWwindow*>(window));
         createSurfaceInfo.hinstance = GetModuleHandle(nullptr);
-        createSurfaceInfo.pNext=nullptr;
+        createSurfaceInfo.pNext=VK_NULL_HANDLE;
 
         VkUtils2::checkCall(vkCreateWin32SurfaceKHR(vkInstance, &createSurfaceInfo, nullptr, const_cast<VkSurfaceKHR*>(&Queues::surface)));
         
@@ -249,7 +250,7 @@ inline void VkUtils2::createSurface()
     }
 
 
-inline void VkUtils2::checkCall(VkResult callPPPPI)
+inline const void VkUtils2::checkCall(VkResult callPPPPI)
         {
             if(checks)
             switch (callPPPPI)
@@ -283,7 +284,7 @@ VKAPI_ATTR inline VkBool32 VKAPI_CALL VkUtils2::debugCallback(VkDebugUtilsMessag
     const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
     void* pUserData)
     {
-        std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+        std::cerr << "validation layer: " << pCallbackData->pMessage << "\n\n";
 
         return VK_FALSE;
     }
@@ -299,7 +300,7 @@ inline void VkUtils2::setupDebugMessenger()
         createInfo.messageSeverity=VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
         createInfo.messageType=VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback=VkUtils2::debugCallback;
-        createInfo.pUserData=nullptr;
+        createInfo.pUserData=VK_NULL_HANDLE;
 
         VkUtils2::checkCall(createDebugUtilsMessengerEXT(vkInstance, &createInfo));
         //debugMessenger = pDebugMessenger[0];
@@ -309,8 +310,8 @@ inline VkResult VkUtils2::createDebugUtilsMessengerEXT(VkInstance instance, cons
 {
     VkDebugUtilsMessengerEXT debugUtils={};
     auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    if (func != nullptr) {
-        return func(instance, pCreateInfo, nullptr, &debugUtils);
+    if (func != VK_NULL_HANDLE) {
+        return func(instance, pCreateInfo, VK_NULL_HANDLE, &debugUtils);
     } else {
         return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
@@ -339,13 +340,13 @@ inline void VkUtils2::pickPhysicalDevice()
             std::cout <<("Check Device:") << d << "\n";
             if(isDeviceSuitable(d)) {
                 std::cout <<("Device Suitable:") << d << "\n";
-                Queues::physicalDevice = d;
+                physicalDevice = d;
                 return;
             }
              std::cout <<("Device Not Suitable:") << d << "\n";
            
         }
-        if (Queues::physicalDevice == VK_NULL_HANDLE) {
+        if (physicalDevice == VK_NULL_HANDLE) {
             std::runtime_error("Failed to find a suitable GPU");
         }
 
@@ -383,9 +384,9 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
  inline void  VkUtils2::checkDeviceExtensionSupport(VkPhysicalDevice device) {
      std::cout << "Verifying checkDeviceExtensionSupport" << "\n";
         uint32_t extensionCount;
-        vkEnumerateDeviceExtensionProperties(device, NULL, &extensionCount, NULL);
+        vkEnumerateDeviceExtensionProperties(device, VK_NULL_HANDLE, &extensionCount, VK_NULL_HANDLE);
          VkExtensionProperties availableExtensions[extensionCount]; //todo: May MEMory Leak
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions);
+        vkEnumerateDeviceExtensionProperties(device, VK_NULL_HANDLE, &extensionCount, availableExtensions);
         std::cout << extensionCount<< "->Extensions"<<"\n";
         // delete[] &availableExtensions;
         // return requiredExtensions.;
@@ -396,28 +397,28 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             std::cout <<("Creating Logical Device")<<"\n";
         
          uint32_t pQueueFamilyPropertyCount=0;
-            vkGetPhysicalDeviceQueueFamilyProperties(Queues::physicalDevice, &pQueueFamilyPropertyCount, nullptr);
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE);
 
 
             VkQueueFamilyProperties uniqueQueueFamilies[3] ;
-            Queues::enumerateDetermineQueueFamilies(Queues::physicalDevice, pQueueFamilyPropertyCount, uniqueQueueFamilies);   
+            Queues::enumerateDetermineQueueFamilies(pQueueFamilyPropertyCount, uniqueQueueFamilies);   
            
             VkDeviceQueueCreateInfo queueCreateInfos={};
             constexpr float priority = 1.0f;
              //uint32_t pIx = 0;
             // for(;pIx<queuea;pIx++)*/ {
                 queueCreateInfos.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                queueCreateInfos.queueFamilyIndex=Queues::graphicsFamily;
+                queueCreateInfos.queueFamilyIndex=graphicsFamily;
                 queueCreateInfos.queueCount=uniqueQueueFamilies[0].queueCount;
                 queueCreateInfos.pQueuePriorities=&priority;
                 queueCreateInfos.flags=0;
-                queueCreateInfos.pNext=nullptr;
+                queueCreateInfos.pNext=VK_NULL_HANDLE;
             //}
             
             VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
                     deviceVulkan12Features.descriptorBindingPartiallyBound=true,
                     deviceVulkan12Features.imagelessFramebuffer=true;
-                    deviceVulkan12Features.pNext=nullptr;
+                    deviceVulkan12Features.pNext=VK_NULL_HANDLE;
                     
          
 
@@ -435,13 +436,13 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 //                        .geometryShader(true);
 //                        .pipelineStatisticsQuery(true)
 //                        .alphaToOne(false);
-            vkGetPhysicalDeviceFeatures2(Queues::physicalDevice, &deviceFeatures2);
+            vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
             VkDeviceCreateInfo createInfo={};
                     createInfo.sType=VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
                     createInfo.pNext=&deviceFeatures2;
                     createInfo.queueCreateInfoCount=1;
                     createInfo.pQueueCreateInfos=&queueCreateInfos;
-                    createInfo.ppEnabledExtensionNames=(deviceExtensions.data());
+                    createInfo.ppEnabledExtensionNames=(deviceExtensions);
                     createInfo.enabledExtensionCount=static_cast<uint32_t>(validationLayers.size());
                     createInfo.ppEnabledLayerNames=(validationLayers.data());
 
@@ -453,9 +454,9 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             // if(ENABLE_VALIDATION_LAYERS) {
             //     createInfo.ppEnabledLayerNames(asPointerBuffer(VALIDATION_LAYERS));
             // }
-            checkCall(vkCreateDevice(Queues::physicalDevice, &createInfo, nullptr, &Queues::device ));
+            checkCall(vkCreateDevice(physicalDevice, &createInfo, VK_NULL_HANDLE, &device ));
 
-              vkGetDeviceQueue(Queues::device, createInfo.pQueueCreateInfos->queueFamilyIndex, 0,  &Queues::GraphicsQueue);
+              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos->queueFamilyIndex, 0,  &GraphicsQueue);
        
     }
 
@@ -473,7 +474,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
     inline const VkSurfaceFormatKHR VkUtils2::querySwapChainSupport(const VkPhysicalDevice device)
 {
 
-        checkCall(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, Queues::surface, &capabilities));
+        checkCall(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, Queues::surface, &SwapChainSupportDetails::capabilities));
 
         uint32_t count;
        
@@ -490,7 +491,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
         if (count != 0) {
             // presentModes = {};
-            checkCall(vkGetPhysicalDeviceSurfacePresentModesKHR(device, Queues::surface, &count, &presentModes));
+            checkCall(vkGetPhysicalDeviceSurfacePresentModesKHR(device, Queues::surface, &count, &SwapChainSupportDetails::presentModes));
         }
          for(const VkSurfaceFormatKHR &format: formats)
          {
@@ -523,7 +524,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
           createInfo.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 
                 createInfo.viewType=VK_IMAGE_VIEW_TYPE_2D;
-                createInfo.format=swapChainImageFormat.format;
+                createInfo.format=SwapChainSupportDetails::swapChainImageFormat.format;
                 createInfo.image=*pSwapchainImages;
 
         createInfo.subresourceRange.aspectMask=VK_IMAGE_ASPECT_COLOR_BIT;
@@ -533,7 +534,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                 createInfo.subresourceRange.layerCount=1;
         
         
-        checkCall(clPPPI(&createInfo, "vkCreateImageView", &swapChainImageViews)); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+        checkCall(clPPPI(&createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews)); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
 
         
 
@@ -576,7 +577,7 @@ VkAttachmentReference attachmentsRefs = {};
                 attachmentsRefs.layout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
        VkAttachmentDescription attachments = {};
-                 attachments.format=swapChainImageFormat.format;
+                 attachments.format=SwapChainSupportDetails::swapChainImageFormat.format;
                  attachments.samples=VK_SAMPLE_COUNT_1_BIT;
                  attachments.loadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE;
                  attachments.storeOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -628,195 +629,16 @@ const VkAttachmentDescription attDesc[]={attachments, depthAttachment};
                 vkRenderPassCreateInfo1.subpassCount=1;
                 vkRenderPassCreateInfo1.pDependencies=&dependency;
                 vkRenderPassCreateInfo1.dependencyCount=2;
-                vkRenderPassCreateInfo1.pNext=nullptr;
+                vkRenderPassCreateInfo1.pNext=VK_NULL_HANDLE ;
 
 
-        clPPPI(&vkRenderPassCreateInfo1, "vkCreateRenderPass", &renderPass);
+        clPPPI(&vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass);
         
        
 
     }
 
-    inline void Pipeline::createGraphicsPipelineLayout()
-    {
-        //Thankfully Dont; need to worry about compiling the Shader Files AnyMore due to
-        std::cout<<("Setting up PipeLine")<< "\n";
-
-        const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile(device, "shaders/21_shader_ubo.vert.spv");
-        const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile(device, "shaders/21_shader_ubo.frag.spv");
-
-        // constexpr char entryPoint[]={"main"};
-
-        VkPipelineShaderStageCreateInfo vertexStage={
-            .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, 
-            .pNext=nullptr,
-//                    .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
-                .stage=VK_SHADER_STAGE_VERTEX_BIT,
-                .module=vertShaderModule,
-                .pName="main"
-                
-        };
-
-        VkPipelineShaderStageCreateInfo fragStage={
-                .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                .pNext=nullptr,
-                .stage=VK_SHADER_STAGE_FRAGMENT_BIT,
-                .module=fragShaderModule,
-                .pName="main"
-        };
-
-        VkPipelineShaderStageCreateInfo shaderStages[] = {vertexStage, fragStage};
-
-        VkVertexInputBindingDescription a {
-                        .binding=0,
-        //                    .stride(vertices.length/2)
-        //                    .stride(vertices.length/VERT_SIZE+1)
-                        .stride=32,
-                        .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
-                };
-
-        VkPipelineVertexInputStateCreateInfo vkPipelineVertexInputStateCreateInfo={};
-                   vkPipelineVertexInputStateCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                vkPipelineVertexInputStateCreateInfo.pVertexBindingDescriptions=&a;
-        // vkPipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions= getAttributeDescriptions();
-        // VkPipelineVertexInputStateCreateInfo.nvertexAttributeDescriptionCount=3;
-
-
-        VkPipelineInputAssemblyStateCreateInfo inputAssembly={};
-                   inputAssembly.sType=VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-                inputAssembly.topology=VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-                inputAssembly.primitiveRestartEnable=VK_FALSE;
-        /*todo: Fixed Viewport COnstruction/Initilaistaion?Configration: ([Had use wrong Function?method Veowpprt/Stagong function Calls/cfongurations e.g.])
-         *(had also used vkViewport instead of VkViewport of Type Buffer which is the atcual correct Obejct/Stage/Steup.veiwport conponnat.consituent
-         *
-         * (CorretcioN: had actually also used viewportBuffer and not vkViewport(Of type VkViewport.Bufferand not VkViewPort....) in VkPipelineViewportStateCreateInfo as well)
-         */
-        VkViewport vkViewport{
-                .x=0.0F,
-                .y=0.0F,
-                .width=static_cast<float>(swapChainExtent.width),
-                .height=static_cast<float>(swapChainExtent.height),
-                .minDepth=0.0F,
-                .maxDepth=1.0F
-        };
-
-        VkRect2D scissor{
-//                    .offset(vkOffset2D ->vkViewport.y()) //todo: not sure if correct Offset
-                .offset={0, 0},
-                .extent=swapChainExtent
-        };
-
-        VkPipelineViewportStateCreateInfo vkViewPortState={};
-                   vkViewPortState.sType=VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-                vkViewPortState.viewportCount=1;
-                vkViewPortState.pViewports=&vkViewport;
-//                    .pScissors(vkrect2DBuffer);
-                vkViewPortState.scissorCount=1;
-                vkViewPortState.pScissors=&scissor;
-
-
-        VkPipelineRasterizationStateCreateInfo VkPipeLineRasterization={};
-                   VkPipeLineRasterization.sType=VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-                VkPipeLineRasterization.depthClampEnable=VK_FALSE;
-                VkPipeLineRasterization.rasterizerDiscardEnable=VK_FALSE;
-                VkPipeLineRasterization.polygonMode=VK_POLYGON_MODE_FILL;
-                VkPipeLineRasterization.lineWidth=1.0f;
-//                   .cullMode(VK_CULL_MODE_BACK_BIT)
-//                   .frontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE)
-                VkPipeLineRasterization.depthBiasEnable=VK_FALSE;
-
-        //todo: actuall need multismapling to Compleet.Initialsie.Construct.Substanciate the renderPipeline corretcly even if Antialsing /AF/MMs are not neeeded......
-        VkPipelineMultisampleStateCreateInfo multisampling={};
-                   multisampling.sType=VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-                multisampling.sampleShadingEnable=VK_FALSE;
-                multisampling.rasterizationSamples=VK_SAMPLE_COUNT_1_BIT;
-//                    .alphaToOneEnable(false)
-//                    .alphaToCoverageEnable(false);
-
-
-        VkPipelineDepthStencilStateCreateInfo depthStencil={};
-                   depthStencil.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-                depthStencil.depthTestEnable=VK_TRUE;
-                depthStencil.depthWriteEnable=VK_TRUE;
-                depthStencil.depthCompareOp=VK_COMPARE_OP_LESS;
-                depthStencil.depthBoundsTestEnable=VK_FALSE;
-//                    .minDepthBounds(0) //Optional
-//                    .maxDepthBounds(1) //Optional
-                depthStencil.stencilTestEnable=VK_FALSE;
-
-
-        VkPipelineColorBlendAttachmentState colorBlendAttachment={};
-                colorBlendAttachment.colorWriteMask=VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-                //(Actually)Add blending?transparency to be suproted
-                colorBlendAttachment.blendEnable=VK_TRUE;
-                colorBlendAttachment.srcColorBlendFactor=VK_BLEND_FACTOR_SRC_ALPHA;
-//                    .dstColorBlendFactor(VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA);
-                colorBlendAttachment.dstColorBlendFactor=VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-//                    .colorBlendOp(VK_BLEND_OP_MAX)
-
-//                    .srcAlphaBlendFactor(VK_BLEND_FACTOR_ONE)
-//                    .dstAlphaBlendFactor(VK_BLEND_FACTOR_ZERO)
-//                    .alphaBlendOp(VK_BLEND_OP_ADD);
-
-        // float blendConstants[]={0.0f, 0.0f, 0.0f, 0.0f};
-        VkPipelineColorBlendStateCreateInfo colorBlending={};
-                   colorBlending.sType=VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-                colorBlending.logicOpEnable=VK_FALSE;
-                colorBlending.logicOp=VK_LOGIC_OP_COPY;
-                colorBlending.pAttachments=&colorBlendAttachment;
-                colorBlending.blendConstants[0]=0.0f;
-                colorBlending.blendConstants[1]=0.0f;
-                colorBlending.blendConstants[2]=0.0f;
-                colorBlending.blendConstants[3]=0.0f;
-//            memFree(colorBlendAttachment);
-
-        VkPushConstantRange vkPushConstantRange={};
-                vkPushConstantRange.offset=0;
-                vkPushConstantRange.size=16 * sizeof(float);
-                vkPushConstantRange.stageFlags=VK_SHADER_STAGE_VERTEX_BIT;
-        VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo;
-                   vkPipelineLayoutCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-                vkPipelineLayoutCreateInfo.pPushConstantRanges=&vkPushConstantRange;
-                vkPipelineLayoutCreateInfo.pSetLayouts=&UniformBufferObject::descriptorSetLayout;
-        //                    .sType(VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO)
-       
-
-
-        std::cout << ("using pipeLine with Length: ") << sizeof(swapChainImageViews);
-        //nmemFree(vkPipelineLayoutCreateInfo1.address());
-        vkCreatePipelineLayout(device, &vkPipelineLayoutCreateInfo, nullptr, &vkLayout);
-        //MemSysm.Memsys2.doPointerAllocSafeX(vkPipelineLayoutCreateInfo, Buffers.capabilities.vkCreatePipelineLayout, Buffers.vkLayout);
-
-
-        VkGraphicsPipelineCreateInfo pipelineInfo{
-                .sType=VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-                .pStages=shaderStages,
-                .stageCount=2,
-                .pVertexInputState=&vkPipelineVertexInputStateCreateInfo,
-                .pInputAssemblyState=&inputAssembly,
-                .pViewportState=&vkViewPortState,
-                .pRasterizationState=&VkPipeLineRasterization,
-                .pMultisampleState=&multisampling,
-                .pDepthStencilState=&depthStencil,
-                .pColorBlendState=&colorBlending,
-//                    .pDynamicState(null)
-                .layout=vkLayout,
-                .renderPass=renderPass,
-                .subpass=0,
-//                    .basePipelineHandle(VK_NULL_HANDLE)
-                .basePipelineIndex=-1
-        };
-       
-
-        //Memsys2.free(entryPoint);
-
-        vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline);
-        // Buffers.graphicsPipeline = MemSysm.doPointerAlloc5L(device, pipelineInfo);
-
-        vkDestroyShaderModule(device, vertShaderModule, nullptr);
-        vkDestroyShaderModule(device, fragShaderModule, nullptr);
-
-    }
+    
 
      inline VkShaderModule createShaderModule(char& spirvCode, VkShaderModuleCreateInfo* pShaderCreateInfo) {
 
@@ -833,5 +655,5 @@ const VkAttachmentDescription attDesc[]={attachments, depthAttachment};
                 poolInfo.queueFamilyIndex=graphicsFamily;
                 poolInfo.flags=0;
         //Memsys2.free(poolInfo);
-        vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool);
+        vkCreateCommandPool(device, &poolInfo, VK_NULL_HANDLE, &commandPool);
     }

@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <stdint.h>
 #include <vulkan/vulkan.h>
@@ -5,34 +6,35 @@
 
 
 
-
+   
 inline namespace Queues
 {
     
-static VkPhysicalDevice physicalDevice;
-static VkDevice device;
-
+     static VkPhysicalDevice physicalDevice;
+    static VkDevice device;
     static uint32_t graphicsFamily;
-    static uint32_t presentFamily;
-    static VkSurfaceKHR surface={};
+     static uint32_t presentFamily;
+     static VkQueue GraphicsQueue;
+     static VkQueue PresentQueue;
 
-    static VkQueue GraphicsQueue;
-    static VkQueue PresentQueue;
-   
+    
+    static inline VkSurfaceKHR surface={};
+
+    
     
 
-    static VkQueueFamilyProperties enumerateDetermineQueueFamilies(const VkPhysicalDevice&, uint32_t, VkQueueFamilyProperties[]);
-    const static bool isComplete();
+    VkQueueFamilyProperties enumerateDetermineQueueFamilies(uint32_t, VkQueueFamilyProperties[]);
+    // const static bool isComplete();
 };
 
-inline VkQueueFamilyProperties Queues::enumerateDetermineQueueFamilies(const VkPhysicalDevice &device, uint32_t VkQueueFamilyProperties, struct VkQueueFamilyProperties *queueFamilies)
+inline VkQueueFamilyProperties Queues::enumerateDetermineQueueFamilies( uint32_t VkQueueFamilyProperties, struct VkQueueFamilyProperties *queueFamilies)
 {
             //std::cout <<("Checking Available Queue families") << "\n";
 
             // uint32_t pQueueFamilyPropertyCount=0;
             // vkGetPhysicalDeviceQueueFamilyProperties(device, &pQueueFamilyPropertyCount, nullptr);
             //VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
-            vkGetPhysicalDeviceQueueFamilyProperties(device, &VkQueueFamilyProperties, queueFamilies);
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &VkQueueFamilyProperties, queueFamilies);
 
             //VkBool32 presentSupport = (VK_FALSE);
            // std::cout << queueFamilies << "\n";
@@ -55,9 +57,4 @@ inline VkQueueFamilyProperties Queues::enumerateDetermineQueueFamilies(const VkP
 
             // std::cout <<a <<"Graphics Family: " << graphicsFamily << " Present family: " << presentFamily<< "\n";
 
-}
-
-const inline bool Queues::isComplete()
-{
-    return graphicsFamily== 0;
 }
