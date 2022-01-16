@@ -1,4 +1,3 @@
-#include "GLFW/glfw3.h"
 // #include "mat4.hpp"
 #include "VkUtils2.hpp"
 
@@ -53,7 +52,7 @@ inline void VkUtils2::createSwapChain()
 {
             VkSurfaceFormatKHR surfaceFormat =  VkUtils2::querySwapChainSupport(physicalDevice);
         
-            VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent(*window);
+            VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent();
             uint32_t imageCount= (SwapChainSupportDetails::capabilities.minImageCount + 1);
 
             if (SwapChainSupportDetails::capabilities.maxImageCount > 0 && imageCount > SwapChainSupportDetails::capabilities.maxImageCount) {
@@ -156,8 +155,8 @@ inline void VkUtils2::createSwapChain()
         VkPipelineVertexInputStateCreateInfo vkPipelineVertexInputStateCreateInfo={};
                    vkPipelineVertexInputStateCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
                 vkPipelineVertexInputStateCreateInfo.pVertexBindingDescriptions=&a;
-        // vkPipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions= getAttributeDescriptions();
-        // VkPipelineVertexInputStateCreateInfo.nvertexAttributeDescriptionCount=3;
+        vkPipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions= Pipeline::getAttributeDescriptions();
+        vkPipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount=3;
 
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly={};
@@ -295,36 +294,3 @@ inline void VkUtils2::createSwapChain()
         vkDestroyShaderModule(device, fragShaderModule, VK_NULL_HANDLE );
 
     }
-
-    inline void UniformBufferObject::createDescriptorSetLayout()
-{
-     {
-            VkDescriptorSetLayoutBinding bindings[]={
-                   VkDescriptorSetLayoutBinding{
-                    .binding=0,
-                    .descriptorCount=1,
-                    .descriptorType=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    .stageFlags=VK_SHADER_STAGE_VERTEX_BIT
-                   },
-
-                 VkDescriptorSetLayoutBinding{
-                    .binding=1,
-                    .descriptorCount=1,
-                    .descriptorType=VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                    //                         .pImmutableSamplers(null)
-                    .stageFlags=VK_SHADER_STAGE_FRAGMENT_BIT
-                    }
-            };
-            //samplerLayoutBinding
-         
-
-
-            VkDescriptorSetLayoutCreateInfo a{
-                    .sType=VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-                    .pBindings=bindings,
-                    
-            };
-            clPPPI(&a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout);
-            //return MemSysm.doPointerAllocSafe(a, device.getCapabilities().vkCreateDescriptorSetLayout);
-        }
-}

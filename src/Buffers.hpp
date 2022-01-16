@@ -1,21 +1,17 @@
 #pragma once
 
-#include "src/Buffers.hpp"
-#include "src/Pipeline.hpp"
-#include "src/Queues.hpp"
-#include <stdexcept>
-#include <stdint.h>
-#include <vulkan/vulkan_core.h>
+
+#include "Pipeline.hpp"
 
 
 // = (&set + sizeof(set));
 
-namespace Buffers
+inline namespace Buffers
 {
     extern VkOffset2D set{.x=0,.y=0};
 
         extern VkImageLayout depthImageView;
-        extern VkPipelineLayout vkLayout;
+        inline VkPipelineLayout vkLayout;
         static void createBuffer(VkBuffer, VkDeviceMemory);
         static void setBuffer(VkBufferUsageFlagBits, size_t, VkBuffer);
         static uint32_t findMemoryType(VkPhysicalDevice, uint32_t, VkMemoryPropertyFlagBits);

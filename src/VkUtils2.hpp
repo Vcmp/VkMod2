@@ -1,71 +1,19 @@
 #pragma once
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define VK_USE_PLATFORM_WIN32_KHR
-#define VK_USE_64_BIT_PTR_DEFINES 1
 
-#include <stdexcept>
-// #include <vcruntime.h>
-#include <string>
-#include <vulkan/vulkan_core.h>
-
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
-#include <stdint.h>
-
-#include <iostream>
-#include <vector>
-
-#include "SwapChainSupportDetails.hpp"
-#include "Queues.hpp"
-    
-#include "Pipeline.hpp"
-#include "Texture.hpp"
-#include "ShaderSPIRVUtils.hpp"
-#include "Buffers.hpp"
 #include "UniformBufferObject.hpp"
-
+#include "ShaderSPIRVUtils.hpp"
+#include "SwapChainSupportDetails.hpp"
+#include "Texture.hpp"
 
  
 
-    constexpr bool debug=true;
-    constexpr bool checks=true;
-    constexpr bool ENABLE_VALIDATION_LAYERS=debug;
-    const std::vector<const char*>   validationLayers = {
-    "VK_LAYER_KHRONOS_validation"};
-    constexpr  char* deviceExtensions[] = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    };
+   
 
 
 
 inline namespace VkUtils2
-{static GLFWwindow* window;
-static GLFWmonitor* monitor;
-static VkInstance vkInstance;
-static VkSwapchainKHR swapChain;
-static VkImage pSwapchainImages[3];
-    inline namespace {
-
-    typedef const VkResult (__vectorcall *callPPPPI) (VkDevice device, const void* pStrct, const VkAllocationCallbacks* pAllocator, const void* hndl/*, const PFN_vkVoidFunction* pHndl*/);
-
-typedef VkResult  (VKAPI_CALL *vkk)(void);
-
-static const void checkCall(VkResult);
-const static inline VkResult clPPPI(const void* pStrct,  const char* a, const void *object)
 {
-    //vkGetDeviceProcAddr()
-    // auto xx=PFN_vkVoidFunction(swapChain);
-    
-    const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device, a));
-    std::cout << &x << "\n";
-    std::cout << &pStrct << &object<<&a<<"\n";
-    std::cout << a<<"\n";
-    std::cout << object<<"\n";
-    const VkResult VkR =x(device, pStrct, nullptr, object);
-    checkCall(VkR);
-    return VkR;
-    //  callPPPPI(device, pStrct, nullptr, a)
-};static std::vector<const char*> getRequiredExtensions();static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
+    static std::vector<const char*> getRequiredExtensions();static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
    
    static VkResult createDebugUtilsMessengerEXT(VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
 	 
@@ -73,7 +21,7 @@ const static inline VkResult clPPPI(const void* pStrct,  const char* a, const vo
     static void checkDeviceExtensionSupport(VkPhysicalDevice);
 
     static const VkSurfaceFormatKHR querySwapChainSupport(VkPhysicalDevice);
-    }
+    
 
 
 
@@ -109,8 +57,8 @@ const static inline VkResult clPPPI(const void* pStrct,  const char* a, const vo
       VkUtils2::createSwapChain();
       VkUtils2::createImageViews();    
       Pipeline::createRenderPasses();
-      UniformBufferObject::createDescriptorSetLayout();
-    //   Pipeline::createGraphicsPipelineLayout();
+    //   UniformBufferObject::createDescriptorSetLayout();
+      Pipeline::createGraphicsPipelineLayout();
     //   Pipeline::createCommandPool();
     //   Texture::createDepthResources();
     
@@ -182,8 +130,8 @@ inline void VkUtils2::createInstance()
                 //memSet(vkApplInfo, 0,VkApplicationInfo.SIZEOF);
                 
                 vkApplInfo.sType=VK_STRUCTURE_TYPE_APPLICATION_INFO;
-				 vkApplInfo.pNext=nullptr;
-                 vkApplInfo.pApplicationName="VKMod";
+				 vkApplInfo.pNext=VK_NULL_HANDLE;
+                 vkApplInfo.pApplicationName="VKMod2";
                  vkApplInfo.applicationVersion=VK_MAKE_VERSION(1, 0, 0);
                  vkApplInfo.pEngineName="No Engine";
                 vkApplInfo .engineVersion=VK_MAKE_VERSION(1, 0, 0);
@@ -219,7 +167,7 @@ inline void VkUtils2::createInstance()
         // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
 
 
-        VkUtils2::checkCall(vkCreateInstance(&InstCreateInfo, VK_NULL_HANDLE, &vkInstance));
+        checkCall(vkCreateInstance(&InstCreateInfo, VK_NULL_HANDLE, &vkInstance));
         // getVersion();
     }
 
@@ -232,7 +180,7 @@ inline void VkUtils2::createSurface()
         createSurfaceInfo.hinstance = GetModuleHandle(nullptr);
         createSurfaceInfo.pNext=VK_NULL_HANDLE;
 
-        VkUtils2::checkCall(vkCreateWin32SurfaceKHR(vkInstance, &createSurfaceInfo, nullptr, const_cast<VkSurfaceKHR*>(&Queues::surface)));
+        checkCall(vkCreateWin32SurfaceKHR(vkInstance, &createSurfaceInfo, nullptr, const_cast<VkSurfaceKHR*>(&Queues::surface)));
         
         
     }
@@ -243,29 +191,14 @@ inline void VkUtils2::createSurface()
         uint32_t layerCount;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
-        std::vector<VkLayerProperties> availableLayers(layerCount);
-        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+        VkLayerProperties availableLayers[layerCount];
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers);
 
         return false;
     }
 
 
-inline const void VkUtils2::checkCall(VkResult callPPPPI)
-        {
-            if(checks)
-            switch (callPPPPI)
-            {
-                case VK_SUCCESS :std::cout<<("OK!")<< "\n"; break;
-                case VK_NOT_READY : throw std::runtime_error("Not ready!"); break;
-                case VK_TIMEOUT : throw std::runtime_error("Bad TimeOut!"); break;
-                case VK_INCOMPLETE : throw std::runtime_error("Incomplete!"); break;
-                case VK_ERROR_INITIALIZATION_FAILED :  throw  std::runtime_error("Error: bad Initialisation!");break;
-                case VK_ERROR_FRAGMENTED_POOL :{ throw std::runtime_error("Error: bad Mem Alloc");}break;
-                case VK_ERROR_OUT_OF_HOST_MEMORY :{  throw  std::runtime_error("No Host Memory");}break;
-                case VK_ERROR_OUT_OF_DEVICE_MEMORY :{ throw  std::runtime_error("No Device Memory");}break;
-                default :{    std::runtime_error("Unknown Error!");}break;
-            }
-        }
+
 
 inline std::vector<const char*> VkUtils2::getRequiredExtensions()
 {
@@ -302,7 +235,7 @@ inline void VkUtils2::setupDebugMessenger()
         createInfo.pfnUserCallback=VkUtils2::debugCallback;
         createInfo.pUserData=VK_NULL_HANDLE;
 
-        VkUtils2::checkCall(createDebugUtilsMessengerEXT(vkInstance, &createInfo));
+        checkCall(createDebugUtilsMessengerEXT(vkInstance, &createInfo));
         //debugMessenger = pDebugMessenger[0];
     }
     

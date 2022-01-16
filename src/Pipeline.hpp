@@ -1,14 +1,10 @@
 #pragma once
+#include "Queues.hpp"
 
+ constexpr int OFFSETOF_COLOR = 3 * sizeof(float);
+ constexpr int OFFSET_POS = 0;
 
-
-
-
-
-#include <stdint.h>
-#include <vulkan/vulkan_core.h>
-
-
+ constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
 
 namespace Pipeline
 {   
@@ -17,12 +13,14 @@ namespace Pipeline
     static void createRenderPasses();
     static void createGraphicsPipelineLayout();
     static void createCommandPool();
+VkVertexInputBindingDescription* getVertexInputBindingDescription();
+    static VkVertexInputAttributeDescription*  getAttributeDescriptions();
 };
 
 
 
 
- static  VkVertexInputBindingDescription* getVertexInputBindingDescription()
+ inline  VkVertexInputBindingDescription* Pipeline::getVertexInputBindingDescription()
     {
          VkVertexInputBindingDescription a {
                 .binding=0,
@@ -34,35 +32,35 @@ namespace Pipeline
         return &a;
     }
 
-//     static VkVertexInputAttributeDescription*  getAttributeDescriptions()
-//     {
+    inline VkVertexInputAttributeDescription*  Pipeline::getAttributeDescriptions()
+    {
 
-//         VkVertexInputAttributeDescription attributeDescriptions[3];
+        VkVertexInputAttributeDescription attributeDescriptions[3];
 
-//         // Position
-//         VkVertexInputAttributeDescription* posDescription = &attributeDescriptions[0];
-//         posDescription->binding=0;
-//         posDescription->location=0;
-//         posDescription->format=VK_FORMAT_R32G32B32_SFLOAT;
-//         posDescription->offset=OFFSET_POS;
+        // Position
+        VkVertexInputAttributeDescription* posDescription = &attributeDescriptions[0];
+        posDescription->binding=0;
+        posDescription->location=0;
+        posDescription->format=VK_FORMAT_R32G32B32_SFLOAT;
+        posDescription->offset=OFFSET_POS;
 
-//         // Color
-//         VkVertexInputAttributeDescription* colorDescription = &attributeDescriptions[1];
-//         colorDescription->binding=0;
-//         colorDescription->location=1;
-//         colorDescription->format=VK_FORMAT_R32G32B32_SFLOAT;
-//         colorDescription->offset=OFFSETOF_COLOR;
+        // Color
+        VkVertexInputAttributeDescription* colorDescription = &attributeDescriptions[1];
+        colorDescription->binding=0;
+        colorDescription->location=1;
+        colorDescription->format=VK_FORMAT_R32G32B32_SFLOAT;
+        colorDescription->offset=OFFSETOF_COLOR;
 
-//         // Texture coordinates
-//         VkVertexInputAttributeDescription *texCoordsDescription = attributeDescriptions[2];
-//         texCoordsDescription->binding=0;
-//         texCoordsDescription->location=2;
-//         texCoordsDescription->format=VK_FORMAT_R32G32_SFLOAT;
-//         texCoordsDescription->offset=OFFSETOF_TEXTCOORDS;
+        // Texture coordinates
+        VkVertexInputAttributeDescription* texCoordsDescription = &attributeDescriptions[2];
+        texCoordsDescription->binding=0;
+        texCoordsDescription->location=2;
+        texCoordsDescription->format=VK_FORMAT_R32G32_SFLOAT;
+        texCoordsDescription->offset=OFFSETOF_TEXTCOORDS;
 
-// //            memFree(attributeDescriptions);
+//            memFree(attributeDescriptions);
 
-//         return attributeDescriptions;
-//     }
+        return attributeDescriptions;
+    }
 
     

@@ -1,8 +1,5 @@
 #pragma once
-#include <iostream>
-#include <stdint.h>
-#include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
+#include "VkUtilsXBase.hpp"
 
 
 
@@ -10,8 +7,7 @@
 inline namespace Queues
 {
     
-     static VkPhysicalDevice physicalDevice;
-    static VkDevice device;
+  
     static uint32_t graphicsFamily;
      static uint32_t presentFamily;
      static VkQueue GraphicsQueue;

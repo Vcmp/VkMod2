@@ -1,12 +1,7 @@
 
 #pragma once
-#include "GLFW/glfw3.h"
 
-#include <iostream>
-#include <stdexcept>
-#include <stdint.h>
-#include <vector>
-#include <vulkan/vulkan.h>
+#include "VkUtilsXBase.hpp"
 
 
 // static VkSurfaceFormatKHR formats={};
@@ -29,7 +24,7 @@ inline namespace SwapChainSupportDetails
     static void createSwapChain();
     static void createImageViews();
     static uint32_t clamp(uint32_t,uint32_t,uint32_t);
-    static VkExtent2D chooseSwapExtent(GLFWwindow&);
+    static VkExtent2D chooseSwapExtent();
     static VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR&);
     static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>);
    
@@ -42,19 +37,19 @@ inline namespace SwapChainSupportDetails
                 const uint32_t a =  (max < value ? max : value);
                 return  (min > a ? min : a);
             }
-        inline VkExtent2D SwapChainSupportDetails::chooseSwapExtent(GLFWwindow &window)
-            
+        inline VkExtent2D SwapChainSupportDetails::chooseSwapExtent()
+            //todo: MAy nto Detect Actal Extent Correctly"
             {
                 std::cout << "Creating: chooseSwapExtent"<<"\n";
                 if (capabilities.currentExtent.width != 0xFFFFFFFF) {
                     return capabilities.currentExtent;
                 }
                 int width, height;
-                glfwGetFramebufferSize(&window, &width, &height);
+                // glfwGetFramebufferSize(&window, &width, &height);
 
                 VkExtent2D actualExtent={
-                    static_cast<uint32_t>(width),
-                    static_cast<uint32_t>(height)
+                    // static_cast<uint32_t>(width),
+                    // static_cast<uint32_t>(height)
                     };
                 VkExtent2D minExtent = capabilities.minImageExtent;
                 VkExtent2D maxExtent = capabilities.maxImageExtent;

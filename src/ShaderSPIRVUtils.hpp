@@ -1,22 +1,11 @@
 
 #pragma once
-
-#include <stdio.h>
-#include <vector>
 #define _CRT_SECURE_NO_WARNINGS
-#include <iostream>
-#include <stdexcept>
 
-
-
-#include <stdint.h>
-
-
-
+#include "Pipeline.hpp"
 #include <fcntl.h>
-
 #include <io.h>
-#include <vulkan/vulkan_core.h>
+
 inline namespace ShaderSPIRVUtils
 {
     // char shaderNamePath;
@@ -26,12 +15,12 @@ inline namespace ShaderSPIRVUtils
     //     VERTEX_SHADER=0,
     //     FRAGMENT_SHADER=1
     // };
-    static const VkShaderModule compileShaderFile(const VkDevice&, const char*);
-    static const VkShaderModule createShaderModule(VkDevice, const char*, size_t);
+    inline constexpr VkShaderModule compileShaderFile(const VkDevice&, const char*);
+    // extern constexpr VkShaderModule createShaderModule(VkDevice, const char*, size_t);
 } ;
 //typedef ShaderSPIRVUtils SPRIV;
-inline namespace{
-inline const VkShaderModuleCreateInfo doRead(const char* shaderNamePath1)
+
+inline extern const VkShaderModuleCreateInfo doRead(const char* shaderNamePath1)
 {
     const int fhndl=_sopen(shaderNamePath1, _O_RDONLY | _O_BINARY | _O_SEQUENTIAL, 0x20, 0x0100);
     // if(!file)
@@ -64,9 +53,9 @@ std::cout<< size << "\n";
     }
     return VsMCI;
 }
-}
 
-inline const VkShaderModule ShaderSPIRVUtils::compileShaderFile(const VkDevice &device, const char* shaderNamePath1)
+
+inline constexpr VkShaderModule ShaderSPIRVUtils::compileShaderFile(const VkDevice &device, const char* shaderNamePath1)
 {
    
    

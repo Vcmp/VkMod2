@@ -1,13 +1,8 @@
 #pragma once
 
 
-#include <fcntl.h>
-#include <io.h>
-#include <iostream>
-#include <stdexcept>
-#include <stdint.h>
-#include <vector>
-#include <vulkan/vulkan_core.h>
+
+#include "VkUtilsXBase.hpp"
 #include "Buffers.hpp"
 
 inline namespace Texture 
@@ -29,35 +24,35 @@ inline namespace Texture
 
     inline void Texture::createTextureImage()
     {
-        const char a[] = ("/shaders/terrain.png");
+        const char a[] = ("bin/shaders/terrain.png");
         std::cout<<(a);
        
        
-        const int fhndl=_sopen(a, _O_RDONLY | _O_BINARY | _O_SEQUENTIAL, 0x20, 0x0100);
-    // if(!file)
-    // {
-    //     std::runtime_error("Fail:Bad or No ShaderFile!");
-    // }
-     _lseek(fhndl, 0, SEEK_END);
-   const size_t size = _tell(fhndl);
-   _lseek(fhndl, 0, SEEK_END);
+//         const int fhndl=_sopen(a, _O_RDONLY | _O_BINARY | _O_SEQUENTIAL, 0x20, 0x0100);
+//     // if(!file)
+//     // {
+//     //     std::runtime_error("Fail:Bad or No ShaderFile!");
+//     // }
+//      _lseek(fhndl, 0, SEEK_END);
+   const size_t size = 0;//_tell(fhndl);
+//    _lseek(fhndl, 0, SEEK_END);
 
         uint8_t pixels[size];
 
-    std::cout<< size << "\n";
-   if(_eof(fhndl)==-1)
-    {
+//     std::cout<< size << "\n";
+//    if(_eof(fhndl)==-1)
+//     {
       
-       throw std::runtime_error("Fail:Bad or No ShaderFile!");
-    }
-     _read(fhndl, pixels, size);
-     std::cout<< pixels << "\n";
-    _flushall();
-    _close(fhndl);
+//        throw std::runtime_error("Fail:Bad or No ShaderFile!");
+//     }
+//      _read(fhndl, pixels, size);
+//      std::cout<< pixels << "\n";
+//     _flushall();
+//     _close(fhndl);
        
 
 
-        size_t imageSize = size * 3;
+        size_t imageSize = sizeof(pixels) * 3;
 
         if (pixels == nullptr) {
             throw std::runtime_error("No Image!");
