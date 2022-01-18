@@ -12,13 +12,14 @@ project ("VkMod2")
 # set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld")
 # set(CMAKE_MODULE_LINKER_FLAGS_INIT "-fuse-ld=lld")
 # set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld")
+# set(CMAKE_CXX_STANDARD 20)
 
 #set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -fvisibility=hidden -fno-semantic-interposition -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -O0 -glldb -fsanitize=address -fsanitize-address-use-after-return=always -fno-omit-frame-pointer -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 
 find_package(Vulkan REQUIRED)
 
-add_subdirectory(third_party)
+#add_subdirectory(third_party)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 
@@ -37,7 +38,7 @@ add_executable(VkMod2
 #set_property(TARGET VkMod2 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
 
 target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
-
+# target_include_directories(VkMod2 PUBLIC "$ENV{VULKAN_SDK}/Include")
 # target_include_directories("${PROJECT_SOURCE_DIR}/third_party/stb_image" INTERFACE stb_image)
 # target_link_libraries(VkMod2 stb_image)
 

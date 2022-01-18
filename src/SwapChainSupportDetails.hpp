@@ -20,7 +20,7 @@ inline namespace SwapChainSupportDetails
     static VkImageView swapChainImageViews={};
     static VkRenderPass renderPass{};
     static VkExtent2D swapChainExtent{};
-    static void querySwapChainSupport(VkPhysicalDevice);
+    // static void querySwapChainSupport(VkPhysicalDevice);
     static void createSwapChain();
     static void createImageViews();
     static uint32_t clamp(uint32_t,uint32_t,uint32_t);
@@ -99,7 +99,34 @@ inline namespace SwapChainSupportDetails
         }       
         
     
+inline void SwapChainSupportDetails::createSwapChain()
+{
+
+}
+inline void SwapChainSupportDetails::createImageViews()
+    {
+        std::cout<< ("Creating Image Views") << "\n";
+
+        
+          VkImageViewCreateInfo createInfo={};
+          createInfo.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+
+                createInfo.viewType=VK_IMAGE_VIEW_TYPE_2D;
+                createInfo.format=SwapChainSupportDetails::swapChainImageFormat.format;
+                createInfo.image=*pSwapchainImages;
+
+        createInfo.subresourceRange.aspectMask=VK_IMAGE_ASPECT_COLOR_BIT;
+                createInfo.subresourceRange.baseMipLevel=0;
+                createInfo.subresourceRange.levelCount=1;
+                createInfo.subresourceRange.baseArrayLayer=0;
+                createInfo.subresourceRange.layerCount=1;
+        
+        
+        checkCall(clPPPI(&createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews)); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+
+        
 
 
+    }
 
 

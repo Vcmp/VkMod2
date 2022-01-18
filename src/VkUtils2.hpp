@@ -5,7 +5,10 @@
 #include "SwapChainSupportDetails.hpp"
 #include "Texture.hpp"
 
- 
+#include "Pipeline.hpp"
+
+ #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 
    
 
@@ -13,6 +16,9 @@
 
 inline namespace VkUtils2
 {
+     static GLFWwindow* window;
+    static GLFWmonitor* monitor;
+    static VkInstance vkInstance;
     static std::vector<const char*> getRequiredExtensions();static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
    
    static VkResult createDebugUtilsMessengerEXT(VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
@@ -44,7 +50,7 @@ inline namespace VkUtils2
 
     static void pickPhysicalDevice();
     static void createLogicalDevice();
-    static void createSwapChain();
+    // static void createSwapChain();
     static void createImageViews();
     // static void createPipeLine();
     static void extracted() {
@@ -54,8 +60,8 @@ inline namespace VkUtils2
       VkUtils2::createSurface();
       VkUtils2::pickPhysicalDevice();
       VkUtils2::createLogicalDevice();
-      VkUtils2::createSwapChain();
-      VkUtils2::createImageViews();    
+      SwapChainSupportDetails::createSwapChain();
+      SwapChainSupportDetails::createImageViews();    
       Pipeline::createRenderPasses();
     //   UniformBufferObject::createDescriptorSetLayout();
       Pipeline::createGraphicsPipelineLayout();
@@ -448,31 +454,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
 
 
-    inline void VkUtils2::createImageViews()
-    {
-        std::cout<< ("Creating Image Views") << "\n";
-
-        
-          VkImageViewCreateInfo createInfo={};
-          createInfo.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-
-                createInfo.viewType=VK_IMAGE_VIEW_TYPE_2D;
-                createInfo.format=SwapChainSupportDetails::swapChainImageFormat.format;
-                createInfo.image=*pSwapchainImages;
-
-        createInfo.subresourceRange.aspectMask=VK_IMAGE_ASPECT_COLOR_BIT;
-                createInfo.subresourceRange.baseMipLevel=0;
-                createInfo.subresourceRange.levelCount=1;
-                createInfo.subresourceRange.baseArrayLayer=0;
-                createInfo.subresourceRange.layerCount=1;
-        
-        
-        checkCall(clPPPI(&createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews)); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
-
-        
-
-
-    }
+    
 inline VkFormat Texture::findDepthFormat()
     {
         VkFormat formatCandidates[3]={VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT};
@@ -582,11 +564,4 @@ const VkAttachmentDescription attDesc[]={attachments, depthAttachment};
         }
     }
 
-    inline void Pipeline::createCommandPool()
-    {
-        VkCommandPoolCreateInfo poolInfo={};
-                poolInfo.queueFamilyIndex=graphicsFamily;
-                poolInfo.flags=0;
-        //Memsys2.free(poolInfo);
-        vkCreateCommandPool(device, &poolInfo, VK_NULL_HANDLE, &commandPool);
-    }
+   

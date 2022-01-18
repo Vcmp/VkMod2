@@ -13,8 +13,8 @@
             ],
             "windowsSdkVersion": "10.0.22000.0",
             "compilerPath": "C:/media-autobuild_suite/msys64/mingw64/bin/clang++.exe",
-            "cStandard": "c17",
-            "cppStandard": "c++17",
+            "cStandard": "c20",
+            "cppStandard": "c++20",
             "intelliSenseMode": "${default}",
             "configurationProvider": "ms-vscode.cmake-tools"
         }

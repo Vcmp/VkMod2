@@ -1,9 +1,7 @@
 #pragma once
 
-
-
-#include "VkUtilsXBase.hpp"
 #include "Buffers.hpp"
+#include "Queues.hpp"
 
 inline namespace Texture 
 {
@@ -131,7 +129,7 @@ inline namespace Texture
 
     static void Texture::transitionImageLayout(int format, VkImageLayout oldLayout, VkImageLayout newLayout)
     {
-        VkCommandBuffer commandBuffer= Buffers::beginSingleTimeCommands();
+        VkCommandBuffer commandBuffer= Queues::beginSingleTimeCommands();
 
         VkImageMemoryBarrier barrier = {
                 .sType=VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -193,7 +191,7 @@ inline namespace Texture
                 VK_NULL_HANDLE,
                 0,
                 VK_NULL_HANDLE,1,&barrier);
-        Buffers::endSingleTimeCommands(commandBuffer);
+        Queues::endSingleTimeCommands(commandBuffer);
 
 
     }

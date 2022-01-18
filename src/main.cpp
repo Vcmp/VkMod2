@@ -48,57 +48,7 @@ bool a = true;
     //todo: Wake from callBack...
     
 
-inline void VkUtils2::createSwapChain()
-{
-            VkSurfaceFormatKHR surfaceFormat =  VkUtils2::querySwapChainSupport(physicalDevice);
-        
-            VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent();
-            uint32_t imageCount= (SwapChainSupportDetails::capabilities.minImageCount + 1);
 
-            if (SwapChainSupportDetails::capabilities.maxImageCount > 0 && imageCount > SwapChainSupportDetails::capabilities.maxImageCount) {
-                imageCount = SwapChainSupportDetails::capabilities.maxImageCount;
-            }
-
-            std::cout<<"ImageCount: "<<imageCount<<"\n";
-
-            VkSwapchainCreateInfoKHR createInfo={};
-
-                    createInfo.sType=VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-                    createInfo.surface=Queues::surface;
-
-                    // Image settings
-                    createInfo.minImageCount=imageCount;
-                    createInfo.imageFormat=surfaceFormat.format;//=&surfaceFormat; //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
-                    createInfo.imageColorSpace=surfaceFormat.colorSpace;
-                    createInfo.imageExtent=extent;
-                    createInfo.imageArrayLayers=1;
-                    createInfo.imageUsage=SwapChainSupportDetails::capabilities.supportedUsageFlags;
-                    createInfo.pNext=nullptr;
-
-                    createInfo.imageSharingMode=VK_SHARING_MODE_EXCLUSIVE;
-                    // createInfo.queueFamilyIndexCount=0;
-                    // createInfo.pQueueFamilyIndices= nullptr;
-        
-                    createInfo.preTransform=SwapChainSupportDetails::capabilities.currentTransform;
-                    createInfo.compositeAlpha=VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-                    createInfo.presentMode=VK_PRESENT_MODE_IMMEDIATE_KHR;
-                    createInfo.clipped=true;
-
-                    createInfo.oldSwapchain=VK_NULL_HANDLE;
-                    std::cout << device<<"\n";
-
-            // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
-            // auto xx=PFN_vkVoidFunction(swapChain);
-            clPPPI(&createInfo, "vkCreateSwapchainKHR", &swapChain); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
-           ;
-
-
-            checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, pSwapchainImages));
-
-            SwapChainSupportDetails::swapChainImageFormat =surfaceFormat;
-            SwapChainSupportDetails::swapChainExtent = extent;
-        
-}
 
 // inline void Texture::createDepthResources()
 //     {
@@ -261,7 +211,7 @@ inline void VkUtils2::createSwapChain()
 
         std::cout << ("using pipeLine with Length: ") << sizeof(SwapChainSupportDetails::swapChainImageViews);
         //nmemFree(vkPipelineLayoutCreateInfo1.address());
-        vkCreatePipelineLayout(device, &vkPipelineLayoutCreateInfo, nullptr, &Buffers::vkLayout);
+        vkCreatePipelineLayout(device, &vkPipelineLayoutCreateInfo, nullptr, &vkLayout);
         //MemSysm.Memsys2.doPointerAllocSafeX(vkPipelineLayoutCreateInfo, Buffers.capabilities.vkCreatePipelineLayout, Buffers.vkLayout);
 
 
@@ -277,7 +227,7 @@ inline void VkUtils2::createSwapChain()
                 .pDepthStencilState=&depthStencil,
                 .pColorBlendState=&colorBlending,
 //                    .pDynamicState(null)
-                .layout=Buffers::vkLayout,
+                .layout=vkLayout,
                 .renderPass=SwapChainSupportDetails::renderPass,
                 .subpass=0,
 //                    .basePipelineHandle(VK_NULL_HANDLE)

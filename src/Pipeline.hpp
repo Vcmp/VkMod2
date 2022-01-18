@@ -1,18 +1,16 @@
 #pragma once
-#include "Queues.hpp"
+#include "VkUtilsXBase.hpp"
 
  constexpr int OFFSETOF_COLOR = 3 * sizeof(float);
  constexpr int OFFSET_POS = 0;
 
  constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
 
-namespace Pipeline
-{   
+inline namespace Pipeline
+{   inline VkPipelineLayout vkLayout;
     static VkPipeline graphicsPipeline;
-    static VkCommandPool commandPool;
     static void createRenderPasses();
     static void createGraphicsPipelineLayout();
-    static void createCommandPool();
 VkVertexInputBindingDescription* getVertexInputBindingDescription();
     static VkVertexInputAttributeDescription*  getAttributeDescriptions();
 };
@@ -61,6 +59,6 @@ VkVertexInputBindingDescription* getVertexInputBindingDescription();
 //            memFree(attributeDescriptions);
 
         return attributeDescriptions;
-    }
+    } 
 
     
