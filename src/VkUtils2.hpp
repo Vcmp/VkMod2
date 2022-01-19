@@ -9,6 +9,7 @@
 
  #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
+#include <stdint.h>
 
    
 
@@ -50,8 +51,9 @@ inline namespace VkUtils2
 
     static void pickPhysicalDevice();
     static void createLogicalDevice();
+    static void cleanup();
     // static void createSwapChain();
-    static void createImageViews();
+    //static void createImageViews();
     // static void createPipeLine();
     static void extracted() {
       VkUtils2::setupWindow();
@@ -63,7 +65,7 @@ inline namespace VkUtils2
       SwapChainSupportDetails::createSwapChain();
       SwapChainSupportDetails::createImageViews();    
       Pipeline::createRenderPasses();
-    //   UniformBufferObject::createDescriptorSetLayout();
+      //UniformBufferObject::createDescriptorSetLayout();
       Pipeline::createGraphicsPipelineLayout();
     //   Pipeline::createCommandPool();
     //   Texture::createDepthResources();
@@ -128,9 +130,11 @@ inline void VkUtils2::createInstance()
         {
              std::runtime_error("Validation requested but not supported");
         }
-        // IntBuffer a = MemSysm.ints(EXTValidationFeatures.VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT, EXTValidationFeatures.VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT, EXTValidationFeatures.VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT, EXTValidationFeatures.VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT);
-        // VkValidationFeaturesEXT extValidationFeatures = VkValidationFeaturesEXT.create(MemSysm.calloc(VkValidationFeaturesEXT.SIZEOF)).sType$Default()
-                // .pEnabledValidationFeatures(a);
+        VkValidationFeatureEnableEXT a[] = {(VkValidationFeatureEnableEXT::VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT, VkValidationFeatureEnableEXT ::VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT, VkValidationFeatureEnableEXT ::VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT, VkValidationFeatureEnableEXT ::VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT)};
+        VkValidationFeaturesEXT extValidationFeatures = {};
+        extValidationFeatures.sType=VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+                extValidationFeatures.pEnabledValidationFeatures=a;
+
 
         VkApplicationInfo vkApplInfo = {};
                 //memSet(vkApplInfo, 0,VkApplicationInfo.SIZEOF);
@@ -159,7 +163,7 @@ inline void VkUtils2::createInstance()
         // PointerBuffer glfwExtensions = getRequiredExtensions();
        auto extensions=getRequiredExtensions();
         InstCreateInfo.ppEnabledExtensionNames=extensions.data();
-        // InstCreateInfo.pNext(extValidationFeatures.address());
+        InstCreateInfo.pNext=&extValidationFeatures;
 
         InstCreateInfo.enabledExtensionCount=static_cast<uint32_t>(extensions.size());
         
@@ -355,6 +359,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             //}
             
             VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
+                    deviceVulkan12Features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
                     deviceVulkan12Features.descriptorBindingPartiallyBound=true,
                     deviceVulkan12Features.imagelessFramebuffer=true;
                     deviceVulkan12Features.pNext=VK_NULL_HANDLE;
@@ -410,44 +415,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
     // }
 
-    inline const VkSurfaceFormatKHR VkUtils2::querySwapChainSupport(const VkPhysicalDevice device)
-{
-
-        checkCall(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, Queues::surface, &SwapChainSupportDetails::capabilities));
-
-        uint32_t count;
-       
-        checkCall(vkGetPhysicalDeviceSurfaceFormatsKHR(device, Queues::surface, &count, NULL));
-        std::cout << "Found: " << count << " Formats -------|^>" << "\n";
-        //VkSurfaceFormatKHR formats[count];
-        VkSurfaceFormatKHR formats[count];
-        if (count != 0) {
-            //formats = new VkSurfaceFormatKHR[count];
-            checkCall(vkGetPhysicalDeviceSurfaceFormatsKHR(device, Queues::surface, &count, formats));
-        }
-
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, Queues::surface, &count, NULL);
-
-        if (count != 0) {
-            // presentModes = {};
-            checkCall(vkGetPhysicalDeviceSurfacePresentModesKHR(device, Queues::surface, &count, &SwapChainSupportDetails::presentModes));
-        }
-         for(const VkSurfaceFormatKHR &format: formats)
-         {
-              std::cout << format.format <<"->"<<format.colorSpace <<"\n";
-         }
-        for(const VkSurfaceFormatKHR &format: formats)
-                {
-                     std::cout <<"Trying: -->"<< format.format <<"->"<<format.colorSpace <<"\n";
-                    if(format.format==VK_FORMAT_B8G8R8A8_UNORM  && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) 
-                    {
-                            return format;
-                    }
-                    
-                }
-                 throw std::runtime_error("No Valid SwapChain Format Found");
-} 
-
+    
 
 //This is horribly Ported from Java so May Suffer.Incur Considerable Breakage
 
@@ -474,94 +442,8 @@ inline VkFormat Texture::findDepthFormat()
         std::runtime_error("failed to find supported format!");
     }
 
-    inline void Pipeline::createRenderPasses()
+ void VkUtils2::cleanup()
     {
-         int capacity = 2;
-        int abs;
-
-        // VkAttachmentReference VkRenderPasses[capacity];
-        // VkRenderPassCreateInfo VkRenderPassesAttach[capacity];
-//            if (!depthEnabled)
-//            {
-//                abs=VK_SUBPASS_EXTERNAL;
-//            }
-        //else
-        abs = VK_SUBPASS_CONTENTS_INLINE;
-VkAttachmentReference attachmentsRefs = {};
-                attachmentsRefs.attachment=0,
-                attachmentsRefs.layout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-       VkAttachmentDescription attachments = {};
-                 attachments.format=SwapChainSupportDetails::swapChainImageFormat.format;
-                 attachments.samples=VK_SAMPLE_COUNT_1_BIT;
-                 attachments.loadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                 attachments.storeOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                 attachments.stencilLoadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                 attachments.stencilStoreOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                 attachments.initialLayout=VK_IMAGE_LAYOUT_UNDEFINED;
-                 attachments.finalLayout=VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-     
-
-
-        VkAttachmentDescription depthAttachment ={};
-                attachments.format=Texture::findDepthFormat();
-                attachments.samples=VK_SAMPLE_COUNT_1_BIT;
-                attachments.loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR;
-                attachments.storeOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                attachments.stencilLoadOp=VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-                attachments.stencilStoreOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;
-                attachments.initialLayout=VK_IMAGE_LAYOUT_UNDEFINED;
-                attachments.finalLayout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-
-        VkAttachmentReference depthAttachmentRef ={};
-                attachmentsRefs.attachment=1;
-                attachmentsRefs.layout=VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;   
-        
-        VkSubpassDescription vkSubpassDescriptions{};
-                vkSubpassDescriptions.pipelineBindPoint=VK_PIPELINE_BIND_POINT_GRAPHICS;
-                vkSubpassDescriptions.colorAttachmentCount=0;
-                vkSubpassDescriptions.pColorAttachments=&attachmentsRefs;
-                vkSubpassDescriptions.pDepthStencilAttachment=&depthAttachmentRef;
-
-const VkAttachmentDescription attDesc[]={attachments, depthAttachment};
-
-        VkSubpassDependency dependency = {};
-                dependency.srcSubpass=abs;
-                dependency.dstSubpass=0;
-                dependency.srcStageMask=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-                dependency.srcAccessMask=VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-                dependency.dstStageMask=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
-                dependency.dstAccessMask=VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-                dependency.dependencyFlags=VK_DEPENDENCY_BY_REGION_BIT;
-
-
-        VkRenderPassCreateInfo vkRenderPassCreateInfo1 = {};
-                vkRenderPassCreateInfo1.sType=VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-                vkRenderPassCreateInfo1.pAttachments=attDesc;
-                vkRenderPassCreateInfo1.attachmentCount=2;
-                vkRenderPassCreateInfo1.pSubpasses=&vkSubpassDescriptions;
-                vkRenderPassCreateInfo1.subpassCount=1;
-                vkRenderPassCreateInfo1.pDependencies=&dependency;
-                vkRenderPassCreateInfo1.dependencyCount=2;
-                vkRenderPassCreateInfo1.pNext=VK_NULL_HANDLE ;
-
-
-        clPPPI(&vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass);
-        
-       
-
+        vkDestroyPipeline(device, Pipeline::graphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(device, Pipeline::vkLayout, nullptr);
     }
-
-    
-
-     inline VkShaderModule createShaderModule(char& spirvCode, VkShaderModuleCreateInfo* pShaderCreateInfo) {
-
-        {
-            VkShaderModule a = nullptr;
-            vkCreateShaderModule(device, pShaderCreateInfo, nullptr, &a);
-            return a;
-        }
-    }
-
-   

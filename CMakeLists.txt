@@ -13,16 +13,23 @@ project ("VkMod2")
 # set(CMAKE_MODULE_LINKER_FLAGS_INIT "-fuse-ld=lld")
 # set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld")
 # set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+    set(CLANG 1)
+endif()
 
 #set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -fvisibility=hidden -fno-semantic-interposition -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -O0 -glldb -fsanitize=address -fsanitize-address-use-after-return=always -fno-omit-frame-pointer -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 
 find_package(Vulkan REQUIRED)
 
+
 #add_subdirectory(third_party)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
-
+#include_directories($ENV{VULKAN_SDK}/include)
 #add_subdirectory(src)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -34,7 +41,8 @@ add_subdirectory(glfw-3.3.6)
 add_executable(VkMod2
     src/main.cpp
    )
-
+   # target_compile_options(${PROJECT_NAME} INTERFACE "/Zc:__cplusplus")
+   # target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 #set_property(TARGET VkMod2 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
 
 target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -57,9 +65,9 @@ find_program(GLSLC glslc HINTS $ENV{VULKAN_SDK}/Bin/)
 
 ## find all the shader files under the shaders folder
 file(GLOB_RECURSE GLSL_SOURCE_FILES
-    "${PROJECT_SOURCE_DIR}/bin/shaders/*.frag"
-    "${PROJECT_SOURCE_DIR}/bin/shaders/*.vert"
-    "${PROJECT_SOURCE_DIR}/bin/shaders/*.comp"
+    "${PROJECT_SOURCE_DIR}/shaders/*.frag"
+    "${PROJECT_SOURCE_DIR}/shaders/*.vert"
+    "${PROJECT_SOURCE_DIR}/shaders/*.comp"
     )
 
 ## iterate each shader
@@ -71,8 +79,8 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
   ##execute glslang command to compile that specific shader
   add_custom_command(
     OUTPUT ${SPIRV}
-    COMMAND ${GLSLC} ${GLSL}  -O --target-env="vulkan1.2"  --target-spv="spv1.5" -o ${SPIRV}
-    DEPENDS ${GLSL})
+    COMMAND ${GLSLC} ${GLSL}  -O -o ${SPIRV}
+    DEPENDS "${PROJECT_SOURCE_DIR}/bin/shaders/")
   list(APPEND SPIRV_BINARY_FILES ${SPIRV})
 endforeach(GLSL)
 

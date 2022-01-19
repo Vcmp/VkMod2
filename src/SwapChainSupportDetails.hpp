@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "VkUtilsXBase.hpp"
+#include "Queues.hpp"
 
 
 // static VkSurfaceFormatKHR formats={};
@@ -16,10 +16,10 @@ inline namespace SwapChainSupportDetails
 //    static VkSurfaceFormatKHR* formats;
    
 
-    static VkSurfaceFormatKHR swapChainImageFormat={};
-    static VkImageView swapChainImageViews={};
-    static VkRenderPass renderPass{};
-    static VkExtent2D swapChainExtent{};
+    static VkSurfaceFormatKHR swapChainImageFormat;
+    static VkImageView swapChainImageViews;
+    static VkRenderPass renderPass;
+    static VkExtent2D swapChainExtent;
     // static void querySwapChainSupport(VkPhysicalDevice);
     static void createSwapChain();
     static void createImageViews();
@@ -98,11 +98,96 @@ inline namespace SwapChainSupportDetails
           
         }       
         
-    
-inline void SwapChainSupportDetails::createSwapChain()
+inline const VkSurfaceFormatKHR querySwapChainSupport()
 {
 
+        checkCall(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, Queues::surface, &SwapChainSupportDetails::capabilities));
+
+        uint32_t count;
+       
+        checkCall(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, Queues::surface, &count, NULL));
+        std::cout << "Found: " << count << " Formats -------|^>" << "\n";
+        //VkSurfaceFormatKHR formats[count];
+        VkSurfaceFormatKHR formats[count];
+        if (count != 0) {
+            //formats = new VkSurfaceFormatKHR[count];
+            checkCall(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, Queues::surface, &count, formats));
+        }
+
+        vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, Queues::surface, &count, NULL);
+
+        if (count != 0) {
+            // presentModes = {};
+            checkCall(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, Queues::surface, &count, &SwapChainSupportDetails::presentModes));
+        }
+         for(const VkSurfaceFormatKHR &format: formats)
+         {
+              std::cout << format.format <<"->"<<format.colorSpace <<"\n";
+         }
+        for(const VkSurfaceFormatKHR &format: formats)
+                {
+                     std::cout <<"Trying: -->"<< format.format <<"->"<<format.colorSpace <<"\n";
+                    if(format.format==VK_FORMAT_B8G8R8A8_UNORM  && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) 
+                    {
+                            return format;
+                    }
+                    
+                }
+                 throw std::runtime_error("No Valid SwapChain Format Found");
+} 
+
+inline void SwapChainSupportDetails::createSwapChain()
+{
+    VkSurfaceFormatKHR surfaceFormat =  querySwapChainSupport();
+        
+            VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent();
+            uint32_t imageCount= (SwapChainSupportDetails::capabilities.minImageCount + 1);
+
+            if (SwapChainSupportDetails::capabilities.maxImageCount > 0 && imageCount > SwapChainSupportDetails::capabilities.maxImageCount) {
+                imageCount = SwapChainSupportDetails::capabilities.maxImageCount;
+            }
+
+            std::cout<<"ImageCount: "<<imageCount<<"\n";
+
+            VkSwapchainCreateInfoKHR createInfo={};
+
+                    createInfo.sType=VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+                    createInfo.surface=Queues::surface;
+
+                    // Image settings
+                    createInfo.minImageCount=imageCount;
+                    createInfo.imageFormat=surfaceFormat.format;//=&surfaceFormat; //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+                    createInfo.imageColorSpace=surfaceFormat.colorSpace;
+                    createInfo.imageExtent=extent;
+                    createInfo.imageArrayLayers=1;
+                    createInfo.imageUsage=SwapChainSupportDetails::capabilities.supportedUsageFlags;
+                    createInfo.pNext=nullptr;
+
+                    createInfo.imageSharingMode=VK_SHARING_MODE_EXCLUSIVE;
+                    // createInfo.queueFamilyIndexCount=0;
+                    // createInfo.pQueueFamilyIndices= nullptr;
+        
+                    createInfo.preTransform=SwapChainSupportDetails::capabilities.currentTransform;
+                    createInfo.compositeAlpha=VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+                    createInfo.presentMode=VK_PRESENT_MODE_IMMEDIATE_KHR;
+                    createInfo.clipped=true;
+
+                    createInfo.oldSwapchain=VK_NULL_HANDLE;
+                    std::cout << device<<"\n";
+
+            // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
+            // auto xx=PFN_vkVoidFunction(swapChain);
+            clPPPI(&createInfo, "vkCreateSwapchainKHR", &swapChain); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+           ;
+
+
+            checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, pSwapchainImages));
+
+            SwapChainSupportDetails::swapChainImageFormat =surfaceFormat;
+            SwapChainSupportDetails::swapChainExtent = extent;
+
 }
+
 inline void SwapChainSupportDetails::createImageViews()
     {
         std::cout<< ("Creating Image Views") << "\n";
@@ -122,7 +207,7 @@ inline void SwapChainSupportDetails::createImageViews()
                 createInfo.subresourceRange.layerCount=1;
         
         
-        checkCall(clPPPI(&createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews)); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+        clPPPI(&createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
 
         
 

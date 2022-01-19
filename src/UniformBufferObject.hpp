@@ -38,7 +38,7 @@ inline const void UniformBufferObject::createDescriptorSetLayout()
                     .pBindings=bindings,
                     
             };
-            vkCreateDescriptorSetLayout(device, &a, VK_NULL_HANDLE, &UniformBufferObject::descriptorSetLayout);
+            clPPPI(&a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout);
             //return MemSysm.doPointerAllocSafe(a, device.getCapabilities().vkCreateDescriptorSetLayout);
         }
 }
