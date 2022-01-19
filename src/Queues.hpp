@@ -22,11 +22,11 @@ static void createCommandPool();
     
     
 
-    VkQueueFamilyProperties enumerateDetermineQueueFamilies(uint32_t, VkQueueFamilyProperties[]);
+    void enumerateDetermineQueueFamilies(uint32_t, VkQueueFamilyProperties[]);
     // const static bool isComplete();
 };
 
-inline VkQueueFamilyProperties Queues::enumerateDetermineQueueFamilies( uint32_t VkQueueFamilyProperties, struct VkQueueFamilyProperties *queueFamilies)
+inline void Queues::enumerateDetermineQueueFamilies( uint32_t VkQueueFamilyProperties, struct VkQueueFamilyProperties *queueFamilies)
 {
             //std::cout <<("Checking Available Queue families") << "\n";
 
@@ -40,7 +40,7 @@ inline VkQueueFamilyProperties Queues::enumerateDetermineQueueFamilies( uint32_t
             uint32_t i = 0;
             
             for (;i<VkQueueFamilyProperties;i++) {
-                std::cout <<(queueFamilies[i].queueCount)<< "\n";
+                // std::cout <<(queueFamilies[i].queueCount)<< "\n";
                 if ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
                     graphicsFamily = i;
                 }
@@ -49,7 +49,7 @@ inline VkQueueFamilyProperties Queues::enumerateDetermineQueueFamilies( uint32_t
             
                 //i++;
             }
-            return *queueFamilies;
+            // return *queueFamilies;
 
 //
 //                while (i <queueFamilyCount.limit() /*&& !isComplete()*/) {

@@ -339,12 +339,29 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
     inline void VkUtils2::createLogicalDevice() {
             std::cout <<("Creating Logical Device")<<"\n";
         
-         uint32_t pQueueFamilyPropertyCount=0;
+         uint32_t pQueueFamilyPropertyCount;
             vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE);
 
 
-            VkQueueFamilyProperties uniqueQueueFamilies[3] ;
-            Queues::enumerateDetermineQueueFamilies(pQueueFamilyPropertyCount, uniqueQueueFamilies);   
+            VkQueueFamilyProperties uniqueQueueFamilies[pQueueFamilyPropertyCount] ;
+            // Queues::enumerateDetermineQueueFamilies(pQueueFamilyPropertyCount, uniqueQueueFamilies);   
+             //VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
+            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies);
+
+            //VkBool32 presentSupport = (VK_FALSE);
+           // std::cout << queueFamilies << "\n";
+            uint32_t i = 0;
+            
+            for (;i<pQueueFamilyPropertyCount;i++) {
+                // std::cout <<(queueFamilies[i].queueCount)<< "\n";
+                if ((uniqueQueueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+                    graphicsFamily = i;
+                }
+                // if (isComplete())
+                //     break;
+            
+                //i++;
+            }
            
             VkDeviceQueueCreateInfo queueCreateInfos={};
             constexpr float priority = 1.0f;
