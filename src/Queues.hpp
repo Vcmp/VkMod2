@@ -1,5 +1,6 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
+#include <vulkan/vulkan_core.h>
 
 
 
@@ -17,7 +18,7 @@ static void createCommandPool();
  static VkCommandBuffer beginSingleTimeCommands();
         static void endSingleTimeCommands(VkCommandBuffer&);
     
-    static inline VkSurfaceKHR surface={};
+    static VkSurfaceKHR surface;
 
     
     
@@ -60,10 +61,11 @@ inline void Queues::enumerateDetermineQueueFamilies( uint32_t VkQueueFamilyPrope
 inline void Queues::createCommandPool()
     {
         VkCommandPoolCreateInfo poolInfo={};
+                poolInfo.sType=VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
                 poolInfo.queueFamilyIndex=graphicsFamily;
                 poolInfo.flags=0;
         //Memsys2.free(poolInfo);
-        vkCreateCommandPool(device, &poolInfo, VK_NULL_HANDLE, &commandPool);
+        clPPPI(&poolInfo, "vkCreateCommandPool", &commandPool);
     }
 
     inline VkCommandBuffer Queues::beginSingleTimeCommands()
@@ -74,11 +76,13 @@ inline void Queues::createCommandPool()
         allocateInfo.level=(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
         allocateInfo.commandPool=(Queues::commandPool);
         allocateInfo.commandBufferCount=(1);
+        allocateInfo.pNext=VK_NULL_HANDLE;
 
         VkCommandBuffer commandBuffer = {};
         VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {};
         vkCommandBufferBeginInfo.sType=(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO);
         vkCommandBufferBeginInfo.flags=(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+        vkCommandBufferBeginInfo.pNext=VK_NULL_HANDLE;
         vkBeginCommandBuffer(commandBuffer, &vkCommandBufferBeginInfo);
         return commandBuffer;
     }
@@ -90,6 +94,7 @@ inline void Queues::createCommandPool()
         submitInfo1.sType=VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo1.pCommandBuffers=&commandBuffer;
         submitInfo1.commandBufferCount=(1);
+        submitInfo1.pNext=VK_NULL_HANDLE;
 
 //            VkSubmitInfo.ncommandBufferCount(submitInfo1, 1);
 

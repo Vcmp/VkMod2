@@ -1,20 +1,36 @@
 #pragma once
 
+// #include "Buffers.hpp"
+#include "src/VkUtilsXBase.hpp"
 #include "Buffers.hpp"
-#include "Queues.hpp"
 
 inline namespace Texture 
 {
-    extern VkImage vkImage;
-    extern VkDeviceMemory vkAllocMemory;
+    static VkImage vkImage;
+    static VkDeviceMemory vkAllocMemory;
     static void createTextureImage();
     static VkFormat findDepthFormat();
     static void createDepthResources();
     static void createImage(uint32_t, uint32_t, VkFormat, int);
-    static void transitionImageLayout(int, VkImageLayout, VkImageLayout);
-    static void createImageView(int, VkImageAspectFlagBits, VkImageLayout);
+    static void transitionImageLayout(VkFormat, VkImageLayout, VkImageLayout);
+    static void createImageView(VkFormat, VkImageAspectFlagBits, VkImageLayout);
 };
 
+
+inline void Texture::createDepthResources()
+    {
+        std::cout << "--->CreateDepthResources"<<"\n";
+          VkFormat depthFormat = findDepthFormat();
+        Texture::createImage(SwapChainSupportDetails::swapChainExtent.width, SwapChainSupportDetails::swapChainExtent.height,
+                depthFormat,
+                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+        );
+
+
+        createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, PipelineX::depthImageView);
+        transitionImageLayout(depthFormat,
+                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+    }
 
 
 
@@ -57,9 +73,9 @@ inline namespace Texture
         }
 
         VkBuffer stagingBufferImg = {0};
-        Buffers::setBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, imageSize, stagingBufferImg);
+        BuffersX::setBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, imageSize, stagingBufferImg);
         VkDeviceMemory stagingBufferMemoryImg = {0};
-        Buffers::createBuffer(stagingBufferImg, stagingBufferMemoryImg);
+        BuffersX::createBuffer(stagingBufferImg, stagingBufferMemoryImg);
 
 
         // vkMapMemory(device, stagingBufferMemoryImg, 0, imageSize, 0, MemSysm.address);
@@ -98,7 +114,7 @@ inline namespace Texture
                 imageInfo.samples=VK_SAMPLE_COUNT_1_BIT;
                 imageInfo.sharingMode=VK_SHARING_MODE_EXCLUSIVE;
        
-        vkCreateImage(device, &imageInfo, VK_NULL_HANDLE, &Texture::vkImage);
+        clPPPI(&imageInfo, "vkCreateImage", &Texture::vkImage);
         VkMemoryDedicatedRequirementsKHR img2 ={};
 
         VkMemoryRequirements2 memRequirements = {};
@@ -108,7 +124,8 @@ inline namespace Texture
                 allocInfo.sType=VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
                 //    allocInfo.pNext=vkMemoryDedicatedAllocateInfoKHR;
                 allocInfo.allocationSize=memRequirements.memoryRequirements.size;
-                allocInfo.memoryTypeIndex=Buffers::findMemoryType(physicalDevice, memRequirements.memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                allocInfo.memoryTypeIndex=BuffersX::findMemoryType(Queues::physicalDevice, memRequirements.memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                 allocInfo.pNext=VK_NULL_HANDLE;
 
         if (img2.prefersDedicatedAllocation || img2.requiresDedicatedAllocation) {
             std::cout<<("Using Dedicated Memory Allocation")<<"\n";
@@ -120,15 +137,16 @@ inline namespace Texture
         }
 
       
-        vkAllocateMemory(device, &allocInfo, VK_NULL_HANDLE, &Texture::vkAllocMemory);
+        clPPPI(&allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory);
 
         vkBindImageMemory(device, Texture::vkImage, Texture::vkAllocMemory, 0);
     }
 
 
 
-    static void Texture::transitionImageLayout(int format, VkImageLayout oldLayout, VkImageLayout newLayout)
+    static void Texture::transitionImageLayout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
     {
+        // VkCommandBuffer commandBuffer= Queues::beginSingleTimeCommands();
         VkCommandBuffer commandBuffer= Queues::beginSingleTimeCommands();
 
         VkImageMemoryBarrier barrier = {
@@ -192,6 +210,25 @@ inline namespace Texture
                 0,
                 VK_NULL_HANDLE,1,&barrier);
         Queues::endSingleTimeCommands(commandBuffer);
+        // endSingleTimeCommands(commandBuffer);
 
 
+    }
+
+    inline void Texture::createImageView(VkFormat swapChainImageFormat, VkImageAspectFlagBits vkImageAspect, VkImageLayout a)
+    {
+        VkImageViewCreateInfo createInfo = {};
+               createInfo.sType=(VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO);
+               createInfo.image=(vkImage);
+               createInfo.viewType=(VK_IMAGE_VIEW_TYPE_2D);
+               createInfo.format=(swapChainImageFormat);
+
+        createInfo.subresourceRange.aspectMask=vkImageAspect;
+               createInfo.subresourceRange.baseMipLevel=(0);
+               createInfo.subresourceRange.levelCount=(1);
+               createInfo.subresourceRange.baseArrayLayer=(0);
+               createInfo.subresourceRange.layerCount=(1);
+//                    Memsys2.free(createInfo);//nmemFree(createInfo.address());
+
+        clPPPI(&createInfo, "vkCreateImageView", &a);
     }

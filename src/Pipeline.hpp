@@ -1,20 +1,25 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
-#include <stdint.h>
+#include "SwapChainSupportDetails.hpp"
 
  constexpr int OFFSETOF_COLOR = 3 * sizeof(float);
  constexpr int OFFSET_POS = 0;
 
  constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
 
-inline namespace Pipeline
+inline namespace PipelineX
 {   static VkPipelineLayout vkLayout;
-    static VkPipeline graphicsPipeline;
+    static VkPipeline graphicsPipeline={};
+
+    static VkImageLayout depthImageView;
+    static VkCommandBuffer commandBuffers[3];
+
     static void createRenderPasses();
     static void createGraphicsPipelineLayout();
-        VkPipelineCache axx;
-    VkShaderModule vertShaderModule;
-         VkShaderModule fragShaderModule; 
+    static void createCommandBuffers();
+
+//     static    VkPipelineCache axx;
+   
     // VkVertexInputBindingDescription* getVertexInputBindingDescription();
     //static VkVertexInputAttributeDescription*  getAttributeDescriptions();
 };
@@ -66,7 +71,7 @@ inline namespace Pipeline
 //     } 
 
 
-inline void Pipeline::createRenderPasses()
+inline void PipelineX::createRenderPasses()
     {
         //  int capacity = 2;
         // int abs;
@@ -84,7 +89,7 @@ VkAttachmentReference attachmentsRefs = {};
                 attachmentsRefs.layout=VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
        VkAttachmentDescription attachments = {};
-                 attachments.format=SwapChainSupportDetails::swapChainImageFormat.format;
+                 attachments.format=SwapChainSupportDetails::swapChainImageFormat;
                  attachments.samples=VK_SAMPLE_COUNT_1_BIT;
                  attachments.loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR;
                  attachments.storeOp=VK_ATTACHMENT_STORE_OP_STORE;
@@ -145,100 +150,101 @@ VkAttachmentReference attachmentsRefs = {};
 
     }
 
-    inline void Pipeline::createGraphicsPipelineLayout()
+    inline void PipelineX::createGraphicsPipelineLayout()
     {
         //Thankfully Dont; need to worry about compiling the Shader Files AnyMore due to
         std::cout<<("Setting up PipeLine")<< "\n";
 
-        
-        ShaderSPIRVUtils::compileShaderFile("shaders/21_shader_ubo.vert.spv", vertShaderModule);
-        ShaderSPIRVUtils::compileShaderFile("shaders/21_shader_ubo.frag.spv", fragShaderModule);
+          
+         
+        const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile("shaders/21_shader_ubo.vert.spv");
+        const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile("shaders/21_shader_ubo.frag.spv");
         // constexpr char entryPoint[]={"main"};
 
         VkPipelineShaderStageCreateInfo vertexStage={};
             vertexStage.sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            vertexStage.pNext=VK_NULL_HANDLE;
 //                    .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
                 vertexStage.stage=VK_SHADER_STAGE_VERTEX_BIT;
                 vertexStage.module=vertShaderModule;
                 vertexStage.pName="main";
+                vertexStage.pNext=VK_NULL_HANDLE;
                 
        
 
         VkPipelineShaderStageCreateInfo fragStage={};
                 fragStage.sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                fragStage.pNext=VK_NULL_HANDLE;
                 fragStage.stage=VK_SHADER_STAGE_FRAGMENT_BIT;
                 fragStage.module=fragShaderModule;
                 fragStage.pName="main";
+                fragStage.pNext=VK_NULL_HANDLE;
         
 
-        const VkPipelineShaderStageCreateInfo shaderStages[] = {vertexStage, fragStage};
+       const VkPipelineShaderStageCreateInfo shaderStages[] = {fragStage, vertexStage};
 
-        // VkVertexInputBindingDescription a ={
-        //                 .binding=0,
-        // //                    .stride(vertices.length/2)
-        // //                    .stride(vertices.length/VERT_SIZE+1)
-        //                 .stride=32,
-        //                 .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
-        //         };
+        VkVertexInputBindingDescription ax ={
+                        .binding=0,
+        //                    .stride(vertices.length/2)
+        //                    .stride(vertices.length/VERT_SIZE+1)
+                        .stride=32,
+                        .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
+                };
 
-        // VkVertexInputAttributeDescription attributeDescriptions[3];
+        VkVertexInputAttributeDescription attributeDescriptions[3];
 
-        // // Position
-        //         attributeDescriptions[0]={};
-        //         attributeDescriptions[0].binding=0;
-        //         attributeDescriptions[0].location=0;
-        //         attributeDescriptions[0].format=VK_FORMAT_R32G32B32_SFLOAT;
-        //         attributeDescriptions[0].offset=OFFSET_POS;
+        // Position
+                attributeDescriptions[0]={};
+                attributeDescriptions[0].binding=0;
+                attributeDescriptions[0].location=0;
+                attributeDescriptions[0].format=VK_FORMAT_R32G32B32_SFLOAT;
+                attributeDescriptions[0].offset=OFFSET_POS;
 
-        //         // Color
-        //         attributeDescriptions[1]={};
-        //         attributeDescriptions[1].binding=0;
-        //         attributeDescriptions[1].location=1;
-        //         attributeDescriptions[1].format=VK_FORMAT_R32G32B32_SFLOAT;
-        //         attributeDescriptions[1].offset=OFFSETOF_COLOR;
+                // Color
+                attributeDescriptions[1]={};
+                attributeDescriptions[1].binding=0;
+                attributeDescriptions[1].location=1;
+                attributeDescriptions[1].format=VK_FORMAT_R32G32B32_SFLOAT;
+                attributeDescriptions[1].offset=OFFSETOF_COLOR;
 
-        //         // Texture coordinates
-        //         attributeDescriptions[2]={};
-        //         attributeDescriptions[2].binding=0;
-        //         attributeDescriptions[2].location=2;
-        //         attributeDescriptions[2].format=VK_FORMAT_R32G32_SFLOAT;
-        //         attributeDescriptions[2].offset=OFFSETOF_TEXTCOORDS;
+                // Texture coordinates
+                attributeDescriptions[2]={};
+                attributeDescriptions[2].binding=0;
+                attributeDescriptions[2].location=2;
+                attributeDescriptions[2].format=VK_FORMAT_R32G32_SFLOAT;
+                attributeDescriptions[2].offset=OFFSETOF_TEXTCOORDS;
 
         VkPipelineVertexInputStateCreateInfo vkPipelineVertexInputStateCreateInfo={};
                    vkPipelineVertexInputStateCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                // vkPipelineVertexInputStateCreateInfo.pVertexBindingDescriptions=&a;
-        // vkPipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions=attributeDescriptions; 
+                vkPipelineVertexInputStateCreateInfo.pVertexBindingDescriptions=&ax;
+        vkPipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions=attributeDescriptions; 
         vkPipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount=0;
         vkPipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount =0;
-        vkPipelineVertexInputStateCreateInfo.pNext=nullptr;
+        vkPipelineVertexInputStateCreateInfo.pNext=VK_NULL_HANDLE;
 
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly={};
                    inputAssembly.sType=VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
                 inputAssembly.topology=VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
                 inputAssembly.primitiveRestartEnable=VK_FALSE;
-                inputAssembly.pNext=nullptr;
+                inputAssembly.pNext=VK_NULL_HANDLE;
         /*todo: Fixed Viewport COnstruction/Initilaistaion?Configration: ([Had use wrong Function?method Veowpprt/Stagong function Calls/cfongurations e.g.])
          *(had also used vkViewport instead of VkViewport of Type Buffer which is the atcual correct Obejct/Stage/Steup.veiwport conponnat.consituent
          *
          * (CorretcioN: had actually also used viewportBuffer and not vkViewport(Of type VkViewport.Bufferand not VkViewPort....) in VkPipelineViewportStateCreateInfo as well)
          */
-        VkViewport vkViewport{
-                .x=0.0F,
-                .y=0.0F,
-                .width=static_cast<float>(SwapChainSupportDetails::swapChainExtent.width),
-                .height=static_cast<float>(SwapChainSupportDetails::swapChainExtent.height),
-                .minDepth=0.0F,
-                .maxDepth=1.0F
-        };
+        VkViewport vkViewport{};
+                vkViewport.x=0.0F;
+                vkViewport.y=0.0F;
+                vkViewport.width=static_cast<float>(SwapChainSupportDetails::swapChainExtent.width);
+                vkViewport.height=static_cast<float>(SwapChainSupportDetails::swapChainExtent.height);
+                vkViewport.minDepth=0.0F;
+                vkViewport.maxDepth=1.0F;
+        
 
-        VkRect2D scissor{
+        VkRect2D scissor{};
 //                    .offset(vkOffset2D ->vkViewport.y()) //todo: not sure if correct Offset
-                .offset=Buffers::set,
-                .extent=SwapChainSupportDetails::swapChainExtent
-        };
+                scissor.offset={0,0};
+                scissor.extent=SwapChainSupportDetails::swapChainExtent;
+      
 
         VkPipelineViewportStateCreateInfo vkViewPortState={};
                    vkViewPortState.sType=VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -247,7 +253,7 @@ VkAttachmentReference attachmentsRefs = {};
 //                    .pScissors(vkrect2DBuffer);
                 vkViewPortState.scissorCount=1;
                 vkViewPortState.pScissors=&scissor;
-                vkViewPortState.pNext=nullptr;
+                vkViewPortState.pNext=VK_NULL_HANDLE;
 
 
         VkPipelineRasterizationStateCreateInfo VkPipeLineRasterization={};
@@ -259,7 +265,7 @@ VkAttachmentReference attachmentsRefs = {};
 //                   .cullMode(VK_CULL_MODE_BACK_BIT)
 //                   .frontFace(VK_FRONT_FACE_COUNTER_CLOCKWISE)
                 VkPipeLineRasterization.depthBiasEnable=VK_FALSE;
-                VkPipeLineRasterization.pNext=nullptr;
+                VkPipeLineRasterization.pNext=VK_NULL_HANDLE;
 
         //todo: actuall need multismapling to Compleet.Initialsie.Construct.Substanciate the renderPipeline corretcly even if Antialsing /AF/MMs are not neeeded......
         VkPipelineMultisampleStateCreateInfo multisampling={};
@@ -267,20 +273,20 @@ VkAttachmentReference attachmentsRefs = {};
                 multisampling.sampleShadingEnable=VK_FALSE;
                 multisampling.rasterizationSamples=VK_SAMPLE_COUNT_1_BIT;
                 multisampling.minSampleShading =1;
-                multisampling.pSampleMask = nullptr;
+                multisampling.pSampleMask = VK_NULL_HANDLE;
 		multisampling.alphaToCoverageEnable = VK_FALSE;
 		multisampling.alphaToOneEnable = VK_FALSE;
 
 
-//         VkPipelineDepthStencilStateCreateInfo depthStencil={};
-//                    depthStencil.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-//                 depthStencil.depthTestEnable=VK_TRUE;
-//                 depthStencil.depthWriteEnable=VK_TRUE;
-//                 depthStencil.depthCompareOp=VK_COMPARE_OP_LESS;
-//                 depthStencil.depthBoundsTestEnable=VK_FALSE;
-// //                    .minDepthBounds(0) //Optional
-// //                    .maxDepthBounds(1) //Optional
-//                 depthStencil.stencilTestEnable=VK_FALSE;
+        VkPipelineDepthStencilStateCreateInfo depthStencil={};
+                   depthStencil.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+                depthStencil.depthTestEnable=VK_TRUE;
+                depthStencil.depthWriteEnable=VK_TRUE;
+                depthStencil.depthCompareOp=VK_COMPARE_OP_LESS;
+                depthStencil.depthBoundsTestEnable=VK_FALSE;
+//                    .minDepthBounds(0) //Optional
+//                    .maxDepthBounds(1) //Optional
+                depthStencil.stencilTestEnable=VK_FALSE;
 
 
         VkPipelineColorBlendAttachmentState colorBlendAttachment={};
@@ -309,15 +315,15 @@ VkAttachmentReference attachmentsRefs = {};
                 // colorBlending.blendConstants[3]=0.0f;
 //            memFree(colorBlendAttachment);
 
-        // VkPushConstantRange vkPushConstantRange={};
-        //         vkPushConstantRange.offset=0;
-        //         vkPushConstantRange.size=16 * sizeof(float);
-        //         vkPushConstantRange.stageFlags=VK_SHADER_STAGE_VERTEX_BIT;
+        VkPushConstantRange vkPushConstantRange={};
+                vkPushConstantRange.offset=0;
+                vkPushConstantRange.size=16 * sizeof(float);
+                vkPushConstantRange.stageFlags=VK_SHADER_STAGE_VERTEX_BIT;
 
 
         VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo={};
                    vkPipelineLayoutCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-                vkPipelineLayoutCreateInfo.pPushConstantRanges=nullptr;//&vkPushConstantRange;
+                vkPipelineLayoutCreateInfo.pPushConstantRanges=&vkPushConstantRange;
                 vkPipelineLayoutCreateInfo.pSetLayouts=0;//&UniformBufferObject::descriptorSetLayout;
                 vkPipelineLayoutCreateInfo.flags=0;
                 vkPipelineLayoutCreateInfo.pushConstantRangeCount =0;
@@ -336,32 +342,102 @@ VkAttachmentReference attachmentsRefs = {};
         VkGraphicsPipelineCreateInfo pipelineInfo={};
                 pipelineInfo.sType=VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
                 pipelineInfo.pStages=shaderStages;
+                pipelineInfo.pNext=VK_NULL_HANDLE;
                 pipelineInfo.stageCount=2;
                 pipelineInfo.pVertexInputState=&vkPipelineVertexInputStateCreateInfo;
                 pipelineInfo.pInputAssemblyState=&inputAssembly;
                 pipelineInfo.pViewportState=&vkViewPortState;
                 pipelineInfo.pRasterizationState=&VkPipeLineRasterization;
                 pipelineInfo.pMultisampleState=&multisampling;
-                        // .pDepthStencilState=&depthStencil,
+                pipelineInfo.pDepthStencilState=&depthStencil,
                 pipelineInfo.pColorBlendState=&colorBlending;
 //              pipelineInfo      .pDynamicState(null)
                 pipelineInfo.layout=vkLayout;
                 pipelineInfo.renderPass=SwapChainSupportDetails::renderPass;
                 pipelineInfo.subpass=0;
-                   //.basePipelineHandle=VK_NULL_HANDLE
-                // .basePipelineIndex=-1
+                   pipelineInfo.basePipelineHandle=VK_NULL_HANDLE;
+                pipelineInfo.basePipelineIndex=-1;
         
        
 
         //Memsys2.free(entryPoint);
         //todo: WARN: Potnetial Major Breakage
         uint32_t a=1;
-        // vkCreateGraphicsPipelines(device, nullptr, 1, &pipelineInfo, nullptr, &graphicsPipeline);
-        clPPPI(&pipelineInfo, "vkCreateGraphicsPipelines", &graphicsPipeline);
-       
+        // // vulkan_layer_chassis::CreateGraphicsPipelines
+      
+                checkCall(vkCreateGraphicsPipelines(device, nullptr, a, &pipelineInfo, nullptr, &graphicsPipeline));
+        // clPPPI(&pipelineInfo, "vkCreateGraphicsPipelines", &graphicsPipeline);
+//        if (graphicsPipeline == nullptr)
+//         {
+//                 std::cout << graphicsPipeline << "\n" <<  &graphicsPipeline<< "\n";
+//                 throw std::runtime_error("bad Alloctaion!: Handle is NUll!/Null handle!");
+//         }
         // Buffers.graphicsPipeline = MemSysm.doPointerAlloc5L(device, pipelineInfo);
 
         vkDestroyShaderModule(device, vertShaderModule, VK_NULL_HANDLE );
         vkDestroyShaderModule(device, fragShaderModule, VK_NULL_HANDLE );
 
     }
+
+    inline void PipelineX::createCommandBuffers()
+{
+    VkCommandBufferAllocateInfo allocateInfo = {};
+                allocateInfo.sType=(VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
+                allocateInfo.commandPool=(Queues::commandPool);
+                allocateInfo.level=(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+                allocateInfo.commandBufferCount=(sizeof(commandBuffers)/sizeof(VkCommandBuffer));
+        std::cout<< allocateInfo.commandBufferCount << "Command Buffers"<<"\n";
+        // = memPointerBuffer(allocateInfo.address(), allocateInfo.commandBufferCount());
+//            MemSysm.Memsys2.free(allocateInfo);
+        vkAllocateCommandBuffers(device, &allocateInfo, PipelineX::commandBuffers);
+        // doPointerAllocS(allocateInfo, capabilities.vkAllocateCommandBuffers, descriptorSets);
+        // commandBuffers.put(descriptorSets);
+        // descriptorSets.free();
+
+        VkCommandBufferBeginInfo beginInfo1 = {};
+                  beginInfo1.sType=VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+                beginInfo1.flags=0;//(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
+
+//            VkRenderPassAttachmentBeginInfo vkRenderPassAttachmentBeginInfo1 = VkRenderPassAttachmentBeginInfo.create(MemSysm.malloc(VkRenderPassAttachmentBeginInfo .SIZEOF))
+//                    .sType$Default();
+        //.pAttachments(VkUtils2.MemSys.stack.longs(VkUtils2.SwapChainSupportDetails.swapChainImageViews));
+        VkRect2D renderArea = {};
+                renderArea.offset={0,0};//(set);
+                renderArea.extent=(SwapChainSupportDetails::swapChainExtent);
+
+
+        VkClearValue clearValues[2]={};
+                clearValues[0].color.float32[0]=0.0F;
+                clearValues[0].color.float32[1]=0.0F;
+                clearValues[0].color.float32[2]=0.0F;
+                clearValues[0].color.float32[3]=0.0F;
+                clearValues[1].depthStencil={1.0f, 0};
+
+
+        VkRenderPassBeginInfo renderPassInfo = {};
+              renderPassInfo.sType=(VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO);
+              renderPassInfo.pClearValues=(clearValues);
+              renderPassInfo.clearValueCount=(1);
+              renderPassInfo.renderPass=(SwapChainSupportDetails::renderPass);
+              renderPassInfo.renderArea=(renderArea);
+                int i=0;
+               for (const VkCommandBuffer &commandBuffer : commandBuffers) 
+               {
+                    //extracted(beginInfo1, renderPassInfo, commandBuffer, i);
+
+                        vkBeginCommandBuffer(commandBuffer, &beginInfo1);
+        
+                        renderPassInfo.framebuffer=(SwapChainSupportDetails::swapChainFramebuffers[i]);
+
+                        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+                        {
+                        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+                        vkCmdDraw(commandBuffer, 3, 0, 0, 0);
+                        }
+                        vkCmdEndRenderPass(commandBuffer);
+                        vkEndCommandBuffer(commandBuffer);
+                       i++;
+
+                }
+}
+

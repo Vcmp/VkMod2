@@ -1,24 +1,26 @@
 #pragma once
 
 
-#include "VkUtilsXBase.hpp"
+#include "Pipeline.hpp"
+#include "SwapChainSupportDetails.hpp"
 
 // = (&set + sizeof(set));
 
-inline namespace Buffers
+inline namespace BuffersX
 {
-    inline VkOffset2D set{.x=0,.y=0};
+        static VkOffset2D set{.x=0,.y=0};
 
-        inline VkImageLayout depthImageView;
+      
         // inline VkPipelineLayout vkLayout;
         static void createBuffer(VkBuffer, VkDeviceMemory);
         static void setBuffer(VkBufferUsageFlagBits, size_t, VkBuffer);
         static uint32_t findMemoryType(VkPhysicalDevice, uint32_t, VkMemoryPropertyFlagBits);
+        
 };
 
 
 
-inline uint32_t Buffers::findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlagBits properties)
+inline uint32_t BuffersX::findMemoryType(VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlagBits properties)
 {
       VkPhysicalDeviceMemoryProperties memProperties = {};
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
@@ -31,4 +33,5 @@ inline uint32_t Buffers::findMemoryType(VkPhysicalDevice physicalDevice, uint32_
 
         throw std::runtime_error("Failed to find suitable memory type");
 }
+
 

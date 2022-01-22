@@ -3,8 +3,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 #include "VkUtilsXBase.hpp"
-#include <fcntl.h>
-#include <io.h>
+#include <fstream>
 
 inline namespace ShaderSPIRVUtils {
 // char shaderNamePath;
@@ -14,48 +13,36 @@ inline namespace ShaderSPIRVUtils {
 //     VERTEX_SHADER=0,
 //     FRAGMENT_SHADER=1
 // };
-inline const void compileShaderFile(const char *, VkShaderModule &);
+static VkShaderModule compileShaderFile(const char *);
 // extern constexpr VkShaderModule createShaderModule(VkDevice, const char*,
 // size_t);
 }; // namespace ShaderSPIRVUtils
 // typedef ShaderSPIRVUtils SPRIV;
 
-inline const std::vector<char> doRead(const char *shaderNamePath1) {
-  const int fhndl =
-      _sopen(shaderNamePath1, _O_RDONLY | _O_BINARY | _O_SEQUENTIAL, 0x40,
-             0x0100 | 0x0080);
-  // if(!file)
-  // {
-  //     std::runtime_error("Fail:Bad or No ShaderFile!");
-  // }
-  _lseek(fhndl, 0, SEEK_END);
-  const size_t size = _tell(fhndl);
-  _lseek(fhndl, 0, SEEK_END);
+  inline std::vector<char> doRead(const char *shaderNamePath1) {
+    std::ifstream file(shaderNamePath1, std::ios::ate | std::ios::binary);
 
-  std::vector<char> x(size);
+    if (!file.is_open()) {
+        throw std::runtime_error("failed to open file!");
+    }
+    size_t fileSize = (size_t) file.tellg();
+    std::vector<char> buffer(fileSize);
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    file.close();
 
-  std::cout << size << "\n";
-  if (_eof(fhndl) == -1) {
+    return buffer;
 
-    throw std::runtime_error("Fail:Bad or No ShaderFile!");
-  }
-  _read(fhndl, x.data(), size);
-  std::cout << x.size() << "\n";
-  // _flushall();
-  _close(fhndl);
-  return x;
 }
 
-inline const void
-ShaderSPIRVUtils::compileShaderFile(const char *shaderNamePath1,
-                                    VkShaderModule &axx) {
+inline VkShaderModule ShaderSPIRVUtils::compileShaderFile(const char *shaderNamePath1) {
 
   auto axl = doRead(shaderNamePath1);
   // axl[axl.size()-1]=(0x07230203);
 
   // for(uint32_t a=0;a<axl.size();a++)
   //     std::cout<<axl[a];
-
+VkShaderModule axx={};
   VkShaderModuleCreateInfo VsMCI = {};
 
   VsMCI.codeSize = axl.size();
@@ -64,6 +51,7 @@ ShaderSPIRVUtils::compileShaderFile(const char *shaderNamePath1,
   VsMCI.pNext = VK_NULL_HANDLE;
 
   vkCreateShaderModule(device, &VsMCI, nullptr, &axx);
+  return axx;
   // clPPPI(&VsMCI, "vkCreateShaderModule", &axx);
   // if (a!=VK_SUCCESS)
   // {

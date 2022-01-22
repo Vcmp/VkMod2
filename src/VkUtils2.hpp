@@ -6,10 +6,11 @@
 #include "Texture.hpp"
 
 #include "Pipeline.hpp"
+#include "src/Queues.hpp"
 
- #include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
-#include <stdint.h>
+//  #include <GLFW/glfw3.h>
+// #include <GLFW/glfw3native.h>
+// #include <stdint.h>
 
    
 
@@ -64,11 +65,14 @@ inline namespace VkUtils2
       VkUtils2::createLogicalDevice();
       SwapChainSupportDetails::createSwapChain();
       SwapChainSupportDetails::createImageViews();    
-      Pipeline::createRenderPasses();
-      //UniformBufferObject::createDescriptorSetLayout();
-      Pipeline::createGraphicsPipelineLayout();
-    //   Pipeline::createCommandPool();
+      PipelineX::createRenderPasses();
+      UniformBufferObject::createDescriptorSetLayout();
+      PipelineX::createGraphicsPipelineLayout();
+      SwapChainSupportDetails::createFramebuffers();
+      Queues::createCommandPool();
     //   Texture::createDepthResources();
+      
+      PipelineX::createCommandBuffers();
     
       // VkUtils2::createInstance;
     }
@@ -109,12 +113,12 @@ inline void VkUtils2::setupWindow()
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_NO_ROBUSTNESS);
-        glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
-        glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
+        // glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_NO_ROBUSTNESS);
+        // glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
+        // glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
 
 
-        window = glfwCreateWindow(854, 480, "VKMod", nullptr, 0);
+        window = glfwCreateWindow(854, 480, "VKMod", nullptr, nullptr);
 
 
         if(window == NULL) exit(1);
@@ -146,7 +150,7 @@ inline void VkUtils2::createInstance()
                  vkApplInfo.pEngineName="No Engine";
                 vkApplInfo .engineVersion=VK_MAKE_VERSION(1, 0, 0);
                  
-                 vkApplInfo.apiVersion=VK_API_VERSION_1_2;
+                 vkApplInfo.apiVersion=VK_API_VERSION_1_0;
                  
 		
 //        MemSysm.Memsys2.free(a);
@@ -352,15 +356,20 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
            // std::cout << queueFamilies << "\n";
             uint32_t i = 0;
             
-            for (;i<pQueueFamilyPropertyCount;i++) {
-                // std::cout <<(queueFamilies[i].queueCount)<< "\n";
-                if ((uniqueQueueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+            for (VkQueueFamilyProperties uniqueQueue;i<pQueueFamilyPropertyCount;i++) {
+                std::cout <<(uniqueQueue.queueCount)<< "\n";
+                if ((uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
                     graphicsFamily = i;
                 }
-                // if (isComplete())
-                //     break;
+                VkBool32 presentSupport = false;
+                vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, Queues::surface, &presentSupport);
+                 if (presentSupport) {
+                    presentFamily = i;
+                }
+                if (presentFamily != NULL&& graphicsFamily!= NULL)
+                    break;
             
-                //i++;
+                // i++;
             }
            
             VkDeviceQueueCreateInfo queueCreateInfos={};
@@ -375,20 +384,20 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                 queueCreateInfos.pNext=VK_NULL_HANDLE;
             //}
             
-            VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
-                    deviceVulkan12Features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-                    deviceVulkan12Features.descriptorBindingPartiallyBound=true,
-                    deviceVulkan12Features.imagelessFramebuffer=true;
-                    deviceVulkan12Features.pNext=VK_NULL_HANDLE;
+            // VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
+            //         deviceVulkan12Features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+            //         deviceVulkan12Features.descriptorBindingPartiallyBound=true,
+            //         deviceVulkan12Features.imagelessFramebuffer=true;
+            //         deviceVulkan12Features.pNext=VK_NULL_HANDLE;
                     
          
 
             VkPhysicalDeviceFeatures deviceFeatures={};
 
-            VkPhysicalDeviceFeatures2 deviceFeatures2={};
-                    deviceFeatures2.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-                    deviceFeatures2.pNext=&deviceVulkan12Features;
-                    deviceFeatures2.features=deviceFeatures;
+            // VkPhysicalDeviceFeatures2 deviceFeatures2={};
+            //         deviceFeatures2.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+            //         deviceFeatures2.pNext=nullptr;//&deviceVulkan12Features;
+            //         deviceFeatures2.features=deviceFeatures;
 
 
 
@@ -397,13 +406,14 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 //                        .geometryShader(true);
 //                        .pipelineStatisticsQuery(true)
 //                        .alphaToOne(false);
-            vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
+            // vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
+            // vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
             VkDeviceCreateInfo createInfo={};
                     createInfo.sType=VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-                    createInfo.pNext=&deviceFeatures2;
+                    createInfo.pNext=&deviceFeatures;//&deviceFeatures2;
                     createInfo.queueCreateInfoCount=1;
                     createInfo.pQueueCreateInfos=&queueCreateInfos;
-                    createInfo.ppEnabledExtensionNames=(deviceExtensions);
+                    createInfo.ppEnabledExtensionNames=(deviceExtensions.data());
                     createInfo.enabledExtensionCount=static_cast<uint32_t>(validationLayers.size());
                     createInfo.ppEnabledLayerNames=(validationLayers.data());
 
@@ -461,6 +471,10 @@ inline VkFormat Texture::findDepthFormat()
 
  void VkUtils2::cleanup()
     {
-        vkDestroyPipeline(device, Pipeline::graphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(device, Pipeline::vkLayout, nullptr);
+         for (auto framebuffer : swapChainFramebuffers) {
+        vkDestroyFramebuffer(device, framebuffer, nullptr);
+    }
+        vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
+        vkDestroyCommandPool(device, commandPool, nullptr);
     }

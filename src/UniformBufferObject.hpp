@@ -6,11 +6,11 @@
 
 inline namespace UniformBufferObject
 {
-    extern inline const void createDescriptorSetLayout();
+    extern inline void createDescriptorSetLayout();
     static VkDescriptorSetLayout descriptorSetLayout;
 };
 
-inline const void UniformBufferObject::createDescriptorSetLayout()
+inline void UniformBufferObject::createDescriptorSetLayout()
 {
      {
             VkDescriptorSetLayoutBinding bindings[]={

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Queues.hpp"
+#include <vulkan/vulkan_core.h>
 
 
 // static VkSurfaceFormatKHR formats={};
@@ -14,12 +15,14 @@ inline namespace SwapChainSupportDetails
    
    
 //    static VkSurfaceFormatKHR* formats;
-   
+   static inline VkSwapchainKHR swapChain;
 
-    static VkSurfaceFormatKHR swapChainImageFormat;
-    static VkImageView swapChainImageViews;
+    static VkFormat swapChainImageFormat;
+    static VkImageView swapChainImageViews[3];
     static VkRenderPass renderPass;
     static VkExtent2D swapChainExtent;
+    static inline VkImage pSwapchainImages[3];
+    static inline VkFramebuffer swapChainFramebuffers[3];
     // static void querySwapChainSupport(VkPhysicalDevice);
     static void createSwapChain();
     static void createImageViews();
@@ -27,6 +30,7 @@ inline namespace SwapChainSupportDetails
     static VkExtent2D chooseSwapExtent();
     static VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR&);
     static VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>);
+    static void createFramebuffers();
    
 };
 
@@ -149,7 +153,7 @@ inline void SwapChainSupportDetails::createSwapChain()
 
             std::cout<<"ImageCount: "<<imageCount<<"\n";
 
-            VkSwapchainCreateInfoKHR createInfo={};
+            VkSwapchainCreateInfoKHR createInfo{};
 
                     createInfo.sType=VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
                     createInfo.surface=Queues::surface;
@@ -178,12 +182,12 @@ inline void SwapChainSupportDetails::createSwapChain()
             // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
             // auto xx=PFN_vkVoidFunction(swapChain);
             clPPPI(&createInfo, "vkCreateSwapchainKHR", &swapChain); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
-           ;
+           
 
 
             checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, pSwapchainImages));
 
-            SwapChainSupportDetails::swapChainImageFormat =surfaceFormat;
+            SwapChainSupportDetails::swapChainImageFormat =surfaceFormat.format;
             SwapChainSupportDetails::swapChainExtent = extent;
 
 }
@@ -191,27 +195,95 @@ inline void SwapChainSupportDetails::createSwapChain()
 inline void SwapChainSupportDetails::createImageViews()
     {
         std::cout<< ("Creating Image Views") << "\n";
+        VkImageViewCreateInfo createInfo={};
+                createInfo.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+
+                        createInfo.viewType=VK_IMAGE_VIEW_TYPE_2D;
+                        createInfo.format=SwapChainSupportDetails::swapChainImageFormat;
+
+                        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+                    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+                    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+                        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+                        
+
+                createInfo.subresourceRange.aspectMask=VK_IMAGE_ASPECT_COLOR_BIT;
+                        createInfo.subresourceRange.baseMipLevel=0;
+                        createInfo.subresourceRange.levelCount=1;
+                        createInfo.subresourceRange.baseArrayLayer=0;
+                        createInfo.subresourceRange.layerCount=1;
+        for (int i=0;i<3;i++)
+        {
+          
+        createInfo.image=pSwapchainImages[i];
+        
+        clPPPI(&createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews[i]); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+        }
 
         
-          VkImageViewCreateInfo createInfo={};
-          createInfo.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-
-                createInfo.viewType=VK_IMAGE_VIEW_TYPE_2D;
-                createInfo.format=SwapChainSupportDetails::swapChainImageFormat.format;
-                createInfo.image=*pSwapchainImages;
-
-        createInfo.subresourceRange.aspectMask=VK_IMAGE_ASPECT_COLOR_BIT;
-                createInfo.subresourceRange.baseMipLevel=0;
-                createInfo.subresourceRange.levelCount=1;
-                createInfo.subresourceRange.baseArrayLayer=0;
-                createInfo.subresourceRange.layerCount=1;
-        
-        
-        clPPPI(&createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews); //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
-
-        
 
 
+    }
+
+    inline void SwapChainSupportDetails::createFramebuffers()
+    {
+        //  PointerBuffer attachments;
+//               if(depthBuffer)
+//               else
+//                   attachments = stack.stack.longs(1);
+ VkFramebufferCreateInfo framebufferCreateInfo ={};
+                    framebufferCreateInfo.sType=(VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO);
+                    framebufferCreateInfo.renderPass=(renderPass);
+                    framebufferCreateInfo.width=(swapChainExtent.width);
+                    framebufferCreateInfo.height=(swapChainExtent.height);
+                    framebufferCreateInfo.layers=(1);
+            // attachments = MemSysm.longs=(swapChainImageFormat, &Buffers::depthImageView));
+
+            //                      .sType(VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO)
+            
+            framebufferCreateInfo.attachmentCount=1;//(framebufferCreateInfo.address(), (attachments).remaining());
+            framebufferCreateInfo.layers=1;
+                for (size_t i = 0; i < 3; i++) {
+                    VkImageView attachments[] = {swapChainImageViews[i]};
+            // VkFramebufferAttachmentImageInfo AttachmentImageInfo[2];// = VkFramebufferAttachmentImageInfo.create(MemSysm.calloc(VkFramebufferAttachmentImageInfo.SIZEOF * 2L), 2);
+            // AttachmentImageInfo[0]={};
+            //         // AttachmentImageInfo[0].sType=VK_STRUCTURE
+            //         AttachmentImageInfo[0].layerCount=(1);
+            //         AttachmentImageInfo[0].width=(swapChainExtent.width);
+            //         AttachmentImageInfo[0].height=(swapChainExtent.height);
+            //         AttachmentImageInfo[0].usage=(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
+            //         AttachmentImageInfo[0].pViewFormats=(VK_FORMAT_R8G8B8A8_SRGB);
+           framebufferCreateInfo.pAttachments= attachments;
+            // AttachmentImageInfo[1]= {};
+            //         // AttachmentImageInfo[1].sType$Default();
+            //         AttachmentImageInfo[1].layerCount=(1);
+            //         AttachmentImageInfo[1].width=(swapChainExtent.width);
+            //         AttachmentImageInfo[1].height=(swapChainExtent.height);
+            //         AttachmentImageInfo[1].usage=(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+            //         AttachmentImageInfo[1].pViewFormats=(&Texture::findDepthFormat());
+                    // AttachmentImageInfo[1].pViewFormats=(&Texture::findDepthFormat());
+
+            
+
+            // Lets allocate the create info struct once and just update the pAttachments field each iteration
+           
+
+            //todo: Check only oneusbpass runing due to differing ColourDpetHFormats and isn;t coauong probelsm sude to Sumuetnous ComandBuffering nort requiinG fencing.Allowing for FenceSkip
+            //memPutLong(framebufferCreateInfo.address() + VkFramebufferCreateInfo.PATTACHMENTS, memAddress0(attachments));
+//               memPutInt(framebufferCreateInfo.address() + VkFramebufferCreateInfo.ATTACHMENTCOUNT, 1);
+            //memPutInt(framebufferCreateInfo.address() + VkFramebufferCreateInfo.ATTACHMENTCOUNT, attachments.capacity());
+            //Memsys2.free(framebufferCreateInfo);
+            //nmemFree(framebufferCreateInfo.address());
+            //TODO: warn Possible Fail!
+
+            clPPPI(&framebufferCreateInfo, "vkCreateFramebuffer", &swapChainFramebuffers[i]);
+                }
+            // for (int i = 0; i < swapChainImageViews.capacity(); i++) {
+            //     attachments.put(0, swapChainImageViews.get(i));
+
+
+            //     swapChainFramebuffers.put(i, MemSysm.doPointerAllocSafe(framebufferCreateInfo/*.pNext(NULL)*/, Buffers.capabilities.vkCreateFramebuffer));
+            // }
     }
 
 

@@ -1,5 +1,6 @@
 // #include "mat4.hpp"
 #include "VkUtils2.hpp"
+#include "renderer2.hpp"
 
 
 // using namespace VkU2;
@@ -30,7 +31,7 @@ bool a = true;
         {
 
 
-            //renderer2.Renderer2.drawFrame();
+            // renderer2::drawFrame();
 			// extracted();
 
             glfwPollEvents();
@@ -50,21 +51,5 @@ bool a = true;
 
     //todo: Wake from callBack...
     
-
-
-
-// inline void Texture::createDepthResources()
-//     {
-//           VkFormat depthFormat = findDepthFormat();
-//         Texture::createImage(SwapChainSupportDetails::swapChainExtent.width, SwapChainSupportDetails::swapChainExtent.height,
-//                 depthFormat,
-//                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-//         );
-
-
-//         createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, Buffers::depthImageView);
-//         transitionImageLayout(depthFormat,
-//                 VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
-//     }
 
     

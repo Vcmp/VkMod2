@@ -18,10 +18,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
     set(CLANG 1)
+	else()
+	set(GCC 1)
 endif()
 
 #set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -fvisibility=hidden -fno-semantic-interposition -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -O0 -glldb -fsanitize=address -fsanitize-address-use-after-return=always -fno-omit-frame-pointer -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
+set(CMAKE_CXX_FLAGS "-std=c++14 -v -march=native -mtune=native -fuse-ld=lld -static -g -O0 -glldb -fsanitize=address -fsanitize-address-use-after-return=always -fno-omit-frame-pointer -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 
 find_package(Vulkan REQUIRED)
 
@@ -32,6 +34,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 #include_directories($ENV{VULKAN_SDK}/include)
 #add_subdirectory(src)
 
+
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -41,6 +44,8 @@ add_subdirectory(glfw-3.3.6)
 add_executable(VkMod2
     src/main.cpp
    )
+   
+   set_target_properties (VkMod2 PROPERTIES CXX_STANDARD 14)
    # target_compile_options(${PROJECT_NAME} INTERFACE "/Zc:__cplusplus")
    # target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 #set_property(TARGET VkMod2 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
