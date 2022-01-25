@@ -149,64 +149,30 @@ inline void createRenderPasses()
         const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile("shaders/21_shader_ubo.frag.spv");
         // constexpr char entryPoint[]={"main"};
 
-        VkPipelineShaderStageCreateInfo vertexStage={};
-            vertexStage.sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-//                    .sType(VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO)
-                vertexStage.stage=VK_SHADER_STAGE_VERTEX_BIT;
-                vertexStage.module=vertShaderModule;
-                vertexStage.pName="main";
-                vertexStage.pNext=VK_NULL_HANDLE;
-                
+        const VkPipelineShaderStageCreateInfo vertexStage={
+            .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .stage=VK_SHADER_STAGE_VERTEX_BIT,
+                .module=vertShaderModule,
+                .pName="main",
+               
+                };
        
 
-        VkPipelineShaderStageCreateInfo fragStage={};
-                fragStage.sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                fragStage.stage=VK_SHADER_STAGE_FRAGMENT_BIT;
-                fragStage.module=fragShaderModule;
-                fragStage.pName="main";
-                fragStage.pNext=VK_NULL_HANDLE;
+        const VkPipelineShaderStageCreateInfo fragStage={
+                .sType=VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                .stage=VK_SHADER_STAGE_FRAGMENT_BIT,
+                .module=fragShaderModule,
+                .pName="main"
+    };
         
 
        VkPipelineShaderStageCreateInfo shaderStages[2] = {fragStage, vertexStage};
 
-        // VkVertexInputBindingDescription ax ={
-        //                 .binding=0,
-        // //                    .stride(vertices.length/2)
-        // //                    .stride(vertices.length/VERT_SIZE+1)
-        //                 .stride=32,
-        //                 .inputRate=VK_VERTEX_INPUT_RATE_VERTEX
-        //         };
-
-        // VkVertexInputAttributeDescription attributeDescriptions[3];
-
-        // // Position
-        //         attributeDescriptions[0]={};
-        //         attributeDescriptions[0].binding=0;
-        //         attributeDescriptions[0].location=0;
-        //         attributeDescriptions[0].format=VK_FORMAT_R32G32B32_SFLOAT;
-        //         attributeDescriptions[0].offset=OFFSET_POS;
-
-        //         // Color
-        //         attributeDescriptions[1]={};
-        //         attributeDescriptions[1].binding=0;
-        //         attributeDescriptions[1].location=1;
-        //         attributeDescriptions[1].format=VK_FORMAT_R32G32B32_SFLOAT;
-        //         attributeDescriptions[1].offset=OFFSETOF_COLOR;
-
-        //         // Texture coordinates
-        //         attributeDescriptions[2]={};
-        //         attributeDescriptions[2].binding=0;
-        //         attributeDescriptions[2].location=2;
-        //         attributeDescriptions[2].format=VK_FORMAT_R32G32_SFLOAT;
-        //         attributeDescriptions[2].offset=OFFSETOF_TEXTCOORDS;
-
+        
         VkPipelineVertexInputStateCreateInfo vkPipelineVertexInputStateCreateInfo={};
                    vkPipelineVertexInputStateCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                // vkPipelineVertexInputStateCreateInfo.pVertexBindingDescriptions=&ax;
-        // vkPipelineVertexInputStateCreateInfo.pVertexAttributeDescriptions=attributeDescriptions; 
-        vkPipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount=0;
-        vkPipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount =0;
-        // vkPipelineVertexInputStateCreateInfo.pNext=VK_NULL_HANDLE;
+                vkPipelineVertexInputStateCreateInfo.vertexBindingDescriptionCount=0;
+                vkPipelineVertexInputStateCreateInfo.vertexAttributeDescriptionCount =0;
 
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly={};
@@ -251,7 +217,7 @@ inline void createRenderPasses()
                 VkPipeLineRasterization.polygonMode=VK_POLYGON_MODE_FILL;
                 VkPipeLineRasterization.lineWidth=1.0f;
                   VkPipeLineRasterization.cullMode=VK_CULL_MODE_BACK_BIT;
-                  VkPipeLineRasterization.frontFace=VK_FRONT_FACE_COUNTER_CLOCKWISE;
+                  VkPipeLineRasterization.frontFace=VK_FRONT_FACE_CLOCKWISE;
                 VkPipeLineRasterization.depthBiasEnable=VK_FALSE;
                 // VkPipeLineRasterization.pNext=VK_NULL_HANDLE;
 
