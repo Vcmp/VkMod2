@@ -1,19 +1,22 @@
 #pragma once
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
+// #ifdef __cplusplus
+// #define VULKAN_HPP_CPLUSPLUS 201803L
+// #endif
+#include <vulkan/vulkan.hpp>
 // #define VK_USE_64_BIT_PTR_DEFINES 1
 //#define VK_NO_PROTOTYPES
 // #define VK_ENABLE_BETA_EXTENSIONS
+// #include <stdint.h>
+
+#ifdef _MSVC_LANG
+#define _MSVC_LANG 201803L
+#endif
+
 
  #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
-// #include <stdint.h>
-
-// #ifdef _MSVC_LANG
-// #define _MSVC_LANG 201803L
-// #endif
-#include <vulkan/vulkan.hpp>
-
 
 // #include <vcruntime.h>
 
@@ -30,7 +33,8 @@
 inline namespace{
 
 
-inline namespace {  
+
+static constexpr uint8_t Frames=3;
 static constexpr bool checks=true;
 
     static constexpr bool debug=true;
@@ -46,18 +50,40 @@ static constexpr bool checks=true;
   
 static inline  void checkCall(VkResult callPPPPI)
         {
-            if(checks)
+            if constexpr(checks)
             switch (callPPPPI)
             {
-                case VK_SUCCESS :std::cout<<("OK!")<< "\n"; break;
+                case VK_SUCCESS :/* std::cout<<("OK!")<< "\n"; */ break;
                 case VK_NOT_READY : throw std::runtime_error("Not ready!"); break;
                 case VK_TIMEOUT : throw std::runtime_error("Bad TimeOut!"); break;
                 case VK_INCOMPLETE : throw std::runtime_error("Incomplete!"); break;
                 case VK_ERROR_INITIALIZATION_FAILED :  throw  std::runtime_error("Error: bad Initialisation!");break;
+                case VK_ERROR_DEVICE_LOST :  throw  std::runtime_error("Error: Device Failed/Lost!");break;
                 case VK_ERROR_FRAGMENTED_POOL :{ throw std::runtime_error("Error: bad Mem Alloc");}break;
                 case VK_ERROR_OUT_OF_HOST_MEMORY :{  throw  std::runtime_error("No Host Memory");}break;
                 case VK_ERROR_OUT_OF_DEVICE_MEMORY :{ throw  std::runtime_error("No Device Memory");}break;
                 case VK_ERROR_UNKNOWN :{ throw  std::runtime_error("Unknown Error!|");}break;
+                case VK_ERROR_OUT_OF_POOL_MEMORY :{ throw  std::runtime_error("Out of PooL Memory");}break;
+                case VK_ERROR_INVALID_EXTERNAL_HANDLE :{ throw  std::runtime_error("VK_ERROR_INVALID_EXTERNAL_HANDLE");}break;
+                case VK_ERROR_FRAGMENTATION :{ throw  std::runtime_error("VK_ERROR_INVALID_EXTERNAL_HANDLE");}break;
+                case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS :{ throw  std::runtime_error("VK_ERROR_FRAGMENTATION");}break;
+                case VK_ERROR_SURFACE_LOST_KHR :{ throw  std::runtime_error("VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS");}break;
+                case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR :{ throw  std::runtime_error("VK_ERROR_NATIVE_WINDOW_IN_USE_KHR");}break;
+                case VK_ERROR_OUT_OF_DATE_KHR :{throw std::runtime_error("");}break;
+                case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR :{throw std::runtime_error("");}break;
+                case VK_ERROR_VALIDATION_FAILED_EXT :{throw std::runtime_error("");}break;
+                case VK_ERROR_INVALID_SHADER_NV :{throw std::runtime_error("");}break;
+                case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT :{throw std::runtime_error("");}break;
+                case VK_ERROR_NOT_PERMITTED_EXT :{throw std::runtime_error("");}break;
+                case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT :{throw std::runtime_error("");}break;
+                case VK_THREAD_IDLE_KHR :{throw std::runtime_error("");}break;
+                case VK_THREAD_DONE_KHR :{throw std::runtime_error("");}break;
+                case VK_OPERATION_DEFERRED_KHR :{throw std::runtime_error("");}break;
+                case VK_OPERATION_NOT_DEFERRED_KHR :{throw std::runtime_error("");}break;
+                case VK_PIPELINE_COMPILE_REQUIRED_EXT :{throw std::runtime_error("");}break ;
+              
+                case VK_SUBOPTIMAL_KHR :{ throw  std::runtime_error("VK_SUBOPTIMAL_KHR");}break;
+                
                 default :{ std::cout<<callPPPPI<<"\n"; throw  std::runtime_error("Unknown Error!");}break;
             }
         }
@@ -128,5 +154,5 @@ static inline void clPPPJI(void * pStrct, uint32_t* ax, const char* a,  void *ob
     // return VkR;
     //  callPPPPI(device, pStrct, nullptr, a)
 }
-};
+
 };

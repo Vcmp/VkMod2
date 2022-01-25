@@ -6,10 +6,11 @@
 #include "Texture.hpp"
 
 #include "Pipeline.hpp"
-#include "src/Queues.hpp"
+#include "Queues.hpp"
+#include <cstdint>
 
-//  #include <GLFW/glfw3.h>
-// #include <GLFW/glfw3native.h>
+
+
 // #include <stdint.h>
 
    
@@ -66,13 +67,17 @@ inline namespace VkUtils2
       SwapChainSupportDetails::createSwapChain();
       SwapChainSupportDetails::createImageViews();    
       PipelineX::createRenderPasses();
-      UniformBufferObject::createDescriptorSetLayout();
+    //   UniformBufferObject::createDescriptorSetLayout();
       PipelineX::createGraphicsPipelineLayout();
-      SwapChainSupportDetails::createFramebuffers();
       Queues::createCommandPool();
+    //   Texture::createDepthResources();
+      SwapChainSupportDetails::createFramebuffers();
+      
     //   Texture::createDepthResources();
       
       PipelineX::createCommandBuffers();
+
+       BuffersX::createVkEvents();
     
       // VkUtils2::createInstance;
     }
@@ -134,10 +139,9 @@ inline void VkUtils2::createInstance()
         {
              std::runtime_error("Validation requested but not supported");
         }
-        VkValidationFeatureEnableEXT a[] = {(VkValidationFeatureEnableEXT::VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT, VkValidationFeatureEnableEXT ::VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT, VkValidationFeatureEnableEXT ::VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT, VkValidationFeatureEnableEXT ::VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_RESERVE_BINDING_SLOT_EXT)};
         VkValidationFeaturesEXT extValidationFeatures = {};
         extValidationFeatures.sType=VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-                extValidationFeatures.pEnabledValidationFeatures=a;
+                // extValidationFeatures.pEnabledValidationFeatures=&a;
 
 
         VkApplicationInfo vkApplInfo = {};
@@ -146,34 +150,26 @@ inline void VkUtils2::createInstance()
                 vkApplInfo.sType=VK_STRUCTURE_TYPE_APPLICATION_INFO;
 				 vkApplInfo.pNext=VK_NULL_HANDLE;
                  vkApplInfo.pApplicationName="VKMod2";
-                 vkApplInfo.applicationVersion=VK_MAKE_VERSION(1, 0, 0);
+                 vkApplInfo.applicationVersion=VK_MAKE_VERSION(1, 2, 0);
                  vkApplInfo.pEngineName="No Engine";
-                vkApplInfo .engineVersion=VK_MAKE_VERSION(1, 0, 0);
+                vkApplInfo .engineVersion=VK_MAKE_VERSION(1, 2, 0);
                  
-                 vkApplInfo.apiVersion=VK_API_VERSION_1_0;
+                 vkApplInfo.apiVersion=VK_API_VERSION_1_2;
                  
-		
-//        MemSysm.Memsys2.free(a);
-        // MemSysm.Memsys2.free(vkApplInfo);
-        //nmemFree(vkApplInfo);
-
-		// uint32_t glfwExtensionCount = 0;
-		// const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-         
+	
          VkInstanceCreateInfo InstCreateInfo={};
         InstCreateInfo.sType =VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         InstCreateInfo.pApplicationInfo=&vkApplInfo;
-		//InstCreateInfo.enabledLayerCount = 0;
-        // PointerBuffer glfwExtensions = getRequiredExtensions();
        auto extensions=getRequiredExtensions();
         InstCreateInfo.ppEnabledExtensionNames=extensions.data();
-        InstCreateInfo.pNext=&extValidationFeatures;
+      
 
         InstCreateInfo.enabledExtensionCount=static_cast<uint32_t>(extensions.size());
         
         if(ENABLE_VALIDATION_LAYERS) {
            InstCreateInfo.ppEnabledLayerNames=(validationLayers.data());
-           InstCreateInfo.enabledLayerCount=static_cast<uint32_t>(validationLayers.size());
+           InstCreateInfo.enabledLayerCount=static_cast<uint32_t>(validationLayers.size());  
+           InstCreateInfo.pNext=&extValidationFeatures;
         }
         else InstCreateInfo.enabledLayerCount=0;
 
@@ -238,7 +234,7 @@ VKAPI_ATTR inline VkBool32 VKAPI_CALL VkUtils2::debugCallback(VkDebugUtilsMessag
 
 inline void VkUtils2::setupDebugMessenger()
     {
-        if(!ENABLE_VALIDATION_LAYERS) {
+        if constexpr(!ENABLE_VALIDATION_LAYERS) {
             return;
         }
 
@@ -279,7 +275,7 @@ inline void VkUtils2::pickPhysicalDevice()
     if(deviceCount == 0) std::runtime_error("Failed to find GPUs with Vulkan support");
     VkPhysicalDevice ppPhysicalDevices[deviceCount];
 
-    VkPhysicalDevice device;
+    // VkPhysicalDevice device;
     std::cout <<("Enumerate Physical Device") << "\n";
    checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, ppPhysicalDevices));
      for(const VkPhysicalDevice& d : ppPhysicalDevices)
@@ -355,7 +351,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             //VkBool32 presentSupport = (VK_FALSE);
            // std::cout << queueFamilies << "\n";
             uint32_t i = 0;
-            
+           
             for (VkQueueFamilyProperties uniqueQueue;i<pQueueFamilyPropertyCount;i++) {
                 std::cout <<(uniqueQueue.queueCount)<< "\n";
                 if ((uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
@@ -372,32 +368,45 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                 // i++;
             }
            
-            VkDeviceQueueCreateInfo queueCreateInfos={};
-            constexpr float priority = 1.0f;
-             //uint32_t pIx = 0;
-            // for(;pIx<queuea;pIx++)*/ {
-                queueCreateInfos.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                queueCreateInfos.queueFamilyIndex=graphicsFamily;
-                queueCreateInfos.queueCount=uniqueQueueFamilies[0].queueCount;
-                queueCreateInfos.pQueuePriorities=&priority;
-                queueCreateInfos.flags=0;
-                queueCreateInfos.pNext=VK_NULL_HANDLE;
-            //}
             
-            // VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
-            //         deviceVulkan12Features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-            //         deviceVulkan12Features.descriptorBindingPartiallyBound=true,
-            //         deviceVulkan12Features.imagelessFramebuffer=true;
-            //         deviceVulkan12Features.pNext=VK_NULL_HANDLE;
+            constexpr float priority = 1.0f;
+             uint32_t pIx = 0;
+            // for(VkDeviceQueueCreateInfo& ques: queueCreateInfos) 
+         
+         VkDeviceQueueCreateInfo GQ{};
+            
+               GQ.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+               GQ.queueFamilyIndex=graphicsFamily;
+               GQ.queueCount=1;
+               GQ.pQueuePriorities=&priority;
+               GQ.flags=0;
+               GQ.pNext=VK_NULL_HANDLE;
+               
+        VkDeviceQueueCreateInfo PQ{};
+            
+               PQ.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+               PQ.queueFamilyIndex=presentFamily;
+               PQ.queueCount=1;
+               PQ.pQueuePriorities=&priority;
+               PQ.flags=0;
+               PQ.pNext=VK_NULL_HANDLE;
+              
+            VkDeviceQueueCreateInfo queueCreateInfos[2]={GQ, PQ};
+            
+            VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
+                    deviceVulkan12Features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
+                    deviceVulkan12Features.descriptorBindingPartiallyBound=true,
+                    deviceVulkan12Features.imagelessFramebuffer=true;
+                    deviceVulkan12Features.pNext=VK_NULL_HANDLE;
                     
          
 
             VkPhysicalDeviceFeatures deviceFeatures={};
 
-            // VkPhysicalDeviceFeatures2 deviceFeatures2={};
-            //         deviceFeatures2.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-            //         deviceFeatures2.pNext=nullptr;//&deviceVulkan12Features;
-            //         deviceFeatures2.features=deviceFeatures;
+            VkPhysicalDeviceFeatures2 deviceFeatures2={};
+                    deviceFeatures2.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+                    deviceFeatures2.pNext=&deviceVulkan12Features;
+                    deviceFeatures2.features=deviceFeatures;
 
 
 
@@ -406,16 +415,17 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 //                        .geometryShader(true);
 //                        .pipelineStatisticsQuery(true)
 //                        .alphaToOne(false);
-            // vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
+           vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
             // vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
             VkDeviceCreateInfo createInfo={};
                     createInfo.sType=VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-                    createInfo.pNext=&deviceFeatures;//&deviceFeatures2;
-                    createInfo.queueCreateInfoCount=1;
-                    createInfo.pQueueCreateInfos=&queueCreateInfos;
+                    createInfo.pNext=&deviceFeatures2;
+                    createInfo.queueCreateInfoCount=2;
+                    createInfo.pQueueCreateInfos=queueCreateInfos;
                     createInfo.ppEnabledExtensionNames=(deviceExtensions.data());
                     createInfo.enabledExtensionCount=static_cast<uint32_t>(validationLayers.size());
                     createInfo.ppEnabledLayerNames=(validationLayers.data());
+                    createInfo.pEnabledFeatures=nullptr;
 
 
             // PointerBuffer value = asPointerBuffer(DEVICE_EXTENSIONS);
@@ -427,7 +437,8 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             // }
             checkCall(vkCreateDevice(physicalDevice, &createInfo, VK_NULL_HANDLE, &device ));
 
-              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos->queueFamilyIndex, 0,  &GraphicsQueue);
+              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0,  &GraphicsQueue);
+              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &PresentQueue);
        
     }
 
@@ -450,31 +461,15 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
 
     
-inline VkFormat Texture::findDepthFormat()
-    {
-        VkFormat formatCandidates[3]={VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT};
-        VkFormatProperties props;
 
-        for (VkFormat format : formatCandidates) {
-
-           
-            vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
-
-            const int i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
-            if (i2 == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT/* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/) {
-                return format;
-            }
-        }
-
-        std::runtime_error("failed to find supported format!");
-    }
 
  void VkUtils2::cleanup()
     {
+        vkDeviceWaitIdle(device);
+        vkDestroyCommandPool(device, commandPool, nullptr);
          for (auto framebuffer : swapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
         vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
-        vkDestroyCommandPool(device, commandPool, nullptr);
     }

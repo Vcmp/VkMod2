@@ -6,13 +6,13 @@ cmake_minimum_required (VERSION 3.17)
 project ("VkMod2")
 
 # set(CMAKE_C_COMPILER_TARGET x86_64-windows-gnu)
-# set(CMAKE_CXX_COMPILER_TARGET x86_64-windows-gnu)
+set(CMAKE_CXX_COMPILER_TARGET x86_64-windows-gnu)
 # set(CLANG_DEFAULT_CXX_STDLIB=libc++)
 # set(CLANG_DEFAULT_RTLIB=compiler-rt)
 # set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld")
 # set(CMAKE_MODULE_LINKER_FLAGS_INIT "-fuse-ld=lld")
 # set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld")
-# set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
@@ -23,7 +23,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 endif()
 
 #set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -fvisibility=hidden -fno-semantic-interposition -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "-std=c++14 -v -march=native -mtune=native -fuse-ld=lld -static -g -O0 -glldb -fsanitize=address -fsanitize-address-use-after-return=always -fno-omit-frame-pointer -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
+set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fmath-errno -fuse-ld=lld -static -g -O0 -glldb -fsanitize=address -fsanitize-address-use-after-return=always -fno-omit-frame-pointer -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 
 find_package(Vulkan REQUIRED)
 
@@ -42,15 +42,16 @@ add_subdirectory(glfw-3.3.6)
 # Add source to this project's executable.
 
 add_executable(VkMod2
-    src/main.cpp
-   )
+	src/main.cpp   
+	)
    
-   set_target_properties (VkMod2 PROPERTIES CXX_STANDARD 14)
+   # set_target_properties (VkMod2 PROPERTIES CXX_STANDARD 20)
    # target_compile_options(${PROJECT_NAME} INTERFACE "/Zc:__cplusplus")
    # target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 #set_property(TARGET VkMod2 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
 
 target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb_image")
 # target_include_directories(VkMod2 PUBLIC "$ENV{VULKAN_SDK}/Include")
 # target_include_directories("${PROJECT_SOURCE_DIR}/third_party/stb_image" INTERFACE stb_image)
 # target_link_libraries(VkMod2 stb_image)
@@ -84,7 +85,7 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
   ##execute glslang command to compile that specific shader
   add_custom_command(
     OUTPUT ${SPIRV}
-    COMMAND ${GLSLC} ${GLSL}  -O -o ${SPIRV}
+    COMMAND ${GLSLC} ${GLSL} -o ${SPIRV}
     DEPENDS "${PROJECT_SOURCE_DIR}/bin/shaders/")
   list(APPEND SPIRV_BINARY_FILES ${SPIRV})
 endforeach(GLSL)

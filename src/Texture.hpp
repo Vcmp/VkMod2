@@ -27,7 +27,7 @@ inline void Texture::createDepthResources()
         );
 
 
-        createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, PipelineX::depthImageView);
+        createImageView(depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, depthImageView);
         transitionImageLayout(depthFormat,
                 VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     }
@@ -231,4 +231,23 @@ inline void Texture::createDepthResources()
 //                    Memsys2.free(createInfo);//nmemFree(createInfo.address());
 
         clPPPI(&createInfo, "vkCreateImageView", &a);
+    }
+
+    inline VkFormat Texture::findDepthFormat()
+    {
+        VkFormat formatCandidates[3]={VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT};
+        VkFormatProperties props;
+
+        for (VkFormat format : formatCandidates) {
+
+           
+            vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+            const int i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+            if (i2 == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT/* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/) {
+                return format;
+            }
+        }
+
+       throw std::runtime_error("failed to find supported format!");
     }

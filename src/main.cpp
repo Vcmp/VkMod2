@@ -19,19 +19,21 @@ bool a = true;
         //System.gc();
 
 //            int i = 0;
+        std::cout << __cplusplus << "\n";
 		VkUtils2::extracted();
         // SwapChainSupportDetails::createSwapChain();
         // SwapChainSupportDetails::createImageViews();
         // Pipeline::createRenderPasses();
         // Pipeline::createGraphicsPipelineLayout();
         // Pipeline::createCommandPool();
+        renderer2::setupRenderDraw();
 
         int aa=0;
         while (!glfwWindowShouldClose((window)))
         {
 
 
-            // renderer2::drawFrame();
+            renderer2::drawFrame();
 			// extracted();
 
             glfwPollEvents();

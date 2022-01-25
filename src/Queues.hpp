@@ -1,6 +1,5 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
-#include <vulkan/vulkan_core.h>
 
 
 
@@ -13,21 +12,19 @@ inline namespace Queues
      static uint32_t presentFamily;
      static VkQueue GraphicsQueue;
      static VkQueue PresentQueue;
-static void createCommandPool();
  static VkCommandPool commandPool;
- static VkCommandBuffer beginSingleTimeCommands();
-        static void endSingleTimeCommands(VkCommandBuffer&);
+
     
     static VkSurfaceKHR surface;
 
     
     
 
-    void enumerateDetermineQueueFamilies(uint32_t, VkQueueFamilyProperties[]);
+  
     // const static bool isComplete();
-};
 
-inline void Queues::enumerateDetermineQueueFamilies( uint32_t VkQueueFamilyProperties, struct VkQueueFamilyProperties *queueFamilies)
+
+static inline void enumerateDetermineQueueFamilies( uint32_t VkQueueFamilyProperties, struct VkQueueFamilyProperties *queueFamilies)
 {
             //std::cout <<("Checking Available Queue families") << "\n";
 
@@ -58,17 +55,17 @@ inline void Queues::enumerateDetermineQueueFamilies( uint32_t VkQueueFamilyPrope
             // std::cout <<a <<"Graphics Family: " << graphicsFamily << " Present family: " << presentFamily<< "\n";
 
 }
-inline void Queues::createCommandPool()
+static inline void createCommandPool()
     {
         VkCommandPoolCreateInfo poolInfo={};
                 poolInfo.sType=VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
                 poolInfo.queueFamilyIndex=graphicsFamily;
-                poolInfo.flags=0;
+                // poolInfo.flags=0;
         //Memsys2.free(poolInfo);
         clPPPI(&poolInfo, "vkCreateCommandPool", &commandPool);
     }
 
-    inline VkCommandBuffer Queues::beginSingleTimeCommands()
+    static inline VkCommandBuffer beginSingleTimeCommands()
     {
 
         VkCommandBufferAllocateInfo allocateInfo = {};
@@ -79,6 +76,7 @@ inline void Queues::createCommandPool()
         allocateInfo.pNext=VK_NULL_HANDLE;
 
         VkCommandBuffer commandBuffer = {};
+        vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffer);
         VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {};
         vkCommandBufferBeginInfo.sType=(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO);
         vkCommandBufferBeginInfo.flags=(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
@@ -87,7 +85,7 @@ inline void Queues::createCommandPool()
         return commandBuffer;
     }
 
-    static void Queues::endSingleTimeCommands(VkCommandBuffer &commandBuffer)
+    static void endSingleTimeCommands(VkCommandBuffer &commandBuffer)
     {
         vkEndCommandBuffer(commandBuffer);
         VkSubmitInfo submitInfo1={};
@@ -102,3 +100,4 @@ inline void Queues::createCommandPool()
 
         vkFreeCommandBuffers(device, Queues::commandPool, 1, &commandBuffer);
     }
+    };

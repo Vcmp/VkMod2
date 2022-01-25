@@ -4,17 +4,19 @@
 #include "Pipeline.hpp"
 #include "SwapChainSupportDetails.hpp"
 
+
 // = (&set + sizeof(set));
 
 inline namespace BuffersX
 {
         static VkOffset2D set{.x=0,.y=0};
 
-      
+        static VkEvent vkEvent;
         // inline VkPipelineLayout vkLayout;
         static void createBuffer(VkBuffer, VkDeviceMemory);
         static void setBuffer(VkBufferUsageFlagBits, size_t, VkBuffer);
         static uint32_t findMemoryType(VkPhysicalDevice, uint32_t, VkMemoryPropertyFlagBits);
+        static void createVkEvents();
         
 };
 
@@ -33,5 +35,14 @@ inline uint32_t BuffersX::findMemoryType(VkPhysicalDevice physicalDevice, uint32
 
         throw std::runtime_error("Failed to find suitable memory type");
 }
+
+inline void BuffersX::createVkEvents()
+    {
+
+        VkEventCreateInfo vkEventCreateInfo = {};
+        vkEventCreateInfo.sType=VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
+        
+        clPPPI(&vkEventCreateInfo, "vkCreateEvent", &vkEvent);
+    }
 
 
