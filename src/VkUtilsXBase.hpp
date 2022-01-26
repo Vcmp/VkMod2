@@ -33,7 +33,7 @@
 inline namespace{
 
 
-
+static constexpr __int128 aXX = 0xF;
 static constexpr uint8_t Frames=3;
 static constexpr bool checks=true;
 
@@ -42,13 +42,13 @@ static constexpr bool checks=true;
     static constexpr bool ENABLE_VALIDATION_LAYERS=debug; //todo: Posible Bug: ValidationLayersBreak Shader Compilation due to (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files as having/Containing Invalid Magic Numbers
     
     static const std::vector<const char*>   validationLayers={"VK_LAYER_KHRONOS_validation"};
-    static const std::vector<const char*> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    static constexpr char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
     
     static VkDevice device;
     
   
-static inline  void checkCall(VkResult callPPPPI)
+static constexpr  void checkCall(VkResult callPPPPI)
         {
             if constexpr(checks)
             switch (callPPPPI)

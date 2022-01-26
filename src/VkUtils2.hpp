@@ -22,15 +22,17 @@ inline namespace VkUtils2
      static GLFWwindow* window;
     static GLFWmonitor* monitor;
     static VkInstance vkInstance;
-    static std::vector<const char*> getRequiredExtensions();static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
+    static const std::vector<const char*> getRequiredExtensions();static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT, VkDebugUtilsMessageTypeFlagsEXT, const VkDebugUtilsMessengerCallbackDataEXT*, void*);
    
-   static VkResult createDebugUtilsMessengerEXT(VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
+   static constexpr VkResult createDebugUtilsMessengerEXT(const VkInstance,  const VkDebugUtilsMessengerCreateInfoEXT*);
 	 
-    static bool isDeviceSuitable(VkPhysicalDevice);
+    static constexpr bool isDeviceSuitable(VkPhysicalDevice);
     static void checkDeviceExtensionSupport(VkPhysicalDevice);
 
     static const VkSurfaceFormatKHR querySwapChainSupport(VkPhysicalDevice);
-    
+    inline namespace{
+    typedef VkResult (VKAPI_PTR *PFN_vkCreateDebugUtilsMessengerEXT2)(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, const VkDebugUtilsMessengerEXT* pMessenger);
+    }
 
 
 
@@ -139,24 +141,23 @@ inline void VkUtils2::createInstance()
         {
              std::runtime_error("Validation requested but not supported");
         }
-        VkValidationFeaturesEXT extValidationFeatures = {};
-        extValidationFeatures.sType=VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+        constexpr VkValidationFeaturesEXT extValidationFeatures = {
+        .sType=VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT
                 // extValidationFeatures.pEnabledValidationFeatures=&a;
+        };
 
-
-        VkApplicationInfo vkApplInfo = {};
+        constexpr VkApplicationInfo vkApplInfo = {
                 //memSet(vkApplInfo, 0,VkApplicationInfo.SIZEOF);
                 
-                vkApplInfo.sType=VK_STRUCTURE_TYPE_APPLICATION_INFO;
-				 vkApplInfo.pNext=VK_NULL_HANDLE;
-                 vkApplInfo.pApplicationName="VKMod2";
-                 vkApplInfo.applicationVersion=VK_MAKE_VERSION(1, 2, 0);
-                 vkApplInfo.pEngineName="No Engine";
-                vkApplInfo .engineVersion=VK_MAKE_VERSION(1, 2, 0);
+                .sType=VK_STRUCTURE_TYPE_APPLICATION_INFO,
+				 .pNext=VK_NULL_HANDLE,
+                 .pApplicationName="VKMod2",
+                 .applicationVersion=VK_MAKE_VERSION(1, 2, 0),
+                 .pEngineName="No Engine",
+                 .engineVersion=VK_MAKE_VERSION(1, 2, 0),
                  
-                 vkApplInfo.apiVersion=VK_API_VERSION_1_2;
-                 
-	
+                 .apiVersion=VK_API_VERSION_1_2
+        };
          VkInstanceCreateInfo InstCreateInfo={};
         InstCreateInfo.sType =VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         InstCreateInfo.pApplicationInfo=&vkApplInfo;
@@ -166,13 +167,13 @@ inline void VkUtils2::createInstance()
 
         InstCreateInfo.enabledExtensionCount=static_cast<uint32_t>(extensions.size());
         
-        if(ENABLE_VALIDATION_LAYERS) {
+        if constexpr(ENABLE_VALIDATION_LAYERS) {
            InstCreateInfo.ppEnabledLayerNames=(validationLayers.data());
            InstCreateInfo.enabledLayerCount=static_cast<uint32_t>(validationLayers.size());  
            InstCreateInfo.pNext=&extValidationFeatures;
         }
         else InstCreateInfo.enabledLayerCount=0;
-
+        
         // PointerBuffer instancePtr = memPointerBuffer(MemSysm.address, 1);	
         // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
 
@@ -210,12 +211,12 @@ inline void VkUtils2::createSurface()
 
 
 
-inline std::vector<const char*> VkUtils2::getRequiredExtensions()
+inline const std::vector<const char*> VkUtils2::getRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions+glfwExtensionCount);
-     if(ENABLE_VALIDATION_LAYERS)
+     if constexpr(ENABLE_VALIDATION_LAYERS)
      {
          extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
      }
@@ -238,21 +239,21 @@ inline void VkUtils2::setupDebugMessenger()
             return;
         }
 
-        VkDebugUtilsMessengerCreateInfoEXT createInfo{};
-        createInfo.sType=VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        createInfo.messageSeverity=VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
-        createInfo.messageType=VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-        createInfo.pfnUserCallback=VkUtils2::debugCallback;
-        createInfo.pUserData=VK_NULL_HANDLE;
-
+        constexpr VkDebugUtilsMessengerCreateInfoEXT createInfo{
+        .sType=VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+        .messageSeverity=VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT,
+        .messageType=VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+        .pfnUserCallback=VkUtils2::debugCallback,
+        .pUserData=VK_NULL_HANDLE,
+};
         checkCall(createDebugUtilsMessengerEXT(vkInstance, &createInfo));
         //debugMessenger = pDebugMessenger[0];
     }
     
-inline VkResult VkUtils2::createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo) 
+inline constexpr VkResult VkUtils2::createDebugUtilsMessengerEXT(const VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo) 
 {
-    VkDebugUtilsMessengerEXT debugUtils={};
-    auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    constexpr VkDebugUtilsMessengerEXT debugUtils={};
+    auto func = (PFN_vkCreateDebugUtilsMessengerEXT2) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
     if (func != VK_NULL_HANDLE) {
         return func(instance, pCreateInfo, VK_NULL_HANDLE, &debugUtils);
     } else {
@@ -296,7 +297,7 @@ inline void VkUtils2::pickPhysicalDevice()
 
 }
 //Use VK Tutorial refernce as that sems to be far m re replable that the prior java approach used
-inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
+inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
  {
 
       VkPhysicalDeviceProperties deviceProperties;
@@ -393,21 +394,21 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
               
             VkDeviceQueueCreateInfo queueCreateInfos[2]={GQ, PQ};
             
-            VkPhysicalDeviceVulkan12Features deviceVulkan12Features={};
-                    deviceVulkan12Features.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES;
-                    deviceVulkan12Features.descriptorBindingPartiallyBound=true,
-                    deviceVulkan12Features.imagelessFramebuffer=true;
-                    deviceVulkan12Features.pNext=VK_NULL_HANDLE;
+              VkPhysicalDeviceVulkan12Features deviceVulkan12Features={
+                    .sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+                    .descriptorBindingPartiallyBound=true,
+                    .imagelessFramebuffer=true,
+                    .pNext=VK_NULL_HANDLE
                     
-         
+         };
 
-            VkPhysicalDeviceFeatures deviceFeatures={};
+           constexpr VkPhysicalDeviceFeatures deviceFeatures={};
 
-            VkPhysicalDeviceFeatures2 deviceFeatures2={};
-                    deviceFeatures2.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-                    deviceFeatures2.pNext=&deviceVulkan12Features;
-                    deviceFeatures2.features=deviceFeatures;
-
+            VkPhysicalDeviceFeatures2 deviceFeatures2={
+                    .sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+                    .pNext=&deviceVulkan12Features,
+                    .features=deviceFeatures
+            };
 
 
             //.fillModeNonSolid(true) //dneeded to adres valditaion errors when using VK_POLIGYON_MODE_LINE or POINT
@@ -422,7 +423,7 @@ inline bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                     createInfo.pNext=&deviceFeatures2;
                     createInfo.queueCreateInfoCount=2;
                     createInfo.pQueueCreateInfos=queueCreateInfos;
-                    createInfo.ppEnabledExtensionNames=(deviceExtensions.data());
+                    createInfo.ppEnabledExtensionNames=(deviceExtensions);
                     createInfo.enabledExtensionCount=static_cast<uint32_t>(validationLayers.size());
                     createInfo.ppEnabledLayerNames=(validationLayers.data());
                     createInfo.pEnabledFeatures=nullptr;

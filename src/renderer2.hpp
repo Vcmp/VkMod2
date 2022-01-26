@@ -3,25 +3,50 @@
 
 inline namespace renderer2 
 {
-    static VkSemaphore AvailableSemaphore;
+    
+
+    static void setupRenderDraw();
+    static void drawFrame();
+inline namespace  {
+static VkSemaphore AvailableSemaphore;
     static VkSemaphore FinishedSemaphore;
     // static VkFence FFence;
-    static VkSubmitInfo info;
-    static VkPresentInfoKHR VkPresentInfoKHR1;
+    
+    // static VkPresentInfoKHR VkPresentInfoKHR1;
     // static VkSemaphore AvailableSemaphores[Frames];
     // static VkSemaphore FinishedSemaphores[Frames];
     // static VkFence vkCreateCFences[Frames];
     // static VkSwapchainKHR swapChains[Frames];
     // static VkSwapchainKHR swapChains[] = {swapChain};
     static  uint32_t currentFrame;
-     constexpr uint32_t TmUt = 1000000000;
+    static constexpr uint32_t TmUt = 1000000000;
+    static inline constexpr VkPresentInfoKHR VkPresentInfoKHR1= {
+                    .sType=VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+                    .pWaitSemaphores=&FinishedSemaphore,
+                    .swapchainCount=1,
+                    .pSwapchains= &swapChain,
+                    .pImageIndices=&currentFrame,
+                    .pResults=nullptr
+                    
+   };
+static constexpr VkPipelineStageFlags  waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}; 
+static VkSubmitInfo info = {
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 
-    static void setupRenderDraw();
-    static void drawFrame();
-constexpr VkPipelineStageFlags  waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        // AvailableSemaphore = {AvailableSemaphore};
+        // VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        .waitSemaphoreCount = 1,
+        .pWaitSemaphores = &AvailableSemaphore,
+        .pWaitDstStageMask = waitStages,
+
+        .commandBufferCount = 1,
+ };
 }
 
-
+ 
+   
+ 
+};
 inline void renderer2::setupRenderDraw()
 {
                         VkSemaphoreCreateInfo vkCreateCSemaphore = {};
@@ -37,17 +62,6 @@ inline void renderer2::setupRenderDraw()
                         checkCall(vkCreateSemaphore(device, &vkCreateCSemaphore, nullptr, &FinishedSemaphore));
                         // checkCall(vkCreateFence(device, &vkCreateCFence, nullptr, &FFence));
                          }
-                        
-                         info = {};
-        info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        // AvailableSemaphore = {AvailableSemaphore};
-        // VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-        info.waitSemaphoreCount = 1;
-        info.pWaitSemaphores = &AvailableSemaphore;
-        info.pWaitDstStageMask = waitStages;
-
-        info.commandBufferCount = 1;
                        
 
                         // AvailableSemaphores[0]={AvailableSemaphore};
@@ -67,13 +81,7 @@ inline void renderer2::setupRenderDraw()
                     //         info.pSignalSemaphores=&FinishedSemaphore;
                          
 
- VkPresentInfoKHR1= {};
-                    VkPresentInfoKHR1.sType=VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-                    VkPresentInfoKHR1.pWaitSemaphores=&FinishedSemaphore;
-                    VkPresentInfoKHR1.swapchainCount=1;
-                    VkPresentInfoKHR1.pSwapchains= &swapChain;
-                    VkPresentInfoKHR1.pImageIndices=&currentFrame;
-                    VkPresentInfoKHR1.pResults=nullptr;
+ 
                         
                         
                         
@@ -97,7 +105,7 @@ inline void renderer2::drawFrame()
     // uint32_t currentFrame;
     // vkResetFences(device, 1, &vkCreateCFences[currentFrame]);
     
-    checkCall(vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, AvailableSemaphore, VK_NULL_HANDLE, &currentFrame));
+    checkCall(vkAcquireNextImageKHR(device, swapChain, TmUt, AvailableSemaphore, VK_NULL_HANDLE, &currentFrame));
 
     
         info.pCommandBuffers = &commandBuffers[currentFrame];
@@ -109,9 +117,7 @@ inline void renderer2::drawFrame()
     // VkPresentInfoKHR1.pWaitSemaphores=&AvailableSemaphore;
     //   vkWaitForFences(device, 1, &vkCreateCFence, false, TmUt);
 
-   
-                    
-   
+  
    
                   
 

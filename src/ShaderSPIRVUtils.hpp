@@ -1,6 +1,5 @@
 
 #pragma once
-#define _CRT_SECURE_NO_WARNINGS
 
 #include "VkUtilsXBase.hpp"
 #include <fstream>
@@ -50,8 +49,9 @@ VkShaderModule axx={};
   VsMCI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   VsMCI.pNext = VK_NULL_HANDLE;
 
-  vkCreateShaderModule(device, &VsMCI, nullptr, &axx);
-  return axx;
+  clPPPI(&VsMCI, "vkCreateShaderModule", &axx);
+  const VkShaderModule axx2=axx;
+  return axx2;
   // clPPPI(&VsMCI, "vkCreateShaderModule", &axx);
   // if (a!=VK_SUCCESS)
   // {

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Queues.hpp"
+#include <vulkan/vulkan_core.h>
 
 
 
@@ -58,7 +59,7 @@ inline namespace SwapChainSupportDetails
                 return actualExtent;
             }
 
-        inline VkPresentModeKHR chooseSwapPresentMode(VkPresentModeKHR *availablePresentModes)
+        inline VkPresentModeKHR chooseSwapPresentMode(const VkPresentModeKHR *availablePresentModes)
             {
 
             for(uint32_t i=0;i<count;i++)
@@ -73,7 +74,7 @@ inline namespace SwapChainSupportDetails
 
 
 
-        inline VkSurfaceFormatKHR chooseSwapSurfaceFormat(VkSurfaceFormatKHR* formats)
+        inline VkSurfaceFormatKHR chooseSwapSurfaceFormat(const VkSurfaceFormatKHR* formats)
         {
             
             {
@@ -94,7 +95,7 @@ inline namespace SwapChainSupportDetails
           
         }       
         
-inline const VkSurfaceFormatKHR querySwapChainSupport(VkSurfaceFormatKHR* formats, VkPresentModeKHR* presentModes)
+inline void querySwapChainSupport(VkSurfaceFormatKHR* formats, VkPresentModeKHR* presentModes)
 {
 
       
@@ -133,7 +134,7 @@ inline void createSwapChain()
         
     
         VkSurfaceFormatKHR surfaceFormat;
-        for(VkSurfaceFormatKHR &surfaceFormat1: surfaceFormats)
+        for(const VkSurfaceFormatKHR &surfaceFormat1: surfaceFormats)
                 {
                     if(surfaceFormat1.format==VK_FORMAT_B8G8R8A8_SRGB  && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) 
                     {
@@ -143,7 +144,7 @@ inline void createSwapChain()
                     
                 }
          VkPresentModeKHR presentMode;
-             for(VkPresentModeKHR &presentMode1: presentModes)
+             for(const VkPresentModeKHR &presentMode1: presentModes)
             { 
                     if (presentMode1 == VK_PRESENT_MODE_IMMEDIATE_KHR) {
                         presentMode=presentMode1;
@@ -163,38 +164,39 @@ inline void createSwapChain()
 
             std::cout<<"ImageCount: "<<imageCount<<"\n";
 
-uint32_t aa[] =  {graphicsFamily, presentFamily};;
+const uint32_t aa[] =  {graphicsFamily, presentFamily};;
 
-            VkSwapchainCreateInfoKHR createInfo{};
+            const VkSwapchainCreateInfoKHR createInfo{
 
-                    createInfo.sType=VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-                    createInfo.surface=Queues::surface;
+                    .sType=VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+                    .surface=Queues::surface,
 
                     // Image settings
-                    createInfo.minImageCount=imageCount;
-                    createInfo.imageFormat=surfaceFormat.format;//=&surfaceFormat; //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
-                    createInfo.imageColorSpace=surfaceFormat.colorSpace;
-                    createInfo.imageExtent=extent;
-                    createInfo.imageArrayLayers=1;
-                    createInfo.imageUsage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-                    createInfo.pNext=nullptr;
+                    .minImageCount=imageCount,
+                    .imageFormat=surfaceFormat.format,//=&surfaceFormat; //BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG,
+                    .imageColorSpace=surfaceFormat.colorSpace,
+                    .imageExtent=extent,
+                    .imageArrayLayers=1,
+                    .imageUsage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                    .pNext=nullptr,
 
                 // if (graphicsFamily != presentFamily) {
-                //     createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                //     createInfo.queueFamilyIndexCount = 2;
-                //     createInfo.pQueueFamilyIndices = aa;
+                //     .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
+                //     .queueFamilyIndexCount = 2,
+                //     .pQueueFamilyIndices = aa,
                 // } else {
-                    createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                    // createInfo.queueFamilyIndexCount = 0; // Optional
-                    // createInfo.pQueueFamilyIndices = nullptr; // Optional
+                    .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
+                    // .queueFamilyIndexCount = 0; // Optiona,
+                    // .pQueueFamilyIndices = nullptr; // Optiona,
                 // }
         
-                    createInfo.preTransform=SwapChainSupportDetails::capabilities.currentTransform;
-                    createInfo.compositeAlpha=VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-                    createInfo.presentMode=presentMode;
-                    createInfo.clipped=true;
+                    .preTransform=SwapChainSupportDetails::capabilities.currentTransform,
+                    .compositeAlpha=VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+                    .presentMode=presentMode,
+                    .clipped=true,
 
-                    createInfo.oldSwapchain=VK_NULL_HANDLE;
+                    .oldSwapchain=VK_NULL_HANDLE
+                    };
                     std::cout << device<<"\n";
 
             // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
@@ -219,7 +221,7 @@ inline void createImageViews()
     {
         std::cout<< ("Creating Image Views") << "\n";
         int i=0;
-         for (VkImage swapchainImage : swapchainImages)
+         for (const VkImage &swapchainImage : swapchainImages)
          {
          VkImageViewCreateInfo createInfo={};
                 createInfo.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -273,8 +275,8 @@ inline void createImageViews()
             // int abx[]={a,b};
             framebufferCreateInfo.attachmentCount=1;//(framebufferCreateInfo.address(), (attachments).remaining());
         //    framebufferCreateInfo.pAttachments= swapChainImageViews;
-                for (size_t i = 0; i < 3; i++) {
-                    VkImageView attachments[] = {swapChainImageViews[i]};
+                for (size_t i = 0; i < Frames; i++) {
+                    // VkImageView attachments[] = {swapChainImageViews[i]};
             // VkFramebufferAttachmentImageInfo AttachmentImageInfo[2];// = VkFramebufferAttachmentImageInfo.create(MemSysm.calloc(VkFramebufferAttachmentImageInfo.SIZEOF * 2L), 2);
             // AttachmentImageInfo[0]={};
             //         // AttachmentImageInfo[0].sType=VK_STRUCTURE
@@ -284,7 +286,7 @@ inline void createImageViews()
             //         AttachmentImageInfo[0].usage=(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
             //         AttachmentImageInfo[0].pViewFormats=(VK_FORMAT_R8G8B8A8_SRGB);
             
-           framebufferCreateInfo.pAttachments= attachments;
+           framebufferCreateInfo.pAttachments= &swapChainImageViews[i];
             // AttachmentImageInfo[1]= {};
             //         // AttachmentImageInfo[1].sType$Default();
             //         AttachmentImageInfo[1].layerCount=(1);
