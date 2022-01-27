@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.17)
 project ("VkMod2")
 
 # set(CMAKE_C_COMPILER_TARGET x86_64-windows-gnu)
-set(CMAKE_CXX_COMPILER_TARGET x86_64-windows-gnu)
+# set(CMAKE_CXX_COMPILER_TARGET x86_64-windows-gnu)
 # set(CLANG_DEFAULT_CXX_STDLIB=libc++)
 # set(CLANG_DEFAULT_RTLIB=compiler-rt)
 # set(CMAKE_EXE_LINKER_FLAGS_INIT "-fuse-ld=lld")
@@ -23,7 +23,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 endif()
 
 #set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -fvisibility=hidden -fno-semantic-interposition -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "-std=c++23 -v -march=native -mtune=native -fmath-errno  -g -O4 -Ofast -ffast-math -fvisibility=hidden -fno-semantic-interposition -pthread -lpthread ")
+set(CMAKE_CXX_FLAGS "-std=c++23 -v -march=native -mtune=native  -Ofast -fno-signed-zeros -fno-trapping-math -frename-registers -pthread -lpthread ")
 
 find_package(Vulkan REQUIRED)
 
@@ -85,7 +85,7 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
   ##execute glslang command to compile that specific shader
   add_custom_command(
     OUTPUT ${SPIRV}
-    COMMAND ${GLSLC} ${GLSL} -o ${SPIRV}
+    COMMAND ${GLSLC} ${GLSL} -O -o ${SPIRV}
     DEPENDS "${PROJECT_SOURCE_DIR}/bin/shaders/")
   list(APPEND SPIRV_BINARY_FILES ${SPIRV})
 endforeach(GLSL)

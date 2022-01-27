@@ -1,15 +1,16 @@
 #include "Pipeline.hpp"
 
 
-inline namespace renderer2 
+static struct renderer2 
 {
     
 
     static void setupRenderDraw();
     static void drawFrame();
-inline namespace  {
-static VkSemaphore AvailableSemaphore;
-    static VkSemaphore FinishedSemaphore;
+    private:
+
+static inline VkSemaphore AvailableSemaphore;
+    // static inline VkSemaphore FinishedSemaphore;
     // static VkFence FFence;
     
     // static VkPresentInfoKHR VkPresentInfoKHR1;
@@ -18,48 +19,51 @@ static VkSemaphore AvailableSemaphore;
     // static VkFence vkCreateCFences[Frames];
     // static VkSwapchainKHR swapChains[Frames];
     // static VkSwapchainKHR swapChains[] = {swapChain};
-    static  uint32_t currentFrame;
+    static inline uint32_t currentFrame;
     static constexpr uint32_t TmUt = 1000000000;
     static inline constexpr VkPresentInfoKHR VkPresentInfoKHR1= {
                     .sType=VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-                    .pWaitSemaphores=&FinishedSemaphore,
+                    // .pWaitSemaphores=&FinishedSemaphore,
                     .swapchainCount=1,
                     .pSwapchains= &swapChain,
                     .pImageIndices=&currentFrame,
                     .pResults=nullptr
                     
-   };
-static constexpr VkPipelineStageFlags  waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}; 
-static VkSubmitInfo info = {
+    };
+static constexpr VkPipelineStageFlags  waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT; 
+ static inline VkSubmitInfo info = {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
 
         // AvailableSemaphore = {AvailableSemaphore};
         // VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         .waitSemaphoreCount = 1,
         .pWaitSemaphores = &AvailableSemaphore,
-        .pWaitDstStageMask = waitStages,
+        .pWaitDstStageMask = &waitStages,
 
         .commandBufferCount = 1,
  };
-}
+ static inline constexpr VkSemaphoreCreateInfo vkCreateCSemaphore = {
+                        .sType=VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                        .pNext=nullptr
+                        };
+                         ~renderer2() { std::cout << "Destructor" << "\n"; }
+};
 
  
    
  
-};
+
 inline void renderer2::setupRenderDraw()
 {
-                        VkSemaphoreCreateInfo vkCreateCSemaphore = {};
-                        vkCreateCSemaphore.sType=VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-                        vkCreateCSemaphore.pNext=nullptr;
+                        
 //  VkFenceCreateInfo vkCreateCFence{};
 //                          vkCreateCFence.sType=VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 //                          vkCreateCFence.pNext=nullptr;
                         // for (int i=0;i<3; i++)
                         {
 
-                        checkCall(vkCreateSemaphore(device, &vkCreateCSemaphore, nullptr, &AvailableSemaphore));
-                        checkCall(vkCreateSemaphore(device, &vkCreateCSemaphore, nullptr, &FinishedSemaphore));
+                        (clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore));
+                        // (clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &FinishedSemaphore));
                         // checkCall(vkCreateFence(device, &vkCreateCFence, nullptr, &FFence));
                          }
                        

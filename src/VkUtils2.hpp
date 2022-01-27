@@ -71,14 +71,14 @@ inline namespace VkUtils2
     //   UniformBufferObject::createDescriptorSetLayout();
       PipelineX::createGraphicsPipelineLayout();
       Queues::createCommandPool();
-      Texture::createDepthResources();
+    //   Texture::createDepthResources();
       SwapChainSupportDetails::createFramebuffers();
       
     //   Texture::createDepthResources();
       
       PipelineX::createCommandBuffers();
 
-       BuffersX::createVkEvents();
+    //    BuffersX::createVkEvents();
     
       // VkUtils2::createInstance;
     }
@@ -124,7 +124,7 @@ inline void VkUtils2::setupWindow()
         // glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
 
 
-        window = glfwCreateWindow(854, 480, "VKMod", nullptr, nullptr);
+        window = glfwCreateWindow(width, height, "VKMod", nullptr, nullptr);
 
 
         if(window == NULL) exit(1);

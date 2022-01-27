@@ -1,6 +1,9 @@
 #pragma once
+#include <cstdint>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
+#define VK_USE_64_BIT_PTR_DEFINES 1
+#define VULKAN_HPP_SUPPORT_SPAN
 // #ifdef __cplusplus
 // #define VULKAN_HPP_CPLUSPLUS 201803L
 // #endif
@@ -24,32 +27,34 @@
 #include <vector>
 
 
-  
+
     
 
 // VkPhysicalDevicePortabilitySubsetFeaturesKHR ptr = {};
     
    
 inline namespace{
+constexpr uint16_t width = 854;
+constexpr uint16_t height = 480;
 
 
-static constexpr __int128 aXX = 0xF;
-static constexpr uint8_t Frames=3;
-static constexpr bool checks=true;
+ constexpr __int128 aXX = 0xF;
+ constexpr uint8_t Frames=3;
+ constexpr bool checks=false;
 
     // Their may seem to be an anomalous memory leak when the main render Loop/Draw Call is used; howver this is mearly/primaro;y due to the Validation layers being enabled, however if said Validation Layers are disabled, the memeory leak virtually entirely disappears and at least thus far does not seem to be an issue thankfully
-    static constexpr bool debug=true;
+     constexpr bool debug=false;
     
-    static constexpr bool ENABLE_VALIDATION_LAYERS=debug; //todo: Posible Bug: ValidationLayersBreak Shader Compilation due to (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files as having/Containing Invalid Magic Numbers
+     constexpr bool ENABLE_VALIDATION_LAYERS=debug; //todo: Posible Bug: ValidationLayersBreak Shader Compilation due to (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files as having/Containing Invalid Magic Numbers
     
-    static constexpr std::array<const char*, 1>   validationLayers={"VK_LAYER_KHRONOS_validation"};
-    static constexpr char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+     constexpr std::array<const char*, 1>   validationLayers={"VK_LAYER_KHRONOS_validation"};
+     constexpr char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
     
-    static VkDevice device;
+     inline VkDevice device;
     
   
-static constexpr  void checkCall(const VkResult callPPPPI)
+ static constexpr  void checkCall(const VkResult callPPPPI)
         {
             if constexpr(checks)
             switch (callPPPPI)
@@ -90,8 +95,13 @@ static constexpr  void checkCall(const VkResult callPPPPI)
         }
 
 
-        typedef VkResult (__vectorcall *callPPPPI) (VkDevice, const void*, const VkAllocationCallbacks*, const void* /* , const PFN_vkVoidFunction pHndl */);
+        typedef VkResult (__vectorcall *callPPPPI) (const VkDevice, const void*, const VkAllocationCallbacks*, const void* , const uint64_t &pHndl);
         
+        static inline void  __vectorcall doPointerAlloc(const void* a, const void* c, const uint64_t &pHndl)
+        {
+             (reinterpret_cast<callPPPPI>(pHndl)(device, a, nullptr, c, pHndl));
+        }
+
         /*todo: Adiitonal posible Bug: if a typeDef Cast/PointerFunction/Aslias e.g .Misc is used to allow access to .call vkPipelineLayoutCreateInfo, the Validtaion layers incorrertcly warn that VkGraphicsPipelineCreateInfo struct is mising the cprrect sType 
         * the only way to correct this is to manuall/Dierctly exempt the "pipelineCache" and "createInfoCount" Arguments/Parametsr of the call, Which causes Misiing createInfoCount  and VkPipelineCache  issues but allows the pipeline to be created properly/correctly
         * this is possibly a Driver Bug/ NV/nSight layer Bug/issue (as a very old beta driver is being utilised [451.74]) but is unconfirmed currently
@@ -108,23 +118,54 @@ static constexpr  void checkCall(const VkResult callPPPPI)
         //                                  const void *,uint32_t*,
                                          
         //                                  const VkAllocationCallbacks *);
+// inline static uint64_t getDevProd(const char* a)
+// {
+//     return reinterpret_cast<uint64_t>(vkGetDeviceProcAddr(device, a));
+// }
 
-static inline void clPPPI(const void* pStrct,  const char* a, const void *object)
+
+static inline uint64_t __vectorcall clPPPI2(const void* pStrct,  const char* a, void *object)
 {
     //vkGetDeviceProcAddr()
     // auto xx= ;
-    // const callPPPPI Hndl = (callPPPPI)vkGetDeviceProcAddr(device, a);
+    const uint64_t Hndl = reinterpret_cast<uint64_t>(vkGetDeviceProcAddr(device, a));
     // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device, a));
     // std::cout << &x << "\n";
     // std::cout << &pStrct << &object<<&a<<"\n";
-    std::cout << a<<"\n";
+    if constexpr(checks)
+        std::cout << a<<"-->"<<Hndl<<"\n";
     // std::cout << object<<"\n";
     // const VkResult VkR =x(device, pStrct, nullptr, object);
-    checkCall((reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device, a))(device, pStrct, nullptr, object)));
-    if (object == nullptr)
-    {
-        throw std::runtime_error("bad Alloctaion!: Null handle!");
-    }
+    (doPointerAlloc(pStrct, object, Hndl));
+     if constexpr(checks)
+
+        if (object == nullptr)
+        {
+            throw std::runtime_error("bad Alloctaion!: Null handle!");
+        }
+    return (uint64_t)object;
+    // return VkR;
+    //  callPPPPI(device, pStrct, nullptr, a)
+}
+static inline void __vectorcall clPPPI(const void* pStrct,  const char* a, const void *object)
+{
+    //vkGetDeviceProcAddr()
+    // auto xx= ;
+    const uint64_t Hndl = reinterpret_cast<uint64_t>(vkGetDeviceProcAddr(device, a));
+    // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device, a));
+    // std::cout << &x << "\n";
+    // std::cout << &pStrct << &object<<&a<<"\n";
+    if constexpr(checks)
+        std::cout << a<<"-->"<<Hndl<<"\n";
+    // std::cout << object<<"\n";
+    // const VkResult VkR =x(device, pStrct, nullptr, object);
+    (doPointerAlloc(pStrct, object, Hndl));
+     if constexpr(checks)
+
+        if (object == nullptr)
+        {
+            throw std::runtime_error("bad Alloctaion!: Null handle!");
+        }
     // return VkR;
     //  callPPPPI(device, pStrct, nullptr, a)
 }
