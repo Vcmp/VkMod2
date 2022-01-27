@@ -3,6 +3,10 @@
 #include "renderer2.hpp"
 
 
+// struct PStruct{
+//      int *a;
+// };
+
 // using namespace VkU2;
 bool a = true;
 //    private static boolean aa;
@@ -26,18 +30,31 @@ bool a = true;
         // Pipeline::createRenderPasses();
         // Pipeline::createGraphicsPipelineLayout();
         // Pipeline::createCommandPool();
+        static int axzl=10;
+        
+        
+        
         renderer2::setupRenderDraw();
 
-        int aa=0;
+        static constexpr int aaa=1000;
+        static int aa=0;
         while (!glfwWindowShouldClose((window)))
         {
-
+            // static constexpr PStruct ap
+            // {
+            //     .a=&aa
+            // };
 
             renderer2::drawFrame();
-			// extracted();
+			// // extracted();
+            // if (*ap.a==aaa)
+            // {
+    		// 	printf("%i \n", *ap.a);
+            //     // ap.a=0;
+            //     *ap.a=0;
+            // }
 
             glfwPollEvents();
-			// printf("%i \n", aa);
 			aa++;
 
         }

@@ -8,7 +8,6 @@
 #include <avxintrin.h>
 #include <avx2intrin.h>
 #include <fmaintrin.h>
-#include <stdint.h>
 #include <memory>
 /*
     Have to include Pragma Guards Directly as VSCode is Dumb and dosent Know/verify that the Host/Currently Utilsied/Subejtc>Applicable/Accessib;e CPU does and cas in aftc support AVX/AVX2+FMA3 correctly

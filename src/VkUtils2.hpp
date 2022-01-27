@@ -7,7 +7,6 @@
 
 #include "Pipeline.hpp"
 #include "Queues.hpp"
-#include <cstdint>
 
 
 
@@ -72,7 +71,7 @@ inline namespace VkUtils2
     //   UniformBufferObject::createDescriptorSetLayout();
       PipelineX::createGraphicsPipelineLayout();
       Queues::createCommandPool();
-    //   Texture::createDepthResources();
+      Texture::createDepthResources();
       SwapChainSupportDetails::createFramebuffers();
       
     //   Texture::createDepthResources();

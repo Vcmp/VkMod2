@@ -37,59 +37,60 @@ static constexpr __int128 aXX = 0xF;
 static constexpr uint8_t Frames=3;
 static constexpr bool checks=true;
 
+    // Their may seem to be an anomalous memory leak when the main render Loop/Draw Call is used; howver this is mearly/primaro;y due to the Validation layers being enabled, however if said Validation Layers are disabled, the memeory leak virtually entirely disappears and at least thus far does not seem to be an issue thankfully
     static constexpr bool debug=true;
     
     static constexpr bool ENABLE_VALIDATION_LAYERS=debug; //todo: Posible Bug: ValidationLayersBreak Shader Compilation due to (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files as having/Containing Invalid Magic Numbers
     
-    static const std::vector<const char*>   validationLayers={"VK_LAYER_KHRONOS_validation"};
+    static constexpr std::array<const char*, 1>   validationLayers={"VK_LAYER_KHRONOS_validation"};
     static constexpr char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
     
     static VkDevice device;
     
   
-static constexpr  void checkCall(VkResult callPPPPI)
+static constexpr  void checkCall(const VkResult callPPPPI)
         {
             if constexpr(checks)
             switch (callPPPPI)
             {
                 case VK_SUCCESS :/* std::cout<<("OK!")<< "\n"; */ break;
-                case VK_NOT_READY : throw std::runtime_error("Not ready!"); break;
-                case VK_TIMEOUT : throw std::runtime_error("Bad TimeOut!"); break;
-                case VK_INCOMPLETE : throw std::runtime_error("Incomplete!"); break;
-                case VK_ERROR_INITIALIZATION_FAILED :  throw  std::runtime_error("Error: bad Initialisation!");break;
-                case VK_ERROR_DEVICE_LOST :  throw  std::runtime_error("Error: Device Failed/Lost!");break;
-                case VK_ERROR_FRAGMENTED_POOL :{ throw std::runtime_error("Error: bad Mem Alloc");}break;
-                case VK_ERROR_OUT_OF_HOST_MEMORY :{  throw  std::runtime_error("No Host Memory");}break;
-                case VK_ERROR_OUT_OF_DEVICE_MEMORY :{ throw  std::runtime_error("No Device Memory");}break;
-                case VK_ERROR_UNKNOWN :{ throw  std::runtime_error("Unknown Error!|");}break;
-                case VK_ERROR_OUT_OF_POOL_MEMORY :{ throw  std::runtime_error("Out of PooL Memory");}break;
-                case VK_ERROR_INVALID_EXTERNAL_HANDLE :{ throw  std::runtime_error("VK_ERROR_INVALID_EXTERNAL_HANDLE");}break;
-                case VK_ERROR_FRAGMENTATION :{ throw  std::runtime_error("VK_ERROR_INVALID_EXTERNAL_HANDLE");}break;
-                case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS :{ throw  std::runtime_error("VK_ERROR_FRAGMENTATION");}break;
-                case VK_ERROR_SURFACE_LOST_KHR :{ throw  std::runtime_error("VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS");}break;
-                case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR :{ throw  std::runtime_error("VK_ERROR_NATIVE_WINDOW_IN_USE_KHR");}break;
-                case VK_ERROR_OUT_OF_DATE_KHR :{throw std::runtime_error("");}break;
-                case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR :{throw std::runtime_error("");}break;
-                case VK_ERROR_VALIDATION_FAILED_EXT :{throw std::runtime_error("");}break;
-                case VK_ERROR_INVALID_SHADER_NV :{throw std::runtime_error("");}break;
-                case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT :{throw std::runtime_error("");}break;
-                case VK_ERROR_NOT_PERMITTED_EXT :{throw std::runtime_error("");}break;
-                case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT :{throw std::runtime_error("");}break;
-                case VK_THREAD_IDLE_KHR :{throw std::runtime_error("");}break;
-                case VK_THREAD_DONE_KHR :{throw std::runtime_error("");}break;
-                case VK_OPERATION_DEFERRED_KHR :{throw std::runtime_error("");}break;
-                case VK_OPERATION_NOT_DEFERRED_KHR :{throw std::runtime_error("");}break;
+                case VK_NOT_READY : throw std::runtime_error("Not ready!"); 
+                case VK_TIMEOUT : throw std::runtime_error("Bad TimeOut!"); 
+                case VK_INCOMPLETE : throw std::runtime_error("Incomplete!"); 
+                case VK_ERROR_INITIALIZATION_FAILED :  throw  std::runtime_error("Error: bad Initialisation!");
+                case VK_ERROR_DEVICE_LOST :  throw  std::runtime_error("Error: Device Failed/Lost!");
+                case VK_ERROR_FRAGMENTED_POOL :{ throw std::runtime_error("Error: bad Mem Alloc");}
+                case VK_ERROR_OUT_OF_HOST_MEMORY :{  throw  std::runtime_error("No Host Memory");}
+                case VK_ERROR_OUT_OF_DEVICE_MEMORY :{ throw  std::runtime_error("No Device Memory");}
+                case VK_ERROR_UNKNOWN :{ throw  std::runtime_error("Unknown Error!|");}
+                case VK_ERROR_OUT_OF_POOL_MEMORY :{ throw  std::runtime_error("Out of PooL Memory");}
+                case VK_ERROR_INVALID_EXTERNAL_HANDLE :{ throw  std::runtime_error("VK_ERROR_INVALID_EXTERNAL_HANDLE");}
+                case VK_ERROR_FRAGMENTATION :{ throw  std::runtime_error("VK_ERROR_INVALID_EXTERNAL_HANDLE");}
+                case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS :{ throw  std::runtime_error("VK_ERROR_FRAGMENTATION");}
+                case VK_ERROR_SURFACE_LOST_KHR :{ throw  std::runtime_error("VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS");}
+                case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR :{ throw  std::runtime_error("VK_ERROR_NATIVE_WINDOW_IN_USE_KHR");}
+                case VK_ERROR_OUT_OF_DATE_KHR :{throw std::runtime_error("");}
+                case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR :{throw std::runtime_error("");}
+                case VK_ERROR_VALIDATION_FAILED_EXT :{throw std::runtime_error("");}
+                case VK_ERROR_INVALID_SHADER_NV :{throw std::runtime_error("");}
+                case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT :{throw std::runtime_error("");}
+                case VK_ERROR_NOT_PERMITTED_EXT :{throw std::runtime_error("");}
+                case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT :{throw std::runtime_error("");}
+                case VK_THREAD_IDLE_KHR :{throw std::runtime_error("");}
+                case VK_THREAD_DONE_KHR :{throw std::runtime_error("");}
+                case VK_OPERATION_DEFERRED_KHR :{throw std::runtime_error("");}
+                case VK_OPERATION_NOT_DEFERRED_KHR :{throw std::runtime_error("");}
                 case VK_PIPELINE_COMPILE_REQUIRED_EXT :{throw std::runtime_error("");}break ;
               
-                case VK_SUBOPTIMAL_KHR :{ throw  std::runtime_error("VK_SUBOPTIMAL_KHR");}break;
+                case VK_SUBOPTIMAL_KHR :{ throw  std::runtime_error("VK_SUBOPTIMAL_KHR");}
                 
-                default :{ std::cout<<callPPPPI<<"\n"; throw  std::runtime_error("Unknown Error!");}break;
+                default :{ std::cout<<callPPPPI<<"\n"; throw  std::runtime_error("Unknown Error!");}
             }
         }
 
 
-        typedef VkResult (__vectorcall *callPPPPI) (VkDevice, const void*, const VkAllocationCallbacks*, const void* , const PFN_vkVoidFunction pHndl);
+        typedef VkResult (__vectorcall *callPPPPI) (VkDevice, const void*, const VkAllocationCallbacks*, const void* /* , const PFN_vkVoidFunction pHndl */);
         
         /*todo: Adiitonal posible Bug: if a typeDef Cast/PointerFunction/Aslias e.g .Misc is used to allow access to .call vkPipelineLayoutCreateInfo, the Validtaion layers incorrertcly warn that VkGraphicsPipelineCreateInfo struct is mising the cprrect sType 
         * the only way to correct this is to manuall/Dierctly exempt the "pipelineCache" and "createInfoCount" Arguments/Parametsr of the call, Which causes Misiing createInfoCount  and VkPipelineCache  issues but allows the pipeline to be created properly/correctly
@@ -112,14 +113,14 @@ static inline void clPPPI(const void* pStrct,  const char* a, const void *object
 {
     //vkGetDeviceProcAddr()
     // auto xx= ;
-    const PFN_vkVoidFunction Hndl = vkGetDeviceProcAddr(device, a);
+    // const callPPPPI Hndl = (callPPPPI)vkGetDeviceProcAddr(device, a);
     // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device, a));
     // std::cout << &x << "\n";
     // std::cout << &pStrct << &object<<&a<<"\n";
     std::cout << a<<"\n";
     // std::cout << object<<"\n";
     // const VkResult VkR =x(device, pStrct, nullptr, object);
-    checkCall((reinterpret_cast<callPPPPI>(Hndl))(device, pStrct, nullptr, object, Hndl));
+    checkCall((reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device, a))(device, pStrct, nullptr, object)));
     if (object == nullptr)
     {
         throw std::runtime_error("bad Alloctaion!: Null handle!");

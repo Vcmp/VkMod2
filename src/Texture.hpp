@@ -11,7 +11,7 @@ inline namespace Texture
     static void createTextureImage();
     static VkFormat findDepthFormat();
     static void createDepthResources();
-    static void createImage(uint32_t, uint32_t, VkFormat, int);
+    static void createImage(VkExtent2D, VkFormat, VkImageUsageFlagBits);
     static void transitionImageLayout(VkFormat, VkImageLayout, VkImageLayout);
     static void createImageView(VkFormat, VkImageAspectFlagBits, VkImageLayout);
 };
@@ -21,7 +21,7 @@ inline void Texture::createDepthResources()
     {
         std::cout << "--->CreateDepthResources"<<"\n";
           VkFormat depthFormat = findDepthFormat();
-        Texture::createImage(SwapChainSupportDetails::swapChainExtent.width, SwapChainSupportDetails::swapChainExtent.height,
+        Texture::createImage(SwapChainSupportDetails::swapChainExtent,
                 depthFormat,
                 VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
         );
@@ -86,10 +86,10 @@ inline void Texture::createDepthResources()
         vkUnmapMemory(device, stagingBufferMemoryImg);
         // STBImage.stbi_image_free(pixels);
 
-        Texture::createImage(1024, 1024,
-                VK_FORMAT_R8G8B8A8_SRGB,
-                VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
-        );
+        // Texture::createImage(1024, 1024,
+        //         VK_FORMAT_R8G8B8A8_SRGB,
+        //         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+        // );
 
 
         // copyBufferToImage(stagingBufferImg, 1024, 1024);
@@ -97,13 +97,13 @@ inline void Texture::createDepthResources()
 
     }
 
-    inline void Texture::createImage(uint32_t width, uint32_t height, VkFormat format, int usage)
+    inline void Texture::createImage(VkExtent2D extent, VkFormat format, VkImageUsageFlagBits usage)
     {
         VkImageCreateInfo imageInfo = {};
                 imageInfo.sType=VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
                 imageInfo.imageType=VK_IMAGE_TYPE_2D;
-        imageInfo.extent.width=width;
-                 imageInfo.extent.height=height;
+        imageInfo.extent.width=extent.width;
+                 imageInfo.extent.height=extent.height;
                  imageInfo.extent.depth=1;
         imageInfo.mipLevels=1;
                 imageInfo.arrayLayers=1;
@@ -235,7 +235,7 @@ inline void Texture::createDepthResources()
 
     inline VkFormat Texture::findDepthFormat()
     {
-        VkFormat formatCandidates[3]={VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT};
+        constexpr VkFormat formatCandidates[3]={VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT};
         VkFormatProperties props;
 
         for (VkFormat format : formatCandidates) {

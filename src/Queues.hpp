@@ -57,9 +57,10 @@ static inline void enumerateDetermineQueueFamilies( uint32_t VkQueueFamilyProper
 }
 static inline void createCommandPool()
     {
-        VkCommandPoolCreateInfo poolInfo={};
-                poolInfo.sType=VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-                poolInfo.queueFamilyIndex=graphicsFamily;
+       const VkCommandPoolCreateInfo poolInfo={
+                .sType=VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+                .queueFamilyIndex=graphicsFamily,
+        };
                 // poolInfo.flags=0;
         //Memsys2.free(poolInfo);
         clPPPI(&poolInfo, "vkCreateCommandPool", &commandPool);
@@ -77,23 +78,24 @@ static inline void createCommandPool()
 
         VkCommandBuffer commandBuffer = {};
         vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffer);
-        VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {};
-        vkCommandBufferBeginInfo.sType=(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO);
-        vkCommandBufferBeginInfo.flags=(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-        vkCommandBufferBeginInfo.pNext=VK_NULL_HANDLE;
+        constexpr VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {
+        .sType=(VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO),
+        .flags=(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
+        .pNext=VK_NULL_HANDLE
+        };
         vkBeginCommandBuffer(commandBuffer, &vkCommandBufferBeginInfo);
         return commandBuffer;
     }
 
-    static void endSingleTimeCommands(VkCommandBuffer &commandBuffer)
+    static void endSingleTimeCommands(const VkCommandBuffer &commandBuffer)
     {
         vkEndCommandBuffer(commandBuffer);
-        VkSubmitInfo submitInfo1={};
-        submitInfo1.sType=VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo1.pCommandBuffers=&commandBuffer;
-        submitInfo1.commandBufferCount=(1);
-        submitInfo1.pNext=VK_NULL_HANDLE;
-
+        const VkSubmitInfo submitInfo1={
+        .sType=VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pCommandBuffers=&commandBuffer,
+        .commandBufferCount=(1),
+        .pNext=VK_NULL_HANDLE
+        };
 //            VkSubmitInfo.ncommandBufferCount(submitInfo1, 1);
 
         vkQueueSubmit(GraphicsQueue, 1, &submitInfo1, VK_NULL_HANDLE);

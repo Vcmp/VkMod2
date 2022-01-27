@@ -2,7 +2,6 @@
 #pragma once
 
 #include "Queues.hpp"
-#include <vulkan/vulkan_core.h>
 
 
 
