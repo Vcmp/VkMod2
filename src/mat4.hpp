@@ -42,7 +42,7 @@ public:
     __m256 __a;
     __m256 __b;
     __m256 __c;
-    inline const __m256 lud(const void* a);
+    inline constexpr __m256 __vectorcall lud(const void* a) __attribute__((alignas(__m256i)));
     inline void domatFMA(mat4*, __m256);
     inline void domatFMA(mat4*);
     
@@ -59,7 +59,7 @@ inline constexpr void __vectorcall mat4::loadAligned(float a[16])
     mat4::__b=_mm256_castsi256_ps(lud(&a+8));
 
 }
-inline constexpr void mat4::loadAligned(const void* a)
+inline void mat4::loadAligned(const void* a)
 {
     //_mm_storeu_si128((__m128*)aa, mat4::a);
     mat4::__a=_mm256_castsi256_ps(lud(a));
@@ -81,10 +81,10 @@ inline void mat4::domatFMA(mat4 *b)
 
 }
 //Hide ugly casting syntax for aligned load as un;ike the AVX512 intrinsics provided by intel, man Load/many intrisics Functions do not include Void* by default as an Argument
-inline const __m256 mat4::lud(const void* a)
+inline constexpr __m256 __vectorcall mat4::lud(const void* a)
 {
-    return _mm256_load_si256(reinterpret_cast<const __m256i*>((a)));
-}
+    return _mm256_load_si256((__m256i*)((a)));
+} 
 
 inline constexpr mat4* mat4::identity()
 {
