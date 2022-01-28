@@ -160,7 +160,7 @@ inline static void createGraphicsPipelineLayout() {
 
   static constexpr VkVertexInputBindingDescription VxL {
                 0,
-                32,
+                20,
                 VK_VERTEX_INPUT_RATE_VERTEX
         };
 
