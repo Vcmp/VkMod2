@@ -65,7 +65,7 @@ inline void Texture::createTextureImage() {
   BuffersX::setBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, imageSize,
                       stagingBufferImg);
   VkDeviceMemory stagingBufferMemoryImg = {0};
-  BuffersX::createBuffer(stagingBufferImg, stagingBufferMemoryImg);
+  // BuffersX::createBuffer(stagingBufferImg, stagingBufferMemoryImg);
 
   // vkMapMemory(device, stagingBufferMemoryImg, 0, imageSize, 0,
   // MemSysm.address);

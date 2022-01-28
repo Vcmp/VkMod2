@@ -3,7 +3,8 @@
 #include "VkUtils2.hpp"
 #include "renderer2.hpp"
 #include "mat4.hpp"
-#include <cstdint>
+#include <apisetcconv.h>
+
 #include <pthread.h>
 #include <unistd.h>
 

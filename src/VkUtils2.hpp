@@ -68,10 +68,11 @@ inline namespace VkUtils2
       SwapChainSupportDetails::createSwapChain();
       SwapChainSupportDetails::createImageViews();    
       PipelineX::createRenderPasses();
-    //   UniformBufferObject::createDescriptorSetLayout();
+      UniformBufferObject::createDescriptorSetLayout();
       PipelineX::createGraphicsPipelineLayout();
       Queues::createCommandPool();
-    //   Texture::createDepthResources();
+      BuffersX::createVertexBuffer();
+      Texture::createDepthResources();
       SwapChainSupportDetails::createFramebuffers();
       
     //   Texture::createDepthResources();
@@ -472,4 +473,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
     }
         vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
+
+        vkDestroyBuffer(device, vertexBuffer, nullptr);
+        vkFreeMemory(device, vertexBufferMemory, nullptr);
     }

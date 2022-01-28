@@ -1,8 +1,10 @@
 #pragma once
-#include "SwapChainSupportDetails.hpp"
+// #include "SwapChainSupportDetails.hpp"
+#include "Buffers.hpp"
 #include <array>
 
-constexpr int OFFSETOF_COLOR = 3 * sizeof(float);
+
+constexpr int OFFSETOF_COLOR = 2 * sizeof(float);
 constexpr int OFFSET_POS = 0;
 
 constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
@@ -22,8 +24,8 @@ static inline VkCommandBuffer commandBuffers[Frames];
 // VkVertexInputBindingDescription* getVertexInputBindingDescription();
 // static VkVertexInputAttributeDescription*  getAttributeDescriptions();
 
-//  inline  VkVertexInputBindingDescription*
-//  Pipeline::getVertexInputBindingDescription()
+//  inline  const VkVertexInputBindingDescription*
+//  getVertexInputBindingDescription()
 //     {
 //          VkVertexInputBindingDescription a {
 //                 .binding=0,
@@ -35,8 +37,8 @@ static inline VkCommandBuffer commandBuffers[Frames];
 //         return &a;
 //     }
 
-//     inline VkVertexInputAttributeDescription*
-//     Pipeline::getAttributeDescriptions()
+//     inline constexpr VkVertexInputAttributeDescription*
+//     getAttributeDescriptions()
 //     {
 
 //         VkVertexInputAttributeDescription attributeDescriptions[3];
@@ -156,13 +158,60 @@ inline static void createGraphicsPipelineLayout() {
   const VkPipelineShaderStageCreateInfo shaderStages[2] = {fragStage,
                                                            vertexStage};
 
-  constexpr VkPipelineVertexInputStateCreateInfo
+  static constexpr VkVertexInputBindingDescription VxL {
+                0,
+                32,
+                VK_VERTEX_INPUT_RATE_VERTEX
+        };
+
+        
+        static constexpr VkVertexInputAttributeDescription attributeDescriptions[]
+        {
+            { .location=0,
+                .binding=0,
+            VK_FORMAT_R32G32_SFLOAT,
+            OFFSET_POS},
+            {
+            .location=1,
+                .binding=0,
+            VK_FORMAT_R32G32B32_SFLOAT,
+            OFFSETOF_COLOR},
+            /* {0,
+            2,
+            VK_FORMAT_R32G32_SFLOAT,
+            OFFSETOF_TEXTCOORDS} */
+            
+        };
+
+        // // Position
+        // VkVertexInputAttributeDescription* posDescription =
+        // &attributeDescriptions[0]; 
+
+        // // Color
+        // VkVertexInputAttributeDescription* colorDescription =
+        // &attributeDescriptions[1]; colorDescription->binding=0;
+        // colorDescription->location=1;
+        // colorDescription->format=VK_FORMAT_R32G32B32_SFLOAT;
+        // colorDescription->offset=OFFSETOF_COLOR;
+
+        // // Texture coordinates
+        // VkVertexInputAttributeDescription* texCoordsDescription =
+        // &attributeDescriptions[2]; texCoordsDescription->binding=0;
+        // texCoordsDescription->location=2;
+        // texCoordsDescription->format=VK_FORMAT_R32G32_SFLOAT;
+        // texCoordsDescription->offset=OFFSETOF_TEXTCOORDS;
+        
+
+  static constexpr VkPipelineVertexInputStateCreateInfo
       vkPipelineVertexInputStateCreateInfo = {
           .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-          .vertexBindingDescriptionCount = 0,
-          .vertexAttributeDescriptionCount = 0};
+          .vertexBindingDescriptionCount = 1,
+          .pVertexBindingDescriptions = &VxL,
+          .vertexAttributeDescriptionCount = sizeof(attributeDescriptions)/sizeof(VkVertexInputAttributeDescription),
+          .pVertexAttributeDescriptions = attributeDescriptions
+          };
 
-  constexpr VkPipelineInputAssemblyStateCreateInfo inputAssembly = {
+  static constexpr VkPipelineInputAssemblyStateCreateInfo inputAssembly = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
       .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
       .primitiveRestartEnable = VK_FALSE};
@@ -233,15 +282,15 @@ inline static void createGraphicsPipelineLayout() {
       .alphaToCoverageEnable = VK_FALSE,
       .alphaToOneEnable = VK_FALSE};
 
-  //         VkPipelineDepthStencilStateCreateInfo depthStencil={};
-  //                    depthStencil.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-  //                 depthStencil.depthTestEnable=VK_TRUE;
-  //                 depthStencil.depthWriteEnable=VK_TRUE;
-  //                 depthStencil.depthCompareOp=VK_COMPARE_OP_LESS;
-  //                 depthStencil.depthBoundsTestEnable=VK_FALSE;
-  // //                    .minDepthBounds(0) //Optional
-  // //                    .maxDepthBounds(1) //Optional
-  //                 depthStencil.stencilTestEnable=VK_FALSE;
+          VkPipelineDepthStencilStateCreateInfo depthStencil={};
+                     depthStencil.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+                  depthStencil.depthTestEnable=VK_TRUE;
+                  depthStencil.depthWriteEnable=VK_TRUE;
+                  depthStencil.depthCompareOp=VK_COMPARE_OP_LESS;
+                  depthStencil.depthBoundsTestEnable=VK_FALSE;
+  //                    .minDepthBounds(0) //Optional
+  //                    .maxDepthBounds(1) //Optional
+                  depthStencil.stencilTestEnable=VK_FALSE;
 
   static constexpr VkPipelineColorBlendAttachmentState colorBlendAttachment = {
       .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
@@ -303,12 +352,12 @@ inline static void createGraphicsPipelineLayout() {
       .pInputAssemblyState = &inputAssembly,
       .pViewportState = &vkViewPortState,
       .pRasterizationState = &VkPipeLineRasterization,
-    //   .pMultisampleState = &multisampling,
-      // .pDepthStencilState=&depthStencil,
-    //   .pColorBlendState = &colorBlending,
+      .pMultisampleState = &multisampling,
+      .pDepthStencilState=&depthStencil,
+      .pColorBlendState = &colorBlending,
       //                    .pDynamicState(null,
-    //   .layout = vkLayout,
-    //   .renderPass = renderPass
+      .layout = vkLayout,
+      .renderPass = renderPass
       // pipelineInfo.subpass=0;
       //    pipelineInfo.basePipelineHandle=VK_NULL_HANDLE;
       // pipelineInfo.basePipelineIndex=-1;
@@ -389,7 +438,9 @@ inline static void createCommandBuffers() {
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                       graphicsPipeline);
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    constexpr VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
+    vkCmdDraw(commandBuffer, ((BuffersX::sizedsf)), 1, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
     checkCall(vkEndCommandBuffer(commandBuffer));
