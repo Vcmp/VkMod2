@@ -2,7 +2,7 @@
 
 // #include "Buffers.hpp"
 #include "Buffers.hpp"
-#include "src/VkUtilsXBase.hpp"
+
 
 
 inline namespace Texture {
@@ -105,7 +105,7 @@ inline void Texture::createImage(VkExtent2D extent, VkFormat format,
   imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
   clPPPI(&imageInfo, "vkCreateImage", &Texture::vkImage);
-  VkMemoryDedicatedRequirementsKHR img2 = {};
+  constexpr VkMemoryDedicatedRequirementsKHR img2 = {VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR, nullptr};
 
   VkMemoryRequirements2 memRequirements = {};
   vkGetImageMemoryRequirements(device, Texture::vkImage,
@@ -120,7 +120,7 @@ inline void Texture::createImage(VkExtent2D extent, VkFormat format,
       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   allocInfo.pNext = VK_NULL_HANDLE;
 
-  if (img2.prefersDedicatedAllocation || img2.requiresDedicatedAllocation) {
+  if constexpr(img2.prefersDedicatedAllocation | img2.requiresDedicatedAllocation) {
     std::cout << ("Using Dedicated Memory Allocation") << "\n";
     VkMemoryDedicatedAllocateInfo dedicatedAllocateInfoKHR = {};
     dedicatedAllocateInfoKHR.sType =

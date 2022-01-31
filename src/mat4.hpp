@@ -8,7 +8,9 @@
 // #include <avxintrin.h>
 // #include <avx2intrin.h>
 // #include <fmaintrin.h>
+#include <cstdio>
 #include <immintrin.h>
+// #include <io.h>
 #include <memory>
 /*
     Have to include Pragma Guards Directly as VSCode is Dumb and dosent Know/verify that the Host/Currently Utilsied/Subejtc>Applicable/Accessib;e CPU does and cas in aftc support AVX/AVX2+FMA3 correctly
@@ -20,7 +22,8 @@
 
 //too lazy to do an SSE version as AVX in many cases can allow for the abilkity to the same steps in half as many stages.steps/procedures/Instructions/Operations e.g. .etc i.e..Misc Visa. versa.
 //Might be able to get away withput using amore explict construct arg sets and isntead just implicitly and Automatically intialise the struct iwth a constexpr Identify Maxtrix Struct.Blob/StandIn Instead
-
+// _read(int _FileHandle, void *_DstBuf, unsigned int _MaxCharCount)
+// fread(void *__restrict _DstBuf, size_t _ElementSize, size_t _Count, FILE *__restrict _File)
 static class mat4
 {
 private:

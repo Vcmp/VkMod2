@@ -3,7 +3,6 @@
 #include "VkUtils2.hpp"
 #include "renderer2.hpp"
 #include "mat4.hpp"
-#include <apisetcconv.h>
 
 #include <pthread.h>
 #include <unistd.h>
@@ -24,7 +23,7 @@ inline namespace{
     //  static   inline std::chrono::time_point<std::chrono::system_clock> startP;
     //  void * Sysm(void * pv_unused);
 }
-
+//Apparently Therads other main main therad have much smaller stall alloctaion Sizes...<Query-> Confirm>
 inline void * Sysm(void * pv_unused)
    { _mm256_zeroall();
        while (a)

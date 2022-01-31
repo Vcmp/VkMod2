@@ -7,6 +7,7 @@
 
 #include "Pipeline.hpp"
 #include "Queues.hpp"
+#include "src/Buffers.hpp"
 
 
 
@@ -72,6 +73,7 @@ inline namespace VkUtils2
       PipelineX::createGraphicsPipelineLayout();
       Queues::createCommandPool();
       BuffersX::createVertexBuffer();
+      BuffersX::createStagingBuffer();
       Texture::createDepthResources();
       SwapChainSupportDetails::createFramebuffers();
       
@@ -467,7 +469,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
  void VkUtils2::cleanup()
     {
         vkDeviceWaitIdle(device);
-        vkDestroyCommandPool(device, commandPool, nullptr);
+        vkDestroyCommandPool(device, (VkCommandPool)commandPool, nullptr);
          for (auto framebuffer : swapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }

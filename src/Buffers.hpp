@@ -1,6 +1,9 @@
 #pragma once
 
 #include "SwapChainSupportDetails.hpp"
+#include "src/Buffers.hpp"
+#include <cstddef>
+#include <vulkan/vulkan_core.h>
 
 
 // = (&set + sizeof(set));
@@ -12,18 +15,38 @@ static inline void* data = nullptr;
 static inline VkBuffer vertexBuffer;
 static inline VkDeviceMemory vertexBufferMemory;
 
+static inline VkBuffer Bufferstaging;
+static inline VkDeviceMemory stagingBufferMemory;
+
+
+
+
+
+inline namespace 
+{
 static constexpr float vectBuf[]=
 {
-  0.0f, -0.5f, 1.0f, 1.0f, 1.0f,  
-  0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-  -0.5f, 0.5f, 0.0f, 0.0f, 1.0f 
-};
-constexpr size_t sizedsf=sizeof(vectBuf);
-
-static constexpr short idxBuf[]=
+    0.0f, -0.5f, 0.5f, 1.0f, 1.0f, 1.0f,
+    0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+    -0.5f, 0.5f,-0.0f, 0.0f, 0.0f, 1.0f,
+    -0.5f, 10.5f,-1.0f, 0.0f, 1.0f, 1.0f
+};static constexpr short idxBuf[]=
 {
 
 };
+constexpr size_t sizedsf=sizeof(vectBuf);
+inline void mapBuf(const float& ,const VkDeviceMemory&,  const size_t&);
+inline void mapBuf(const float &mainVertbuf,const VkDeviceMemory& memBuf,  const size_t& sizsedf)
+{
+        vkMapMemory(device, memBuf, 0, sizsedf, 0, &data);
+        {
+            memcpy(data, &mainVertbuf, sizsedf);
+            //                GLU2.theGLU.wrap()
+
+        }
+        vkUnmapMemory(device, memBuf);
+}
+}
 
 
 
@@ -38,6 +61,8 @@ static uint32_t findMemoryType(VkPhysicalDevice, uint32_t,
                                VkMemoryPropertyFlagBits);
 static void createVkEvents();
 static void createVertexBuffer();
+static void createStagingBuffer();
+static void copyBuffer(VkBuffer&, VkBuffer&, size_t);
 
 }; // namespace BuffersX
 
@@ -69,12 +94,14 @@ inline void BuffersX::createVkEvents() {
 inline void BuffersX::createVertexBuffer()
 {
   // constexpr size_t size =sizeof(vectBuf);
-  setBuffer(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, sizedsf, vertexBuffer);
+    VkBufferUsageFlagBits x = (VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+
+  setBuffer(x, sizedsf, vertexBuffer);
 
   
 
 
-  VkMemoryPropertyFlagBits p = (VkMemoryPropertyFlagBits)(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  VkMemoryPropertyFlagBits p = (VkMemoryPropertyFlagBits)(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
   vertexBufferMemory=createBuffer2(p, vertexBuffer);
 
 // VkMemoryAllocateInfo allocInfo{
@@ -85,15 +112,22 @@ inline void BuffersX::createVertexBuffer()
 
 // clPPPI(&allocInfo, "vkBindBufferMemory", &vertexBufferMemory);
  
-  vkMapMemory(device, vertexBufferMemory, 0, sizedsf, 0, &data);
-        {
-            memcpy(data, vectBuf, sizedsf);
-            //                GLU2.theGLU.wrap()
-
-        }
-        vkUnmapMemory(device, vertexBufferMemory);
+    //  BuffersX::mapBuf(*vectBuf, vertexBufferMemory, sizedsf);
 
 }
+
+inline void BuffersX::createStagingBuffer()
+{
+  setBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, sizedsf, Bufferstaging);
+  constexpr VkMemoryPropertyFlagBits p = (VkMemoryPropertyFlagBits)(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  stagingBufferMemory= createBuffer2(p, Bufferstaging);
+
+  BuffersX::mapBuf(*vectBuf, stagingBufferMemory, sizedsf);
+
+  BuffersX::copyBuffer(Bufferstaging, vertexBuffer, sizedsf);
+
+}
+
 
 
  inline void BuffersX::setBuffer(VkBufferUsageFlagBits usage, size_t size, VkBuffer &a)
@@ -116,7 +150,6 @@ inline void BuffersX::createVertexBuffer()
         //long vkMemoryRequirements = VkUtils2.MemSysm.malloc(VkMemoryRequirements.SIZEOF);
  VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
-        vkGetBufferMemoryRequirements(device, currentBuffer, &memRequirements);
 
 
         VkMemoryAllocateInfo allocateInfo1 = {
@@ -132,4 +165,17 @@ inline void BuffersX::createVertexBuffer()
         //memPutLong( device.address(), a);
         return vertexBufferMemory;
 
+    }
+
+    inline void BuffersX::copyBuffer(VkBuffer &src, VkBuffer &dst, size_t sized)
+    {
+       VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+      const VkBufferCopy vkBufferCopy{
+                .srcOffset=0,
+                .dstOffset=0,
+                .size=sized,
+      };
+        // MemSysm.Memsys2.free(vkBufferCopy);
+        vkCmdCopyBuffer(commandBuffer, src, dst, 1, &vkBufferCopy);
+        endSingleTimeCommands(commandBuffer);
     }

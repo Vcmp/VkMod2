@@ -8,7 +8,7 @@ static uint32_t graphicsFamily;
 static uint32_t presentFamily;
 static VkQueue GraphicsQueue;
 static VkQueue PresentQueue;
-static VkCommandPool commandPool;
+static uint64_t commandPool;
 
 static VkSurfaceKHR surface;
 
@@ -55,19 +55,19 @@ static inline void createCommandPool() {
   };
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);
-  clPPPI(&poolInfo, "vkCreateCommandPool", &commandPool);
+  commandPool = clPPPI2(&poolInfo, "vkCreateCommandPool");
 }
 
 static inline VkCommandBuffer beginSingleTimeCommands() {
 
-  VkCommandBufferAllocateInfo allocateInfo = {};
-  allocateInfo.sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO);
-  allocateInfo.level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-  allocateInfo.commandPool = (Queues::commandPool);
-  allocateInfo.commandBufferCount = (1);
-  allocateInfo.pNext = VK_NULL_HANDLE;
-
-  VkCommandBuffer commandBuffer = {};
+  const VkCommandBufferAllocateInfo allocateInfo = {
+  .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
+  .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
+  .commandPool = (VkCommandPool)(Queues::commandPool),
+  .commandBufferCount = (1),
+  .pNext = VK_NULL_HANDLE
+};
+  VkCommandBuffer commandBuffer;
   vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffer);
   constexpr VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {
       .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO),
@@ -87,6 +87,6 @@ static void endSingleTimeCommands(const VkCommandBuffer &commandBuffer) {
 
   vkQueueSubmit(GraphicsQueue, 1, &submitInfo1, VK_NULL_HANDLE);
 
-  vkFreeCommandBuffers(device, Queues::commandPool, 1, &commandBuffer);
+  vkFreeCommandBuffers(device, (VkCommandPool)Queues::commandPool, 1, &commandBuffer);
 }
 }; // namespace Queues

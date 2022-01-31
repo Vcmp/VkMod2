@@ -4,7 +4,7 @@
 #include <array>
 
 
-constexpr int OFFSETOF_COLOR = 2 * sizeof(float);
+constexpr int OFFSETOF_COLOR = 3 * sizeof(float);
 constexpr int OFFSET_POS = 0;
 
 constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
@@ -160,7 +160,7 @@ inline static void createGraphicsPipelineLayout() {
 
   static constexpr VkVertexInputBindingDescription VxL {
                 0,
-                20,
+                (sizedsf/4),
                 VK_VERTEX_INPUT_RATE_VERTEX
         };
 
@@ -169,7 +169,7 @@ inline static void createGraphicsPipelineLayout() {
         {
             { .location=0,
                 .binding=0,
-            VK_FORMAT_R32G32_SFLOAT,
+            VK_FORMAT_R32G32B32_SFLOAT,
             OFFSET_POS},
             {
             .location=1,
@@ -386,7 +386,7 @@ inline static void createGraphicsPipelineLayout() {
 inline static void createCommandBuffers() {
   const VkCommandBufferAllocateInfo allocateInfo = {
       .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
-      .commandPool = (commandPool),
+      .commandPool = (VkCommandPool)(commandPool),
       .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
       .commandBufferCount = sizeof(commandBuffers)/sizeof(VkCommandBuffer)};
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"

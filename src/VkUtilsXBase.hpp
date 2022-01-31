@@ -43,7 +43,7 @@ constexpr uint16_t height = 480;
  constexpr bool checks=true;
 
     // Their may seem to be an anomalous memory leak when the main render Loop/Draw Call is used; howver this is mearly/primaro;y due to the Validation layers being enabled, however if said Validation Layers are disabled, the memeory leak virtually entirely disappears and at least thus far does not seem to be an issue thankfully
-     constexpr bool debug=true;
+     constexpr bool debug=false;
     
      constexpr bool ENABLE_VALIDATION_LAYERS=debug; //todo: Posible Bug: ValidationLayersBreak Shader Compilation due to (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files as having/Containing Invalid Magic Numbers
     
@@ -96,8 +96,12 @@ constexpr uint16_t height = 480;
 
 
         typedef VkResult (__vectorcall *callPPPPI) (const VkDevice, const void*, const VkAllocationCallbacks*, const void* , const uint64_t &pHndl);
+        typedef VkResult (__vectorcall *callPPPPI2) (const VkDevice, const void*, const VkAllocationCallbacks*,  const uint64_t* , const uint64_t &pHndl);
         
-        static inline void  __vectorcall doPointerAlloc(const void* a, const void* c, const uint64_t &pHndl)
+        static inline void  __vectorcall doPointerAlloc2(const void* a,  const uint64_t *c, const uint64_t &pHndl)
+        {
+             (reinterpret_cast<callPPPPI2>(pHndl)(device, a, nullptr, c, pHndl));
+        }static inline void  __vectorcall doPointerAlloc(const void* a, const void* c, const uint64_t &pHndl)
         {
              (reinterpret_cast<callPPPPI>(pHndl)(device, a, nullptr, c, pHndl));
         }
@@ -118,17 +122,17 @@ constexpr uint16_t height = 480;
         //                                  const void *,uint32_t*,
                                          
         //                                  const VkAllocationCallbacks *);
-// inline static uint64_t getDevProd(const char* a)
-// {
-//     return reinterpret_cast<uint64_t>(vkGetDeviceProcAddr(device, a));
-// }
+inline static uint64_t getDevProd(const char* a)
+{
+    return reinterpret_cast<uint64_t>(vkGetDeviceProcAddr(device, a));
+}
 
 
-static inline uint64_t __vectorcall clPPPI2(const void* pStrct,  const char* a, void *object)
+static inline constexpr uint64_t __vectorcall clPPPI2(const void* pStrct,  const char* a)
 {
     //vkGetDeviceProcAddr()
     // auto xx= ;
-    const uint64_t Hndl = reinterpret_cast<uint64_t>(vkGetDeviceProcAddr(device, a));
+    const uint64_t Hndl = getDevProd(a);
     // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device, a));
     // std::cout << &x << "\n";
     // std::cout << &pStrct << &object<<&a<<"\n";
@@ -136,14 +140,15 @@ static inline uint64_t __vectorcall clPPPI2(const void* pStrct,  const char* a, 
         std::cout << a<<"-->"<<Hndl<<"\n";
     // std::cout << object<<"\n";
     // const VkResult VkR =x(device, pStrct, nullptr, object);
-    (doPointerAlloc(pStrct, object, Hndl));
+    uint64_t object = 0;
+    (doPointerAlloc2(pStrct, &object, Hndl));
      if constexpr(checks)
 
-        if (object == nullptr)
+        if (object == 0)
         {
             throw std::runtime_error("bad Alloctaion!: Null handle!");
         }
-    return (uint64_t)object;
+    return object;
     // return VkR;
     //  callPPPPI(device, pStrct, nullptr, a)
 }
