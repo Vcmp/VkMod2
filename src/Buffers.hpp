@@ -1,12 +1,14 @@
 #pragma once
 
 #include "SwapChainSupportDetails.hpp"
+#include <vulkan/vulkan_core.h>
 
 // = (&set + sizeof(set));
 
 inline namespace BuffersX {
 
 static inline void* data = nullptr;
+// static inline void* data2 = nullptr;
 
 static inline VkBuffer vertexBuffer;
 static inline VkDeviceMemory vertexBufferMemory;
@@ -23,10 +25,12 @@ inline namespace
 {
   static constexpr float vectBuf[]=
   {
-      0.0f, -0.5f, 1.0f, 1.0f, 1.0f,
-      0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-      -0.5f, 0.5f, 0.0f, 0.0f, 1.0f
-  };static constexpr short idxBuf[]=
+     -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+    -0.5f, 0.5f, 1.0f, 1.0f, 1.0f
+  };
+  static constexpr short idxBuf[]=
   {
        0, 1, 2, 2, 3, 0
   };
@@ -107,26 +111,37 @@ inline void BuffersX::createVkEvents() {
       
       VkBufferUsageFlagBits x2 = (VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
       constexpr VkMemoryPropertyFlagBits p = (VkMemoryPropertyFlagBits)(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-      createSetBuffer(p, Bufferstaging, x2, sizedsf, stagingBufferMemory);      
+      createSetBuffer(p, Bufferstaging, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, sizedsf, stagingBufferMemory);      
 
       // stagingBufferMemory= createBuffer2(p, Bufferstaging);
+      VkBufferUsageFlagBits x3=(VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+       createSetBuffer(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory);
 
 
-
-
-      checkCall(vkMapMemory(device, stagingBufferMemory, 0, sizedsfIdx, 0, &data));
+      vkMapMemory(device, stagingBufferMemory, 0, sizedsf, 0, &data);
           {
               memcpy(data, vectBuf, sizedsf);
-              //                GLU2.theGLU.wrap()
+          }
+          vkUnmapMemory(device, stagingBufferMemory);
+              BuffersX::copyBuffer(vertexBuffer, sizedsf);
+      
+      
+          vkMapMemory(device, stagingBufferMemory, 0, sizedsfIdx, 0, &data);
+          {
+          memcpy(data, idxBuf, sizedsfIdx);
 
           }
           vkUnmapMemory(device, stagingBufferMemory);
+          copyBuffer(indexBuffer, sizedsfIdx);
+         
 
-        BuffersX::copyBuffer(vertexBuffer, sizedsf);
 
-  // constexpr size_t size =sizeof(vectBuf);
+      //   {
+      //   }
+      //   vkUnmapMemory(device, stagingBufferMemory);
+
       
-
+ 
     }
 
 

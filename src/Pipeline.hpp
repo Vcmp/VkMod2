@@ -162,7 +162,7 @@ inline static void createGraphicsPipelineLayout() {
 
   static constexpr VkVertexInputBindingDescription VxL {
                 0,
-                (sizedsf/3),
+                (sizedsf/4),
                 VK_VERTEX_INPUT_RATE_VERTEX
         };
 
@@ -442,7 +442,8 @@ inline static void createCommandBuffers() {
                       graphicsPipeline);
     constexpr VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
-    vkCmdDraw(commandBuffer, ((BuffersX::sizedsf)), 1, 0, 0);
+    vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdDrawIndexed(commandBuffer, ((BuffersX::sizedsfIdx)/2), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
     checkCall(vkEndCommandBuffer(commandBuffer));
