@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <vulkan/vulkan_core.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_64_BIT_PTR_DEFINES 1
@@ -68,6 +69,7 @@ constexpr uint16_t height = 480;
                 case VK_ERROR_FRAGMENTED_POOL :{ throw std::runtime_error("Error: bad Mem Alloc");}
                 case VK_ERROR_OUT_OF_HOST_MEMORY :{  throw  std::runtime_error("No Host Memory");}
                 case VK_ERROR_OUT_OF_DEVICE_MEMORY :{ throw  std::runtime_error("No Device Memory");}
+                case VK_ERROR_MEMORY_MAP_FAILED :{ throw  std::runtime_error("Bad Memory map!");}
                 case VK_ERROR_UNKNOWN :{ throw  std::runtime_error("Unknown Error!|");}
                 case VK_ERROR_OUT_OF_POOL_MEMORY :{ throw  std::runtime_error("Out of PooL Memory");}
                 case VK_ERROR_INVALID_EXTERNAL_HANDLE :{ throw  std::runtime_error("VK_ERROR_INVALID_EXTERNAL_HANDLE");}
@@ -101,9 +103,9 @@ constexpr uint16_t height = 480;
         static inline void  __vectorcall doPointerAlloc2(const void* a,  const uint64_t *c, const uint64_t &pHndl)
         {
              (reinterpret_cast<callPPPPI2>(pHndl)(device, a, nullptr, c, pHndl));
-        }static inline void  __vectorcall doPointerAlloc(const void* a, const void* c, const uint64_t &pHndl)
+        }static inline VkResult  __vectorcall doPointerAlloc(const void* a, const void* c, const uint64_t &pHndl)
         {
-             (reinterpret_cast<callPPPPI>(pHndl)(device, a, nullptr, c, pHndl));
+             return (reinterpret_cast<callPPPPI>(pHndl)(device, a, nullptr, c, pHndl));
         }
 
         /*todo: Adiitonal posible Bug: if a typeDef Cast/PointerFunction/Aslias e.g .Misc is used to allow access to .call vkPipelineLayoutCreateInfo, the Validtaion layers incorrertcly warn that VkGraphicsPipelineCreateInfo struct is mising the cprrect sType 
@@ -164,14 +166,14 @@ static inline void __vectorcall clPPPI(const void* pStrct,  const char* a, const
         std::cout << a<<"-->"<<Hndl<<"\n";
     // std::cout << object<<"\n";
     // const VkResult VkR =x(device, pStrct, nullptr, object);
-    (doPointerAlloc(pStrct, object, Hndl));
+    checkCall(doPointerAlloc(pStrct, object, Hndl));
      if constexpr(checks)
 
         if (object == nullptr)
         {
             throw std::runtime_error("bad Alloctaion!: Null handle!");
         }
-    // return VkR;
+   
     //  callPPPPI(device, pStrct, nullptr, a)
 }
 // static inline int doSized(const void* aabs, const void* abs2x)

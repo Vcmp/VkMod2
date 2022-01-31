@@ -72,9 +72,11 @@ inline namespace VkUtils2
       UniformBufferObject::createDescriptorSetLayout();
       PipelineX::createGraphicsPipelineLayout();
       Queues::createCommandPool();
-      BuffersX::createVertexBuffer();
-      BuffersX::createStagingBuffer();
       Texture::createDepthResources();
+      BuffersX::setupBuffers();
+    //   BuffersX::createVertexBuffer();
+    //   BuffersX::createStagingBuffer();
+    //   BuffersX::createIndexBuffer();
       SwapChainSupportDetails::createFramebuffers();
       
     //   Texture::createDepthResources();

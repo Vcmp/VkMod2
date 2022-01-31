@@ -1,10 +1,12 @@
 #pragma once
 // #include "SwapChainSupportDetails.hpp"
 #include "Buffers.hpp"
+#include "src/Buffers.hpp"
 #include <array>
+#include <vulkan/vulkan_core.h>
 
 
-constexpr int OFFSETOF_COLOR = 3 * sizeof(float);
+constexpr int OFFSETOF_COLOR = 2 * sizeof(float);
 constexpr int OFFSET_POS = 0;
 
 constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
@@ -160,7 +162,7 @@ inline static void createGraphicsPipelineLayout() {
 
   static constexpr VkVertexInputBindingDescription VxL {
                 0,
-                (sizedsf/4),
+                (sizedsf/3),
                 VK_VERTEX_INPUT_RATE_VERTEX
         };
 
@@ -169,7 +171,7 @@ inline static void createGraphicsPipelineLayout() {
         {
             { .location=0,
                 .binding=0,
-            VK_FORMAT_R32G32B32_SFLOAT,
+            VK_FORMAT_R32G32_SFLOAT,
             OFFSET_POS},
             {
             .location=1,
