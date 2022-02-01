@@ -1,6 +1,4 @@
 #pragma once
-#include <cstdint>
-#include <vulkan/vulkan_core.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_64_BIT_PTR_DEFINES 1

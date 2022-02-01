@@ -1,7 +1,7 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
 
-inline namespace Queues {
+constexpr struct Queues {
 static VkPhysicalDevice physicalDevice;
 
 static uint32_t graphicsFamily;
@@ -11,6 +11,7 @@ static VkQueue PresentQueue;
 static uint64_t commandPool;
 
 static VkSurfaceKHR surface;
+} Queues;
 
 // const static bool isComplete();
 
@@ -24,7 +25,7 @@ enumerateDetermineQueueFamilies(uint32_t VkQueueFamilyProperties,
   // &pQueueFamilyPropertyCount, nullptr);
   // VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
   vkGetPhysicalDeviceQueueFamilyProperties(
-      physicalDevice, &VkQueueFamilyProperties, queueFamilies);
+      Queues::physicalDevice, &VkQueueFamilyProperties, queueFamilies);
 
   // VkBool32 presentSupport = (VK_FALSE);
   // std::cout << queueFamilies << "\n";
@@ -33,7 +34,7 @@ enumerateDetermineQueueFamilies(uint32_t VkQueueFamilyProperties,
   for (; i < VkQueueFamilyProperties; i++) {
     // std::cout <<(queueFamilies[i].queueCount)<< "\n";
     if ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
-      graphicsFamily = i;
+      Queues::graphicsFamily = i;
     }
     // if (isComplete())
     //     break;
@@ -51,28 +52,28 @@ enumerateDetermineQueueFamilies(uint32_t VkQueueFamilyProperties,
 static inline void createCommandPool() {
   const VkCommandPoolCreateInfo poolInfo = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-      .queueFamilyIndex = graphicsFamily,
+      .queueFamilyIndex = Queues::graphicsFamily,
   };
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);
-  commandPool = clPPPI2(&poolInfo, "vkCreateCommandPool");
+  Queues::commandPool = clPPPI2(&poolInfo, "vkCreateCommandPool");
 }
 
 static inline VkCommandBuffer beginSingleTimeCommands() {
 
   const VkCommandBufferAllocateInfo allocateInfo = {
   .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
-  .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
+  .pNext = VK_NULL_HANDLE,
   .commandPool = (VkCommandPool)(Queues::commandPool),
+  .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
   .commandBufferCount = (1),
-  .pNext = VK_NULL_HANDLE
 };
   VkCommandBuffer commandBuffer;
   vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffer);
   constexpr VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {
       .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO),
-      .flags = (VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT),
-      .pNext = VK_NULL_HANDLE};
+      .pNext = VK_NULL_HANDLE,
+      .flags = (VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT)};
   vkBeginCommandBuffer(commandBuffer, &vkCommandBufferBeginInfo);
   return commandBuffer;
 }
@@ -80,13 +81,13 @@ static inline VkCommandBuffer beginSingleTimeCommands() {
 static void endSingleTimeCommands(const VkCommandBuffer &commandBuffer) {
   vkEndCommandBuffer(commandBuffer);
   const VkSubmitInfo submitInfo1 = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-                                    .pCommandBuffers = &commandBuffer,
+                                    .pNext = VK_NULL_HANDLE,
                                     .commandBufferCount = (1),
-                                    .pNext = VK_NULL_HANDLE};
+                                    .pCommandBuffers = &commandBuffer};
   //            VkSubmitInfo.ncommandBufferCount(submitInfo1, 1);
 
-  vkQueueSubmit(GraphicsQueue, 1, &submitInfo1, VK_NULL_HANDLE);
+  vkQueueSubmit(Queues::GraphicsQueue, 1, &submitInfo1, VK_NULL_HANDLE);
 
   vkFreeCommandBuffers(device, (VkCommandPool)Queues::commandPool, 1, &commandBuffer);
 }
-}; // namespace Queues
+ // namespace Queues

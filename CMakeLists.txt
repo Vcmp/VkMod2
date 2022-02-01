@@ -38,7 +38,8 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory(glfw-3.3.6)
+add_subdirectory(glfw)
+add_subdirectory(glm)
 # Add source to this project's executable.
 
 add_executable(VkMod2
@@ -52,6 +53,7 @@ add_executable(VkMod2
 
 target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb_image")
+# target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm")
 # target_include_directories(VkMod2 PUBLIC "$ENV{VULKAN_SDK}/Include")
 # target_include_directories("${PROJECT_SOURCE_DIR}/third_party/stb_image" INTERFACE stb_image)
 # target_link_libraries(VkMod2 stb_image)
@@ -61,7 +63,7 @@ target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_part
 
 
 
-target_link_libraries(VkMod2 Vulkan::Vulkan glfw)
+target_link_libraries(VkMod2 Vulkan::Vulkan glfw glm)
 
 add_dependencies(VkMod2 Shaders)
 

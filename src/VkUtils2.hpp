@@ -7,7 +7,7 @@
 
 #include "Pipeline.hpp"
 #include "Queues.hpp"
-#include "src/Buffers.hpp"
+
 
 
 
@@ -68,11 +68,11 @@ inline namespace VkUtils2
       VkUtils2::createLogicalDevice();
       SwapChainSupportDetails::createSwapChain();
       SwapChainSupportDetails::createImageViews();    
-      PipelineX::createRenderPasses();
+      createRenderPasses();
       UniformBufferObject::createDescriptorSetLayout();
-      PipelineX::createGraphicsPipelineLayout();
-      Queues::createCommandPool();
-      Texture::createDepthResources();
+      createGraphicsPipelineLayout();
+      createCommandPool();
+    //   Texture::createDepthResources();
       BuffersX::setupBuffers();
     //   BuffersX::createVertexBuffer();
     //   BuffersX::createStagingBuffer();
@@ -80,8 +80,11 @@ inline namespace VkUtils2
       SwapChainSupportDetails::createFramebuffers();
       
     //   Texture::createDepthResources();
+      UniformBufferObject::createUniformBuffers();
       
-      PipelineX::createCommandBuffers();
+      UniformBufferObject::createDescriptorPool();
+        UniformBufferObject::createDescriptorSets();
+      createCommandBuffers();
 
     //    BuffersX::createVkEvents();
     
@@ -288,13 +291,13 @@ inline void VkUtils2::pickPhysicalDevice()
             std::cout <<("Check Device:") << d << "\n";
             if(isDeviceSuitable(d)) {
                 std::cout <<("Device Suitable:") << d << "\n";
-                physicalDevice = d;
+                Queues::physicalDevice = d;
                 return;
             }
              std::cout <<("Device Not Suitable:") << d << "\n";
            
         }
-        if (physicalDevice == VK_NULL_HANDLE) {
+        if (Queues::physicalDevice == VK_NULL_HANDLE) {
             std::runtime_error("Failed to find a suitable GPU");
         }
 
@@ -345,13 +348,13 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             std::cout <<("Creating Logical Device")<<"\n";
         
          uint32_t pQueueFamilyPropertyCount;
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE);
+            vkGetPhysicalDeviceQueueFamilyProperties(Queues::physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE);
 
 
             VkQueueFamilyProperties uniqueQueueFamilies[pQueueFamilyPropertyCount] ;
             // Queues::enumerateDetermineQueueFamilies(pQueueFamilyPropertyCount, uniqueQueueFamilies);   
              //VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
-            vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies);
+            vkGetPhysicalDeviceQueueFamilyProperties(Queues::physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies);
 
             //VkBool32 presentSupport = (VK_FALSE);
            // std::cout << queueFamilies << "\n";
@@ -360,14 +363,14 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             for (VkQueueFamilyProperties uniqueQueue;i<pQueueFamilyPropertyCount;i++) {
                 std::cout <<(uniqueQueue.queueCount)<< "\n";
                 if ((uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
-                    graphicsFamily = i;
+                    Queues::graphicsFamily = i;
                 }
                 VkBool32 presentSupport = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, Queues::surface, &presentSupport);
+                vkGetPhysicalDeviceSurfaceSupportKHR(Queues::physicalDevice, i, Queues::surface, &presentSupport);
                  if (presentSupport) {
-                    presentFamily = i;
+                    Queues::presentFamily = i;
                 }
-                if (presentFamily != NULL&& graphicsFamily!= NULL)
+                if (Queues::presentFamily != NULL&& Queues::graphicsFamily!= NULL)
                     break;
             
                 // i++;
@@ -381,7 +384,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
          VkDeviceQueueCreateInfo GQ{};
             
                GQ.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-               GQ.queueFamilyIndex=graphicsFamily;
+               GQ.queueFamilyIndex=Queues::graphicsFamily;
                GQ.queueCount=1;
                GQ.pQueuePriorities=&priority;
                GQ.flags=0;
@@ -390,7 +393,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
         VkDeviceQueueCreateInfo PQ{};
             
                PQ.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-               PQ.queueFamilyIndex=presentFamily;
+               PQ.queueFamilyIndex=Queues::presentFamily;
                PQ.queueCount=1;
                PQ.pQueuePriorities=&priority;
                PQ.flags=0;
@@ -420,7 +423,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 //                        .geometryShader(true);
 //                        .pipelineStatisticsQuery(true)
 //                        .alphaToOne(false);
-           vkGetPhysicalDeviceFeatures2(physicalDevice, &deviceFeatures2);
+           vkGetPhysicalDeviceFeatures2(Queues::physicalDevice, &deviceFeatures2);
             // vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
             VkDeviceCreateInfo createInfo={};
                     createInfo.sType=VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -440,10 +443,10 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             // if(ENABLE_VALIDATION_LAYERS) {
             //     createInfo.ppEnabledLayerNames(asPointerBuffer(VALIDATION_LAYERS));
             // }
-            checkCall(vkCreateDevice(physicalDevice, &createInfo, VK_NULL_HANDLE, &device ));
+            checkCall(vkCreateDevice(Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ));
 
-              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0,  &GraphicsQueue);
-              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &PresentQueue);
+              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0,  &Queues::GraphicsQueue);
+              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &Queues::PresentQueue);
        
     }
 
@@ -471,7 +474,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
  void VkUtils2::cleanup()
     {
         vkDeviceWaitIdle(device);
-        vkDestroyCommandPool(device, (VkCommandPool)commandPool, nullptr);
+        vkDestroyCommandPool(device, (VkCommandPool)Queues.commandPool, nullptr);
          for (auto framebuffer : swapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }

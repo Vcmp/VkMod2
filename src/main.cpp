@@ -1,8 +1,7 @@
 // #include "mat4.hpp"
-#include "GLFW/glfw3.h"
 #include "VkUtils2.hpp"
 #include "renderer2.hpp"
-#include "mat4.hpp"
+
 
 #include <pthread.h>
 #include <unistd.h>
@@ -43,18 +42,18 @@ inline void * Sysm(void * pv_unused)
    { _mm256_zeroall();
        while (a)
        {
-            renderer2::drawFrame();aa++;
+            drawFrame();aa++;
        }
              return NULL;
    }
      int __vectorcall main()
     {
-        float laa[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-        mat4 m4;
-         float laaa[16]={1};
-        mat4 m45;
-        m45.loadAligned(laaa);
-        m4.identity()->domatFMA(&m45);
+        // float laa[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+        // mat4 m4;
+        //  float laaa[16]={1};
+        // mat4 m45;
+        // m45.loadAligned(laaa);
+        // m4.identity()->domatFMA(&m45);
       //  VkUtils2.extracted();
         //System.gc();
 
@@ -76,7 +75,7 @@ inline void * Sysm(void * pv_unused)
         r=pthread_create(&rThrd, nullptr, RDrw, nullptr);
         
         //  pthread_join(sys, nullptr);
-        renderer2::setupRenderDraw();
+        setupRenderDraw();
 
         // static constexpr int aaa=1000;
          

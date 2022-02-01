@@ -1,9 +1,9 @@
 #pragma once
 // #include "SwapChainSupportDetails.hpp"
 #include "Buffers.hpp"
-#include "src/Buffers.hpp"
+#include "UniformBufferObject.hpp"
+#include "src/Queues.hpp"
 #include <array>
-#include <vulkan/vulkan_core.h>
 
 
 constexpr int OFFSETOF_COLOR = 2 * sizeof(float);
@@ -11,12 +11,12 @@ constexpr int OFFSET_POS = 0;
 
 constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
 constexpr float UNormFlt = 0.1F;
-inline namespace PipelineX {
+static constexpr struct PipelineX {
 static inline VkPipelineLayout vkLayout;
 static inline VkPipeline graphicsPipeline;
 
 static inline VkCommandBuffer commandBuffers[Frames];
-
+} inline pipeline; 
 //     static void createRenderPasses();
 //     static void createGraphicsPipelineLayout();
 //     static void createCommandBuffers();
@@ -78,7 +78,7 @@ VkFormat findDepthFormat() {
 
   for (const VkFormat &format : formatCandidates) {
 
-    vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+    vkGetPhysicalDeviceFormatProperties(Queues.physicalDevice, format, &props);
 
     const int i2 = props.optimalTilingFeatures &
                    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -257,7 +257,7 @@ inline static void createGraphicsPipelineLayout() {
       .polygonMode = VK_POLYGON_MODE_FILL,
       .lineWidth = 1.0f,
       .cullMode =
-          VK_CULL_MODE_BACK_BIT, // WARNING: EXTREMEL:Y VERY VERY IMPORTANT!:
+          VK_CULL_MODE_NONE, // WARNING: EXTREMEL:Y VERY VERY IMPORTANT!:
                                  // Make sur ethe culling direction is correct
                                  // as it applies even to 2DVecs/Fixed
                                  // Function.Const Runtime/Evaluated Shaders
@@ -268,7 +268,7 @@ inline static void createGraphicsPipelineLayout() {
                                  // can Overide ve shader Dierctinves/Fixed
                                  // Functiosn pipelines/ShadersFrags/Verts
                                  // Directly!,
-      .frontFace = VK_FRONT_FACE_CLOCKWISE,
+      .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
       .depthBiasEnable = VK_FALSE
       // VkPipeLineRasterization.pNext=VK_NULL_HANDLE;
   };
@@ -328,12 +328,12 @@ inline static void createGraphicsPipelineLayout() {
   //         vkPushConstantRange.stageFlags=VK_SHADER_STAGE_VERTEX_BIT;
 
   constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = {
-      .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO
+      .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
       // vkPipelineLayoutCreateInfo.pPushConstantRanges=&vkPushConstantRange;
-      // vkPipelineLayoutCreateInfo.pSetLayouts=0;//&UniformBufferObject::descriptorSetLayout;
+      .pSetLayouts=&descriptorSetLayout,
       // vkPipelineLayoutCreateInfo.flags=0;
       // vkPipelineLayoutCreateInfo.pushConstantRangeCount =1;
-      // vkPipelineLayoutCreateInfo.setLayoutCount=0;
+      .setLayoutCount=1,
       // vkPipelineLayoutCreateInfo.pNext=VK_NULL_HANDLE;
       //            vkPipelineLayoutCreateInfo.sType=VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   };
@@ -341,7 +341,7 @@ inline static void createGraphicsPipelineLayout() {
   std::cout << ("using pipeLine with Length: ")
             << sizeof(SwapChainSupportDetails::swapChainImageViews);
   // nmemFree(vkPipelineLayoutCreateInfo1.address());
-  clPPPI(&vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &vkLayout);
+  clPPPI(&vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &PipelineX::vkLayout);
   // MemSysm.Memsys2.doPointerAllocSafeX(vkPipelineLayoutCreateInfo,
   // Buffers.capabilities.vkCreatePipelineLayout, Buffers.vkLayout);
 
@@ -355,10 +355,10 @@ inline static void createGraphicsPipelineLayout() {
       .pViewportState = &vkViewPortState,
       .pRasterizationState = &VkPipeLineRasterization,
       .pMultisampleState = &multisampling,
-      .pDepthStencilState=&depthStencil,
+    //   .pDepthStencilState=&depthStencil,
       .pColorBlendState = &colorBlending,
       //                    .pDynamicState(null,
-      .layout = vkLayout,
+      .layout = PipelineX::vkLayout,
       .renderPass = renderPass
       // pipelineInfo.subpass=0;
       //    pipelineInfo.basePipelineHandle=VK_NULL_HANDLE;
@@ -371,7 +371,7 @@ inline static void createGraphicsPipelineLayout() {
   // // vulkan_layer_chassis::CreateGraphicsPipelines
 
   checkCall(vkCreateGraphicsPipelines(device, nullptr, a, &pipelineInfo,
-                                      nullptr, &graphicsPipeline));
+                                      nullptr, &PipelineX::graphicsPipeline));
   // clPPPI(&pipelineInfo, "vkCreateGraphicsPipelines", &graphicsPipeline);
   //        if (graphicsPipeline == nullptr)
   //         {
@@ -388,15 +388,15 @@ inline static void createGraphicsPipelineLayout() {
 inline static void createCommandBuffers() {
   const VkCommandBufferAllocateInfo allocateInfo = {
       .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
-      .commandPool = (VkCommandPool)(commandPool),
+      .commandPool = (VkCommandPool)(Queues.commandPool),
       .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
-      .commandBufferCount = sizeof(commandBuffers)/sizeof(VkCommandBuffer)};
+      .commandBufferCount = sizeof(PipelineX::commandBuffers)/sizeof(VkCommandBuffer)};
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
   // = memPointerBuffer(allocateInfo.address(),
   // allocateInfo.commandBufferCount());
   //            MemSysm.Memsys2.free(allocateInfo);
-  vkAllocateCommandBuffers(device, &allocateInfo, commandBuffers);
+  vkAllocateCommandBuffers(device, &allocateInfo, PipelineX::commandBuffers);
   // doPointerAllocS(allocateInfo, capabilities.vkAllocateCommandBuffers,
   // descriptorSets); commandBuffers.put(descriptorSets); descriptorSets.free();
 
@@ -427,7 +427,9 @@ inline static void createCommandBuffers() {
   renderPassInfo.renderPass = (renderPass);
   renderPassInfo.renderArea = renderArea;
   uint8_t i = 0;
-  for (const VkCommandBuffer &commandBuffer : commandBuffers) {
+
+  
+  for (const VkCommandBuffer &commandBuffer : PipelineX::commandBuffers) {
     // extracted(beginInfo1, renderPassInfo, commandBuffer, i);
 
     checkCall(vkBeginCommandBuffer(commandBuffer, &beginInfo1));
@@ -439,10 +441,13 @@ inline static void createCommandBuffers() {
                          VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                      graphicsPipeline);
+                      PipelineX::graphicsPipeline);
     constexpr VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,PipelineX::vkLayout, 0, 1, &descriptorSets[i], 0, nullptr);
+
     vkCmdDrawIndexed(commandBuffer, ((BuffersX::sizedsfIdx)/2), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
@@ -451,4 +456,4 @@ inline static void createCommandBuffers() {
   }
 }
 
-}; // namespace PipelineX
+// namespace PipelineX

@@ -1,6 +1,7 @@
 
 #pragma once
 #include "Queues.hpp"
+#include "src/Queues.hpp"
 
 // static VkSurfaceFormatKHR formats={};
 
@@ -81,40 +82,40 @@ inline void querySwapChainSupport(VkSurfaceFormatKHR *formats,
   // VkSurfaceFormatKHR *formats;
   if (count != 0) {
     // formats =  new VkSurfaceFormatKHR[count];
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &count,
+    vkGetPhysicalDeviceSurfaceFormatsKHR(Queues.physicalDevice, Queues.surface, &count,
                                          formats);
   }
 
-  vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &count,
+  vkGetPhysicalDeviceSurfacePresentModesKHR(Queues.physicalDevice, Queues.surface, &count,
                                             nullptr);
 
   // VkPresentModeKHR    presentModes;
   if (count != 0) {
     // presentModes = new VkPresentModeKHR[count];
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &count,
+    vkGetPhysicalDeviceSurfacePresentModesKHR(Queues.physicalDevice, Queues.surface, &count,
                                               presentModes);
   }
   //   formats1=formats;
 }
 
 inline void createSwapChain() {
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface,
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Queues.physicalDevice, Queues::surface,
                                             &capabilities);
 
-  vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &count,
+  vkGetPhysicalDeviceSurfaceFormatsKHR(Queues::physicalDevice, Queues::surface, &count,
                                        nullptr);
   VkSurfaceFormatKHR surfaceFormats[count];
 
   if (count != 0)
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &count,
+    vkGetPhysicalDeviceSurfaceFormatsKHR(Queues::physicalDevice, Queues::surface, &count,
                                          surfaceFormats);
 
-  vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &count,
+  vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
                                             nullptr);
   VkPresentModeKHR presentModes[count];
   // VkPresentModeKHR    presentModes;
   if (count != 0)
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &count,
+    vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
                                               presentModes);
 
   VkSurfaceFormatKHR surfaceFormat;
@@ -147,7 +148,7 @@ inline void createSwapChain() {
 
   std::cout << "ImageCount: " << imageCount << "\n";
 
-  const uint32_t aa[] = {graphicsFamily, presentFamily};
+  const uint32_t aa[] = {Queues::graphicsFamily, Queues::presentFamily};
   ;
 
   const VkSwapchainCreateInfoKHR createInfo{

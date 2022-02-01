@@ -45,3 +45,6 @@
 /third_party
 /bin
 /assets
+/glfw
+/glm
+/*.7z

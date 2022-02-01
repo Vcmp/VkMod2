@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SwapChainSupportDetails.hpp"
-#include <vulkan/vulkan_core.h>
+
 
 // = (&set + sizeof(set));
 
@@ -104,7 +104,7 @@ inline void BuffersX::createVkEvents() {
     {
       
      
-      VkBufferUsageFlagBits x1 = (VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+      VkBufferUsageFlagBits x1 = (VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT);
       VkMemoryPropertyFlagBits p1 = (VkMemoryPropertyFlagBits)(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
       createSetBuffer(p1, vertexBuffer, x1, sizedsf, vertexBufferMemory);
       // vertexBufferMemory=createBuffer2(p1, vertexBuffer);
@@ -114,7 +114,7 @@ inline void BuffersX::createVkEvents() {
       createSetBuffer(p, Bufferstaging, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, sizedsf, stagingBufferMemory);      
 
       // stagingBufferMemory= createBuffer2(p, Bufferstaging);
-      VkBufferUsageFlagBits x3=(VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+      VkBufferUsageFlagBits x3=(VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT);
        createSetBuffer(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory);
 
 

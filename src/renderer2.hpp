@@ -1,13 +1,15 @@
 #include "Pipeline.hpp"
-
-
-static struct renderer2 
+#include "UniformBufferObject.hpp"
+#include "src/Pipeline.hpp"
+#define GLM_FORCE_LEFT_HANDED 
+constexpr static struct renderer2 
 {
     
 
     static void setupRenderDraw();
     static void drawFrame();
-    private:
+    static void updateUniformBuffer(uint32_t);
+    
 
 static inline VkSemaphore AvailableSemaphore;
     // static inline VkSemaphore FinishedSemaphore;
@@ -46,14 +48,13 @@ static constexpr VkPipelineStageFlags  waitStages = VK_PIPELINE_STAGE_EARLY_FRAG
                         .sType=VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
                         .pNext=nullptr
                         };
-                         ~renderer2() { std::cout << "Destructor" << "\n"; }
-};
+} inline r2;
 
  
    
  
 
-inline void renderer2::setupRenderDraw()
+inline void setupRenderDraw()
 {
                         
 //  VkFenceCreateInfo vkCreateCFence{};
@@ -62,7 +63,7 @@ inline void renderer2::setupRenderDraw()
                         // for (int i=0;i<3; i++)
                         {
 
-                        (clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore));
+                        (clPPPI(&r2.vkCreateCSemaphore, "vkCreateSemaphore", &r2.AvailableSemaphore));
                         // (clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &FinishedSemaphore));
                         // checkCall(vkCreateFence(device, &vkCreateCFence, nullptr, &FFence));
                          }
@@ -104,20 +105,20 @@ inline void renderer2::setupRenderDraw()
 
 
 
-inline void renderer2::drawFrame()
+inline void drawFrame()
 {
     // uint32_t currentFrame;
     // vkResetFences(device, 1, &vkCreateCFences[currentFrame]);
     
-    checkCall(vkAcquireNextImageKHR(device, swapChain, TmUt, AvailableSemaphore, VK_NULL_HANDLE, &currentFrame));
+    checkCall(vkAcquireNextImageKHR(device, swapChain, r2.TmUt, r2.AvailableSemaphore, VK_NULL_HANDLE, &r2.currentFrame));
 
     
-        info.pCommandBuffers = &commandBuffers[currentFrame];
-
+    r2.updateUniformBuffer(r2.currentFrame);
+        r2.info.pCommandBuffers = &PipelineX::commandBuffers[r2.currentFrame];
         // info.signalSemaphoreCount = 1;
         // info.pSignalSemaphores = &FinishedSemaphore;
 
-    checkCall(vkQueueSubmit(Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE));
+    checkCall(vkQueueSubmit(Queues::GraphicsQueue, 1, &r2.info, VK_NULL_HANDLE));
     // VkPresentInfoKHR1.pWaitSemaphores=&AvailableSemaphore;
     //   vkWaitForFences(device, 1, &vkCreateCFence, false, TmUt);
 
@@ -126,9 +127,35 @@ inline void renderer2::drawFrame()
                   
 
 
-    checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &VkPresentInfoKHR1));
+    checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &r2.VkPresentInfoKHR1));
 
-    currentFrame = (currentFrame + 1) % Frames;
+    r2.currentFrame = (r2.currentFrame + 1) % Frames;
 
    
+}
+
+// struct UBO{
+//      glm::mat4 model;
+//       glm::mat4 proj;
+//       glm::mat4 view;
+//     //mat4 Trans;
+// } inline ubo;
+
+inline void renderer2::updateUniformBuffer(uint32_t currentFrame)
+{
+    float tme = glfwGetTime();
+
+  
+    
+    float h =tan(90.0f*(M_PI/180.0f))*.5f;
+    ubo.proj = glm::perspectiveFovLH(glm::radians(45.0f), (float)width, (float)height, 1.7f, 90.0f);
+    ubo.view = glm::lookAt(glm::vec3(0.0f, 2.0f, -2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    // ubo.proj[1][1] *= -1;
+   
+    vkMapMemory(device, uniformBuffersMemory[currentFrame], 0,Sized, 0, &data);
+    {
+        memcpy(data, &ubo, Sized);
+    }
+    vkUnmapMemory(device, uniformBuffersMemory[currentFrame]);
 }
