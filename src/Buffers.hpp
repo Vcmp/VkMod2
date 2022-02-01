@@ -165,7 +165,7 @@ inline void BuffersX::createVkEvents() {
         VkMemoryAllocateInfo allocateInfo1 = {
                 .sType=VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
                 .allocationSize=memRequirements.size,
-                .memoryTypeIndex=findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties),
+                .memoryTypeIndex=findMemoryType(Queues::physicalDevice, memRequirements.memoryTypeBits, properties),
         };
 //           
         clPPPI(&allocateInfo1, "vkAllocateMemory", &vertexBufferMemory);

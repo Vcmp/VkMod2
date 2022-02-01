@@ -78,7 +78,7 @@ VkFormat findDepthFormat() {
 
   for (const VkFormat &format : formatCandidates) {
 
-    vkGetPhysicalDeviceFormatProperties(Queues.physicalDevice, format, &props);
+    vkGetPhysicalDeviceFormatProperties(Queues::physicalDevice, format, &props);
 
     const int i2 = props.optimalTilingFeatures &
                    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -388,7 +388,7 @@ inline static void createGraphicsPipelineLayout() {
 inline static void createCommandBuffers() {
   const VkCommandBufferAllocateInfo allocateInfo = {
       .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
-      .commandPool = (VkCommandPool)(Queues.commandPool),
+      .commandPool = (VkCommandPool)(Queues::commandPool),
       .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
       .commandBufferCount = sizeof(PipelineX::commandBuffers)/sizeof(VkCommandBuffer)};
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"

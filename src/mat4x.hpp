@@ -61,8 +61,8 @@ public:
 inline constexpr void __vectorcall mat4x::loadAligned(float a[16])
 {
     //_mm_storeu_si128((__m128*)aa, mat4x::a);
-    m4.__a=_mm256_castsi256_ps(lud(a));
-    m4.__b=_mm256_castsi256_ps(lud(&a+8));
+    __a=_mm256_castsi256_ps(lud(a));
+    __b=_mm256_castsi256_ps(lud(&a+8));
 
 }
 inline void mat4x::loadAligned(const void* a)

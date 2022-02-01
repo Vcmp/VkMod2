@@ -82,24 +82,24 @@ inline void querySwapChainSupport(VkSurfaceFormatKHR *formats,
   // VkSurfaceFormatKHR *formats;
   if (count != 0) {
     // formats =  new VkSurfaceFormatKHR[count];
-    vkGetPhysicalDeviceSurfaceFormatsKHR(Queues.physicalDevice, Queues.surface, &count,
+    vkGetPhysicalDeviceSurfaceFormatsKHR(Queues::physicalDevice, Queues::surface, &count,
                                          formats);
   }
 
-  vkGetPhysicalDeviceSurfacePresentModesKHR(Queues.physicalDevice, Queues.surface, &count,
+  vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
                                             nullptr);
 
   // VkPresentModeKHR    presentModes;
   if (count != 0) {
     // presentModes = new VkPresentModeKHR[count];
-    vkGetPhysicalDeviceSurfacePresentModesKHR(Queues.physicalDevice, Queues.surface, &count,
+    vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
                                               presentModes);
   }
   //   formats1=formats;
 }
 
 inline void createSwapChain() {
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Queues.physicalDevice, Queues::surface,
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Queues::physicalDevice, Queues::surface,
                                             &capabilities);
 
   vkGetPhysicalDeviceSurfaceFormatsKHR(Queues::physicalDevice, Queues::surface, &count,

@@ -474,7 +474,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
  void VkUtils2::cleanup()
     {
         vkDeviceWaitIdle(device);
-        vkDestroyCommandPool(device, (VkCommandPool)Queues.commandPool, nullptr);
+        vkDestroyCommandPool(device, (VkCommandPool)Queues::commandPool, nullptr);
          for (auto framebuffer : swapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }

@@ -1,7 +1,7 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
 
-constexpr struct Queues {
+inline namespace Queues {
 static VkPhysicalDevice physicalDevice;
 
 static uint32_t graphicsFamily;
@@ -11,7 +11,7 @@ static VkQueue PresentQueue;
 static uint64_t commandPool;
 
 static VkSurfaceKHR surface;
-} Queues;
+};
 
 // const static bool isComplete();
 

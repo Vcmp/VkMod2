@@ -1,19 +1,20 @@
 #pragma once
+#define GLM_FORCE_LEFT_HANDED 
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "Buffers.hpp"
-
-inline namespace UniformBufferObject 
-{
-
- static struct alignas(16) UBO{
+static struct alignas(16) UBO{
      glm::mat4 model;
       glm::mat4 view;
       glm::mat4 proj;
     //mat4 Trans;
 } inline ubo;
+inline namespace UniformBufferObject 
+{
+
+ 
 
 constexpr size_t Sized=(sizeof(ubo));
 static inline VkDescriptorSet descriptorSets[Frames];

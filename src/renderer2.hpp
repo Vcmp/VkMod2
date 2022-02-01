@@ -1,14 +1,12 @@
 #include "Pipeline.hpp"
 #include "UniformBufferObject.hpp"
-#include "src/Pipeline.hpp"
-#define GLM_FORCE_LEFT_HANDED 
 constexpr static struct renderer2 
 {
     
 
     static void setupRenderDraw();
     static void drawFrame();
-    static void updateUniformBuffer(uint32_t);
+    static void updateUniformBuffer();
     
 
 static inline VkSemaphore AvailableSemaphore;
@@ -141,15 +139,15 @@ inline void drawFrame()
 //     //mat4 Trans;
 // } inline ubo;
 
-inline void renderer2::updateUniformBuffer(uint32_t currentFrame)
+inline void renderer2::updateUniformBuffer()
 {
-    float tme = glfwGetTime();
+   
 
   
     
     float h =tan(90.0f*(M_PI/180.0f))*.5f;
-    ubo.proj = glm::perspectiveFovLH(glm::radians(45.0f), (float)width, (float)height, 1.7f, 90.0f);
-    ubo.view = glm::lookAt(glm::vec3(0.0f, 2.0f, -2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    ubo.proj = glm::perspective(glm::radians(45.0f), width/ (float)height, 0.7f, 90.0f);
+    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     // ubo.proj[1][1] *= -1;
    
@@ -158,4 +156,5 @@ inline void renderer2::updateUniformBuffer(uint32_t currentFrame)
         memcpy(data, &ubo, Sized);
     }
     vkUnmapMemory(device, uniformBuffersMemory[currentFrame]);
+    
 }

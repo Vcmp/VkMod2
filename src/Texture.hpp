@@ -139,7 +139,7 @@ static void Texture::transitionImageLayout(VkFormat format,
                                            VkImageLayout oldLayout,
                                            VkImageLayout newLayout) {
   // VkCommandBuffer commandBuffer= Queues::beginSingleTimeCommands();
-  VkCommandBuffer commandBuffer = Queues::beginSingleTimeCommands();
+  VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
   VkImageMemoryBarrier barrier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -205,7 +205,7 @@ static void Texture::transitionImageLayout(VkFormat format,
   vkCmdPipelineBarrier(commandBuffer, sourceStage /* TODO */,
                        destinationStage /* TODO */, 0, 0, VK_NULL_HANDLE, 0,
                        VK_NULL_HANDLE, 1, &barrier);
-  Queues::endSingleTimeCommands(commandBuffer);
+  endSingleTimeCommands(commandBuffer);
   // endSingleTimeCommands(commandBuffer);
 }
 
@@ -236,7 +236,7 @@ inline VkFormat Texture::findDepthFormat() {
 
   for (VkFormat format : formatCandidates) {
 
-    vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+    vkGetPhysicalDeviceFormatProperties(Queues::physicalDevice, format, &props);
 
     const int i2 = props.optimalTilingFeatures &
                    VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
