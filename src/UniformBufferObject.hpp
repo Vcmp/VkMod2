@@ -1,22 +1,23 @@
 #pragma once
 #define GLM_FORCE_LEFT_HANDED 
+#include "glm/detail/qualifier.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/fwd.hpp"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "Buffers.hpp"
-static struct alignas(16) UBO{
+static inline struct alignas(sizeof(__m256)) UBO{
      glm::mat4 model;
-      glm::mat4 view;
-      glm::mat4 proj;
+      const glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+      const glm::mat4 proj=glm::perspective(glm::radians(45.0f)*-1, width/ (float)height, 0.7f, 90.0f);
     //mat4 Trans;
 } inline ubo;
-inline namespace UniformBufferObject 
+static constexpr struct UniformBufferObject 
 {
 
  
 
-constexpr size_t Sized=(sizeof(ubo));
+static constexpr size_t Sized=(sizeof(ubo));
 static inline VkDescriptorSet descriptorSets[Frames];
 static inline VkDescriptorSetLayout descriptorSetLayout;
 static inline VkDescriptorPool descriptorPool;
@@ -24,7 +25,8 @@ static inline VkImageView textureImageView;
 static inline VkBuffer uniformBuffers[Frames];
 static inline VkDeviceMemory uniformBuffersMemory[Frames];
 
-inline void createDescriptorSetLayout() 
+
+static void createDescriptorSetLayout() 
 {
   {
     static constexpr VkDescriptorSetLayoutBinding bindings = {
@@ -166,4 +168,4 @@ static void createDescriptorPool()
     
 
 
-};
+} ubos;

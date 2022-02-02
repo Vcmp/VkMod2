@@ -1,8 +1,16 @@
+#pragma once
+#include "GLFW/glfw3.h"
 #include "Pipeline.hpp"
 #include "UniformBufferObject.hpp"
+#include "glm/detail/qualifier.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "Buffers.hpp"
+
+
+typedef size_t __int256 __attribute__((__vector_size__(UniformBufferObject::Sized), __aligned__(256)));
+    static __int256* ax=(__int256*)&ubo;
 constexpr static struct renderer2 
 {
-    
 
     static void setupRenderDraw();
     static void drawFrame();
@@ -111,7 +119,7 @@ inline void drawFrame()
     checkCall(vkAcquireNextImageKHR(device, swapChain, r2.TmUt, r2.AvailableSemaphore, VK_NULL_HANDLE, &r2.currentFrame));
 
     
-    r2.updateUniformBuffer(r2.currentFrame);
+    r2.updateUniformBuffer();
         r2.info.pCommandBuffers = &PipelineX::commandBuffers[r2.currentFrame];
         // info.signalSemaphoreCount = 1;
         // info.pSignalSemaphores = &FinishedSemaphore;
@@ -139,22 +147,33 @@ inline void drawFrame()
 //     //mat4 Trans;
 // } inline ubo;
 
+constexpr void memcpy2(__int256 *  _Dst,   __int256 const* _Src,size_t _MaxCount)
+{
+    // for (uint64_t i=0;i<1; i++)
+    
+    {
+        // _Dst=(__m5121*)&data+256;
+        *_Dst=*_Src;
+    }
+}
+
 inline void renderer2::updateUniformBuffer()
 {
    
 
   
     
-    float h =tan(90.0f*(M_PI/180.0f))*.5f;
-    ubo.proj = glm::perspective(glm::radians(45.0f), width/ (float)height, 0.7f, 90.0f);
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    // ubo.proj[1][1] *= -1;
+    float time = glfwGetTime()*glm::radians(90.0f);
    
-    vkMapMemory(device, uniformBuffersMemory[currentFrame], 0,Sized, 0, &data);
+    
+    ubo.model = glm::rotate(glm::mat4(1.0f), time, glm::vec3(0.0f, 0.0f, 1.0f));
+    // ubo.proj[1][1] *= -1;
+//    __m512 a =(__m512)&data+0x200;
+    
+    vkMapMemory(device, UniformBufferObject::uniformBuffersMemory[currentFrame], 0, UniformBufferObject::Sized, 0, &data);
     {
-        memcpy(data, &ubo, Sized);
+        memcpy2((__int256*)data, ax, UniformBufferObject::Sized);
     }
-    vkUnmapMemory(device, uniformBuffersMemory[currentFrame]);
+    vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory[currentFrame]);
     
 }

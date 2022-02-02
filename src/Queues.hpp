@@ -11,11 +11,16 @@ static VkQueue PresentQueue;
 static uint64_t commandPool;
 
 static VkSurfaceKHR surface;
+
+// static inline void
+// enumerateDetermineQueueFamilies(uint32_t VkQueueFamilyProperties,
+//                                 struct VkQueueFamilyProperties *queueFamilies);
+//                                 static inline VkCommandBuffer beginSingleTimeCommands();
 };
 
 // const static bool isComplete();
 
-static inline void
+inline void
 enumerateDetermineQueueFamilies(uint32_t VkQueueFamilyProperties,
                                 struct VkQueueFamilyProperties *queueFamilies) {
   // std::cout <<("Checking Available Queue families") << "\n";

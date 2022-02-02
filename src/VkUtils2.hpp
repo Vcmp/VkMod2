@@ -70,9 +70,9 @@ inline namespace VkUtils2
       SwapChainSupportDetails::createImageViews();    
       createRenderPasses();
       UniformBufferObject::createDescriptorSetLayout();
-      createGraphicsPipelineLayout();
+      PipelineX::createGraphicsPipelineLayout();
       createCommandPool();
-    //   Texture::createDepthResources();
+      Texture::createDepthResources();
       BuffersX::setupBuffers();
     //   BuffersX::createVertexBuffer();
     //   BuffersX::createStagingBuffer();
@@ -84,7 +84,7 @@ inline namespace VkUtils2
       
       UniformBufferObject::createDescriptorPool();
         UniformBufferObject::createDescriptorSets();
-      createCommandBuffers();
+      PipelineX::createCommandBuffers();
 
     //    BuffersX::createVkEvents();
     
@@ -132,7 +132,7 @@ inline void VkUtils2::setupWindow()
         // glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
 
 
-        window = glfwCreateWindow(width, height, "VKMod", nullptr, nullptr);
+        window = glfwCreateWindow(width, height, "VKMod2", nullptr, nullptr);
 
 
         if(window == NULL) exit(1);
@@ -478,8 +478,8 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
          for (auto framebuffer : swapChainFramebuffers) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
-        vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
+        // vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
+        // vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
 
         vkDestroyBuffer(device, vertexBuffer, nullptr);
         vkFreeMemory(device, vertexBufferMemory, nullptr);

@@ -42,7 +42,7 @@ inline void * Sysm(void * pv_unused)
    { _mm256_zeroall();
        while (a)
        {
-            drawFrame();aa++;
+            // drawFrame();aa++;
        }
              return NULL;
    }
@@ -99,7 +99,8 @@ inline void * Sysm(void * pv_unused)
             // }
             // pthread_join(rThrd, nullptr);
             glfwPollEvents();
-            glfwWaitEventsTimeout(1);
+            // glfwWaitEventsTimeout(1);
+             drawFrame();aa++;
             // endP = std::chrono::system_clock::now();
             
             

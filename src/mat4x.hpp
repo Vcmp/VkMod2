@@ -9,11 +9,11 @@
 // #include <avxintrin.h>
 // #include <avx2intrin.h>
 // #include <fmaintrin.h>
-#include <cstdio>
+// #include <cstdio>
 #include <immintrin.h>
 // #include <io.h>
-#include <memory>
-#include <math.h>
+// #include <memory>
+// #include <math.h>
 /*
     Have to include Pragma Guards Directly as VSCode is Dumb and dosent Know/verify that the Host/Currently Utilsied/Subejtc>Applicable/Accessib;e CPU does and cas in aftc support AVX/AVX2+FMA3 correctly
     * howver this is an issue that mostly effects the Lexical Analysis/IDE Analysis  and Thnakfully therefore  does not effect the compilation process or the executable Bianry in any tanigble or averse way manner or degree pr tanigble edtend or manner or way According to current Knwleadge.Understainding/Ascertainations
@@ -43,11 +43,11 @@ public:
          mat4x::__b=_mm256_castsi256_ps(lud(ax+8));
     }
 
-    float a[2][8];
+    // float a[2][8];
     __m256 __a;
     __m256 __b;
     __m256 __c;
-    inline constexpr __m256 __vectorcall lud(const void* a) __attribute__((alignas(__m256i)));
+    inline constexpr __m256 __vectorcall lud(const void* a) __attribute__((__aligned__(sizeof(__m256))));
     inline void domatFMA(mat4x*, __m256);
     inline void domatFMA(mat4x*);
     

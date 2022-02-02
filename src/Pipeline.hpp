@@ -2,7 +2,7 @@
 // #include "SwapChainSupportDetails.hpp"
 #include "Buffers.hpp"
 #include "UniformBufferObject.hpp"
-#include "src/Queues.hpp"
+#include "Queues.hpp"
 #include <array>
 
 
@@ -12,10 +12,13 @@ constexpr int OFFSET_POS = 0;
 constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
 constexpr float UNormFlt = 0.1F;
 static constexpr struct PipelineX {
+    private:
 static inline VkPipelineLayout vkLayout;
 static inline VkPipeline graphicsPipeline;
-
+    public:
 static inline VkCommandBuffer commandBuffers[Frames];
+inline static void createGraphicsPipelineLayout();
+inline static void createCommandBuffers();
 } inline pipeline; 
 //     static void createRenderPasses();
 //     static void createGraphicsPipelineLayout();
@@ -132,7 +135,7 @@ inline static void createRenderPasses() {
          &SwapChainSupportDetails::renderPass);
 }
 
-inline static void createGraphicsPipelineLayout() {
+inline void PipelineX::createGraphicsPipelineLayout() {
   // Thankfully Dont; need to worry about compiling the Shader Files AnyMore due
   // to
   std::cout << ("Setting up PipeLine") << "\n";
@@ -162,7 +165,7 @@ inline static void createGraphicsPipelineLayout() {
 
   static constexpr VkVertexInputBindingDescription VxL {
                 0,
-                (sizedsf/4),
+                (20),
                 VK_VERTEX_INPUT_RATE_VERTEX
         };
 
@@ -284,16 +287,16 @@ inline static void createGraphicsPipelineLayout() {
       .alphaToCoverageEnable = VK_FALSE,
       .alphaToOneEnable = VK_FALSE};
 
-          VkPipelineDepthStencilStateCreateInfo depthStencil={};
-                     depthStencil.sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-                  depthStencil.depthTestEnable=VK_TRUE;
-                  depthStencil.depthWriteEnable=VK_TRUE;
-                  depthStencil.depthCompareOp=VK_COMPARE_OP_LESS;
-                  depthStencil.depthBoundsTestEnable=VK_FALSE;
+        constexpr  VkPipelineDepthStencilStateCreateInfo depthStencil={
+                     .sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+                  .depthTestEnable=VK_TRUE,
+                  .depthWriteEnable=VK_TRUE,
+                  .depthCompareOp=VK_COMPARE_OP_LESS,
+                  .depthBoundsTestEnable=VK_FALSE,
   //                    .minDepthBounds(0) //Optional
   //                    .maxDepthBounds(1) //Optional
-                  depthStencil.stencilTestEnable=VK_FALSE;
-
+                  .stencilTestEnable=VK_FALSE,
+};
   static constexpr VkPipelineColorBlendAttachmentState colorBlendAttachment = {
       .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
                         VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
@@ -330,7 +333,7 @@ inline static void createGraphicsPipelineLayout() {
   constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
       // vkPipelineLayoutCreateInfo.pPushConstantRanges=&vkPushConstantRange;
-      .pSetLayouts=&descriptorSetLayout,
+      .pSetLayouts=&UniformBufferObject::descriptorSetLayout,
       // vkPipelineLayoutCreateInfo.flags=0;
       // vkPipelineLayoutCreateInfo.pushConstantRangeCount =1;
       .setLayoutCount=1,
@@ -355,7 +358,7 @@ inline static void createGraphicsPipelineLayout() {
       .pViewportState = &vkViewPortState,
       .pRasterizationState = &VkPipeLineRasterization,
       .pMultisampleState = &multisampling,
-    //   .pDepthStencilState=&depthStencil,
+      .pDepthStencilState=&depthStencil,
       .pColorBlendState = &colorBlending,
       //                    .pDynamicState(null,
       .layout = PipelineX::vkLayout,
@@ -385,7 +388,7 @@ inline static void createGraphicsPipelineLayout() {
   vkDestroyShaderModule(device, fragShaderModule, VK_NULL_HANDLE);
 }
 
-inline static void createCommandBuffers() {
+inline void PipelineX::createCommandBuffers() {
   const VkCommandBufferAllocateInfo allocateInfo = {
       .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
       .commandPool = (VkCommandPool)(Queues::commandPool),
@@ -446,7 +449,7 @@ inline static void createCommandBuffers() {
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,PipelineX::vkLayout, 0, 1, &descriptorSets[i], 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,PipelineX::vkLayout, 0, 1, &UniformBufferObject::descriptorSets[i], 0, nullptr);
 
     vkCmdDrawIndexed(commandBuffer, ((BuffersX::sizedsfIdx)/2), 1, 0, 0, 0);
 

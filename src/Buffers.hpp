@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SwapChainSupportDetails.hpp"
+#include "Queues.hpp"
 
 
 // = (&set + sizeof(set));
@@ -34,6 +35,7 @@ inline namespace
   {
        0, 1, 2, 2, 3, 0
   };
+  constexpr size_t vecSizsed=20;//(sizeof(vectBuf)/(sizeof(float)));
   constexpr size_t sizedsf=sizeof(vectBuf);
   constexpr size_t sizedsfIdx=sizeof(idxBuf);
   // inline void mapBuf(const float& ,const VkDeviceMemory&,  const size_t&);
@@ -43,7 +45,7 @@ inline namespace
 
 
 
-static VkOffset2D set{.x = 0, .y = 0};
+// static VkOffset2D set{.x = 0, .y = 0};
 
 static VkEvent vkEvent;
 

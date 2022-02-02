@@ -23,7 +23,7 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 endif()
 
 #set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -fuse-ld=lld -static -g -fvisibility=hidden -fno-semantic-interposition -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "-std=c++23 -v -march=native -mtune=native  -Ofast -fno-signed-zeros -fno-trapping-math -frename-registers -pthread -lpthread ")
+set(CMAKE_CXX_FLAGS "-std=c++23 -v -march=native -mtune=native -g -fverbose-asm -save-temps -masm=intel -Ofast -fvisibility=hidden -fno-semantic-interposition -fno-signed-zeros -fno-trapping-math -frename-registers -pthread -lpthread ")
 
 find_package(Vulkan REQUIRED)
 
