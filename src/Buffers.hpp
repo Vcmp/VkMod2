@@ -26,16 +26,22 @@ inline namespace
 {
   static constexpr float vectBuf[]=
   {
-     -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-    0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-    0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-    -0.5f, 0.5f, 1.0f, 1.0f, 1.0f
+     -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+    0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+    -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 1.0f
+    
+    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+    -0.5f, 0.5f, -0.5f, 1.0f, 1.0f, 1.0f
   };
   static constexpr short idxBuf[]=
   {
-       0, 1, 2, 2, 3, 0
+       0, 1, 2, 2, 3, 0,
+       4, 5, 6, 6, 7, 4
   };
-  constexpr size_t vecSizsed=20;//(sizeof(vectBuf)/(sizeof(float)));
+  constexpr size_t vecSizsed=24;//(sizeof(vectBuf)/(sizeof(float)));
   constexpr size_t sizedsf=sizeof(vectBuf);
   constexpr size_t sizedsfIdx=sizeof(idxBuf);
   // inline void mapBuf(const float& ,const VkDeviceMemory&,  const size_t&);

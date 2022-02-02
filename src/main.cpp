@@ -38,14 +38,14 @@ inline void * Sysm(void * pv_unused)
        }
              return NULL;
    }
-   inline void * RDrw(void * pv_unused)
-   { _mm256_zeroall();
-       while (a)
-       {
-            // drawFrame();aa++;
-       }
-             return NULL;
-   }
+//    inline void * RDrw(void * pv_unused)
+//    { _mm256_zeroall();
+//        while (a)
+//        {
+//             // drawFrame();aa++;
+//        }
+//              return NULL;
+//    }
      int __vectorcall main()
     {
         // float laa[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -72,7 +72,7 @@ inline void * Sysm(void * pv_unused)
         int r;
        
         r=pthread_create(&sys, nullptr, Sysm, nullptr);
-        r=pthread_create(&rThrd, nullptr, RDrw, nullptr);
+        // r=pthread_create(&rThrd, nullptr, RDrw, nullptr);
         
         //  pthread_join(sys, nullptr);
         setupRenderDraw();

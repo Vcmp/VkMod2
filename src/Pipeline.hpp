@@ -4,9 +4,10 @@
 #include "UniformBufferObject.hpp"
 #include "Queues.hpp"
 #include <array>
+#include <vulkan/vulkan_core.h>
 
 
-constexpr int OFFSETOF_COLOR = 2 * sizeof(float);
+constexpr int OFFSETOF_COLOR = 3 * sizeof(float);
 constexpr int OFFSET_POS = 0;
 
 constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
@@ -165,7 +166,7 @@ inline void PipelineX::createGraphicsPipelineLayout() {
 
   static constexpr VkVertexInputBindingDescription VxL {
                 0,
-                (20),
+                (24),
                 VK_VERTEX_INPUT_RATE_VERTEX
         };
 
@@ -174,7 +175,7 @@ inline void PipelineX::createGraphicsPipelineLayout() {
         {
             { .location=0,
                 .binding=0,
-            VK_FORMAT_R32G32_SFLOAT,
+            VK_FORMAT_R32G32B32_SFLOAT,
             OFFSET_POS},
             {
             .location=1,
@@ -260,7 +261,7 @@ inline void PipelineX::createGraphicsPipelineLayout() {
       .polygonMode = VK_POLYGON_MODE_FILL,
       .lineWidth = 1.0f,
       .cullMode =
-          VK_CULL_MODE_NONE, // WARNING: EXTREMEL:Y VERY VERY IMPORTANT!:
+          VK_CULL_MODE_BACK_BIT, // WARNING: EXTREMEL:Y VERY VERY IMPORTANT!:
                                  // Make sur ethe culling direction is correct
                                  // as it applies even to 2DVecs/Fixed
                                  // Function.Const Runtime/Evaluated Shaders
