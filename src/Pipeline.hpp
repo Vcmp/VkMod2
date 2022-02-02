@@ -258,10 +258,10 @@ inline void PipelineX::createGraphicsPipelineLayout() {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
       .depthClampEnable = VK_FALSE,
       .rasterizerDiscardEnable = VK_FALSE,
-      .polygonMode = VK_POLYGON_MODE_FILL,
+      .polygonMode = VK_POLYGON_MODE_LINE,
       .lineWidth = 1.0f,
       .cullMode =
-          VK_CULL_MODE_BACK_BIT, // WARNING: EXTREMEL:Y VERY VERY IMPORTANT!:
+          VK_CULL_MODE_NONE, // WARNING: EXTREMEL:Y VERY VERY IMPORTANT!:
                                  // Make sur ethe culling direction is correct
                                  // as it applies even to 2DVecs/Fixed
                                  // Function.Const Runtime/Evaluated Shaders
