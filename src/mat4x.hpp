@@ -1,31 +1,13 @@
 #pragma once
-// #define __SCE__ 1
-// #define __IMMINTRIN_H 1
-// #define __FMAINTRIN_H 1
-// #define _HAS_CXX20 1
-//#include <immintrin.h>
-// #include <xmmintrin.h>
-// #include <emmintrin.h>
-// #include <avxintrin.h>
-// #include <avx2intrin.h>
-// #include <fmaintrin.h>
-// #include <cstdio>
 #include <immintrin.h>
-// #include <io.h>
-// #include <memory>
-// #include <math.h>
-/*
-    Have to include Pragma Guards Directly as VSCode is Dumb and dosent Know/verify that the Host/Currently Utilsied/Subejtc>Applicable/Accessib;e CPU does and cas in aftc support AVX/AVX2+FMA3 correctly
-    * howver this is an issue that mostly effects the Lexical Analysis/IDE Analysis  and Thnakfully therefore  does not effect the compilation process or the executable Bianry in any tanigble or averse way manner or degree pr tanigble edtend or manner or way According to current Knwleadge.Understainding/Ascertainations
-    */
 
 
-//typedef __builtin_ia32_vfmaddps256 _mm256_fmadd_ps  ;
 
-//too lazy to do an SSE version as AVX in many cases can allow for the abilkity to the same steps in half as many stages.steps/procedures/Instructions/Operations e.g. .etc i.e..Misc Visa. versa.
-//Might be able to get away withput using amore explict construct arg sets and isntead just implicitly and Automatically intialise the struct iwth a constexpr Identify Maxtrix Struct.Blob/StandIn Instead
-// _read(int _FileHandle, void *_DstBuf, unsigned int _MaxCharCount)
-// fread(void *__restrict _DstBuf, size_t _ElementSize, size_t _Count, FILE *__restrict _File)
+
+/*too lazy to do an SSE version as AVX in many cases can allow for the abilkity to the same steps in half as many stages e.g.
+    Might be able to get away withput using amore explict construct arg sets and isntead just implicitly and Automatically intialise the struct iwth a constexpr Identify Maxtrix Struct.Blob/StandIn Instead
+ _read(int _FileHandle, void *_DstBuf, unsigned int _MaxCharCount)
+*/ 
 static class mat4x
 {
 private:
@@ -86,10 +68,10 @@ inline void mat4x::domatFMA(mat4x *b)
     b->__b=__builtin_ia32_vfmaddps256(mat4x::__b, b->__b, __c);
 
 }
-//Hide ugly casting syntax for aligned load as un;ike the AVX512 intrinsics provided by intel, man Load/many intrisics Functions do not include Void* by default as an Argument
+//Hide ugly casting syntax for aligned load as unlike the AVX512 intrinsics provided by intel, man Load/many intrisics Functions do not include Void* by default as an Argument
 inline constexpr __m256 __vectorcall mat4x::lud(const void* a)
 {
-    return _mm256_load_si256((__m256i*)((a)));
+    return _mm256_load_ps((__m256i*)((a)));
 } 
 
 inline constexpr mat4x* mat4x::identity()

@@ -106,19 +106,6 @@ long permuteMat(long, long);
 
 
 
-// namespace VkU2 {
-    // void extracted() {
-    //   VkUtils2::setupWindow();
-    //   VkUtils2::createInstance();
-    //   VkUtils2::setupDebugMessenger();
-    //   VkUtils2::createSurface();
-    //   VkUtils2::pickPhysicalDevice();
-    //   VkUtils2::createLogicalDevice();
-    //   VkUtils2::createSwapChain();
-    // //   VkUtils2::createImageViews();
-    //   // VkUtils2::createInstance;
-    // }
-// };
 
 
 inline void VkUtils2::setupWindow()
@@ -318,18 +305,6 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
     return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU; /*&&
            deviceFeatures.geometryShader;*/
 
-        // bool extensionsSupported = checkDeviceExtensionSupport(device);
-        // bool swapChainAdequate = false;
-        // std::cout << extensionsSupported << "\n";
-        // if(extensionsSupported) {
-		// 	std::cout << "Verifying querySwapChainSupport" << "\n";
-        //     SwapChainSupportDetails::querySwapChainSupport(device);
-        //     swapChainAdequate = formats.format && presentModes;
-        // }
-		
-		// std::cout << "Enumerating Queuefamilies" << "\n";
-        // Queues::enumerateDetermineQueueFamilies(device);
-		// return /* Queues.isComplete() && */ extensionsSupported && swapChainAdequate;
 }
 
  inline void  VkUtils2::checkDeviceExtensionSupport(VkPhysicalDevice device) {
@@ -352,12 +327,8 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
 
             VkQueueFamilyProperties uniqueQueueFamilies[pQueueFamilyPropertyCount] ;
-            // Queues::enumerateDetermineQueueFamilies(pQueueFamilyPropertyCount, uniqueQueueFamilies);   
-             //VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
             vkGetPhysicalDeviceQueueFamilyProperties(Queues::physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies);
 
-            //VkBool32 presentSupport = (VK_FALSE);
-           // std::cout << queueFamilies << "\n";
             uint32_t i = 0;
            
             for (VkQueueFamilyProperties uniqueQueue;i<pQueueFamilyPropertyCount;i++) {
@@ -379,7 +350,6 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             
             constexpr float priority = 1.0f;
              uint32_t pIx = 0;
-            // for(VkDeviceQueueCreateInfo& ques: queueCreateInfos) 
          
          VkDeviceQueueCreateInfo GQ{};
             
@@ -436,39 +406,15 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                     createInfo.pEnabledFeatures=nullptr;
 
 
-            // PointerBuffer value = asPointerBuffer(DEVICE_EXTENSIONS);
-            // memPutLong(createInfo.address() + VkDeviceCreateInfo.PPENABLEDEXTENSIONNAMES, value.address0());
-            // memPutInt(createInfo.address() + VkDeviceCreateInfo.ENABLEDEXTENSIONCOUNT, value.remaining());
-
-            // if(ENABLE_VALIDATION_LAYERS) {
-            //     createInfo.ppEnabledLayerNames(asPointerBuffer(VALIDATION_LAYERS));
-            // }
+            if constexpr(ENABLE_VALIDATION_LAYERS) {
+                createInfo.ppEnabledLayerNames=validationLayers.data();
+            }
             checkCall(vkCreateDevice(Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ));
 
               vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0,  &Queues::GraphicsQueue);
               vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &Queues::PresentQueue);
        
     }
-
-    //  static void setupQueues()
-    // {
-
-    //     nvkGetDeviceQueue(device, Queues.graphicsFamily, 0,MemSysm.address);
-    //     Queues.graphicsQueue = new VkQueue(memGetLong(MemSysm.address), device);
-
-    //     nvkGetDeviceQueue(device, Queues.presentFamily, 0,MemSysm.address);
-    //     Queues.presentQueue = new VkQueue(memGetLong(MemSysm.address), device);
-
-    // }
-
-    
-
-//This is horribly Ported from Java so May Suffer.Incur Considerable Breakage
-
-
-
-
-    
 
 
  void VkUtils2::cleanup()

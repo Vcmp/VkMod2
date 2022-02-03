@@ -8,8 +8,7 @@
 
 inline namespace BuffersX {
 
-static inline void* data = nullptr;
-// static inline void* data2 = nullptr;
+static inline void* data = nullptr; //Similar to the Hardcodes Address Field in the Memory Allocation System used in the Java Version
 
 static inline VkBuffer vertexBuffer;
 static inline VkDeviceMemory vertexBufferMemory;
@@ -24,37 +23,39 @@ static inline VkDeviceMemory indexBufferMemory;
 
 inline namespace 
 {
-  static constexpr float vectBuf[]=
+   inline constexpr float x = 0;
+   inline constexpr float y = 1;
+  static inline constexpr float vectBuf[]=
   {
-            0, 0, 0,  1, 0, 0,
-            1, 1, 0,  0, 1, 0,
-            1, 1, 0,  0, 0, 1,
-            0, 1, 0,  1, 1, 1,    
+/*0  -->*/   x, x, x,  1, 0, 0,
+/*1  -->*/   y, y, x,  x, y, x,
+/*2  -->*/   y, y, x,  x, x, y,
+/*3  -->*/   x, y, x,  y, y, y,    
 
-            0, 0, 1,  1, 0, 0,
-            1, 0, 1,  0, 1, 0,
-            1, 1, 1,  0, 0, 1,
-            0, 1, 1,  1, 1, 1,    
+/*4  -->*/   x, x, y,  y, x, x,
+/*5  -->*/   y, x, y,  x, y, x,
+/*6  -->*/   y, y, y,  x, x, y,
+/*7  -->*/   x, y, y,  y, y, y,    
 
-            0, 0, 0,  1, 0, 0,
-            1, 0, 0,  0, 1, 0,
-            1, 0, 1,  0, 0, 1,
-            0, 0, 1,  1, 1, 1,    
+/*8  -->*/   x, x, x,  y, x, x,
+/*9  -->*/    y, x, x,  x, y, x,
+/*10  -->*/   y, x, y,  x, x, y,
+/*11  -->*/   x, x, y,  y, y, y,    
 
-            0, 1, 1,  1, 0, 0,
-            1, 1, 1,  0, 1, 0,
-            1, 1, 0,  0, 0, 1,
-            0, 1, 0,  1, 1, 1,    
+ /*12  -->*/   x, y, y,  y, x, x,
+ /*13  -->*/   y, y, y,  x, y, x,
+ /*14  -->*/   y, y, x,  x, x, y,
+ /*15  -->*/   x, y, x,  y, y, y,    
 
-            0, 0, 1,  1, 0, 0,
-            0, 1, 1,  0, 1, 0,
-            0, 1, 0,  0, 0, 1,
-            0, 0, 0,  1, 1, 1,    
+ /*16  -->*/   x, x, y,  y, x, x,
+ /*17  -->*/   x, y, y,  x, y, x,
+ /*18  -->*/   x, y, x,  x, x, y,
+ /*19  -->*/   x, x, x,  y, y, y,    
 
-            1, 0, 0,  1, 0, 0,
-            1, 1, 0,  0, 1, 0,
-            1, 1, 1,  0, 0, 1,
-            1, 0, 1,  1, 1, 1,    
+ /*20  -->*/   y, x, x,  y, x, x,
+ /*21  -->*/   y, y, x,  x, y, x,
+ /*22  -->*/   y, y, y,  x, x, y,
+ /*23  -->*/   y, x, y,  y, y, y,    
   
   };
   static constexpr short idxBuf[]=
@@ -64,12 +65,11 @@ inline namespace
             8, 9, 10, 10, 11, 8,
             12, 13, 14, 14, 15, 12,
             16, 17, 18, 18, 19, 16,
-            20, 21, 22, 22, 23, 20
+            20, 21, 22, 22, 23, 20,
   };
-  constexpr size_t vecSizsed=24;//(sizeof(vectBuf)/(sizeof(float)));
+
   constexpr size_t sizedsf=sizeof(vectBuf);
   constexpr size_t sizedsfIdx=sizeof(idxBuf);
-  // inline void mapBuf(const float& ,const VkDeviceMemory&,  const size_t&);
   
   static void copyBuffer(VkBuffer&, const size_t);
 };
@@ -166,14 +166,7 @@ inline void BuffersX::createVkEvents() {
           }
           vkUnmapMemory(device, stagingBufferMemory);
           copyBuffer(indexBuffer, sizedsfIdx);
-         
-
-
-      //   {
-      //   }
-      //   vkUnmapMemory(device, stagingBufferMemory);
-
-      
+               
  
     }
 

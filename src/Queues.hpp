@@ -11,49 +11,8 @@ static VkQueue PresentQueue;
 static uint64_t commandPool;
 
 static VkSurfaceKHR surface;
-
-// static inline void
-// enumerateDetermineQueueFamilies(uint32_t VkQueueFamilyProperties,
-//                                 struct VkQueueFamilyProperties *queueFamilies);
-//                                 static inline VkCommandBuffer beginSingleTimeCommands();
 };
 
-// const static bool isComplete();
-
-inline void
-enumerateDetermineQueueFamilies(uint32_t VkQueueFamilyProperties,
-                                struct VkQueueFamilyProperties *queueFamilies) {
-  // std::cout <<("Checking Available Queue families") << "\n";
-
-  // uint32_t pQueueFamilyPropertyCount=0;
-  // vkGetPhysicalDeviceQueueFamilyProperties(device,
-  // &pQueueFamilyPropertyCount, nullptr);
-  // VkQueueFamilyProperties queueFamilies[pQueueFamilyPropertyCount];
-  vkGetPhysicalDeviceQueueFamilyProperties(
-      Queues::physicalDevice, &VkQueueFamilyProperties, queueFamilies);
-
-  // VkBool32 presentSupport = (VK_FALSE);
-  // std::cout << queueFamilies << "\n";
-  uint32_t i = 0;
-
-  for (; i < VkQueueFamilyProperties; i++) {
-    // std::cout <<(queueFamilies[i].queueCount)<< "\n";
-    if ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
-      Queues::graphicsFamily = i;
-    }
-    // if (isComplete())
-    //     break;
-
-    // i++;
-  }
-  // return *queueFamilies;
-
-  //
-  //                while (i <queueFamilyCount.limit() /*&& !isComplete()*/) {
-
-  // std::cout <<a <<"Graphics Family: " << graphicsFamily << " Present family:
-  // " << presentFamily<< "\n";
-}
 static inline void createCommandPool() {
   const VkCommandPoolCreateInfo poolInfo = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -64,15 +23,17 @@ static inline void createCommandPool() {
   Queues::commandPool = clPPPI2(&poolInfo, "vkCreateCommandPool");
 }
 
-static inline VkCommandBuffer beginSingleTimeCommands() {
+static inline VkCommandBuffer beginSingleTimeCommands() 
+{
 
-  const VkCommandBufferAllocateInfo allocateInfo = {
-  .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
-  .pNext = VK_NULL_HANDLE,
-  .commandPool = (VkCommandPool)(Queues::commandPool),
-  .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
-  .commandBufferCount = (1),
-};
+  const VkCommandBufferAllocateInfo allocateInfo
+  {
+    .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
+    .pNext = VK_NULL_HANDLE,
+    .commandPool = (VkCommandPool)(Queues::commandPool),
+    .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
+    .commandBufferCount = (1),
+  };
   VkCommandBuffer commandBuffer;
   vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffer);
   constexpr VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {

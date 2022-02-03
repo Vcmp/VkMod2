@@ -29,62 +29,44 @@ inline void Texture::createDepthResources() {
 }
 
 inline void Texture::createTextureImage() {
-  const char a[] = ("bin/shaders/terrain.png");
-  std::cout << (a);
+  // const char a[] = ("bin/shaders/terrain.png");
+  // std::cout << (a);
 
-  //         const int fhndl=_sopen(a, _O_RDONLY | _O_BINARY | _O_SEQUENTIAL,
-  //         0x20, 0x0100);
-  //     // if(!file)
-  //     // {
-  //     //     std::runtime_error("Fail:Bad or No ShaderFile!");
-  //     // }
-  //      _lseek(fhndl, 0, SEEK_END);
-  const size_t size = 0; //_tell(fhndl);
-                         //    _lseek(fhndl, 0, SEEK_END);
+  // const size_t size = 0;
 
-  uint8_t pixels[size];
+  // uint8_t pixels[size];
 
-  //     std::cout<< size << "\n";
-  //    if(_eof(fhndl)==-1)
-  //     {
 
-  //        throw std::runtime_error("Fail:Bad or No ShaderFile!");
-  //     }
-  //      _read(fhndl, pixels, size);
-  //      std::cout<< pixels << "\n";
-  //     _flushall();
-  //     _close(fhndl);
+  // size_t imageSize = sizeof(pixels) * 3;
 
-  size_t imageSize = sizeof(pixels) * 3;
+  // if (pixels == nullptr) {
+  //   throw std::runtime_error("No Image!");
+  // }
 
-  if (pixels == nullptr) {
-    throw std::runtime_error("No Image!");
-  }
+  // VkBuffer stagingBufferImg = {0};
+  // /* BuffersX::setBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, imageSize,
+  //                     stagingBufferImg); */
+  // VkDeviceMemory stagingBufferMemoryImg = {0};
+  // // BuffersX::createBuffer(stagingBufferImg, stagingBufferMemoryImg);
 
-  VkBuffer stagingBufferImg = {0};
-  /* BuffersX::setBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, imageSize,
-                      stagingBufferImg); */
-  VkDeviceMemory stagingBufferMemoryImg = {0};
-  // BuffersX::createBuffer(stagingBufferImg, stagingBufferMemoryImg);
+  // // vkMapMemory(device, stagingBufferMemoryImg, 0, imageSize, 0,
+  // // MemSysm.address);
+  // {
+  //   //                        memByteBuffer(getHandle(), imageSize).put(pixels);
+  //   //    memcpy((pixels), MemSysm.getHandle(), imageSize);
+  // }
+  // vkUnmapMemory(device, stagingBufferMemoryImg);
+  // // STBImage.stbi_image_free(pixels);
 
-  // vkMapMemory(device, stagingBufferMemoryImg, 0, imageSize, 0,
-  // MemSysm.address);
-  {
-    //                        memByteBuffer(getHandle(), imageSize).put(pixels);
-    //    memcpy((pixels), MemSysm.getHandle(), imageSize);
-  }
-  vkUnmapMemory(device, stagingBufferMemoryImg);
-  // STBImage.stbi_image_free(pixels);
+  // // Texture::createImage(1024, 1024,
+  // //         VK_FORMAT_R8G8B8A8_SRGB,
+  // //         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+  // // );
 
-  // Texture::createImage(1024, 1024,
-  //         VK_FORMAT_R8G8B8A8_SRGB,
-  //         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
-  // );
-
-  // copyBufferToImage(stagingBufferImg, 1024, 1024);
-  Texture::transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB,
-                                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+  // // copyBufferToImage(stagingBufferImg, 1024, 1024);
+  // Texture::transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB,
+  //                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+  //                                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }
 
 inline void Texture::createImage(VkExtent2D extent, VkFormat format,
@@ -156,7 +138,7 @@ static void Texture::transitionImageLayout(VkFormat format,
                                   .baseArrayLayer = (0),
                                   .layerCount = (1)},
   };
-  //            membarrier=barrier.address0();
+
   if (newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
 
     if (format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
@@ -206,7 +188,6 @@ static void Texture::transitionImageLayout(VkFormat format,
                        destinationStage /* TODO */, 0, 0, VK_NULL_HANDLE, 0,
                        VK_NULL_HANDLE, 1, &barrier);
   endSingleTimeCommands(commandBuffer);
-  // endSingleTimeCommands(commandBuffer);
 }
 
 inline void Texture::createImageView(VkFormat swapChainImageFormat,
@@ -223,7 +204,6 @@ inline void Texture::createImageView(VkFormat swapChainImageFormat,
   createInfo.subresourceRange.levelCount = (1);
   createInfo.subresourceRange.baseArrayLayer = (0);
   createInfo.subresourceRange.layerCount = (1);
-  //                    Memsys2.free(createInfo);//nmemFree(createInfo.address());
 
   clPPPI(&createInfo, "vkCreateImageView", &a);
 }

@@ -2,16 +2,11 @@
 #pragma once
 #include "Queues.hpp"
 
-// static VkSurfaceFormatKHR formats={};
 
 inline namespace SwapChainSupportDetails {
-// static VkPresentModeKHR presentModes={};
 static inline VkSurfaceCapabilitiesKHR capabilities{};
 
 static inline VkImageLayout depthImageView;
-// static inline VkSurfaceFormatKHR *formats;
-// static inline VkPresentModeKHR   *presentModes;
-//    static inline VkSurfaceFormatKHR* formats;
 static inline VkSwapchainKHR swapChain;
 static inline uint32_t count;
 
@@ -21,14 +16,13 @@ static inline VkRenderPass renderPass;
 static inline VkExtent2D swapChainExtent;
 static inline VkImage swapchainImages[Frames];
 static inline VkFramebuffer swapChainFramebuffers[Frames];
-// static void querySwapChainSupport(VkPhysicalDevice);
 
 inline uint32_t clamp(uint32_t min, uint32_t max, uint32_t value) {
   const uint32_t a = (max < value ? max : value);
   return (min > a ? min : a);
 }
 inline VkExtent2D chooseSwapExtent()
-// todo: MAy nto Detect Actal Extent Correctly"
+// todo: May not Detect Acutal Extent Correctly"
 {
   if (capabilities.currentExtent.width != 0xFFFFFFFF) {
     return capabilities.currentExtent;
@@ -78,9 +72,7 @@ chooseSwapSurfaceFormat(const VkSurfaceFormatKHR *formats) {
 inline void querySwapChainSupport(VkSurfaceFormatKHR *formats,
                                   VkPresentModeKHR *presentModes) {
 
-  // VkSurfaceFormatKHR *formats;
   if (count != 0) {
-    // formats =  new VkSurfaceFormatKHR[count];
     vkGetPhysicalDeviceSurfaceFormatsKHR(Queues::physicalDevice, Queues::surface, &count,
                                          formats);
   }
@@ -88,13 +80,10 @@ inline void querySwapChainSupport(VkSurfaceFormatKHR *formats,
   vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
                                             nullptr);
 
-  // VkPresentModeKHR    presentModes;
   if (count != 0) {
-    // presentModes = new VkPresentModeKHR[count];
     vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
                                               presentModes);
   }
-  //   formats1=formats;
 }
 
 inline void createSwapChain() {
@@ -112,7 +101,6 @@ inline void createSwapChain() {
   vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
                                             nullptr);
   VkPresentModeKHR presentModes[count];
-  // VkPresentModeKHR    presentModes;
   if (count != 0)
     vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
                                               presentModes);
@@ -153,18 +141,16 @@ inline void createSwapChain() {
   const VkSwapchainCreateInfoKHR createInfo{
 
       .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+      .pNext = nullptr,
       .surface = Queues::surface,
 
       // Image settings
       .minImageCount = imageCount,
-      .imageFormat =
-          surfaceFormat.format, //=&surfaceFormat;
-                                ////BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG,
+      .imageFormat = surfaceFormat.format,
       .imageColorSpace = surfaceFormat.colorSpace,
       .imageExtent = extent,
       .imageArrayLayers = 1,
       .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-      .pNext = nullptr,
 
       // if (graphicsFamily != presentFamily) {
       //     .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
@@ -188,7 +174,7 @@ inline void createSwapChain() {
   // auto xx=PFN_vkVoidFunction(swapChain);
   checkCall(vkCreateSwapchainKHR(
       device, &createInfo, nullptr,
-      &swapChain)); // BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+      &swapChain));
 
   // checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount,
   // nullptr));
@@ -234,75 +220,26 @@ inline void createImageViews() {
 }
 
 inline void createFramebuffers() {
-  //  PointerBuffer attachments;
-  //               if(depthBuffer)
-  //               else
-  //                   attachments = stack.stack.longs(1);
+ 
   VkFramebufferCreateInfo framebufferCreateInfo = {};
   framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
   framebufferCreateInfo.renderPass = renderPass;
   framebufferCreateInfo.width = swapChainExtent.width;
   framebufferCreateInfo.height = swapChainExtent.height;
   framebufferCreateInfo.layers = 1;
-  // attachments = MemSysm.longs=(swapChainImageFormat,
-  // &Buffers::depthImageView));
 
-  //                      .sType(VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO)
-  // int a =swapChainImageFormat;
-  // int b=depthImageView;
-  // int abx[]={a,b};
   framebufferCreateInfo.attachmentCount =
       1; //(framebufferCreateInfo.address(), (attachments).remaining());
          //    framebufferCreateInfo.pAttachments= swapChainImageViews;
   for (size_t i = 0; i < Frames; i++) {
-    // VkImageView attachments[] = {swapChainImageViews[i]};
-    // VkFramebufferAttachmentImageInfo AttachmentImageInfo[2];// =
-    // VkFramebufferAttachmentImageInfo.create(MemSysm.calloc(VkFramebufferAttachmentImageInfo.SIZEOF
-    // * 2L), 2); AttachmentImageInfo[0]={};
-    //         // AttachmentImageInfo[0].sType=VK_STRUCTURE
-    //         AttachmentImageInfo[0].layerCount=(1);
-    //         AttachmentImageInfo[0].width=(swapChainExtent.width);
-    //         AttachmentImageInfo[0].height=(swapChainExtent.height);
-    //         AttachmentImageInfo[0].usage=(VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-    //         VK_IMAGE_USAGE_SAMPLED_BIT);
-    //         AttachmentImageInfo[0].pViewFormats=(VK_FORMAT_R8G8B8A8_SRGB);
-
+    
     framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
-    // AttachmentImageInfo[1]= {};
-    //         // AttachmentImageInfo[1].sType$Default();
-    //         AttachmentImageInfo[1].layerCount=(1);
-    //         AttachmentImageInfo[1].width=(swapChainExtent.width);
-    //         AttachmentImageInfo[1].height=(swapChainExtent.height);
-    //         AttachmentImageInfo[1].usage=(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-    //         AttachmentImageInfo[1].pViewFormats=(&Texture::findDepthFormat());
-    // AttachmentImageInfo[1].pViewFormats=(&Texture::findDepthFormat());
-
-    // Lets allocate the create info struct once and just update the
-    // pAttachments field each iteration
-
-    // todo: Check only oneusbpass runing due to differing ColourDpetHFormats
-    // and isn;t coauong probelsm sude to Sumuetnous ComandBuffering nort
-    // requiinG fencing.Allowing for FenceSkip
-    // memPutLong(framebufferCreateInfo.address() +
-    // VkFramebufferCreateInfo.PATTACHMENTS, memAddress0(attachments));
-    //               memPutInt(framebufferCreateInfo.address() +
-    //               VkFramebufferCreateInfo.ATTACHMENTCOUNT, 1);
-    // memPutInt(framebufferCreateInfo.address() +
-    // VkFramebufferCreateInfo.ATTACHMENTCOUNT, attachments.capacity());
-    // Memsys2.free(framebufferCreateInfo);
-    // nmemFree(framebufferCreateInfo.address());
-    // TODO: warn Possible Fail!
+   
 
     clPPPI(&framebufferCreateInfo, "vkCreateFramebuffer",
            &swapChainFramebuffers[i]);
   }
-  // for (int i = 0; i < swapChainImageViews.capacity(); i++) {
-  //     attachments.put(0, swapChainImageViews.get(i));
-
-  //     swapChainFramebuffers.put(i,
-  //     MemSysm.doPointerAllocSafe(framebufferCreateInfo/*.pNext(NULL)*/,
-  //     Buffers.capabilities.vkCreateFramebuffer));
-  // }
+ 
 }
 
-}; // namespace SwapChainSupportDetails
+}; 

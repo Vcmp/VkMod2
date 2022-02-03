@@ -37,10 +37,7 @@ inline VkShaderModule
 ShaderSPIRVUtils::compileShaderFile(const char *shaderNamePath1) {
 
   auto axl = doRead(shaderNamePath1);
-  // axl[axl.size()-1]=(0x07230203);
 
-  // for(uint32_t a=0;a<axl.size();a++)
-  //     std::cout<<axl[a];
   VkShaderModule axx = {};
   VkShaderModuleCreateInfo VsMCI = {};
 
@@ -52,11 +49,5 @@ ShaderSPIRVUtils::compileShaderFile(const char *shaderNamePath1) {
   clPPPI(&VsMCI, "vkCreateShaderModule", &axx);
   const VkShaderModule axx2 = axx;
   return axx2;
-  // clPPPI(&VsMCI, "vkCreateShaderModule", &axx);
-  // if (a!=VK_SUCCESS)
-  // {
-  //     std::cout <<a<<"\n";
-  //     throw std::runtime_error("Fail: Bad Shader Module");
-  // }
-  // return axx;
+  
 }
