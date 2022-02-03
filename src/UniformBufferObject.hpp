@@ -8,8 +8,8 @@
 #include "Buffers.hpp"
 static inline struct alignas(sizeof(__m256)) UBO{
      glm::mat4 model;
-      const glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-      const glm::mat4 proj=glm::perspective(glm::radians(45.0f)*-1, width/ (float)height, 0.7f, 90.0f);
+     glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+     glm::mat4 proj=glm::perspective(glm::radians(45.0f)*-1, width/ (float)height, 0.7f, 90.0f);
     //mat4 Trans;
 } inline ubo;
 static constexpr struct UniformBufferObject 
@@ -18,12 +18,12 @@ static constexpr struct UniformBufferObject
  
 
 static constexpr size_t Sized=(sizeof(ubo));
-static inline VkDescriptorSet descriptorSets[Frames];
+static inline VkDescriptorSet descriptorSets;
 static inline VkDescriptorSetLayout descriptorSetLayout;
 static inline VkDescriptorPool descriptorPool;
 static inline VkImageView textureImageView;
-static inline VkBuffer uniformBuffers[Frames];
-static inline VkDeviceMemory uniformBuffersMemory[Frames];
+static inline VkBuffer uniformBuffers;
+static inline VkDeviceMemory uniformBuffersMemory;
 
 
 static void createDescriptorSetLayout() 
@@ -33,7 +33,7 @@ static void createDescriptorSetLayout()
         .binding = 0,
           .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
           .descriptorCount = 1,
-          .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+          .stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS,
         /* { .binding = 1,
           .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
           .descriptorCount = 1,
@@ -56,9 +56,9 @@ static void createDescriptorSetLayout()
 
 static void createUniformBuffers()
 {
-   for (int i = 0; i < Frames; i++) {
+   for (int i = 0; i < 1; i++) {
 
-        BuffersX::createSetBuffer((VkMemoryPropertyFlagBits)(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT), uniformBuffers[i], VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, Sized, uniformBuffersMemory[i]);
+        BuffersX::createSetBuffer((VkMemoryPropertyFlagBits)(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT), uniformBuffers, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, Sized, uniformBuffersMemory);
            
    }
 }
@@ -130,11 +130,11 @@ static void createDescriptorPool()
                     .pSetLayouts=layouts.data()
             };
 
-            checkCall(vkAllocateDescriptorSets(device, &allocInfo, descriptorSets));
-      for(int i=0; i< Frames;i++)
+            checkCall(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets));
+      for(int i=0; i< 1;i++)
       {
             VkDescriptorBufferInfo bufferInfo{
-                    .buffer=uniformBuffers[i],
+                    .buffer=uniformBuffers,
                     .offset=0,
                     .range=(Sized)
             };
@@ -149,7 +149,7 @@ static void createDescriptorPool()
 
                   
                        .sType=VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                      .dstSet=descriptorSets[i],
+                      .dstSet=descriptorSets,
                       .dstBinding=0,
                             .dstArrayElement=0,
                             .descriptorCount=1,

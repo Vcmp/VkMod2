@@ -187,7 +187,7 @@ static void Texture::transitionImageLayout(VkFormat format,
   vkCmdPipelineBarrier(commandBuffer, sourceStage /* TODO */,
                        destinationStage /* TODO */, 0, 0, VK_NULL_HANDLE, 0,
                        VK_NULL_HANDLE, 1, &barrier);
-  endSingleTimeCommands(commandBuffer);
+  Queues::endSingleTimeCommands(commandBuffer);
 }
 
 inline void Texture::createImageView(VkFormat swapChainImageFormat,

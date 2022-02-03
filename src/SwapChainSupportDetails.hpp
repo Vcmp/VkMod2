@@ -86,7 +86,8 @@ inline void querySwapChainSupport(VkSurfaceFormatKHR *formats,
   }
 }
 
-inline void createSwapChain() {
+inline void createSwapChain() 
+{
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Queues::physicalDevice, Queues::surface,
                                             &capabilities);
 

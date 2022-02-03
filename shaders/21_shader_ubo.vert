@@ -1,4 +1,5 @@
 #version 460
+#extension GL_EXT_debug_printf : enable
 layout(binding = 0) uniform UBO {
   mat4 model;
   mat4 view;
@@ -14,4 +15,6 @@ layout(location = 0) out vec3 fragColor;
 void main() {
   gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
   fragColor = inColor;
+
+  debugPrintfEXT("%f", gl_Position);
 }

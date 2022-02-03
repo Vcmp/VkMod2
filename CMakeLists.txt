@@ -1,6 +1,6 @@
-﻿# CMakeList.txt : CMake project for vulkan_guide, include source and define
-# project specific logic here.
-#
+﻿# Partially caniballised from vkGuide.net: 
+
+
 cmake_minimum_required (VERSION 3.17)
 
 project ("VkMod2")
@@ -22,8 +22,8 @@ if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 	set(GCC 1)
 endif()
 
-set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-# set(CMAKE_CXX_FLAGS "-std=c++23 -v -march=native -mtune=native -g -fverbose-asm -save-temps -masm=intel -Ofast -fvisibility=hidden -fno-semantic-interposition -fno-signed-zeros -fno-trapping-math -frename-registers -pthread -lpthread ")
+# set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
+set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -g  -O0 -g -gmodules -fverbose-asm -save-temps -masm=intel -fsanitize=address -fno-common -fno-omit-frame-pointer -fsanitize-address-use-after-return=always -flax-vector-conversions=all -time -ftime-report -fno-common -fstandalone-debug -fvect-cost-model -fno-inline -pthread -lpthread ")
 
 find_package(Vulkan REQUIRED)
 
@@ -43,14 +43,15 @@ add_subdirectory(glm)
 # Add source to this project's executable.
 
 add_executable(VkMod2
-	src/main.cpp   
+	src/main.cpp
+	src/VkUtils2.hpp   
+	src/renderer2.hpp   
 	)
    
    # set_target_properties (VkMod2 PROPERTIES CXX_STANDARD 20)
    # target_compile_options(${PROJECT_NAME} INTERFACE "/Zc:__cplusplus")
    # target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 #set_property(TARGET VkMod2 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:vulkan_guide>")
-
 target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb_image")
 # target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm")
@@ -71,7 +72,7 @@ add_dependencies(VkMod2 Shaders)
 
 find_program(GLSLC glslc HINTS $ENV{VULKAN_SDK}/Bin/)
 
-## find all the shader files under the shaders folder
+## TODO: make this recompile shader files if they are changed/do not match checksums instead of having to mnaully delete them each time
 file(GLOB_RECURSE GLSL_SOURCE_FILES
     "${PROJECT_SOURCE_DIR}/shaders/*.frag"
     "${PROJECT_SOURCE_DIR}/shaders/*.vert"

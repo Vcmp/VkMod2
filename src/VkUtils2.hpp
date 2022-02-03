@@ -72,7 +72,7 @@ inline namespace VkUtils2
       UniformBufferObject::createDescriptorSetLayout();
       PipelineX::createGraphicsPipelineLayout();
       createCommandPool();
-      Texture::createDepthResources();
+    //   Texture::createDepthResources();
       BuffersX::setupBuffers();
     //   BuffersX::createVertexBuffer();
     //   BuffersX::createStagingBuffer();
@@ -135,8 +135,12 @@ inline void VkUtils2::createInstance()
         {
              std::runtime_error("Validation requested but not supported");
         }
+
+        static constexpr VkValidationFeatureEnableEXT valdFeatures[] = {VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT, VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT, VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT};
         constexpr VkValidationFeaturesEXT extValidationFeatures = {
-        .sType=VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT
+        .sType=VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
+        .enabledValidationFeatureCount= 3,
+        .pEnabledValidationFeatures=valdFeatures,
                 // extValidationFeatures.pEnabledValidationFeatures=&a;
         };
 
@@ -330,7 +334,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             vkGetPhysicalDeviceQueueFamilyProperties(Queues::physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies);
 
             uint32_t i = 0;
-           
+           //todo: Likley/Prop won;t work with AMD properly 
             for (VkQueueFamilyProperties uniqueQueue;i<pQueueFamilyPropertyCount;i++) {
                 std::cout <<(uniqueQueue.queueCount)<< "\n";
                 if ((uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
@@ -371,15 +375,15 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
               
             VkDeviceQueueCreateInfo queueCreateInfos[2]={GQ, PQ};
             
-              VkPhysicalDeviceVulkan12Features deviceVulkan12Features={
+            static   VkPhysicalDeviceVulkan12Features deviceVulkan12Features={
                     .sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+                    .pNext=VK_NULL_HANDLE,
                     .descriptorBindingPartiallyBound=true,
                     .imagelessFramebuffer=true,
-                    .pNext=VK_NULL_HANDLE
                     
          };
 
-           constexpr VkPhysicalDeviceFeatures deviceFeatures={};
+           static constexpr VkPhysicalDeviceFeatures deviceFeatures={};
 
             VkPhysicalDeviceFeatures2 deviceFeatures2={
                     .sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
@@ -402,7 +406,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                     createInfo.pQueueCreateInfos=queueCreateInfos;
                     createInfo.ppEnabledExtensionNames=(deviceExtensions);
                     createInfo.enabledExtensionCount=static_cast<uint32_t>(validationLayers.size());
-                    createInfo.ppEnabledLayerNames=(validationLayers.data());
+                    // createInfo.ppEnabledLayerNames=(validationLayers.data());
                     createInfo.pEnabledFeatures=nullptr;
 
 

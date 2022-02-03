@@ -112,6 +112,7 @@ inline void BuffersX::createVkEvents() {
 
   VkEventCreateInfo vkEventCreateInfo = {};
   vkEventCreateInfo.sType = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
+  vkEventCreateInfo.pNext = nullptr;
 
   clPPPI(&vkEventCreateInfo, "vkCreateEvent", &vkEvent);
 }
@@ -166,7 +167,7 @@ inline void BuffersX::createVkEvents() {
           }
           vkUnmapMemory(device, stagingBufferMemory);
           copyBuffer(indexBuffer, sizedsfIdx);
-               
+     
  
     }
 
@@ -177,6 +178,7 @@ inline void BuffersX::createVkEvents() {
     {
           const VkBufferCreateInfo allocateInfo ={
                 .sType=VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+                .pNext=nullptr,
                 .size=sized,
                 .usage=usage,
                 .sharingMode=VK_SHARING_MODE_EXCLUSIVE,
@@ -190,6 +192,7 @@ inline void BuffersX::createVkEvents() {
 
         VkMemoryAllocateInfo allocateInfo1 = {
                 .sType=VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+                .pNext=nullptr,
                 .allocationSize=memRequirements.size,
                 .memoryTypeIndex=findMemoryType(Queues::physicalDevice, memRequirements.memoryTypeBits, properties),
         };

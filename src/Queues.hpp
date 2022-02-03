@@ -11,9 +11,14 @@ static VkQueue PresentQueue;
 static uint64_t commandPool;
 
 static VkSurfaceKHR surface;
+
+static inline void createCommandPool();
+static inline VkCommandBuffer beginSingleTimeCommands();
+static void endSingleTimeCommands(VkCommandBuffer &commandBuffer);
+
 };
 
-static inline void createCommandPool() {
+static inline void Queues::createCommandPool() {
   const VkCommandPoolCreateInfo poolInfo = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
       .queueFamilyIndex = Queues::graphicsFamily,
@@ -23,7 +28,7 @@ static inline void createCommandPool() {
   Queues::commandPool = clPPPI2(&poolInfo, "vkCreateCommandPool");
 }
 
-static inline VkCommandBuffer beginSingleTimeCommands() 
+inline VkCommandBuffer Queues::beginSingleTimeCommands() 
 {
 
   const VkCommandBufferAllocateInfo allocateInfo
@@ -44,7 +49,7 @@ static inline VkCommandBuffer beginSingleTimeCommands()
   return commandBuffer;
 }
 
-static void endSingleTimeCommands(const VkCommandBuffer &commandBuffer) {
+inline void Queues::endSingleTimeCommands(VkCommandBuffer &commandBuffer) {
   vkEndCommandBuffer(commandBuffer);
   const VkSubmitInfo submitInfo1 = {.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
                                     .pNext = VK_NULL_HANDLE,

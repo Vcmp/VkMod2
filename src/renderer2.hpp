@@ -1,5 +1,4 @@
 #pragma once
-#include "GLFW/glfw3.h"
 #include "Pipeline.hpp"
 #include "UniformBufferObject.hpp"
 #include "glm/detail/qualifier.hpp"
@@ -55,7 +54,8 @@ inline void setupRenderDraw()
                         
 
                         (clPPPI(&r2.vkCreateCSemaphore, "vkCreateSemaphore", &r2.AvailableSemaphore));
-                         
+                             r2.updateUniformBuffer();
+
     
 
 }
@@ -77,7 +77,7 @@ inline void drawFrame()
   
   
    
-                  
+                  r2.info.pWaitSemaphores = &r2.AvailableSemaphore;
 
 
     checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &r2.VkPresentInfoKHR1));
@@ -105,10 +105,11 @@ inline void renderer2::updateUniformBuffer()
     /*Should Ideally Peristently map the Uniberform buffer allocation instead 
         *Howver don't currently know of a method to carry this out in C++ without Java Unsafe API Black Magic (Write to mem addresses dierctly without Type checking)
         */
-    vkMapMemory(device, UniformBufferObject::uniformBuffersMemory[currentFrame], 0, UniformBufferObject::Sized, 0, &data);
+    vkMapMemory(device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data);
     {
         memcpy2((__int256*)data, ax, UniformBufferObject::Sized);
     }
-    vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory[currentFrame]);
+    vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory);
+     data=nullptr;
     
 }
