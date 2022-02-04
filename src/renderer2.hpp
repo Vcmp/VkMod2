@@ -4,6 +4,7 @@
 #include "glm/detail/qualifier.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "Buffers.hpp"
+#include "src/UniformBufferObject.hpp"
 
 //trick to use builtins+Attributes to treat a blob of memory as a vector type which compiles more cleanly into slightly better asm with vmovps (At least with Clang)
 typedef size_t __int256 __attribute__((__vector_size__(UniformBufferObject::Sized), __aligned__(256)));
@@ -48,13 +49,13 @@ constexpr static struct renderer2
    
  
 
-inline void setupRenderDraw()
+inline void  renderer2::setupRenderDraw()
 {
                         
                         
 
-                        (clPPPI(&r2.vkCreateCSemaphore, "vkCreateSemaphore", &r2.AvailableSemaphore));
-                             r2.updateUniformBuffer();
+                        (clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore));
+                           
 
     
 
@@ -62,27 +63,27 @@ inline void setupRenderDraw()
 
 
 //Lazy way to avoid having to deal with fences via use of SIMULTANEOUS USE BIT which depsote the apparent ineffciency of redundant submision is drastically more performant than a considrrable degree of more contventional fence/Synchronisation setups
-inline void drawFrame()
+inline void renderer2::drawFrame()
 {
     
     
-    checkCall(vkAcquireNextImageKHR(device, swapChain, r2.TmUt, r2.AvailableSemaphore, VK_NULL_HANDLE, &r2.currentFrame));
+    checkCall(vkAcquireNextImageKHR(device, swapChain,TmUt,AvailableSemaphore, VK_NULL_HANDLE, &currentFrame));
 
     
-    r2.updateUniformBuffer();
-        r2.info.pCommandBuffers = &PipelineX::commandBuffers[r2.currentFrame];
+   updateUniformBuffer();
+       info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
       
 
-    checkCall(vkQueueSubmit(Queues::GraphicsQueue, 1, &r2.info, VK_NULL_HANDLE));
+    checkCall(vkQueueSubmit(Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE));
   
   
    
-                  r2.info.pWaitSemaphores = &r2.AvailableSemaphore;
+                //  info.pWaitSemaphores = &AvailableSemaphore;
 
 
-    checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &r2.VkPresentInfoKHR1));
+    checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &VkPresentInfoKHR1));
 
-    r2.currentFrame = (r2.currentFrame + 1) % Frames;
+   currentFrame = (currentFrame + 1) % Frames;
 
    
 }
@@ -107,7 +108,7 @@ inline void renderer2::updateUniformBuffer()
         */
     vkMapMemory(device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data);
     {
-        memcpy2((__int256*)data, ax, UniformBufferObject::Sized);
+        memcpy(data, &ubo, UniformBufferObject::Sized);
     }
     vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory);
      data=nullptr;

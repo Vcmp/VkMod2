@@ -39,7 +39,7 @@ constexpr uint16_t height = 480;
 
  constexpr __int128 aXX = 0xF;
  constexpr uint8_t Frames=3;
- constexpr bool checks=true;
+ constexpr bool checks=false;
 
     // Their may seem to be an anomalous memory leak when the main render Loop/Draw Call is used; howver this is mearly/primaro;y due to the Validation layers being enabled, however if said Validation Layers are disabled, the memeory leak virtually entirely disappears and at least thus far does not seem to be an issue thankfully
      constexpr bool debug=false;

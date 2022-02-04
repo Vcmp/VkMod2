@@ -7,8 +7,6 @@
 
 #include "Pipeline.hpp"
 #include "Queues.hpp"
-#include "src/Queues.hpp"
-#include <vulkan/vulkan_core.h>
 
 
 
@@ -74,7 +72,7 @@ inline namespace VkUtils2
       UniformBufferObject::createDescriptorSetLayout();
       PipelineX::createGraphicsPipelineLayout();
       createCommandPool();
-    //   Texture::createDepthResources();
+      Texture::createDepthResources();
       BuffersX::setupBuffers();
     //   BuffersX::createVertexBuffer();
     //   BuffersX::createStagingBuffer();
@@ -141,8 +139,8 @@ inline void VkUtils2::createInstance()
         static constexpr VkValidationFeatureEnableEXT valdFeatures[] = {VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT, VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT, VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT};
         constexpr VkValidationFeaturesEXT extValidationFeatures = {
         .sType=VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
-        // .enabledValidationFeatureCount= 3,
-        // .pEnabledValidationFeatures=valdFeatures,
+        .enabledValidationFeatureCount= 3,
+        .pEnabledValidationFeatures=valdFeatures,
                 // extValidationFeatures.pEnabledValidationFeatures=&a;
         };
 
@@ -341,15 +339,15 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                 std::cout <<(uniqueQueue.queueCount)<< "\n";
                 if ((uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
                     Queues::graphicsFamily = i;
+                    continue;
                 }
                 VkBool32 presentSupport = false;
                 vkGetPhysicalDeviceSurfaceSupportKHR(Queues::physicalDevice, i, Queues::surface, &presentSupport);
-                 if (uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !presentSupport && uniqueQueue.queueFlags & 0x00000020) {
+                 if (uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !presentSupport) {
                     Queues::presentFamily = i;
-                }
-                if (Queues::presentFamily != NULL&& Queues::graphicsFamily!= NULL)
                     break;
-            
+                }
+             
                 i++;
             }
            std::cout <<"Using: "<< graphicsFamily <<"-->"<< presentFamily << "\n";
@@ -418,7 +416,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             checkCall(vkCreateDevice(Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ));
 
               vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0,  &Queues::GraphicsQueue);
-              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &Queues::PresentQueue);
+            //   vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &Queues::PresentQueue);
        
     }
 

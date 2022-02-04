@@ -13,7 +13,7 @@ static inline struct alignas(sizeof(__m256)) UBO{
      glm::mat4 proj=glm::perspective(glm::radians(45.0f)*-1, width/ (float)height, 0.7f, 90.0f);
     //mat4 Trans;
 } inline ubo;
-static constexpr struct UniformBufferObject 
+ struct UniformBufferObject 
 {
 
  
@@ -73,20 +73,21 @@ static void createDescriptorPool()
               
               /* uniformBufferPoolSize */ 
                   .type=VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                    .descriptorCount=Frames
+                    .descriptorCount=1
 
               
             };
 //                        .type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 //                        .descriptorCount(PipeLine.swapChainImages.length);
           
-            constexpr VkDescriptorPoolCreateInfo poolCreateInfo{
+            static constexpr VkDescriptorPoolCreateInfo poolCreateInfo{
             .sType=VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-                    .maxSets=Frames,
+                    .pNext=nullptr,
+                    .maxSets=1,
                     .poolSizeCount=1,
                     .pPoolSizes=&poolSize
             };
-            clPPPI(&poolCreateInfo, "vkCreateDescriptorPool", &descriptorPool);
+            (vkCreateDescriptorPool(device, &poolCreateInfo, nullptr, &descriptorPool));
 //               descriptorPool=aLong[0];
         }
     }
@@ -122,17 +123,18 @@ static void createDescriptorPool()
     {
         {
             // VkDescriptorSetLayout layouts[Frames];
-           std::vector<VkDescriptorSetLayout> layouts(Frames, descriptorSetLayout);
+          //  std::vector<VkDescriptorSetLayout> layouts(1, descriptorSetLayout);
 
             const VkDescriptorSetAllocateInfo allocInfo{
                 .sType=VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+                .pNext=nullptr,
                 .descriptorPool=descriptorPool,
-                .descriptorSetCount=Frames,
-                    .pSetLayouts=layouts.data()
+                .descriptorSetCount=1,
+                    .pSetLayouts=&descriptorSetLayout
             };
 
-            checkCall(vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets));
-      for(int i=0; i< 1;i++)
+            vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets);
+    
       {
             VkDescriptorBufferInfo bufferInfo{
                     .buffer=uniformBuffers,
@@ -169,4 +171,4 @@ static void createDescriptorPool()
     
 
 
-} ubos;
+};

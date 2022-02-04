@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define ASAN_OPTIONS = debug=true
+// #define ASAN_OPTIONS = debug=true
 
 
 
@@ -64,13 +64,13 @@ int __vectorcall main()
         int r;
        
         r=pthread_create(&sys, nullptr, Sysm, nullptr);
-        setupRenderDraw();
-       _mm256_zeroall();
+         renderer2::setupRenderDraw();
+      
        while (!glfwWindowShouldClose((window)))
         {
             glfwPollEvents();
             // glfwWaitEventsTimeout(1);
-             drawFrame();aa++;
+              renderer2::drawFrame();aa++;
             
             
 			

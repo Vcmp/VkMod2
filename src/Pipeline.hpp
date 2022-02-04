@@ -4,7 +4,6 @@
 #include "UniformBufferObject.hpp"
 #include "Queues.hpp"
 #include <array>
-#include <vulkan/vulkan_core.h>
 
 
 constexpr int OFFSETOF_COLOR = 3 * sizeof(float);
@@ -13,10 +12,10 @@ constexpr int OFFSET_POS = 0;
 constexpr int OFFSETOF_TEXTCOORDS = (3 + 3) * sizeof(float);
 constexpr float UNormFlt = 0.1F;
 static constexpr struct PipelineX {
-    private:
+
 static inline VkPipelineLayout vkLayout;
 static inline VkPipeline graphicsPipeline;
-    public:
+
 static inline VkCommandBuffer commandBuffers[Frames];
 inline static void createGraphicsPipelineLayout();
 inline static void createCommandBuffers();
@@ -202,8 +201,8 @@ inline void PipelineX::createGraphicsPipelineLayout() {
 
         constexpr  VkPipelineDepthStencilStateCreateInfo depthStencil={
                      .sType=VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-                  .depthTestEnable=VK_TRUE,
-                  .depthWriteEnable=VK_TRUE,
+                  .depthTestEnable=VK_FALSE,
+                  .depthWriteEnable=VK_FALSE,
                   .depthCompareOp=VK_COMPARE_OP_LESS,
                   .depthBoundsTestEnable=VK_FALSE,
   //                    .minDepthBounds(0) //Optional
@@ -228,8 +227,8 @@ inline void PipelineX::createGraphicsPipelineLayout() {
 
   constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-      .pSetLayouts=&UniformBufferObject::descriptorSetLayout,
       .setLayoutCount=1,
+      .pSetLayouts=&UniformBufferObject::descriptorSetLayout,
   };
 
   std::cout << ("using pipeLine with Length: ")
@@ -249,7 +248,7 @@ inline void PipelineX::createGraphicsPipelineLayout() {
       .pDepthStencilState=&depthStencil,
       .pColorBlendState = &colorBlending,
       //                    .pDynamicState(null,
-      .layout = PipelineX::vkLayout,
+      .layout = vkLayout,
       .renderPass = renderPass
       // pipelineInfo.subpass=0;
       //    pipelineInfo.basePipelineHandle=VK_NULL_HANDLE;
