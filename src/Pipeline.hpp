@@ -313,7 +313,7 @@ inline void PipelineX::createCommandBuffers()
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, offsets);
     vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,PipelineX::vkLayout, 0, 1, &UniformBufferObject::descriptorSets[i], 0, nullptr);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,PipelineX::vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr);
 
     vkCmdDrawIndexed(commandBuffer, ((BuffersX::sizedsfIdx)/2), 1, 0, 0, 0);
 

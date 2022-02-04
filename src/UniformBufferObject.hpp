@@ -1,4 +1,5 @@
 #pragma once
+#include <vulkan/vulkan_core.h>
 #define GLM_FORCE_LEFT_HANDED 
 #include "glm/detail/qualifier.hpp"
 #include "glm/ext/matrix_transform.hpp"
@@ -33,7 +34,7 @@ static void createDescriptorSetLayout()
         .binding = 0,
           .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
           .descriptorCount = 1,
-          .stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS,
+          .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
         /* { .binding = 1,
           .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
           .descriptorCount = 1,

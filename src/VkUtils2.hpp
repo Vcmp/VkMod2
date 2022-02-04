@@ -7,6 +7,8 @@
 
 #include "Pipeline.hpp"
 #include "Queues.hpp"
+#include "src/Queues.hpp"
+#include <vulkan/vulkan_core.h>
 
 
 
@@ -139,8 +141,8 @@ inline void VkUtils2::createInstance()
         static constexpr VkValidationFeatureEnableEXT valdFeatures[] = {VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT, VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT, VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT};
         constexpr VkValidationFeaturesEXT extValidationFeatures = {
         .sType=VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
-        .enabledValidationFeatureCount= 3,
-        .pEnabledValidationFeatures=valdFeatures,
+        // .enabledValidationFeatureCount= 3,
+        // .pEnabledValidationFeatures=valdFeatures,
                 // extValidationFeatures.pEnabledValidationFeatures=&a;
         };
 
@@ -240,7 +242,7 @@ inline void VkUtils2::setupDebugMessenger()
         constexpr VkDebugUtilsMessengerCreateInfoEXT createInfo{
         .sType=VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
         .messageSeverity=VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT,
-        .messageType=VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+        .messageType= VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
         .pfnUserCallback=VkUtils2::debugCallback,
         .pUserData=VK_NULL_HANDLE,
 };
@@ -326,8 +328,8 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
     inline void VkUtils2::createLogicalDevice() {
             std::cout <<("Creating Logical Device")<<"\n";
         
-         uint32_t pQueueFamilyPropertyCount;
-            vkGetPhysicalDeviceQueueFamilyProperties(Queues::physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE);
+         uint32_t pQueueFamilyPropertyCount=5;
+            // vkGetPhysicalDeviceQueueFamilyProperties(Queues::physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE);
 
 
             VkQueueFamilyProperties uniqueQueueFamilies[pQueueFamilyPropertyCount] ;
@@ -335,22 +337,22 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
 
             uint32_t i = 0;
            //todo: Likley/Prop won;t work with AMD properly 
-            for (VkQueueFamilyProperties uniqueQueue;i<pQueueFamilyPropertyCount;i++) {
+            for (VkQueueFamilyProperties& uniqueQueue:uniqueQueueFamilies) {
                 std::cout <<(uniqueQueue.queueCount)<< "\n";
                 if ((uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
                     Queues::graphicsFamily = i;
                 }
                 VkBool32 presentSupport = false;
                 vkGetPhysicalDeviceSurfaceSupportKHR(Queues::physicalDevice, i, Queues::surface, &presentSupport);
-                 if (presentSupport) {
+                 if (uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !presentSupport && uniqueQueue.queueFlags & 0x00000020) {
                     Queues::presentFamily = i;
                 }
                 if (Queues::presentFamily != NULL&& Queues::graphicsFamily!= NULL)
                     break;
             
-                // i++;
+                i++;
             }
-           
+           std::cout <<"Using: "<< graphicsFamily <<"-->"<< presentFamily << "\n";
             
             constexpr float priority = 1.0f;
              uint32_t pIx = 0;

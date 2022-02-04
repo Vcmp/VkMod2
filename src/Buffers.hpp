@@ -187,7 +187,7 @@ inline void BuffersX::createVkEvents() {
        clPPPI(&allocateInfo, "vkCreateBuffer", &currentBuffer);
 
        VkMemoryRequirements memRequirements;
-      vkGetBufferMemoryRequirements(device, vertexBuffer, &memRequirements);
+      vkGetBufferMemoryRequirements(device, currentBuffer, &memRequirements);
 
 
         VkMemoryAllocateInfo allocateInfo1 = {
