@@ -5,11 +5,11 @@ inline namespace Queues {
 static VkPhysicalDevice physicalDevice;
 
 static uint32_t graphicsFamily;
-static uint32_t presentFamily;
+static uint32_t transferFamily;
 static VkQueue GraphicsQueue;
-// static VkQueue PresentQueue;
+static VkQueue TransferQueue;
 static uint64_t commandPool;
-// static uint64_t commandPool2;
+static uint64_t commandPool2;
 
 static VkSurfaceKHR surface;
 
@@ -28,13 +28,13 @@ inline void Queues::createCommandPool() {
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);
   Queues::commandPool = clPPPI2(&poolInfo, "vkCreateCommandPool"); 
-  // const VkCommandPoolCreateInfo poolInfo2 = {
-  //     .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-  //     .queueFamilyIndex = Queues::presentFamily,
-  // };
-  // // poolInfo.flags=0;
-  // // Memsys2.free(poolInfo);
-  // Queues::commandPool2 = clPPPI2(&poolInfo2, "vkCreateCommandPool");
+  const VkCommandPoolCreateInfo poolInfo2 = {
+      .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+      .queueFamilyIndex = Queues::transferFamily,
+  };
+  // poolInfo.flags=0;
+  // Memsys2.free(poolInfo);
+  Queues::commandPool2 = clPPPI2(&poolInfo2, "vkCreateCommandPool");
 }
 
 inline VkCommandBuffer Queues::beginSingleTimeCommands() 
@@ -44,7 +44,7 @@ inline VkCommandBuffer Queues::beginSingleTimeCommands()
   {
     .sType = (VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO),
     .pNext = VK_NULL_HANDLE,
-    .commandPool = (VkCommandPool)(Queues::commandPool),
+    .commandPool = (VkCommandPool)(Queues::commandPool2),
     .level = (VK_COMMAND_BUFFER_LEVEL_PRIMARY),
     .commandBufferCount = (1),
   };
@@ -66,8 +66,8 @@ inline void Queues::endSingleTimeCommands(VkCommandBuffer &commandBuffer) {
                                     .pCommandBuffers = &commandBuffer};
   //            VkSubmitInfo.ncommandBufferCount(submitInfo1, 1);
 
-  vkQueueSubmit(GraphicsQueue, 1, &submitInfo1, VK_NULL_HANDLE);
-  vkQueueWaitIdle(GraphicsQueue);
-  vkFreeCommandBuffers(device, (VkCommandPool)Queues::commandPool, 1, &commandBuffer);
+  vkQueueSubmit(TransferQueue, 1, &submitInfo1, VK_NULL_HANDLE);
+  vkQueueWaitIdle(TransferQueue);
+  vkFreeCommandBuffers(device, (VkCommandPool)Queues::commandPool2, 1, &commandBuffer);
 }
  // namespace Queues

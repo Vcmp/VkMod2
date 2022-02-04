@@ -13,7 +13,7 @@ static inline struct alignas(sizeof(__m256)) UBO{
      glm::mat4 proj=glm::perspective(glm::radians(45.0f)*-1, width/ (float)height, 0.7f, 90.0f);
     //mat4 Trans;
 } inline ubo;
- struct UniformBufferObject 
+static constexpr struct UniformBufferObject 
 {
 
  
@@ -171,4 +171,4 @@ static void createDescriptorPool()
     
 
 
-};
+} inline ubos;

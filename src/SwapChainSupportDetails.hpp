@@ -1,6 +1,7 @@
 
 #pragma once
 #include "Queues.hpp"
+#include "src/Queues.hpp"
 
 
 inline namespace SwapChainSupportDetails {
@@ -136,7 +137,7 @@ inline void createSwapChain()
 
   std::cout << "ImageCount: " << imageCount << "\n";
 
-  const uint32_t aa[] = {Queues::graphicsFamily, Queues::presentFamily};
+  const uint32_t aa[] = {Queues::graphicsFamily, Queues::transferFamily};
   ;
 
   const VkSwapchainCreateInfoKHR createInfo{

@@ -7,6 +7,7 @@
 
 #include "Pipeline.hpp"
 #include "Queues.hpp"
+#include "src/Queues.hpp"
 
 
 
@@ -344,13 +345,13 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                 VkBool32 presentSupport = false;
                 vkGetPhysicalDeviceSurfaceSupportKHR(Queues::physicalDevice, i, Queues::surface, &presentSupport);
                  if (uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !presentSupport) {
-                    Queues::presentFamily = i;
+                    Queues::transferFamily = i;
                     break;
                 }
              
                 i++;
             }
-           std::cout <<"Using: "<< graphicsFamily <<"-->"<< presentFamily << "\n";
+           std::cout <<"Using: "<< graphicsFamily <<"-->"<< transferFamily << "\n";
             
             constexpr float priority = 1.0f;
              uint32_t pIx = 0;
@@ -367,7 +368,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
         VkDeviceQueueCreateInfo PQ{};
             
                PQ.sType=VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-               PQ.queueFamilyIndex=Queues::presentFamily;
+               PQ.queueFamilyIndex=Queues::transferFamily;
                PQ.queueCount=1;
                PQ.pQueuePriorities=&priority;
                PQ.flags=0;
@@ -416,7 +417,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
             checkCall(vkCreateDevice(Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ));
 
               vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0,  &Queues::GraphicsQueue);
-            //   vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &Queues::PresentQueue);
+              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &Queues::TransferQueue);
        
     }
 
