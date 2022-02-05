@@ -32,7 +32,7 @@
 // VkPhysicalDevicePortabilitySubsetFeaturesKHR ptr = {};
     
    
-static constexpr struct strct
+inline namespace
 {
 static constexpr uint16_t width = 854;
 static constexpr uint16_t height = 480;
@@ -40,10 +40,10 @@ static constexpr uint16_t height = 480;
 
  static constexpr __int128 aXX = 0xF;
  static constexpr uint8_t Frames=3;
- static constexpr bool checks=false;
+ static constexpr bool checks=true;
 
     // Their may seem to be an anomalous memory leak when the main render Loop/Draw Call is used; howver this is mearly/primaro;y due to the Validation layers being enabled, however if said Validation Layers are disabled, the memeory leak virtually entirely disappears and at least thus far does not seem to be an issue thankfully
-     static constexpr bool debug=false;
+     static constexpr bool debug=true;
     
      static constexpr bool ENABLE_VALIDATION_LAYERS=debug; //todo: Posible Bug: ValidationLayersBreak Shader Compilation due to (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files as having/Containing Invalid Magic Numbers
     
@@ -203,4 +203,4 @@ static inline void clPPPJI(void * pStrct, uint32_t* ax, const char* a,  void *ob
     //  callPPPPI(device, pStrct, nullptr, a)
 }
 
-} inline pstrct;
+}

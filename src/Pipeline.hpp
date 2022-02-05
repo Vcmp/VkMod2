@@ -1,9 +1,8 @@
 #pragma once
 // #include "SwapChainSupportDetails.hpp"
-#include "Buffers.hpp"
 #include "UniformBufferObject.hpp"
-#include "Queues.hpp"
-#include "src/UniformBufferObject.hpp"
+#include "ShaderSPIRVUtils.hpp"
+#include "src/SwapChainSupportDetails.hpp"
 #include <vulkan/vulkan_core.h>
 
 
@@ -18,7 +17,7 @@ static constexpr float UNormFlt = 0.1F;
 static inline VkPipelineLayout vkLayout;
 static inline VkPipeline graphicsPipeline;
 public:
-static inline VkCommandBuffer commandBuffers[pstrct.Frames];
+static inline VkCommandBuffer commandBuffers[Frames];
 inline static void createGraphicsPipelineLayout();
 inline static void createCommandBuffers();
 } inline pipeline; 
@@ -46,7 +45,7 @@ VkFormat findDepthFormat()
 
 inline static void createRenderPasses() {
   static const VkAttachmentDescription colorAttachment{
-      .format = SwapChainSupportDetails::swapChainImageFormat,
+      .format = VK_FORMAT_B8G8R8A8_SRGB,//SwapChainSupportDetails::swapChainImageFormat,
       .samples = VK_SAMPLE_COUNT_1_BIT,
       .loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
       .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
@@ -64,6 +63,7 @@ inline static void createRenderPasses() {
 
   constexpr VkRenderPassCreateInfo vkRenderPassCreateInfo1 = {
       .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+    //   .flags=VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT,
       .attachmentCount = 1,
       .pAttachments = &colorAttachment,
       .subpassCount = 1,
@@ -73,7 +73,7 @@ inline static void createRenderPasses() {
   };
   
 
-  pstrct.clPPPI(&vkRenderPassCreateInfo1, "vkCreateRenderPass",
+  clPPPI(&vkRenderPassCreateInfo1, "vkCreateRenderPass",
          &SwapChainSupportDetails::renderPass);
 }
 
@@ -152,8 +152,8 @@ inline void PipelineX::createGraphicsPipelineLayout() {
   
   static constexpr VkViewport vkViewport{.x = 0.0F,
                                          .y = 0.0F,
-                                         .width = pstrct.width,
-                                         .height = pstrct.height,
+                                         .width = width,
+                                         .height = height,
                                          .minDepth = UNormFlt,
                                          .maxDepth = 1.0F};
 
@@ -161,7 +161,7 @@ inline void PipelineX::createGraphicsPipelineLayout() {
       //                    .offset(vkOffset2D ->vkViewport.y()) //todo: not
       //                    sure if correct Offset
       .offset = {0, 0},
-      .extent{pstrct.width, pstrct.height}};
+      .extent{width, height}};
 
   constexpr VkPipelineViewportStateCreateInfo vkViewPortState = {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
@@ -244,7 +244,7 @@ inline void PipelineX::createGraphicsPipelineLayout() {
 
   std::cout << ("using pipeLine with Length: ")
             << sizeof(SwapChainSupportDetails::swapChainImageViews);
-  pstrct.clPPPI(&vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &PipelineX::vkLayout);
+  clPPPI(&vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &PipelineX::vkLayout);
 
   const VkGraphicsPipelineCreateInfo pipelineInfo = {
       .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -266,11 +266,11 @@ inline void PipelineX::createGraphicsPipelineLayout() {
       // pipelineInfo.basePipelineIndex=-1;
   };
 
-  pstrct.checkCall(vkCreateGraphicsPipelines(pstrct.device, nullptr, 1, &pipelineInfo,
+  checkCall(vkCreateGraphicsPipelines(device, nullptr, 1, &pipelineInfo,
                                       nullptr, &PipelineX::graphicsPipeline));
 
-  vkDestroyShaderModule(pstrct.device, vertShaderModule, VK_NULL_HANDLE);
-  vkDestroyShaderModule(pstrct.device, fragShaderModule, VK_NULL_HANDLE);
+  vkDestroyShaderModule(device, vertShaderModule, VK_NULL_HANDLE);
+  vkDestroyShaderModule(device, fragShaderModule, VK_NULL_HANDLE);
 }
 
 inline void PipelineX::createCommandBuffers() 
@@ -282,11 +282,20 @@ inline void PipelineX::createCommandBuffers()
       .commandBufferCount = sizeof(PipelineX::commandBuffers)/sizeof(VkCommandBuffer)};
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
-  vkAllocateCommandBuffers(pstrct.device, &allocateInfo, PipelineX::commandBuffers);
+  checkCall(vkAllocateCommandBuffers(device, &allocateInfo, PipelineX::commandBuffers));
 
   constexpr VkCommandBufferBeginInfo beginInfo1 = {
       .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
       .flags = (VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)};
+
+
+VkRenderPassAttachmentBeginInfo attachmentsbeginInfo
+{
+    .sType=VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO,
+    .attachmentCount=1,
+    .pAttachments=&SwapChainSupportDetails::swapChainImageViews[0]
+};
+
   const VkRect2D renderArea = {
       .offset = {0, 0}, .extent = SwapChainSupportDetails::swapChainExtent};
 
@@ -299,17 +308,18 @@ inline void PipelineX::createCommandBuffers()
 
   VkRenderPassBeginInfo renderPassInfo = {};
   renderPassInfo.sType = (VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO);
+//   renderPassInfo.pNext =&attachmentsbeginInfo;
   renderPassInfo.pClearValues = clearValues;
   renderPassInfo.clearValueCount = 2;
   renderPassInfo.renderPass = (renderPass);
   renderPassInfo.renderArea = renderArea;
   uint8_t i = 0;
 
-  vkMapMemory(pstrct.device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data);
+  vkMapMemory(device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data);
   for (const VkCommandBuffer &commandBuffer : PipelineX::commandBuffers) {
     // extracted(beginInfo1, renderPassInfo, commandBuffer, i);
 
-    pstrct.checkCall(vkBeginCommandBuffer(commandBuffer, &beginInfo1));
+    checkCall(vkBeginCommandBuffer(commandBuffer, &beginInfo1));
 
     renderPassInfo.framebuffer =
         (SwapChainSupportDetails::swapChainFramebuffers[i]);
@@ -328,7 +338,7 @@ inline void PipelineX::createCommandBuffers()
     vkCmdDrawIndexed(commandBuffer, ((BuffersX::sizedsfIdx)/2), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
-    pstrct.checkCall(vkEndCommandBuffer(commandBuffer));
+    checkCall(vkEndCommandBuffer(commandBuffer));
     i++;
   }
 }

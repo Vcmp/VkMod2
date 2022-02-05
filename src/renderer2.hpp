@@ -59,7 +59,7 @@ inline void  renderer2::setupRenderDraw()
                         
                         
 
-                        (pstrct.clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore));
+                        (clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore));
                            
 
     
@@ -72,23 +72,23 @@ inline void renderer2::drawFrame()
 {
     
     
-    pstrct.checkCall(vkAcquireNextImageKHR(pstrct.device, swapChain,TmUt,AvailableSemaphore, VK_NULL_HANDLE, &currentFrame));
+    checkCall(vkAcquireNextImageKHR(device, swapChain,TmUt,AvailableSemaphore, VK_NULL_HANDLE, &currentFrame));
 
     
    updateUniformBuffer();
        info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
       
 
-    pstrct.checkCall(vkQueueSubmit(Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE));
+    checkCall(vkQueueSubmit(Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE));
   
   
    
                 //  info.pWaitSemaphores = &AvailableSemaphore;
 
 
-    pstrct.checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &VkPresentInfoKHR1));
+    checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &VkPresentInfoKHR1));
 
-   currentFrame = (currentFrame + 1) % pstrct.Frames;
+   currentFrame = (currentFrame + 1) % Frames;
 
    
 }
@@ -111,11 +111,11 @@ inline void renderer2::updateUniformBuffer()
     /*Should Ideally Peristently map the Uniberform buffer allocation instead 
         *Howver don't currently know of a method to carry this out in C++ without Java Unsafe API Black Magic (Write to mem addresses dierctly without Type checking)
         */
-    // vkMapMemory(pstrct.device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data);
+    // vkMapMemory(device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data);
     {
         memcpy2((__int256*)data, (__int256*)&ubo.model, UniformBufferObject::Sized);
     }
-    // vkUnmapMemory(pstrct.device, UniformBufferObject::uniformBuffersMemory);
+    // vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory);
     //  data=nullptr;
     
 }

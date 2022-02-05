@@ -115,7 +115,7 @@ inline void BuffersX::createVkEvents() {
   vkEventCreateInfo.sType = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
   vkEventCreateInfo.pNext = nullptr;
 
-  pstrct.clPPPI(&vkEventCreateInfo, "vkCreateEvent", &vkEvent);
+  clPPPI(&vkEventCreateInfo, "vkCreateEvent", &vkEvent);
 }
 
   
@@ -130,7 +130,7 @@ inline void BuffersX::createVkEvents() {
       };
         // MemSysm.Memsys2.free(vkBufferCopy);
         vkCmdCopyBuffer(queues.commandBuffer, Bufferstaging, dst, 1, &vkBufferCopy);
-        Queues::endSingleTimeCommands(queues.commandBuffer);
+        Queues::endSingleTimeCommands();
     }
 
     
@@ -153,7 +153,7 @@ inline void BuffersX::createVkEvents() {
        createSetBuffer(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory);
 
 
-      vkMapMemory(pstrct.device, stagingBufferMemory, 0, sizedsf, 0, &data);
+      vkMapMemory(device, stagingBufferMemory, 0, sizedsf, 0, &data);
           {
               memcpy(data, vectBuf, sizedsf);
           }
@@ -166,7 +166,7 @@ inline void BuffersX::createVkEvents() {
           memcpy(data, idxBuf, sizedsfIdx);
 
           }
-          vkUnmapMemory(pstrct.device, stagingBufferMemory);
+          vkUnmapMemory(device, stagingBufferMemory);
           copyBuffer(indexBuffer, sizedsfIdx);
      
  
@@ -185,10 +185,10 @@ inline void BuffersX::createVkEvents() {
                 .sharingMode=VK_SHARING_MODE_EXCLUSIVE,
         };
 
-       pstrct.clPPPI(&allocateInfo, "vkCreateBuffer", &currentBuffer);
+       clPPPI(&allocateInfo, "vkCreateBuffer", &currentBuffer);
 
        VkMemoryRequirements memRequirements;
-      vkGetBufferMemoryRequirements(pstrct.device, currentBuffer, &memRequirements);
+      vkGetBufferMemoryRequirements(device, currentBuffer, &memRequirements);
 
 
         VkMemoryAllocateInfo allocateInfo1 = {
@@ -198,8 +198,8 @@ inline void BuffersX::createVkEvents() {
                 .memoryTypeIndex=findMemoryType(Queues::physicalDevice, memRequirements.memoryTypeBits, properties),
         };
 //           
-        pstrct.clPPPI(&allocateInfo1, "vkAllocateMemory", &vertexBufferMemory);
+        clPPPI(&allocateInfo1, "vkAllocateMemory", &vertexBufferMemory);
        
-        pstrct.checkCall(vkBindBufferMemory(pstrct.device, currentBuffer, vertexBufferMemory, 0));
+        checkCall(vkBindBufferMemory(device, currentBuffer, vertexBufferMemory, 0));
         //memPutLong( device.address(), a);
     }

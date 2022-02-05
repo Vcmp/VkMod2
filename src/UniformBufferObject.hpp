@@ -8,7 +8,7 @@
 #include "Buffers.hpp"
 
 
-   const  glm::mat4 viewproj = glm::perspective(glm::radians(45.0f)*-1, pstrct.width/ (float)pstrct.height, 0.7f, 90.0f)*glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+   const  glm::mat4 viewproj = glm::perspective(glm::radians(45.0f)*-1, width/ (float)height, 0.7f, 90.0f)*glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 static inline struct alignas((128)) UBO{
      glm::mat4 model=viewproj;
     //mat4 Trans;
@@ -48,7 +48,7 @@ static void createDescriptorSetLayout()
         .pBindings = &bindings,
 
     };
-    pstrct.clPPPI(&a, "vkCreateDescriptorSetLayout",
+    clPPPI(&a, "vkCreateDescriptorSetLayout",
            &UniformBufferObject::descriptorSetLayout);
     // return MemSysm.doPointerAllocSafe(a,
     // device.getCapabilities().vkCreateDescriptorSetLayout);
@@ -87,7 +87,7 @@ static void createDescriptorPool()
                     .poolSizeCount=1,
                     .pPoolSizes=&poolSize
             };
-            (vkCreateDescriptorPool(pstrct.device, &poolCreateInfo, nullptr, &descriptorPool));
+            (vkCreateDescriptorPool(device, &poolCreateInfo, nullptr, &descriptorPool));
 //               descriptorPool=aLong[0];
         }
     }
@@ -114,7 +114,7 @@ static void createDescriptorPool()
                 .unnormalizedCoordinates=false,
         };
         VkSampler sampler = nullptr;
-     pstrct.clPPPI(&samplerInfo, "vkCreateSampler", &sampler);
+     clPPPI(&samplerInfo, "vkCreateSampler", &sampler);
      return sampler;
         //nmemFree(samplerInfo.address());
     }
@@ -133,7 +133,7 @@ static void createDescriptorPool()
                     .pSetLayouts=&descriptorSetLayout
             };
 
-            vkAllocateDescriptorSets(pstrct.device, &allocInfo, &descriptorSets);
+            vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets);
     
       {
             VkDescriptorBufferInfo bufferInfo{
@@ -162,7 +162,7 @@ static void createDescriptorPool()
 
                   /*  */
             };
-                vkUpdateDescriptorSets(pstrct.device, 1, &descriptorWrites, 0, nullptr);
+                vkUpdateDescriptorSets(device, 1, &descriptorWrites, 0, nullptr);
 
       }
         }}
