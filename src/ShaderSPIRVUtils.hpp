@@ -46,7 +46,7 @@ ShaderSPIRVUtils::compileShaderFile(const char *shaderNamePath1) {
   VsMCI.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   VsMCI.pNext = VK_NULL_HANDLE;
 
-  clPPPI(&VsMCI, "vkCreateShaderModule", &axx);
+  pstrct.clPPPI(&VsMCI, "vkCreateShaderModule", &axx);
   const VkShaderModule axx2 = axx;
   return axx2;
   

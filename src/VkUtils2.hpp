@@ -72,8 +72,8 @@ inline namespace VkUtils2
       createRenderPasses();
       UniformBufferObject::createDescriptorSetLayout();
       PipelineX::createGraphicsPipelineLayout();
-      createCommandPool();
-      Texture::createDepthResources();
+      Queues::createCommandPool();
+    //   Texture::createDepthResources();
       BuffersX::setupBuffers();
     //   BuffersX::createVertexBuffer();
     //   BuffersX::createStagingBuffer();
@@ -120,7 +120,7 @@ inline void VkUtils2::setupWindow()
         // glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
 
 
-        window = glfwCreateWindow(width, height, "VKMod2", nullptr, nullptr);
+        window = glfwCreateWindow(pstrct.width, pstrct.height, "VKMod2", nullptr, nullptr);
 
 
         if(window == NULL) exit(1);
@@ -132,7 +132,7 @@ inline void VkUtils2::setupWindow()
 inline void VkUtils2::createInstance()
     {
        std::cout <<("Creating Instance") << "\n";
-        if (ENABLE_VALIDATION_LAYERS && !VkUtils2::checkValidationLayerSupport())
+        if (pstrct.ENABLE_VALIDATION_LAYERS && !VkUtils2::checkValidationLayerSupport())
         {
              std::runtime_error("Validation requested but not supported");
         }
@@ -166,9 +166,9 @@ inline void VkUtils2::createInstance()
 
         InstCreateInfo.enabledExtensionCount=static_cast<uint32_t>(extensions.size());
         
-        if constexpr(ENABLE_VALIDATION_LAYERS) {
-           InstCreateInfo.ppEnabledLayerNames=(validationLayers.data());
-           InstCreateInfo.enabledLayerCount=static_cast<uint32_t>(validationLayers.size());  
+        if constexpr(pstrct.ENABLE_VALIDATION_LAYERS) {
+           InstCreateInfo.ppEnabledLayerNames=(pstrct.validationLayers.data());
+           InstCreateInfo.enabledLayerCount=static_cast<uint32_t>(pstrct.validationLayers.size());  
            InstCreateInfo.pNext=&extValidationFeatures;
         }
         else InstCreateInfo.enabledLayerCount=0;
@@ -177,7 +177,7 @@ inline void VkUtils2::createInstance()
         // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
 
 
-        checkCall(vkCreateInstance(&InstCreateInfo, VK_NULL_HANDLE, &vkInstance));
+        pstrct.checkCall(vkCreateInstance(&InstCreateInfo, VK_NULL_HANDLE, &vkInstance));
         // getVersion();
     }
 
@@ -190,7 +190,7 @@ inline void VkUtils2::createSurface()
         createSurfaceInfo.hinstance = GetModuleHandle(nullptr);
         createSurfaceInfo.pNext=VK_NULL_HANDLE;
 
-        checkCall(vkCreateWin32SurfaceKHR(vkInstance, &createSurfaceInfo, nullptr, const_cast<VkSurfaceKHR*>(&Queues::surface)));
+        pstrct.checkCall(vkCreateWin32SurfaceKHR(vkInstance, &createSurfaceInfo, nullptr, const_cast<VkSurfaceKHR*>(&Queues::surface)));
         
         
     }
@@ -215,7 +215,7 @@ inline const std::vector<const char*> VkUtils2::getRequiredExtensions()
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions+glfwExtensionCount);
-     if constexpr(ENABLE_VALIDATION_LAYERS)
+     if constexpr(pstrct.ENABLE_VALIDATION_LAYERS)
      {
          extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
      }
@@ -234,7 +234,7 @@ VKAPI_ATTR inline VkBool32 VKAPI_CALL VkUtils2::debugCallback(VkDebugUtilsMessag
 
 inline void VkUtils2::setupDebugMessenger()
     {
-        if constexpr(!ENABLE_VALIDATION_LAYERS) {
+        if constexpr(!pstrct.ENABLE_VALIDATION_LAYERS) {
             return;
         }
 
@@ -245,7 +245,7 @@ inline void VkUtils2::setupDebugMessenger()
         .pfnUserCallback=VkUtils2::debugCallback,
         .pUserData=VK_NULL_HANDLE,
 };
-        checkCall(createDebugUtilsMessengerEXT(vkInstance, &createInfo));
+        pstrct.checkCall(createDebugUtilsMessengerEXT(vkInstance, &createInfo));
         //debugMessenger = pDebugMessenger[0];
     }
     
@@ -271,13 +271,13 @@ inline void VkUtils2::pickPhysicalDevice()
 {
     std::cout <<("Picking Physical Device")<<"\n";
     uint32_t deviceCount;
-    checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr));
+    pstrct.checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr));
     if(deviceCount == 0) std::runtime_error("Failed to find GPUs with Vulkan support");
     VkPhysicalDevice ppPhysicalDevices[deviceCount];
 
     // VkPhysicalDevice device;
     std::cout <<("Enumerate Physical Device") << "\n";
-   checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, ppPhysicalDevices));
+   pstrct.checkCall(vkEnumeratePhysicalDevices(vkInstance, &deviceCount, ppPhysicalDevices));
      for(const VkPhysicalDevice& d : ppPhysicalDevices)
         {  
             std::cout <<("Check Device:") << d << "\n";
@@ -351,7 +351,7 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
              
                 i++;
             }
-           std::cout <<"Using: "<< graphicsFamily <<"-->"<< transferFamily << "\n";
+           std::cout <<"Using: "<< Queues::graphicsFamily <<"-->"<< Queues::transferFamily << "\n";
             
             constexpr float priority = 1.0f;
              uint32_t pIx = 0;
@@ -405,33 +405,35 @@ inline constexpr bool VkUtils2::isDeviceSuitable(const VkPhysicalDevice device)
                     createInfo.pNext=&deviceFeatures2;
                     createInfo.queueCreateInfoCount=2;
                     createInfo.pQueueCreateInfos=queueCreateInfos;
-                    createInfo.ppEnabledExtensionNames=(deviceExtensions);
-                    createInfo.enabledExtensionCount=static_cast<uint32_t>(validationLayers.size());
+                    createInfo.ppEnabledExtensionNames=(pstrct.deviceExtensions);
+                    createInfo.enabledExtensionCount=static_cast<uint32_t>(pstrct.validationLayers.size());
                     // createInfo.ppEnabledLayerNames=(validationLayers.data());
                     createInfo.pEnabledFeatures=nullptr;
 
 
-            if constexpr(ENABLE_VALIDATION_LAYERS) {
-                createInfo.ppEnabledLayerNames=validationLayers.data();
+            if constexpr(pstrct.ENABLE_VALIDATION_LAYERS) {
+                createInfo.ppEnabledLayerNames=pstrct.validationLayers.data();
             }
-            checkCall(vkCreateDevice(Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ));
+            pstrct.checkCall(vkCreateDevice(Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &pstrct.device ));
 
-              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0,  &Queues::GraphicsQueue);
-              vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &Queues::TransferQueue);
+              vkGetDeviceQueue(pstrct.device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0,  &Queues::GraphicsQueue);
+              vkGetDeviceQueue(pstrct.device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0,  &Queues::TransferQueue[0]);
+              vkGetDeviceQueue(pstrct.device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 1,  &Queues::TransferQueue[1]);
        
     }
 
 
  void VkUtils2::cleanup()
     {
-        vkDeviceWaitIdle(device);
-        vkDestroyCommandPool(device, (VkCommandPool)Queues::commandPool, nullptr);
+        vkDeviceWaitIdle(pstrct.device);
+        vkUnmapMemory(pstrct.device, UniformBufferObject::uniformBuffersMemory);
+        vkDestroyCommandPool(pstrct.device, (VkCommandPool)Queues::commandPool, nullptr);
          for (auto framebuffer : swapChainFramebuffers) {
-        vkDestroyFramebuffer(device, framebuffer, nullptr);
+        vkDestroyFramebuffer(pstrct.device, framebuffer, nullptr);
     }
         // vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
         // vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
 
-        vkDestroyBuffer(device, vertexBuffer, nullptr);
-        vkFreeMemory(device, vertexBufferMemory, nullptr);
+        vkDestroyBuffer(pstrct.device, vertexBuffer, nullptr);
+        vkFreeMemory(pstrct.device, vertexBufferMemory, nullptr);
     }

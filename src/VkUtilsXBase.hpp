@@ -32,25 +32,26 @@
 // VkPhysicalDevicePortabilitySubsetFeaturesKHR ptr = {};
     
    
-inline namespace{
-constexpr uint16_t width = 854;
-constexpr uint16_t height = 480;
+static constexpr struct strct
+{
+static constexpr uint16_t width = 854;
+static constexpr uint16_t height = 480;
 
 
- constexpr __int128 aXX = 0xF;
- constexpr uint8_t Frames=3;
- constexpr bool checks=false;
+ static constexpr __int128 aXX = 0xF;
+ static constexpr uint8_t Frames=3;
+ static constexpr bool checks=false;
 
     // Their may seem to be an anomalous memory leak when the main render Loop/Draw Call is used; howver this is mearly/primaro;y due to the Validation layers being enabled, however if said Validation Layers are disabled, the memeory leak virtually entirely disappears and at least thus far does not seem to be an issue thankfully
-     constexpr bool debug=false;
+     static constexpr bool debug=false;
     
-     constexpr bool ENABLE_VALIDATION_LAYERS=debug; //todo: Posible Bug: ValidationLayersBreak Shader Compilation due to (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files as having/Containing Invalid Magic Numbers
+     static constexpr bool ENABLE_VALIDATION_LAYERS=debug; //todo: Posible Bug: ValidationLayersBreak Shader Compilation due to (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files as having/Containing Invalid Magic Numbers
     
-     constexpr std::array<const char*, 1>   validationLayers={"VK_LAYER_KHRONOS_validation"};
-     constexpr char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+     static constexpr std::array<const char*, 1>   validationLayers={"VK_LAYER_KHRONOS_validation"};
+     static constexpr char* deviceExtensions[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
     
-     inline VkDevice device;
+     static inline VkDevice device;
     
   
  static constexpr  void checkCall(const VkResult callPPPPI)
@@ -202,4 +203,4 @@ static inline void clPPPJI(void * pStrct, uint32_t* ax, const char* a,  void *ob
     //  callPPPPI(device, pStrct, nullptr, a)
 }
 
-};
+} inline pstrct;

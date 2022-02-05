@@ -2,6 +2,7 @@
 
 #include "SwapChainSupportDetails.hpp"
 #include "Queues.hpp"
+#include "src/Queues.hpp"
 
 
 // = (&set + sizeof(set));
@@ -114,22 +115,22 @@ inline void BuffersX::createVkEvents() {
   vkEventCreateInfo.sType = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
   vkEventCreateInfo.pNext = nullptr;
 
-  clPPPI(&vkEventCreateInfo, "vkCreateEvent", &vkEvent);
+  pstrct.clPPPI(&vkEventCreateInfo, "vkCreateEvent", &vkEvent);
 }
 
   
 
     inline void BuffersX::copyBuffer(VkBuffer &dst, const size_t sized)
     {
-       VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+       Queues::beginSingleTimeCommands();
       const VkBufferCopy vkBufferCopy{
                 .srcOffset=0,
                 .dstOffset=0,
                 .size=sized,
       };
         // MemSysm.Memsys2.free(vkBufferCopy);
-        vkCmdCopyBuffer(commandBuffer, Bufferstaging, dst, 1, &vkBufferCopy);
-        endSingleTimeCommands(commandBuffer);
+        vkCmdCopyBuffer(queues.commandBuffer, Bufferstaging, dst, 1, &vkBufferCopy);
+        Queues::endSingleTimeCommands(queues.commandBuffer);
     }
 
     
@@ -143,29 +144,29 @@ inline void BuffersX::createVkEvents() {
       createSetBuffer(p1, vertexBuffer, x1, sizedsf, vertexBufferMemory);
       // vertexBufferMemory=createBuffer2(p1, vertexBuffer);
       
-      VkBufferUsageFlagBits x2 = (VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
+      VkBufferUsageFlagBits x2 = (VkBufferUsageFlagBits)(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT|VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
       constexpr VkMemoryPropertyFlagBits p = (VkMemoryPropertyFlagBits)(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-      createSetBuffer(p, Bufferstaging, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, sizedsf, stagingBufferMemory);      
+      createSetBuffer(p, Bufferstaging, x2, sizedsf, stagingBufferMemory);      
 
       // stagingBufferMemory= createBuffer2(p, Bufferstaging);
       VkBufferUsageFlagBits x3=(VkBufferUsageFlagBits)(VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT);
        createSetBuffer(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory);
 
 
-      vkMapMemory(device, stagingBufferMemory, 0, sizedsf, 0, &data);
+      vkMapMemory(pstrct.device, stagingBufferMemory, 0, sizedsf, 0, &data);
           {
               memcpy(data, vectBuf, sizedsf);
           }
-          vkUnmapMemory(device, stagingBufferMemory);
+        
               BuffersX::copyBuffer(vertexBuffer, sizedsf);
       
       
-          vkMapMemory(device, stagingBufferMemory, 0, sizedsfIdx, 0, &data);
+        
           {
           memcpy(data, idxBuf, sizedsfIdx);
 
           }
-          vkUnmapMemory(device, stagingBufferMemory);
+          vkUnmapMemory(pstrct.device, stagingBufferMemory);
           copyBuffer(indexBuffer, sizedsfIdx);
      
  
@@ -184,10 +185,10 @@ inline void BuffersX::createVkEvents() {
                 .sharingMode=VK_SHARING_MODE_EXCLUSIVE,
         };
 
-       clPPPI(&allocateInfo, "vkCreateBuffer", &currentBuffer);
+       pstrct.clPPPI(&allocateInfo, "vkCreateBuffer", &currentBuffer);
 
        VkMemoryRequirements memRequirements;
-      vkGetBufferMemoryRequirements(device, currentBuffer, &memRequirements);
+      vkGetBufferMemoryRequirements(pstrct.device, currentBuffer, &memRequirements);
 
 
         VkMemoryAllocateInfo allocateInfo1 = {
@@ -197,8 +198,8 @@ inline void BuffersX::createVkEvents() {
                 .memoryTypeIndex=findMemoryType(Queues::physicalDevice, memRequirements.memoryTypeBits, properties),
         };
 //           
-        clPPPI(&allocateInfo1, "vkAllocateMemory", &vertexBufferMemory);
+        pstrct.clPPPI(&allocateInfo1, "vkAllocateMemory", &vertexBufferMemory);
        
-        checkCall(vkBindBufferMemory(device, currentBuffer, vertexBufferMemory, 0));
+        pstrct.checkCall(vkBindBufferMemory(pstrct.device, currentBuffer, vertexBufferMemory, 0));
         //memPutLong( device.address(), a);
     }

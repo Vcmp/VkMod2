@@ -1,5 +1,4 @@
 #pragma once
-#include <vulkan/vulkan_core.h>
 #define GLM_FORCE_LEFT_HANDED 
 #include "glm/detail/qualifier.hpp"
 #include "glm/ext/matrix_transform.hpp"
@@ -7,10 +6,11 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "Buffers.hpp"
-static inline struct alignas(sizeof(__m256)) UBO{
-     glm::mat4 model;
-     glm::mat4 view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-     glm::mat4 proj=glm::perspective(glm::radians(45.0f)*-1, width/ (float)height, 0.7f, 90.0f);
+
+
+   const  glm::mat4 viewproj = glm::perspective(glm::radians(45.0f)*-1, pstrct.width/ (float)pstrct.height, 0.7f, 90.0f)*glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+static inline struct alignas((128)) UBO{
+     glm::mat4 model=viewproj;
     //mat4 Trans;
 } inline ubo;
 static constexpr struct UniformBufferObject 
@@ -48,7 +48,7 @@ static void createDescriptorSetLayout()
         .pBindings = &bindings,
 
     };
-    clPPPI(&a, "vkCreateDescriptorSetLayout",
+    pstrct.clPPPI(&a, "vkCreateDescriptorSetLayout",
            &UniformBufferObject::descriptorSetLayout);
     // return MemSysm.doPointerAllocSafe(a,
     // device.getCapabilities().vkCreateDescriptorSetLayout);
@@ -87,7 +87,7 @@ static void createDescriptorPool()
                     .poolSizeCount=1,
                     .pPoolSizes=&poolSize
             };
-            (vkCreateDescriptorPool(device, &poolCreateInfo, nullptr, &descriptorPool));
+            (vkCreateDescriptorPool(pstrct.device, &poolCreateInfo, nullptr, &descriptorPool));
 //               descriptorPool=aLong[0];
         }
     }
@@ -114,7 +114,7 @@ static void createDescriptorPool()
                 .unnormalizedCoordinates=false,
         };
         VkSampler sampler = nullptr;
-     clPPPI(&samplerInfo, "vkCreateSampler", &sampler);
+     pstrct.clPPPI(&samplerInfo, "vkCreateSampler", &sampler);
      return sampler;
         //nmemFree(samplerInfo.address());
     }
@@ -133,7 +133,7 @@ static void createDescriptorPool()
                     .pSetLayouts=&descriptorSetLayout
             };
 
-            vkAllocateDescriptorSets(device, &allocInfo, &descriptorSets);
+            vkAllocateDescriptorSets(pstrct.device, &allocInfo, &descriptorSets);
     
       {
             VkDescriptorBufferInfo bufferInfo{
@@ -162,7 +162,7 @@ static void createDescriptorPool()
 
                   /*  */
             };
-                vkUpdateDescriptorSets(device, 1, &descriptorWrites, 0, nullptr);
+                vkUpdateDescriptorSets(pstrct.device, 1, &descriptorWrites, 0, nullptr);
 
       }
         }}

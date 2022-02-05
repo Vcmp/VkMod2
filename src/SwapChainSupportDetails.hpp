@@ -1,7 +1,6 @@
 
 #pragma once
 #include "Queues.hpp"
-#include "src/Queues.hpp"
 
 
 inline namespace SwapChainSupportDetails {
@@ -12,11 +11,11 @@ static inline VkSwapchainKHR swapChain;
 static inline uint32_t count;
 
 static inline VkFormat swapChainImageFormat;
-static inline VkImageView swapChainImageViews[Frames];
+static inline VkImageView swapChainImageViews[pstrct.Frames];
 static inline VkRenderPass renderPass;
 static inline VkExtent2D swapChainExtent;
-static inline VkImage swapchainImages[Frames];
-static inline VkFramebuffer swapChainFramebuffers[Frames];
+static inline VkImage swapchainImages[pstrct.Frames];
+static inline VkFramebuffer swapChainFramebuffers[pstrct.Frames];
 
 inline uint32_t clamp(uint32_t min, uint32_t max, uint32_t value) {
   const uint32_t a = (max < value ? max : value);
@@ -29,7 +28,7 @@ inline VkExtent2D chooseSwapExtent()
     return capabilities.currentExtent;
   }
 
-  VkExtent2D actualExtent = {width, height};
+  VkExtent2D actualExtent = {pstrct.width, pstrct.height};
 
   VkExtent2D minExtent = capabilities.minImageExtent;
   VkExtent2D maxExtent = capabilities.maxImageExtent;
@@ -170,12 +169,12 @@ inline void createSwapChain()
       .clipped = true,
 
       .oldSwapchain = VK_NULL_HANDLE};
-  std::cout << device << "\n";
+  std::cout << pstrct.device << "\n";
 
   // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
   // auto xx=PFN_vkVoidFunction(swapChain);
-  checkCall(vkCreateSwapchainKHR(
-      device, &createInfo, nullptr,
+  pstrct.checkCall(vkCreateSwapchainKHR(
+      pstrct.device, &createInfo, nullptr,
       &swapChain));
 
   // checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount,
@@ -186,8 +185,8 @@ inline void createSwapChain()
   //     throw std::runtime_error("Swapchains not equal to allocated length: Bad
   //     SwapChain");
   // }
-  checkCall(
-      vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapchainImages));
+  pstrct.checkCall(
+      vkGetSwapchainImagesKHR(pstrct.device, swapChain, &imageCount, swapchainImages));
   SwapChainSupportDetails::swapChainImageFormat = surfaceFormat.format;
   SwapChainSupportDetails::swapChainExtent = extent;
 }
@@ -215,7 +214,7 @@ inline void createImageViews() {
 
     createInfo.image = swapchainImage;
 
-    clPPPI(&createInfo, "vkCreateImageView",
+    pstrct.clPPPI(&createInfo, "vkCreateImageView",
            &SwapChainSupportDetails::swapChainImageViews
                [i++]); // BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
   }
@@ -233,12 +232,12 @@ inline void createFramebuffers() {
   framebufferCreateInfo.attachmentCount =
       1; //(framebufferCreateInfo.address(), (attachments).remaining());
          //    framebufferCreateInfo.pAttachments= swapChainImageViews;
-  for (size_t i = 0; i < Frames; i++) {
+  for (size_t i = 0; i < pstrct.Frames; i++) {
     
     framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
    
 
-    clPPPI(&framebufferCreateInfo, "vkCreateFramebuffer",
+    pstrct.clPPPI(&framebufferCreateInfo, "vkCreateFramebuffer",
            &swapChainFramebuffers[i]);
   }
  

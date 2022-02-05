@@ -86,11 +86,11 @@ inline void Texture::createImage(VkExtent2D extent, VkFormat format,
   imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  clPPPI(&imageInfo, "vkCreateImage", &Texture::vkImage);
+  pstrct.clPPPI(&imageInfo, "vkCreateImage", &Texture::vkImage);
   constexpr VkMemoryDedicatedRequirementsKHR img2 = {VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR, nullptr};
 
   VkMemoryRequirements2 memRequirements = {};
-  vkGetImageMemoryRequirements(device, Texture::vkImage,
+  vkGetImageMemoryRequirements(pstrct.device, Texture::vkImage,
                                &memRequirements.memoryRequirements);
 
   VkMemoryAllocateInfo allocInfo = {};
@@ -112,16 +112,16 @@ inline void Texture::createImage(VkExtent2D extent, VkFormat format,
     allocInfo.pNext = &dedicatedAllocateInfoKHR;
   }
 
-  clPPPI(&allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory);
+  pstrct.clPPPI(&allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory);
 
-  vkBindImageMemory(device, Texture::vkImage, Texture::vkAllocMemory, 0);
+  vkBindImageMemory(pstrct.device, Texture::vkImage, Texture::vkAllocMemory, 0);
 }
 
 static void Texture::transitionImageLayout(VkFormat format,
                                            VkImageLayout oldLayout,
                                            VkImageLayout newLayout) {
   // VkCommandBuffer commandBuffer= Queues::beginSingleTimeCommands();
-  VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+  VkCommandBuffer commandBuffer = Queues::beginSingleTimeCommands();
 
   VkImageMemoryBarrier barrier = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -205,7 +205,7 @@ inline void Texture::createImageView(VkFormat swapChainImageFormat,
   createInfo.subresourceRange.baseArrayLayer = (0);
   createInfo.subresourceRange.layerCount = (1);
 
-  clPPPI(&createInfo, "vkCreateImageView", &a);
+  pstrct.clPPPI(&createInfo, "vkCreateImageView", &a);
 }
 
 inline VkFormat Texture::findDepthFormat() {

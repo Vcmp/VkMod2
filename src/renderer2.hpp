@@ -1,19 +1,24 @@
 #pragma once
-#include "Pipeline.hpp"
-#include "UniformBufferObject.hpp"
+
 #include "glm/detail/qualifier.hpp"
+#include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
-#include "Buffers.hpp"
+#include "Pipeline.hpp"
 #include "src/UniformBufferObject.hpp"
+
 
 //trick to use builtins+Attributes to treat a blob of memory as a vector type which compiles more cleanly into slightly better asm with vmovps (At least with Clang)
 typedef size_t __int256 __attribute__((__vector_size__(UniformBufferObject::Sized), __aligned__(256)));
-    static __int256* ax=(__int256*)&ubo;
+    static __int256* __restrict__ ax=(__int256*)&ubo;
+
+    constexpr float ah=glm::radians(90.0f);
 constexpr static struct renderer2 
 {
-
+    
     static void setupRenderDraw();
     static void drawFrame();
+
+    constexpr static void memcpy2(__int256 * __restrict__,   __int256 const* __restrict__ ,size_t);
     static void updateUniformBuffer();
     
 
@@ -54,7 +59,7 @@ inline void  renderer2::setupRenderDraw()
                         
                         
 
-                        (clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore));
+                        (pstrct.clPPPI(&vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore));
                            
 
     
@@ -67,29 +72,29 @@ inline void renderer2::drawFrame()
 {
     
     
-    checkCall(vkAcquireNextImageKHR(device, swapChain,TmUt,AvailableSemaphore, VK_NULL_HANDLE, &currentFrame));
+    pstrct.checkCall(vkAcquireNextImageKHR(pstrct.device, swapChain,TmUt,AvailableSemaphore, VK_NULL_HANDLE, &currentFrame));
 
     
    updateUniformBuffer();
        info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
       
 
-    checkCall(vkQueueSubmit(Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE));
+    pstrct.checkCall(vkQueueSubmit(Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE));
   
   
    
                 //  info.pWaitSemaphores = &AvailableSemaphore;
 
 
-    checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &VkPresentInfoKHR1));
+    pstrct.checkCall(vkQueuePresentKHR(Queues::GraphicsQueue, &VkPresentInfoKHR1));
 
-   currentFrame = (currentFrame + 1) % Frames;
+   currentFrame = (currentFrame + 1) % pstrct.Frames;
 
    
 }
 
 
-constexpr void memcpy2(__int256 *  _Dst,   __int256 const* _Src,size_t _MaxCount)
+constexpr inline void renderer2::memcpy2(__int256 * __restrict__  _Dst,   __int256 const* __restrict__ _Src,size_t _MaxCount)
 {
         *_Dst=*_Src;
 }
@@ -97,20 +102,20 @@ constexpr void memcpy2(__int256 *  _Dst,   __int256 const* _Src,size_t _MaxCount
 inline void renderer2::updateUniformBuffer()
 {
     
-    float time = glfwGetTime()*glm::radians(90.0f);
+    float time = glfwGetTime()*ah;
    
-    ubo.model = glm::rotate(glm::mat4(1.0f), time, glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.model = viewproj * glm::rotate(glm::identity<glm::mat4>(), time, glm::vec3(0.0f, 0.0f, 1.0f));
     // ubo.proj[1][1] *= -1;
 //    __m512 a =(__m512)&data+0x200;
     
     /*Should Ideally Peristently map the Uniberform buffer allocation instead 
         *Howver don't currently know of a method to carry this out in C++ without Java Unsafe API Black Magic (Write to mem addresses dierctly without Type checking)
         */
-    vkMapMemory(device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data);
+    // vkMapMemory(pstrct.device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data);
     {
-        memcpy(data, &ubo, UniformBufferObject::Sized);
+        memcpy2((__int256*)data, (__int256*)&ubo.model, UniformBufferObject::Sized);
     }
-    vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory);
-     data=nullptr;
+    // vkUnmapMemory(pstrct.device, UniformBufferObject::uniformBuffersMemory);
+    //  data=nullptr;
     
 }
