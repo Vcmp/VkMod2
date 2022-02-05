@@ -3,7 +3,6 @@
 #include "Queues.hpp"
 #include <vulkan/vulkan_core.h>
 
-
 inline namespace SwapChainSupportDetails {
 static inline VkSurfaceCapabilitiesKHR capabilities{};
 
@@ -44,25 +43,26 @@ inline VkExtent2D chooseSwapExtent()
   return actualExtent;
 }
 
-inline void setupImageFormats()
-{
-   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Queues::physicalDevice, Queues::surface,
-                                            &capabilities);
+inline void setupImageFormats() {
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Queues::physicalDevice,
+                                            Queues::surface, &capabilities);
 
-  vkGetPhysicalDeviceSurfaceFormatsKHR(Queues::physicalDevice, Queues::surface, &count,
-                                       nullptr);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(Queues::physicalDevice, Queues::surface,
+                                       &count, nullptr);
   VkSurfaceFormatKHR surfaceFormats[count];
 
-  if (count != 0)
-    vkGetPhysicalDeviceSurfaceFormatsKHR(Queues::physicalDevice, Queues::surface, &count,
-                                         surfaceFormats);
+  if (count != 0) {
+    vkGetPhysicalDeviceSurfaceFormatsKHR(
+        Queues::physicalDevice, Queues::surface, &count, surfaceFormats);
+  }
 
-  vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
-                                            nullptr);
+  vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice,
+                                            Queues::surface, &count, nullptr);
   VkPresentModeKHR presentModes[count];
-  if (count != 0)
-    vkGetPhysicalDeviceSurfacePresentModesKHR(Queues::physicalDevice, Queues::surface, &count,
-                                              presentModes);
+  if (count != 0) {
+    vkGetPhysicalDeviceSurfacePresentModesKHR(
+        Queues::physicalDevice, Queues::surface, &count, presentModes);
+  }
 
   VkSurfaceFormatKHR surfaceFormat;
   for (const VkSurfaceFormatKHR &surfaceFormat1 : surfaceFormats) {
@@ -72,32 +72,30 @@ inline void setupImageFormats()
       break;
     }
   }
-  
+
   for (const VkPresentModeKHR &presentMode1 : presentModes) {
     if (presentMode1 == VK_PRESENT_MODE_IMMEDIATE_KHR) {
       presentMode = presentMode1;
       break;
-    } else
+    } else {
       presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    }
   }
 
   // return VK_PRESENT_MODE_FIFO_KHR;
 
   VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent();
-  imageCount =
-      (SwapChainSupportDetails::capabilities.minImageCount + 1);
+  imageCount = (SwapChainSupportDetails::capabilities.minImageCount + 1);
 
   if (SwapChainSupportDetails::capabilities.maxImageCount > 0 &&
       imageCount > SwapChainSupportDetails::capabilities.maxImageCount) {
     imageCount = SwapChainSupportDetails::capabilities.maxImageCount;
   }
 
-   SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
+  SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
   SwapChainSupportDetails::swapChainExtent = extent;
 }
-inline void createSwapChain() 
-{
- 
+inline void createSwapChain() {
 
   std::cout << "ImageCount: " << imageCount << "\n";
 
@@ -119,9 +117,9 @@ inline void createSwapChain()
       .imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 
       // if (graphicsFamily != presentFamily) {
-          .imageSharingMode = VK_SHARING_MODE_CONCURRENT,
-          .queueFamilyIndexCount = 2,
-          .pQueueFamilyIndices = aa,
+      .imageSharingMode = VK_SHARING_MODE_CONCURRENT,
+      .queueFamilyIndexCount = 2,
+      .pQueueFamilyIndices = aa,
       // } else {
       // .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       // .queueFamilyIndexCount = 0; // Optiona,
@@ -138,9 +136,7 @@ inline void createSwapChain()
 
   // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
   // auto xx=PFN_vkVoidFunction(swapChain);
-  checkCall(vkCreateSwapchainKHR(
-      device, &createInfo, nullptr,
-      &swapChain));
+  checkCall(vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain));
 
   // checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount,
   // nullptr));
@@ -152,7 +148,6 @@ inline void createSwapChain()
   // }
   checkCall(
       vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapchainImages));
- 
 }
 
 inline void createImageViews() {
@@ -185,7 +180,7 @@ inline void createImageViews() {
 }
 
 inline void createFramebuffers() {
- 
+
   VkFramebufferCreateInfo framebufferCreateInfo = {};
   framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
   framebufferCreateInfo.renderPass = renderPass;
@@ -197,14 +192,12 @@ inline void createFramebuffers() {
       1; //(framebufferCreateInfo.address(), (attachments).remaining());
          //    framebufferCreateInfo.pAttachments= swapChainImageViews;
   for (size_t i = 0; i < Frames; i++) {
-    
+
     framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
-   
 
     clPPPI(&framebufferCreateInfo, "vkCreateFramebuffer",
            &swapChainFramebuffers[i]);
   }
- 
 }
 
-}; 
+} // namespace SwapChainSupportDetails
