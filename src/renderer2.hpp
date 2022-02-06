@@ -5,6 +5,7 @@
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "src/UniformBufferObject.hpp"
+#include "src/mat4x.hpp"
 
 // trick to use builtins+Attributes to treat a blob of memory as a vector type
 // which compiles more cleanly into slightly better asm with vmovps (At least
@@ -48,6 +49,11 @@ inline void renderer2::setupRenderDraw()
   ( clPPPI( &vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore ) );
 }
 
+inline static void memPutLong( void * a, void const * b )
+{
+  a = &b;
+}
+
 // Lazy way to avoid having to deal with fences via use of SIMULTANEOUS USE BIT
 // which depsote the apparent ineffciency of redundant submision is drastically
 // more performant than a considrrable degree of more contventional
@@ -79,9 +85,9 @@ inline void renderer2::updateUniformBuffer()
   float time = glfwGetTime() * ah;
 
   ubo.model = viewproj * glm::rotate( glm::identity<glm::mat4>(), time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
-  // ubo.proj[1][1] *= -1;
-  //    __m512 a =(__m512)&data+0x200;
-
+  //  ubo.proj[1][1] *= -1;
+  //     __m512 a =(__m512)&data+0x200;
+  m4.loadAligned( &ubo.model );
   /*Should Ideally Peristently map the Uniberform buffer allocation instead
    *Howver don't currently know of a method to carry this out in C++ without
    *Java Unsafe API Black Magic (Write to mem addresses dierctly without Type
@@ -90,7 +96,7 @@ inline void renderer2::updateUniformBuffer()
   // vkMapMemory(device, UniformBufferObject::uniformBuffersMemory, 0,
   // UniformBufferObject::Sized, 0, &data);
   {
-    memcpy2( static_cast<__int256 *>( data ), reinterpret_cast<__int256 *>( &ubo.model ), UniformBufferObject::Sized );
+    memcpy2( static_cast<__int256 *>( data ), reinterpret_cast<__int256 *>( &m4 ), UniformBufferObject::Sized );
   }
   // vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory);
   //  data=nullptr;

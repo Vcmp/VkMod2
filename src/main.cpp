@@ -1,10 +1,10 @@
 // #include "mat4.hpp"
 #include "VkUtils2.hpp"
+#include "mat4x.hpp"
 #include "renderer2.hpp"
 
 #include <pthread.h>
 #include <unistd.h>
-
 
 // #define ASAN_OPTIONS = debug=true
 
@@ -53,6 +53,7 @@ inline void * Sysm( void * pv_unused )
   while ( a )
   {
     std::cout << aa /* <<"--->"<< duration  */ << "\n";
+    m4.show();
     aa = 0;
     sleep( 1 );
   }

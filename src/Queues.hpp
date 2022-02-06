@@ -73,7 +73,8 @@ inline void Queues::endSingleTimeCommands()
   a = ( a ^ 1 );
   vkQueueSubmit( TransferQueue[a], 1, &submitInfo1, VK_NULL_HANDLE );
   vkQueueWaitIdle( TransferQueue[a] );
-  vkResetCommandPool( device, static_cast<VkCommandPool>( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
+  vkResetCommandPool(
+    device, reinterpret_cast<VkCommandPool>( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
   // vkFreeCommandBuffers(device, (VkCommandPool)Queues::commandPool2, 1,
   // &commandBuffer);
 }
