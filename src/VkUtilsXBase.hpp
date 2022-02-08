@@ -40,7 +40,7 @@ inline namespace
   // being enabled, however if said Validation Layers are disabled, the memeory
   // leak virtually entirely disappears and at least thus far does not seem to be
   // an issue thankfully
-  static constexpr bool debug = true;
+  static constexpr bool debug = false;
 
   static constexpr bool ENABLE_VALIDATION_LAYERS =
     debug;  // todo: Posible Bug: ValidationLayersBreak Shader Compilation due to
@@ -97,10 +97,10 @@ inline namespace
 
 typedef VkResult( __vectorcall * callPPPPI )(
   const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
-typedef VkResult( __vectorcall * callPPPPI2 )(
-  const VkDevice, const void *, const VkAllocationCallbacks *, const uint64_t *, const uint64_t & pHndl );
+const typedef VkResult( __vectorcall * callPPPPI2 )(
+  const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
 
-static inline void __vectorcall doPointerAlloc2( const void * a, const uint64_t * c, const uint64_t & pHndl )
+static inline void __vectorcall doPointerAlloc2( const void * a, const void * c, const uint64_t & pHndl )
 {
   ( reinterpret_cast<callPPPPI2>( pHndl )( device, a, nullptr, c, pHndl ) );
 }
@@ -131,8 +131,9 @@ inline static uint64_t getDevProd( const char * a )
 {
   return reinterpret_cast<uint64_t>( vkGetDeviceProcAddr( device, a ) );
 }
+template <typename T>
 
-static inline constexpr uint64_t __vectorcall clPPPI2( const void * pStrct, const char * a )
+static inline constexpr T __vectorcall clPPPI2( const void * pStrct, const char * a )
 {
   // vkGetDeviceProcAddr()
   //  auto xx= ;
@@ -145,7 +146,7 @@ static inline constexpr uint64_t __vectorcall clPPPI2( const void * pStrct, cons
   }
   // std::cout << object<<"\n";
   // const VkResult VkR =x(device, pStrct, nullptr, object);
-  uint64_t object = 0;
+  T object = 0;
   ( doPointerAlloc2( pStrct, &object, Hndl ) );
   if constexpr ( checks )
   {
@@ -153,8 +154,9 @@ static inline constexpr uint64_t __vectorcall clPPPI2( const void * pStrct, cons
     {
       throw std::runtime_error( "bad Alloctaion!: Null handle!" );
     }
+    std::cout << &object << "\n";
   }
-  return object;
+  return ( object );
   // return VkR;
   //  callPPPPI(device, pStrct, nullptr, a)
 }

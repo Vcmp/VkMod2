@@ -1,7 +1,8 @@
 #pragma once
-#include "glm/ext/matrix_float4x4.hpp"
 
-#include <cstdint>
+#include "glm/ext/scalar_constants.hpp"
+#include "glm/trigonometric.hpp"
+
 #include <cstdio>
 #include <immintrin.h>
 
@@ -19,22 +20,26 @@ private:
   __m256 __b;
 
 public:
-  explicit mat4x() : __a( _mm256_load_ps( ax ) ), __b( _mm256_load_ps( ax + 8 ) ) {}
+  constexpr explicit mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
   // float a[2][8];
 
-  inline constexpr __m256 __vectorcall lud( const void * a ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
-  inline void domatFMA( mat4x *, __m256 );
-  inline void domatFMA( mat4x * );
+  inline constexpr __m256 __vectorcall lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  // inline constexpr __m256 __vectorcall lud( const void * a ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  inline void           domatFMA( mat4x *, __m256 );
+  inline constexpr void domatFMA( mat4x & ) __attribute__( ( pure, hot ) );
 
   // inline constexpr void __vectorcall loadAligned( float a[16] );
   inline constexpr void __vectorcall loadTmp( const float[] );
-  inline void __vectorcall loadAligned( const void * a ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  inline void __vectorcall loadAligned( mat4x ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  inline constexpr void __vectorcall loadAligned( const void * a ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
   inline constexpr mat4x * identity();
   inline void              neg();
   inline void              setPerspective( float, float, float, float, bool );
-  inline constexpr void    copyOf();
+  inline constexpr mat4x   copyOf();
   inline void              show();
-} m4;
+  inline void              permute();
+  inline void              doRot( float );
+} m4, m5;
 
 // inline constexpr void __vectorcall mat4x::loadAligned( float a[16] )
 // {
@@ -42,17 +47,38 @@ public:
 //   __a = ( lud( a ) );
 //   __b = ( lud( &a + 8 ) );
 // }
+
+inline void mat4x::permute()
+{
+  __m128  x = _mm256_castps256_ps128( __a );
+  __m256d y = _mm256_castps_pd( __b );
+
+  x[1] = y[1];
+  x[2] = y[2];
+}
+
 inline constexpr void mat4x::loadTmp( const float * a )
 {
   //_mm_storeu_si128((__m128*)aa, mat4x::a);
   __a = _mm256_load_ps( a );
   __b = _mm256_load_ps( a + 8 );
 }
-inline void mat4x::loadAligned( const void * a )
+inline constexpr void mat4x::loadAligned( const void * a )
 {
   //_mm_storeu_si128((__m128*)aa, mat4x::a);
   mat4x::__a = ( _mm256_load_ps( static_cast<float const *>( a ) ) );
   mat4x::__b = ( _mm256_load_ps( static_cast<float const *>( a ) + 8 ) );
+
+  // __a = _mm256_andnot_ps( __b, __a );
+  // __b[4]     = 1.0F;
+  // __b[5]     = 1.0F;
+  // __b[7] += 10.0F;
+}
+inline void mat4x::loadAligned( mat4x b )
+{
+  //_mm_storeu_si128((__m128*)aa, mat4x::a);
+  __a = b.__a;
+  __b = b.__b;
 
   // __a = _mm256_andnot_ps( __b, __a );
   // __b[4]     = 1.0F;
@@ -67,17 +93,22 @@ inline void mat4x::domatFMA( mat4x * b, __m256 __Trans )
   b->__a = __builtin_ia32_vfmaddps256( mat4x::__a, b->__a, __Trans );
   b->__b = __builtin_ia32_vfmaddps256( mat4x::__b, b->__b, __Trans );
 }
-inline void mat4x::domatFMA( mat4x * b )
+/*
+ * Might be useful to retain teh expected side-effetcs.bugs.oversoght.ineicincpted efeftcs of Pure by reusing the last
+ * resuls if passed by pointer?refernce as it effectivley allows the state of the Matrix to be '"reset"' between each
+ * isteal. Mul.Operation>Modifictaion>Writeing to
+ */
+inline constexpr void mat4x::domatFMA( mat4x & b )
 {
   // _mm256_fmadd_ps
-  // b->__a = __builtin_ia32_vfmaddps256( mat4x::__a, b->__a, __c );
-  // b->__b = __builtin_ia32_vfmaddps256( mat4x::__b, b->__b, __c );
+  __a = _mm256_mul_ps( __a, b.__a );
+  __b = _mm256_mul_ps( __b, b.__b );
 }
 // Hide ugly casting syntax for aligned load as unlike the AVX512 intrinsics provided by intel, man Load/many intrisics
 // Functions do not include Void* by default as an Argument
-inline constexpr __m256 __vectorcall mat4x::lud( const void * a )
+inline constexpr __m256 __vectorcall mat4x::lud( const float * a )
 {
-  return _mm256_load_ps( (float *)( ( a ) ) );
+  return _mm256_load_ps( ( ( a ) ) );
 }
 
 inline constexpr mat4x * mat4x::identity()
@@ -97,6 +128,11 @@ inline void mat4x::neg()
 
 // }
 
+inline constexpr mat4x mat4x::copyOf()
+{
+  return *this;
+}
+
 inline void mat4x::show()
 {
   __m256 zx[2] = { __a, __b };
@@ -108,4 +144,27 @@ inline void mat4x::show()
   }
 
   printf( "\n" );
+}
+
+// Very heavily based from the Java Joml Library:
+void mat4x::doRot( float ang )
+{
+  float sin = glm::sin( ang );
+  float cos = glm::sin( sin + ( glm::pi<float>() * 0.5F ) );
+  //__a       = _mm256_mul_ps( __a, __b );
+
+  __a[0] = std::fma( __a[0], cos, sin );
+  __a[1] = std::fma( __a[1], cos, -cos );
+  // __a[2] = std::fma( __a[7], sin, 0 );
+  // __a[3] = std::fma( __a[3], cos, __a[7] );
+  //           __a[1](std::fma(a2, cos, v1 * sin))
+  __a[4] = std::fma( __a[1], -sin, cos );
+  __a[5] = std::fma( __a[2], -sin, cos );
+  __a[6] = std::fma( __a[2], -sin, __a[2] * cos );
+  __a[7] = std::fma( __a[3], -sin, __a[3] * cos );
+  // __a[4] = cos;
+  // __a[0] = -sin;
+  // __a[5] = sin;
+  // __a[1] = cos;
+  //__a[6] = 0;
 }

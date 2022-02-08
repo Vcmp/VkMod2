@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Pipeline.hpp"
+#include "UniformBufferObject.hpp"
 #include "glm/detail/qualifier.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
-#include "src/UniformBufferObject.hpp"
-#include "src/mat4x.hpp"
+#include "mat4x.hpp"
 
 // trick to use builtins+Attributes to treat a blob of memory as a vector type
 // which compiles more cleanly into slightly better asm with vmovps (At least
@@ -40,12 +40,13 @@ struct renderer2
                   .pWaitDstStageMask  = &waitStages,
                   .commandBufferCount = 1,
   };
-  static inline constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                                                                    .pNext = nullptr };
 };
 
 inline void renderer2::setupRenderDraw()
 {
+  static constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                                                             .pNext = nullptr };
+
   ( clPPPI( &vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore ) );
 }
 
@@ -87,7 +88,17 @@ inline void renderer2::updateUniformBuffer()
   ubo.model = viewproj * glm::rotate( glm::identity<glm::mat4>(), time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
   //  ubo.proj[1][1] *= -1;
   //     __m512 a =(__m512)&data+0x200;
+  // const float ax[16] = {
+  //   time, time, time, time, time, time, time, time, time, time, time, time, time, time, time, time
+  // };
+  // const float ax2[16] = { time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2,
+  //                         time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2 };
+  // m4.loadTmp( ax2 );
+  // m5.loadTmp( ax2 );
   m4.loadAligned( &ubo.model );
+
+  // m4.doRot( time );
+  // m4.domatFMA( m5 );
   /*Should Ideally Peristently map the Uniberform buffer allocation instead
    *Howver don't currently know of a method to carry this out in C++ without
    *Java Unsafe API Black Magic (Write to mem addresses dierctly without Type

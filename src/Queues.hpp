@@ -1,15 +1,16 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
+
 static constexpr struct Queues
 {
+  static inline VkCommandPool               commandPool;
+  static inline VkCommandPool               commandPool2;
   static inline VkPhysicalDevice            physicalDevice;
   static inline boolean                     a = false;
   static inline uint32_t                    graphicsFamily;
   static inline uint32_t                    transferFamily;
   static inline VkQueue                     GraphicsQueue;
   static inline VkQueue                     TransferQueue[2];
-  static inline uint64_t                    commandPool;
-  static inline uint64_t                    commandPool2;
   static constexpr VkCommandBufferBeginInfo vkCommandBufferBeginInfo = {
     .sType = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO ),
     .pNext = VK_NULL_HANDLE,
@@ -32,19 +33,19 @@ inline void Queues::createCommandPool()
   const VkCommandPoolCreateInfo poolInfo = {
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext            = nullptr,
-    .queueFamilyIndex = graphicsFamily,
+    .queueFamilyIndex = 0,
   };
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);
-  commandPool                             = clPPPI2( &poolInfo, "vkCreateCommandPool" );
+  commandPool                             = clPPPI2<VkCommandPool_T *>( &poolInfo, "vkCreateCommandPool" );
   const VkCommandPoolCreateInfo poolInfo2 = {
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext            = nullptr,
-    .queueFamilyIndex = transferFamily,
+    .queueFamilyIndex = 1,
   };
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);RRRR
-  commandPool2 = clPPPI2( &poolInfo2, "vkCreateCommandPool" );
+  commandPool2 = clPPPI2<VkCommandPool>( &poolInfo2, "vkCreateCommandPool" );
   if ( commandBuffer == nullptr )
   {
     const VkCommandBufferAllocateInfo allocateInfo{

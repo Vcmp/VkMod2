@@ -1,8 +1,8 @@
 // #include "mat4.hpp"
 #include "VkUtils2.hpp"
-#include "mat4x.hpp"
 #include "renderer2.hpp"
 
+#include <istream>
 #include <pthread.h>
 #include <unistd.h>
 
@@ -38,7 +38,6 @@
    detected Asvertained.verifies witH AddressSantitiser so may ne anull,alignemnt,struct intilaistaion issue with
    mising/null-Initialised/Incorretcly Initilaised Fields
 */
-
 inline namespace
 {
   inline bool             a = true;
@@ -62,12 +61,13 @@ inline void * Sysm( void * pv_unused )
 
 int __vectorcall main()
 {
+  std::iostream::sync_with_stdio( false );
   VkUtils2::extracted();
   int r;
 
   r = pthread_create( &sys, nullptr, Sysm, nullptr );
   renderer2::setupRenderDraw();
-
+  _mm256_zeroall();
   while ( !glfwWindowShouldClose( ( window ) ) )
   {
     glfwPollEvents();

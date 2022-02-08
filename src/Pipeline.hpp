@@ -2,6 +2,8 @@
 // #include "SwapChainSupportDetails.hpp"
 #include "ShaderSPIRVUtils.hpp"
 #include "UniformBufferObject.hpp"
+#include "src/UniformBufferObject.hpp"
+#include "src/mat4x.hpp"
 
 struct PipelineX
 {
@@ -280,7 +282,6 @@ inline void PipelineX::createCommandBuffers()
   renderPassInfo.renderPass      = ( renderPass );
   renderPassInfo.renderArea      = renderArea;
   uint8_t i                      = 0;
-
   vkMapMemory( device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data );
   for ( const VkCommandBuffer & commandBuffer : PipelineX::commandBuffers )
   {
@@ -305,6 +306,9 @@ inline void PipelineX::createCommandBuffers()
                              &UniformBufferObject::descriptorSets,
                              0,
                              nullptr );
+    m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
+
+    memcpy( ( data ), ( &viewproj ), UniformBufferObject::Sized );
 
     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 
