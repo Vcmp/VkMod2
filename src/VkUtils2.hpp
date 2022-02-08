@@ -50,46 +50,47 @@ inline namespace VkUtils2
 
   static void pickPhysicalDevice();
   static void createLogicalDevice();
-  static void cleanup();
+  static void cleanup() __attribute__( ( cold ) );
   // static void createSwapChain();
   // static void createImageViews();
   // static void createPipeLine();
-  static void extracted()
-  {
-    VkUtils2::setupWindow();
-    VkUtils2::createInstance();
-    VkUtils2::setupDebugMessenger();
-    VkUtils2::createSurface();
-    VkUtils2::pickPhysicalDevice();
-    VkUtils2::createLogicalDevice();
-    SwapChainSupportDetails::setupImageFormats();
-    SwapChainSupportDetails::createSwapChain();
-    SwapChainSupportDetails::createImageViews();
-    createRenderPasses();
-    UniformBufferObject::createDescriptorSetLayout();
-    PipelineX::createGraphicsPipelineLayout();
-    Queues::createCommandPool();
-    //   Texture::createDepthResources();
-    BuffersX::setupBuffers();
-    //   BuffersX::createVertexBuffer();
-    //   BuffersX::createStagingBuffer();
-    //   BuffersX::createIndexBuffer();
-    SwapChainSupportDetails::createFramebuffers();
-
-    //   Texture::createDepthResources();
-    UniformBufferObject::createUniformBuffers();
-
-    UniformBufferObject::createDescriptorPool();
-    UniformBufferObject::createDescriptorSets();
-    PipelineX::createCommandBuffers();
-
-    //    BuffersX::createVkEvents();
-
-    // VkUtils2::createInstance;
-  }
+  static void extracted();  // __attribute__( ( cold ) );
 
 };  // namespace VkUtils2
 
+static void VkUtils2::extracted()
+{
+  VkUtils2::setupWindow();
+  VkUtils2::createInstance();
+  VkUtils2::setupDebugMessenger();
+  VkUtils2::createSurface();
+  VkUtils2::pickPhysicalDevice();
+  VkUtils2::createLogicalDevice();
+  SwapChainSupportDetails::setupImageFormats();
+  SwapChainSupportDetails::createSwapChain();
+  SwapChainSupportDetails::createImageViews();
+  createRenderPasses();
+  UniformBufferObject::createDescriptorSetLayout();
+  PipelineX::createGraphicsPipelineLayout();
+  Queues::createCommandPool();
+  //   Texture::createDepthResources();
+  BuffersX::setupBuffers();
+  //   BuffersX::createVertexBuffer();
+  //   BuffersX::createStagingBuffer();
+  //   BuffersX::createIndexBuffer();
+  SwapChainSupportDetails::createFramebuffers();
+
+  //   Texture::createDepthResources();
+  UniformBufferObject::createUniformBuffers();
+
+  UniformBufferObject::createDescriptorPool();
+  UniformBufferObject::createDescriptorSets();
+  PipelineX::createCommandBuffers();
+
+  //    BuffersX::createVkEvents();
+
+  // VkUtils2::createInstance;
+}
 long permuteMat( long, long );
 
 inline void VkUtils2::setupWindow()

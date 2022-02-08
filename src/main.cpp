@@ -1,6 +1,7 @@
 // #include "mat4.hpp"
 #include "VkUtils2.hpp"
 #include "renderer2.hpp"
+#include "src/renderer2.hpp"
 
 #include <istream>
 #include <pthread.h>
@@ -48,18 +49,18 @@ inline namespace
 // Apparently Threads other main main therad have much smaller stall alloctaion Sizes...<Query-> Confirm>
 inline void * Sysm( void * pv_unused )
 {
-  _mm256_zeroall();
+  // _mm256_zeroall();
   while ( a )
   {
     std::cout << aa /* <<"--->"<< duration  */ << "\n";
-    m4.show();
+    // m4.show();
     aa = 0;
     sleep( 1 );
   }
   return NULL;
 }
 
-int __vectorcall main()
+int __cdecl main()  // __attribute__( ( __aligned__( 32 ) ) )
 {
   std::iostream::sync_with_stdio( false );
   VkUtils2::extracted();

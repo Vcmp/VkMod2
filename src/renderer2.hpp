@@ -7,20 +7,22 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "mat4x.hpp"
 
+#include <vulkan/vulkan_core.h>
+
 // trick to use builtins+Attributes to treat a blob of memory as a vector type
 // which compiles more cleanly into slightly better asm with vmovps (At least
 // with Clang)
-typedef size_t __int256 __attribute__( ( __vector_size__( UniformBufferObject::Sized ), __aligned__( 256 ) ) );
 // static __int256 *__restrict__ ax = reinterpret_cast<__int256 *>(&ubo);
 
-constexpr float ah = glm::radians( 90.0F );
-struct renderer2
+typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( m4 ) ), __aligned__( 64 ) ) );
+struct /* __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) */ renderer2
 {
-  static void setupRenderDraw();
-  static void drawFrame();
+  static constexpr float ah = glm::radians( 90.0F );
+  static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
+  static void            drawFrame() __attribute__( ( hot, flatten, preserve_most ) );
 
-  constexpr static void memcpy2( __int256 *, __int256 const *, size_t );
-  static void           updateUniformBuffer();
+  constexpr static void __vectorcall memcpy2( __int256 *, __int256 const *, size_t );
+  static void updateUniformBuffer();  // __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
 
   static inline VkSemaphore AvailableSemaphore;
 
@@ -42,12 +44,12 @@ struct renderer2
   };
 };
 
-inline void renderer2::setupRenderDraw()
+inline constexpr void renderer2::setupRenderDraw()
 {
-  static constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                                                             .pNext = nullptr };
+  constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                                                      .pNext = nullptr };
 
-  ( clPPPI( &vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore ) );
+  ( AvailableSemaphore = clPPPI2<VkSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore" ) );
 }
 
 inline static void memPutLong( void * a, void const * b )
@@ -83,9 +85,9 @@ constexpr inline void
 
 inline void renderer2::updateUniformBuffer()
 {
-  float time = glfwGetTime() * ah;
+  const float time = glfwGetTime() * ah;
 
-  ubo.model = viewproj * glm::rotate( glm::identity<glm::mat4>(), time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
+  ubo.model = glm::rotate( viewproj, time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
   //  ubo.proj[1][1] *= -1;
   //     __m512 a =(__m512)&data+0x200;
   // const float ax[16] = {

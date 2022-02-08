@@ -6,6 +6,8 @@
 // #ifdef __cplusplus
 // #define VULKAN_HPP_CPLUSPLUS 201803L
 // #endif
+#define VKAPI_CALL __cdecl
+#define VKAPI_ptr  __regcall
 #include <vulkan/vulkan.hpp>
 // #define VK_USE_64_BIT_PTR_DEFINES 1
 //#define VK_NO_PROTOTYPES

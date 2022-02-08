@@ -7,9 +7,13 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-const glm::mat4 viewproj =
-  glm::perspective( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 0.7f, 90.0f ) *
+const glm::mat4 pers =
+  glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 0.7f, 90.0f );
+const glm::mat4 look =
   glm::lookAt( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
+
+const glm::mat4 viewproj = pers * look;
+
 static inline struct alignas( ( 128 ) ) UBO
 {
   glm::mat4 model = viewproj;

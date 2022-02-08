@@ -26,20 +26,20 @@ public:
   inline constexpr __m256 __vectorcall lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
   // inline constexpr __m256 __vectorcall lud( const void * a ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
   inline void           domatFMA( mat4x *, __m256 );
-  inline constexpr void domatFMA( mat4x & ) __attribute__( ( pure, hot ) );
+  inline constexpr void domatFMA( mat4x & );
 
   // inline constexpr void __vectorcall loadAligned( float a[16] );
   inline constexpr void __vectorcall loadTmp( const float[] );
-  inline void __vectorcall loadAligned( mat4x ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
-  inline constexpr void __vectorcall loadAligned( const void * a ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  // inline void              loadAligned( mat4x ) __declspec( preserve_most );
+  inline constexpr void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
   inline constexpr mat4x * identity();
   inline void              neg();
   inline void              setPerspective( float, float, float, float, bool );
-  inline constexpr mat4x   copyOf();
+  inline constexpr mat4x   copyOf() __attribute__( ( pure ) );
   inline void              show();
   inline void              permute();
   inline void              doRot( float );
-} m4, m5;
+} m4;
 
 // inline constexpr void __vectorcall mat4x::loadAligned( float a[16] )
 // {
@@ -74,17 +74,17 @@ inline constexpr void mat4x::loadAligned( const void * a )
   // __b[5]     = 1.0F;
   // __b[7] += 10.0F;
 }
-inline void mat4x::loadAligned( mat4x b )
-{
-  //_mm_storeu_si128((__m128*)aa, mat4x::a);
-  __a = b.__a;
-  __b = b.__b;
+// inline void mat4x::loadAligned( mat4x b )
+// {
+//   //_mm_storeu_si128((__m128*)aa, mat4x::a);
+//   __a = b.__a;
+//   __b = b.__b;
 
-  // __a = _mm256_andnot_ps( __b, __a );
-  // __b[4]     = 1.0F;
-  // __b[5]     = 1.0F;
-  // __b[7] += 10.0F;
-}
+//   // __a = _mm256_andnot_ps( __b, __a );
+//   // __b[4]     = 1.0F;
+//   // __b[5]     = 1.0F;
+//   // __b[7] += 10.0F;
+// }
 // Try to add a translation before Multiplying the matrix as an attempted Optimisation
 inline void mat4x::domatFMA( mat4x * b, __m256 __Trans )
 {
