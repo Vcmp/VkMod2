@@ -35,7 +35,7 @@ inline namespace
 
   static constexpr __int128 aXX    = 0xF;
   static constexpr uint8_t  Frames = 3;
-  static constexpr bool     checks = true;
+  static constexpr bool     checks = false;
 
   // Their may seem to be an anomalous memory leak when the main render Loop/Draw
   // Call is used; howver this is mearly/primaro;y due to the Validation layers

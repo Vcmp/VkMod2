@@ -1,13 +1,8 @@
 #pragma once
 
 #include "Pipeline.hpp"
-#include "UniformBufferObject.hpp"
-#include "glm/detail/qualifier.hpp"
-#include "glm/ext/matrix_float4x4.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "mat4x.hpp"
 
-#include <vulkan/vulkan_core.h>
+// #include "mat4x.hpp"
 
 // trick to use builtins+Attributes to treat a blob of memory as a vector type
 // which compiles more cleanly into slightly better asm with vmovps (At least
@@ -87,7 +82,7 @@ inline void renderer2::updateUniformBuffer()
 {
   const float time = glfwGetTime() * ah;
 
-  ubo.model = glm::rotate( viewproj, time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
+  // ubo.model = glm::rotate( viewproj, time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
   //  ubo.proj[1][1] *= -1;
   //     __m512 a =(__m512)&data+0x200;
   // const float ax[16] = {
@@ -97,9 +92,9 @@ inline void renderer2::updateUniformBuffer()
   //                         time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2 };
   // m4.loadTmp( ax2 );
   // m5.loadTmp( ax2 );
-  m4.loadAligned( &ubo.model );
+  // m4.loadAligned( &ubo.model );
 
-  // m4.doRot( time );
+  m4.rotateL( viewproj, time /* , glm::vec3( 0.0F, 0.0F, 1.0F ) */ );
   // m4.domatFMA( m5 );
   /*Should Ideally Peristently map the Uniberform buffer allocation instead
    *Howver don't currently know of a method to carry this out in C++ without

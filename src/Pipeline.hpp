@@ -2,8 +2,8 @@
 // #include "SwapChainSupportDetails.hpp"
 #include "ShaderSPIRVUtils.hpp"
 #include "UniformBufferObject.hpp"
-#include "src/UniformBufferObject.hpp"
-#include "src/mat4x.hpp"
+#include "mat4x.hpp"
+
 
 struct PipelineX
 {
