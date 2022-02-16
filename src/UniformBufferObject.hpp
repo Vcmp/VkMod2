@@ -12,9 +12,11 @@ const glm::mat4 pers =
 const glm::mat4 look =
   glm::lookAt( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
-const glm::mat4 viewproj = pers * look;
+const glm::mat4          viewproj  = pers * look;
+const static glm::mat2x4 viewproj1 = ( viewproj );
+;
 
-static inline struct alignas( ( 128 ) ) UBO
+static inline struct alignas( ( 64 ) ) UBO
 {
   glm::mat4 model = viewproj;
   // mat4 Trans;

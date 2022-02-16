@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Pipeline.hpp"
+#include "src/UniformBufferObject.hpp"
 
 // #include "mat4x.hpp"
 
@@ -16,7 +17,9 @@ struct /* __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__(
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
   static void            drawFrame() __attribute__( ( hot, flatten, preserve_most ) );
 
-  constexpr static void __vectorcall memcpy2( __int256 *, __int256 const *, size_t );
+  constexpr static void memcpy2( __int256 *, __int256 const *, size_t )
+    __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
+  ;
   static void updateUniformBuffer();  // __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
 
   static inline VkSemaphore AvailableSemaphore;
@@ -77,10 +80,14 @@ constexpr inline void
 {
   *_Dst = *_Src;
 }
-
+static inline void * __movsb( void * d, const void * s, size_t n )
+{
+  asm volatile( "rep movsb" : "=D"( d ), "=S"( s ), "=c"( n ) : "0"( d ), "1"( s ), "2"( n ) : "memory" );
+  return d;
+}
 inline void renderer2::updateUniformBuffer()
 {
-  const float time = glfwGetTime() * ah;
+  const float time = static_cast<float>( glfwGetTime() ) * ah;
 
   // ubo.model = glm::rotate( viewproj, time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
   //  ubo.proj[1][1] *= -1;
@@ -94,7 +101,7 @@ inline void renderer2::updateUniformBuffer()
   // m5.loadTmp( ax2 );
   // m4.loadAligned( &ubo.model );
 
-  m4.rotateL( viewproj, time /* , glm::vec3( 0.0F, 0.0F, 1.0F ) */ );
+  m4.rotateL( viewproj1, time /* , glm::vec3( 0.0F, 0.0F, 1.0F ) */ );
   // m4.domatFMA( m5 );
   /*Should Ideally Peristently map the Uniberform buffer allocation instead
    *Howver don't currently know of a method to carry this out in C++ without
@@ -104,7 +111,8 @@ inline void renderer2::updateUniformBuffer()
   // vkMapMemory(device, UniformBufferObject::uniformBuffersMemory, 0,
   // UniformBufferObject::Sized, 0, &data);
   {
-    memcpy2( static_cast<__int256 *>( data ), reinterpret_cast<__int256 *>( &m4 ), UniformBufferObject::Sized );
+    // memcpy2( reinterpret_cast<__int256 *>( data ), reinterpret_cast<__int256 *>( &m4 ), sizeof( m4 ) );
+    // memcpy2( reinterpret_cast<__int256 *>( data ), reinterpret_cast<__int256 *>( &m4 ), UniformBufferObject::Sized );
   }
   // vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory);
   //  data=nullptr;

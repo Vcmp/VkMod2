@@ -52,7 +52,7 @@ inline void * Sysm( void * pv_unused )
   while ( a )
   {
     std::cout << aa /* <<"--->"<< duration  */ << "\n";
-    // m4.show();
+    m4.show();
     aa = 0;
     sleep( 1 );
   }

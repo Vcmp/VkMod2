@@ -1,12 +1,16 @@
 #pragma once
 
 #include "glm/ext/matrix_float2x2.hpp"
+#include "glm/ext/matrix_float2x4.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/vector_float4.hpp"
 #include "glm/trigonometric.hpp"
+#include "src/Buffers.hpp"
+#include "src/UniformBufferObject.hpp"
 
 #include <cstdio>
 #include <immintrin.h>
+#include <xmmintrin.h>
 
 /*too lazy to do an SSE version as AVX in many cases can allow for the abilkity to the same steps in half as many stages
  e.g. Might be able to get away withput using amore explict construct arg sets and isntead just implicitly and
@@ -18,8 +22,8 @@ inline static struct __attribute__( ( __vector_size__( 64 ), __aligned__( 64 ) )
 {
 private:
   //__m256 __ab[2];
-  __m256 __a;
-  __m256 __b;
+  __v8sf __a;
+  __v8sf __b;
 
 public:
   constexpr explicit mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
@@ -41,7 +45,9 @@ public:
   inline void              show();
   inline void              permute();
   inline void              doRot( float );
-  inline void              rotateL( glm::mat4 const, float const /* , glm::vec3 const &  */ );
+  inline void __vectorcall rotateL( glm::mat2x4 const, float const /* , glm::vec3 const &  */ )
+    __attribute__( ( __aligned__( 32 ), hot, flatten, pure ) );
+  ;
 } m4;  //, m5, m6;
 
 // inline constexpr void __vectorcall mat4x::loadAligned( float a[16] )
@@ -182,11 +188,42 @@ void mat4x::doRot( float ang )
   // return m4.__a;
 }
 
-inline void mat4x::rotateL( const glm::mat4 m, const float angle /* , const glm::vec3 & v */ )
+inline void mat4x::rotateL( const glm::mat2x4 m, const float angle /* , const glm::vec3 & v */ )
 {
   //   float const a = angle;
   float const c = glm::cos( angle );
   float const s = glm::sin( angle );
+  __builtin_prefetch( BuffersX::data );
+  // const float aa[4] = { c, s, -s, c };
+
+  // // loadAligned( &m );
+
+  // const __m128 x = _mm_broadcast_ss( &aa[0] );
+  // const __m128 y = _mm_broadcast_ss( &aa[1] );
+
+  // // __m256 z = _mm256_loadu2_m128( &aa[0], &aa[1] );
+  // const float  t[4] = { viewproj1[0][0], viewproj1[0][1], viewproj1[0][2], viewproj1[0][3] };
+  // const float  r[4] = { viewproj1[1][0], viewproj1[1][1], viewproj1[1][2], viewproj1[1][3] };
+  // const __m128 x1   = _mm_broadcast_ss( t );
+  // const __m128 y1   = _mm_broadcast_ss( r );
+  // __m128       v    = _mm_fmadd_ps( x1, x, _mm_mul_ps( y1, y ) );
+  // __m128       v1   = _mm_fmadd_ps( x1, -y, _mm_mul_ps( y1, x ) );
+
+  // __a = _mm256_loadu2_m128( reinterpret_cast<float *>( &v ), reinterpret_cast<float *>( &v1 ) );
+
+  __a[0] = viewproj1[0][0] * c + viewproj1[1][0] * s;
+  __a[1] = viewproj1[0][1] * c + viewproj1[1][1] * s;
+  __a[2] = viewproj1[0][2] * c + viewproj1[1][2] * s;
+  __a[3] = viewproj1[0][3] * c + viewproj1[1][3] * s;
+
+  __a[4] = viewproj1[0][0] * -s + viewproj1[1][0] * c;
+  __a[5] = viewproj1[0][1] * -s + viewproj1[1][1] * c;
+  __a[6] = viewproj1[0][2] * -s + viewproj1[1][2] * c;
+  __a[7] = viewproj1[0][3] * -s + viewproj1[1][3] * c;
+
+  _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), __a );
+
+  // __a = _mm256_mul_ps( __a; _mm256_broadcast_ss( aa ) );
 
   // constexpr glm::vec3 axis = { 0, 0, 1 };
   // glm::vec3           temp( ( float( 1 ) - c ) * axis );
@@ -204,12 +241,12 @@ inline void mat4x::rotateL( const glm::mat4 m, const float angle /* , const glm:
   // Rotate[2][1] = 0;
   // Rotate[2][2] = c + temp[2];
 
-  const glm::vec4 Result[2]{                       // Rotate.transpos
-                             m[0] * c + m[1] * s,  // + m[2] * Rotate[0][2];
-                             m[0] * -s + m[1] * c
-  };  // + m[2] * Rotate[1][2];
+  // const glm::mat2x4 Result{                                       // Rotate.transpos
+  //                           viewproj1[0] * c + viewproj1[1] * s,  // + m[2] * Rotate[0][2];
+  //                           viewproj1[0] * -s + viewproj1[1] * c
+  // };  // + m[2] * Rotate[1][2];
   // Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] * Rotate[2][2];
   // Result[3] = m[3];
 
-  loadAligned( &Result );
+  // loadAligned( &Result );
 }
