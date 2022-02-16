@@ -4,7 +4,6 @@
 #include "UniformBufferObject.hpp"
 #include "mat4x.hpp"
 
-
 struct PipelineX
 {
 private:
@@ -205,7 +204,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
   static constexpr VkPushConstantRange vkPushConstantRange{
     .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
     .offset     = 0,
-    .size       = sizeof( ubo ),
+    .size       = sizeof( mat4x ),
   };
 
   constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = { .sType =
@@ -308,7 +307,7 @@ inline void PipelineX::createCommandBuffers()
                              nullptr );
     m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
 
-    memcpy( ( data ), ( &viewproj ), UniformBufferObject::Sized );
+    memcpy( ( data ), ( &m4 ), sizeof( mat4x ) );
 
     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 

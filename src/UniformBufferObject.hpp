@@ -10,20 +10,20 @@
 const glm::mat4 pers =
   glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 0.7f, 90.0f );
 const glm::mat4 look =
-  glm::lookAt( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
+  glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
 const glm::mat4          viewproj  = pers * look;
 const static glm::mat2x4 viewproj1 = ( viewproj );
 ;
 
-static inline struct alignas( ( 64 ) ) UBO
-{
-  glm::mat4 model = viewproj;
-  // mat4 Trans;
-} ubo;
+// static inline struct alignas( ( 64 ) ) UBO
+// {
+//   glm::mat4 model = viewproj;
+//   // mat4 Trans;
+// } ubo;
 struct UniformBufferObject
 {
-  static constexpr size_t             Sized = ( sizeof( ubo ) );
+  static constexpr size_t             Sized = ( sizeof( viewproj ) );
   static inline VkDescriptorSet       descriptorSets;
   static inline VkDescriptorSetLayout descriptorSetLayout;
   static inline VkDescriptorPool      descriptorPool;

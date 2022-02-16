@@ -1,12 +1,12 @@
 #pragma once
 
+#include "Buffers.hpp"
+#include "UniformBufferObject.hpp"
 #include "glm/ext/matrix_float2x2.hpp"
 #include "glm/ext/matrix_float2x4.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/vector_float4.hpp"
 #include "glm/trigonometric.hpp"
-#include "src/Buffers.hpp"
-#include "src/UniformBufferObject.hpp"
 
 #include <cstdio>
 #include <immintrin.h>
@@ -38,17 +38,19 @@ public:
   inline constexpr void __vectorcall loadTmp( const float[] );
   // inline void              loadAligned( mat4x ) __declspec( preserve_most );
   inline constexpr void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
+  inline constexpr void    loadAligned( const mat4x * a ) __attribute__( ( preserve_most ) );
   inline constexpr mat4x * identity();
   inline void              neg();
   inline void              setPerspective( float, float, float, float, bool );
   inline constexpr mat4x   copyOf() __attribute__( ( pure ) );
   inline void              show();
   inline void              permute();
-  inline void              doRot( float );
-  inline void __vectorcall rotateL( glm::mat2x4 const, float const /* , glm::vec3 const &  */ )
-    __attribute__( ( __aligned__( 32 ), hot, flatten, pure ) );
+  inline void              doPerspective( float, float, float, float );
+  inline void              doLook( float );
+  inline void __vectorcall rotateL( float const /* , glm::vec3 const &  */ )
+    __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
-} m4;  //, m5, m6;
+} m4, m5, m6;
 
 // inline constexpr void __vectorcall mat4x::loadAligned( float a[16] )
 // {
@@ -77,6 +79,17 @@ inline constexpr void mat4x::loadAligned( const void * a )
   //_mm_storeu_si128((__m128*)aa, mat4x::a);
   mat4x::__a = ( _mm256_load_ps( static_cast<float const *>( a ) ) );
   mat4x::__b = ( _mm256_load_ps( static_cast<float const *>( a ) + 8 ) );
+
+  // __a = _mm256_andnot_ps( __b, __a );
+  // __b[4]     = 1.0F;
+  // __b[5]     = 1.0F;
+  // __b[7] += 10.0F;
+}
+inline constexpr void mat4x::loadAligned( const mat4x * a )
+{
+  //_mm_storeu_si128((__m128*)aa, mat4x::a);
+  mat4x::__a = a->__a;
+  mat4x::__b = a->__b;
 
   // __a = _mm256_andnot_ps( __b, __a );
   // __b[4]     = 1.0F;
@@ -113,6 +126,7 @@ inline constexpr void mat4x::domatFMA( mat4x & b )
   __a = _mm256_mul_ps( __a, b.__a );
   __b = _mm256_mul_ps( __b, b.__b );
 }
+
 // Hide ugly casting syntax for aligned load as unlike the AVX512 intrinsics provided by intel, man Load/many intrisics
 // Functions do not include Void* by default as an Argument
 inline constexpr __m256 __vectorcall mat4x::lud( const float * a )
@@ -156,39 +170,42 @@ inline void mat4x::show()
 }
 
 // Very heavily based from the Java Joml Library:
-void mat4x::doRot( float ang )
+void mat4x::doPerspective( float fovy, float aspect, float zFar, float zNear )
 {
-  // float s = glm::sin( ang );
-  // float c = glm::sin( sin + ( glm::pi<float>() * 0.5F ) );
-  //__a       = _mm256_mul_ps( __a, __b );
+  // assert( abs( aspect - std::numeric_limits<float>::epsilon() ) > static_cast<float>( 0 ) );
 
-  // float const a = ang;
-  // float const c = cos( a );
-  // float const s = sin( a );
+  float const tanHalfFovy = tan( fovy / static_cast<float>( 2 ) );
 
-  // float axis[3] = { 0, 0, 1 };
-  // float temp[3] = { 0, 0, ( 1 - c * axis[2] ) };
-
-  // m6.__a[0] = c + temp[0] * axis[0];
-  // m6.__a[1] = temp[0] * axis[1] + s * axis[2];
-  // m6.__a[2] = temp[0] * axis[2] - s * axis[1];
-
-  // m6.__a[4] = temp[1] * axis[0] - s * axis[2];
-  // m6.__a[5] = c + temp[1] * axis[1];
-  // m6.__a[6] = temp[1] * axis[2] + s * axis[0];
-
-  // m6.__b[0] = temp[2] * axis[0] + s * axis[1];
-  // m6.__b[1] = temp[2] * axis[1] - s * axis[0];
-  // m6.__b[2] = c + temp[2] * axis[2];
-
-  // m4.__a[0] = m5.__a[0] * m6.__a[0] + m5.__a[4] * m6.__a[1] + m5.__b[0] * m6.__a[2];
-  // m4.__a[1] = m5.__a[0] * m6.__a[4] + m5.__a[4] * m6.__a[5] + m5.__b[0] * m6.__a[3];
-  // m4.__a[2] = m5.__a[0] * m6.__b[0] + m5.__a[4] * m6.__b[1] + m5.__b[0] * m6.__b[2];
-  // m4.__a[3] = m5.__b[4];
-  // return m4.__a;
+  __a[0] = 1 / ( aspect * tanHalfFovy );
+  __a[5] = 1 / ( tanHalfFovy );
+  __b[2] = zFar / ( zFar - zNear );
+  __b[3] = 1;
+  __b[6] = -( zFar * zNear ) / ( zFar - zNear );
+  m6.doLook( 1 );
 }
 
-inline void mat4x::rotateL( const glm::mat2x4 m, const float angle /* , const glm::vec3 & v */ )
+void mat4x::doLook( float a )
+{
+  // vec<3, T, Q> const f( normalize( center - eye ) );
+  // vec<3, T, Q> const s( normalize( cross( up, f ) ) );
+  // vec<3, T, Q> const u( cross( f, s ) );
+
+  // Result[0][0] = s.x;
+  // Result[1][0] = s.y;
+  // Result[2][0] = s.z;
+  // Result[0][1] = u.x;
+  // Result[1][1] = u.y;
+  __b[1] = 1;
+  __a[2] = 2;
+  __a[6] = 2;
+  __b[3] = 2;
+  __b[4] = -( 0.F * 2.F );
+  __b[5] = -( 1.F * 2.F );
+  __b[6] = -( 2.F * 2.F );
+  // return Result;
+}
+
+inline void mat4x::rotateL( const float angle /* , const glm::vec3 & v */ )
 {
   //   float const a = angle;
   float const c = glm::cos( angle );
@@ -210,6 +227,7 @@ inline void mat4x::rotateL( const glm::mat2x4 m, const float angle /* , const gl
   // __m128       v1   = _mm_fmadd_ps( x1, -y, _mm_mul_ps( y1, x ) );
 
   // __a = _mm256_loadu2_m128( reinterpret_cast<float *>( &v ), reinterpret_cast<float *>( &v1 ) );
+  __a = _mm256_load_ps( ax );
 
   __a[0] = viewproj1[0][0] * c + viewproj1[1][0] * s;
   __a[1] = viewproj1[0][1] * c + viewproj1[1][1] * s;

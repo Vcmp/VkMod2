@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Pipeline.hpp"
-#include "src/UniformBufferObject.hpp"
+#include "UniformBufferObject.hpp"
 
 // #include "mat4x.hpp"
 
@@ -61,6 +61,7 @@ inline static void memPutLong( void * a, void const * b )
 // fence/Synchronisation setups
 inline void renderer2::drawFrame()
 {
+  // m4.loadAligned( &m5 );
   checkCall( vkAcquireNextImageKHR( device, swapChain, TmUt, AvailableSemaphore, VK_NULL_HANDLE, &currentFrame ) );
 
   updateUniformBuffer();
@@ -101,7 +102,7 @@ inline void renderer2::updateUniformBuffer()
   // m5.loadTmp( ax2 );
   // m4.loadAligned( &ubo.model );
 
-  m4.rotateL( viewproj1, time /* , glm::vec3( 0.0F, 0.0F, 1.0F ) */ );
+  m4.rotateL( time /* , glm::vec3( 0.0F, 0.0F, 1.0F ) */ );
   // m4.domatFMA( m5 );
   /*Should Ideally Peristently map the Uniberform buffer allocation instead
    *Howver don't currently know of a method to carry this out in C++ without
