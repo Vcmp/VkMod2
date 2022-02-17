@@ -11,15 +11,20 @@
 // static __int256 *__restrict__ ax = reinterpret_cast<__int256 *>(&ubo);
 
 typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( m4 ) ), __aligned__( 64 ) ) );
+
+// const PFN_vkAcquireNextImageKHR * vckANI =
+//   VkUtilsXBase::getAddrFuncPtr<PFN_vkAcquireNextImageKHR>( "vkAcquireNextImageKHR" );
 struct /* __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) */ renderer2
 {
   static constexpr float ah = glm::radians( 90.0F );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
   static void            drawFrame() __attribute__( ( hot, flatten, preserve_most ) );
 
+private:
   constexpr static void memcpy2( __int256 *, __int256 const *, size_t )
     __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   ;
+
   static void updateUniformBuffer();  // __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
 
   static inline VkSemaphore AvailableSemaphore;
@@ -47,7 +52,7 @@ inline constexpr void renderer2::setupRenderDraw()
   constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
                                                       .pNext = nullptr };
 
-  ( AvailableSemaphore = clPPPI2<VkSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore" ) );
+  ( AvailableSemaphore = VkUtilsXBase::clPPPI2<VkSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore" ) );
 }
 
 inline static void memPutLong( void * a, void const * b )
@@ -62,18 +67,19 @@ inline static void memPutLong( void * a, void const * b )
 inline void renderer2::drawFrame()
 {
   // m4.loadAligned( &m5 );
-  checkCall( vkAcquireNextImageKHR( device, swapChain, TmUt, AvailableSemaphore, VK_NULL_HANDLE, &currentFrame ) );
+  VkUtilsXBase::checkCall(
+    vkAcquireNextImageKHR( VkUtilsXBase::device, swapChain, TmUt, AvailableSemaphore, VK_NULL_HANDLE, &currentFrame ) );
 
   updateUniformBuffer();
   info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
 
-  checkCall( vkQueueSubmit( Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE ) );
+  VkUtilsXBase::checkCall( vkQueueSubmit( Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE ) );
 
   //  info.pWaitSemaphores = &AvailableSemaphore;
 
-  checkCall( vkQueuePresentKHR( Queues::GraphicsQueue, &VkPresentInfoKHR1 ) );
+  VkUtilsXBase::checkCall( vkQueuePresentKHR( Queues::GraphicsQueue, &VkPresentInfoKHR1 ) );
 
-  currentFrame = ( currentFrame + 1 ) % Frames;
+  currentFrame = ( currentFrame + 1 ) % VkUtilsXBase::Frames;
 }
 
 constexpr inline void

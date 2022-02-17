@@ -1,20 +1,19 @@
 #pragma once
 #define GLM_FORCE_LEFT_HANDED
 #include "Buffers.hpp"
-#include "glm/detail/qualifier.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
-#include "glm/fwd.hpp"
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+inline namespace
+{
+  static const glm::mat4 pers = glm::perspectiveLH_ZO(
+    glm::radians( 45.0f ) * -1, VkUtilsXBase::width / static_cast<float>( VkUtilsXBase::height ), 0.7f, 90.0f );
+  static const glm::mat4 look =
+    glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
-const glm::mat4 pers =
-  glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 0.7f, 90.0f );
-const glm::mat4 look =
-  glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
-
-const glm::mat4          viewproj  = pers * look;
-const static glm::mat2x4 viewproj1 = ( viewproj );
-;
+  static const glm::mat4          viewproj  = pers * look;
+  static const static glm::mat2x4 viewproj1 = ( viewproj );
+};  // namespace
 
 // static inline struct alignas( ( 64 ) ) UBO
 // {
@@ -52,7 +51,7 @@ struct UniformBufferObject
         .pBindings    = &bindings,
 
       };
-      clPPPI( &a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout );
+      VkUtilsXBase::clPPPI( &a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout );
       // return MemSysm.doPointerAllocSafe(a,
       // device.getCapabilities().vkCreateDescriptorSetLayout);
     }
@@ -90,7 +89,7 @@ struct UniformBufferObject
                                                                   .maxSets       = 1,
                                                                   .poolSizeCount = 1,
                                                                   .pPoolSizes    = &poolSize };
-      ( vkCreateDescriptorPool( device, &poolCreateInfo, nullptr, &descriptorPool ) );
+      ( vkCreateDescriptorPool( VkUtilsXBase::device, &poolCreateInfo, nullptr, &descriptorPool ) );
       //               descriptorPool=aLong[0];
     }
   }
@@ -117,7 +116,7 @@ struct UniformBufferObject
       .unnormalizedCoordinates = false,
     };
     VkSampler sampler = nullptr;
-    clPPPI( &samplerInfo, "vkCreateSampler", &sampler );
+    VkUtilsXBase::clPPPI( &samplerInfo, "vkCreateSampler", &sampler );
     return sampler;
     // nmemFree(samplerInfo.address());
   }
@@ -134,7 +133,7 @@ struct UniformBufferObject
                                                    .descriptorSetCount = 1,
                                                    .pSetLayouts        = &descriptorSetLayout };
 
-      vkAllocateDescriptorSets( device, &allocInfo, &descriptorSets );
+      vkAllocateDescriptorSets( VkUtilsXBase::device, &allocInfo, &descriptorSets );
 
       {
         VkDescriptorBufferInfo bufferInfo{ .buffer = uniformBuffers, .offset = 0, .range = ( Sized ) };
@@ -157,7 +156,7 @@ struct UniformBufferObject
 
           /*  */
         };
-        vkUpdateDescriptorSets( device, 1, &descriptorWrites, 0, nullptr );
+        vkUpdateDescriptorSets( VkUtilsXBase::device, 1, &descriptorWrites, 0, nullptr );
       }
     }
   }

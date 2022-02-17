@@ -40,10 +40,11 @@
 */
 inline namespace
 {
-  inline bool             a = true;
+  static inline bool      a = true;
   static inline uint16_t  aa;
   static inline pthread_t sys;
   static inline pthread_t rThrd;
+
 }  // namespace
 // Apparently Threads other main main therad have much smaller stall alloctaion Sizes...<Query-> Confirm>
 inline void * Sysm( void * pv_unused )
@@ -68,7 +69,7 @@ int __cdecl main()  // __attribute__( ( __aligned__( 32 ) ) )
   r = pthread_create( &sys, nullptr, Sysm, nullptr );
   renderer2::setupRenderDraw();
   _mm256_zeroall();
-  while ( !glfwWindowShouldClose( ( window ) ) )
+  while ( !glfwWindowShouldClose( ( VkUtils2::window ) ) )
   {
     glfwPollEvents();
     // glfwWaitEventsTimeout(1);
@@ -80,7 +81,7 @@ int __cdecl main()  // __attribute__( ( __aligned__( 32 ) ) )
   pthread_join( sys, nullptr );
 
   VkUtils2::cleanup();
-  glfwDestroyWindow( window );
+  glfwDestroyWindow( VkUtils2::window );
   glfwTerminate();
 }
 

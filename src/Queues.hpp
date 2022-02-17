@@ -37,7 +37,7 @@ inline void Queues::createCommandPool()
   };
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);
-  commandPool                             = clPPPI2<VkCommandPool_T *>( &poolInfo, "vkCreateCommandPool" );
+  commandPool = VkUtilsXBase::clPPPI2<VkCommandPool_T *>( &poolInfo, "vkCreateCommandPool" );
   const VkCommandPoolCreateInfo poolInfo2 = {
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext            = nullptr,
@@ -45,7 +45,7 @@ inline void Queues::createCommandPool()
   };
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);RRRR
-  commandPool2 = clPPPI2<VkCommandPool>( &poolInfo2, "vkCreateCommandPool" );
+  commandPool2 = VkUtilsXBase::clPPPI2<VkCommandPool>( &poolInfo2, "vkCreateCommandPool" );
   if ( commandBuffer == nullptr )
   {
     const VkCommandBufferAllocateInfo allocateInfo{
@@ -56,7 +56,7 @@ inline void Queues::createCommandPool()
       .commandBufferCount = ( 1 ),
     };
 
-    vkAllocateCommandBuffers( device, &allocateInfo, &commandBuffer );
+    vkAllocateCommandBuffers( VkUtilsXBase::device, &allocateInfo, &commandBuffer );
   }
 }
 
@@ -74,8 +74,9 @@ inline void Queues::endSingleTimeCommands()
   a = ( a ^ 1 );
   vkQueueSubmit( TransferQueue[a], 1, &submitInfo1, VK_NULL_HANDLE );
   vkQueueWaitIdle( TransferQueue[a] );
-  vkResetCommandPool(
-    device, reinterpret_cast<VkCommandPool>( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
+  vkResetCommandPool( VkUtilsXBase::device,
+                      reinterpret_cast<VkCommandPool>( commandPool2 ),
+                      VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
   // vkFreeCommandBuffers(device, (VkCommandPool)Queues::commandPool2, 1,
   // &commandBuffer);
 }

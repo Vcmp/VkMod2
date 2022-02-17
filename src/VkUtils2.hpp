@@ -5,14 +5,13 @@
 #include "SwapChainSupportDetails.hpp"
 #include "Texture.hpp"
 #include "UniformBufferObject.hpp"
-
 // #include <stdint.h>
 
-inline namespace VkUtils2
+struct VkUtils2
 {
-  static GLFWwindow *                    window;
-  static GLFWmonitor *                   monitor;
-  static VkInstance                      vkInstance;
+  static inline GLFWwindow *             window;
+  static inline GLFWmonitor *            monitor;
+  static inline VkInstance               vkInstance;
   static const std::vector<const char *> getRequiredExtensions();
   static VKAPI_ATTR VkBool32 VKAPI_CALL  debugCallback( VkDebugUtilsMessageSeverityFlagBitsEXT,
                                                         VkDebugUtilsMessageTypeFlagsEXT,
@@ -26,14 +25,12 @@ inline namespace VkUtils2
   static void           checkDeviceExtensionSupport( VkPhysicalDevice );
 
   static const VkSurfaceFormatKHR querySwapChainSupport( VkPhysicalDevice );
-  inline namespace
-  {
-    typedef VkResult( VKAPI_PTR * PFN_vkCreateDebugUtilsMessengerEXT2 )(
-      VkInstance                                 instance,
-      const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo,
-      const VkAllocationCallbacks *              pAllocator,
-      const VkDebugUtilsMessengerEXT *           pMessenger );
-  }
+
+  typedef VkResult( VKAPI_PTR * PFN_vkCreateDebugUtilsMessengerEXT2 )(
+    VkInstance                                 instance,
+    const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo,
+    const VkAllocationCallbacks *              pAllocator,
+    const VkDebugUtilsMessengerEXT *           pMessenger );
 
   //    private static final long[] pDebugMessenger = new long[1];
   //    X(),
@@ -58,7 +55,7 @@ inline namespace VkUtils2
 
 };  // namespace VkUtils2
 
-static void VkUtils2::extracted()
+inline void VkUtils2::extracted()
 {
   VkUtils2::setupWindow();
   VkUtils2::createInstance();
@@ -103,7 +100,7 @@ inline void VkUtils2::setupWindow()
   // glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
   // glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
 
-  window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
+  window = glfwCreateWindow( VkUtilsXBase::width, VkUtilsXBase::height, "VKMod2", nullptr, nullptr );
 
   if ( window == NULL )
     exit( 1 );
@@ -115,7 +112,7 @@ inline void VkUtils2::setupWindow()
 inline void VkUtils2::createInstance()
 {
   std::cout << ( "Creating Instance" ) << "\n";
-  if ( ENABLE_VALIDATION_LAYERS && !VkUtils2::checkValidationLayerSupport() )
+  if ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS && !VkUtils2::checkValidationLayerSupport() )
   {
     std::runtime_error( "Validation requested but not supported" );
   }
@@ -149,10 +146,10 @@ inline void VkUtils2::createInstance()
 
   InstCreateInfo.enabledExtensionCount = static_cast<uint32_t>( extensions.size() );
 
-  if constexpr ( ENABLE_VALIDATION_LAYERS )
+  if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {
-    InstCreateInfo.ppEnabledLayerNames = ( validationLayers.data() );
-    InstCreateInfo.enabledLayerCount   = static_cast<uint32_t>( validationLayers.size() );
+    InstCreateInfo.ppEnabledLayerNames = ( VkUtilsXBase::validationLayers.data() );
+    InstCreateInfo.enabledLayerCount   = static_cast<uint32_t>( VkUtilsXBase::validationLayers.size() );
     InstCreateInfo.pNext               = &extValidationFeatures;
   }
   else
@@ -161,7 +158,7 @@ inline void VkUtils2::createInstance()
   // PointerBuffer instancePtr = memPointerBuffer(MemSysm.address, 1);
   // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
 
-  checkCall( vkCreateInstance( &InstCreateInfo, VK_NULL_HANDLE, &vkInstance ) );
+  VkUtilsXBase::checkCall( vkCreateInstance( &InstCreateInfo, VK_NULL_HANDLE, &vkInstance ) );
   // getVersion();
 }
 
@@ -174,7 +171,7 @@ inline void VkUtils2::createSurface()
   createSurfaceInfo.hinstance                   = GetModuleHandle( nullptr );
   createSurfaceInfo.pNext                       = VK_NULL_HANDLE;
 
-  checkCall( vkCreateWin32SurfaceKHR(
+  VkUtilsXBase::checkCall( vkCreateWin32SurfaceKHR(
     vkInstance, &createSurfaceInfo, nullptr, const_cast<VkSurfaceKHR *>( &Queues::surface ) ) );
 }
 
@@ -194,7 +191,7 @@ inline const std::vector<const char *> VkUtils2::getRequiredExtensions()
   uint32_t                  glfwExtensionCount = 0;
   const char **             glfwExtensions     = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
   std::vector<const char *> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
-  if constexpr ( ENABLE_VALIDATION_LAYERS )
+  if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {
     extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
   }
@@ -214,7 +211,7 @@ VKAPI_ATTR inline VkBool32 VKAPI_CALL
 
 inline void VkUtils2::setupDebugMessenger()
 {
-  if constexpr ( !ENABLE_VALIDATION_LAYERS )
+  if constexpr ( !VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {
     return;
   }
@@ -228,7 +225,7 @@ inline void VkUtils2::setupDebugMessenger()
     .pfnUserCallback = VkUtils2::debugCallback,
     .pUserData       = VK_NULL_HANDLE,
   };
-  checkCall( createDebugUtilsMessengerEXT( vkInstance, &createInfo ) );
+  VkUtilsXBase::checkCall( createDebugUtilsMessengerEXT( vkInstance, &createInfo ) );
   // debugMessenger = pDebugMessenger[0];
 }
 
@@ -252,14 +249,14 @@ inline void VkUtils2::pickPhysicalDevice()
 {
   std::cout << ( "Picking Physical Device" ) << "\n";
   uint32_t deviceCount;
-  checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, nullptr ) );
+  VkUtilsXBase::checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, nullptr ) );
   if ( deviceCount == 0 )
     std::runtime_error( "Failed to find GPUs with Vulkan support" );
   VkPhysicalDevice ppPhysicalDevices[deviceCount];
 
   // VkPhysicalDevice device;
   std::cout << ( "Enumerate Physical Device" ) << "\n";
-  checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, ppPhysicalDevices ) );
+  VkUtilsXBase::checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, ppPhysicalDevices ) );
   for ( const VkPhysicalDevice & d : ppPhysicalDevices )
   {
     std::cout << ( "Check Device:" ) << d << "\n";
@@ -386,8 +383,8 @@ inline void VkUtils2::createLogicalDevice()
   createInfo.pNext                   = &deviceFeatures2;
   createInfo.queueCreateInfoCount    = 2;
   createInfo.pQueueCreateInfos       = queueCreateInfos;
-  createInfo.ppEnabledExtensionNames = ( deviceExtensions );
-  createInfo.enabledExtensionCount   = static_cast<uint32_t>( validationLayers.size() );
+  createInfo.ppEnabledExtensionNames = ( VkUtilsXBase::deviceExtensions );
+  createInfo.enabledExtensionCount   = static_cast<uint32_t>( VkUtilsXBase::validationLayers.size() );
   // createInfo.ppEnabledLayerNames=(validationLayers.data());
   createInfo.pEnabledFeatures = nullptr;
 
@@ -395,29 +392,32 @@ inline void VkUtils2::createLogicalDevice()
   {
     throw std::runtime_error( "Failed Enumeration!" );
   }
-  if constexpr ( ENABLE_VALIDATION_LAYERS )
+  if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {
-    createInfo.ppEnabledLayerNames = validationLayers.data();
+    createInfo.ppEnabledLayerNames = VkUtilsXBase::validationLayers.data();
   }
-  checkCall( vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ) );
+  VkUtilsXBase::checkCall(
+    vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &VkUtilsXBase::device ) );
 
-  vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0, &Queues::GraphicsQueue );
-  vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0, &Queues::TransferQueue[0] );
-  vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 1, &Queues::TransferQueue[1] );
+  vkGetDeviceQueue( VkUtilsXBase::device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0, &Queues::GraphicsQueue );
+  vkGetDeviceQueue(
+    VkUtilsXBase::device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0, &Queues::TransferQueue[0] );
+  vkGetDeviceQueue(
+    VkUtilsXBase::device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 1, &Queues::TransferQueue[1] );
 }
 
 void VkUtils2::cleanup()
 {
-  vkDeviceWaitIdle( device );
-  vkUnmapMemory( device, UniformBufferObject::uniformBuffersMemory );
-  vkDestroyCommandPool( device, (VkCommandPool)Queues::commandPool, nullptr );
+  vkDeviceWaitIdle( VkUtilsXBase::device );
+  vkUnmapMemory( VkUtilsXBase::device, UniformBufferObject::uniformBuffersMemory );
+  vkDestroyCommandPool( VkUtilsXBase::device, (VkCommandPool)Queues::commandPool, nullptr );
   for ( auto framebuffer : swapChainFramebuffers )
   {
-    vkDestroyFramebuffer( device, framebuffer, nullptr );
+    vkDestroyFramebuffer( VkUtilsXBase::device, framebuffer, nullptr );
   }
   // vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
   // vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
 
-  vkDestroyBuffer( device, vertexBuffer, nullptr );
-  vkFreeMemory( device, vertexBufferMemory, nullptr );
+  vkDestroyBuffer( VkUtilsXBase::device, vertexBuffer, nullptr );
+  vkFreeMemory( VkUtilsXBase::device, vertexBufferMemory, nullptr );
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Queues.hpp"
 #include "SwapChainSupportDetails.hpp"
 
 // = (&set + sizeof(set));
@@ -102,7 +101,7 @@ inline void BuffersX::createVkEvents()
   vkEventCreateInfo.sType             = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
   vkEventCreateInfo.pNext             = nullptr;
 
-  clPPPI( &vkEventCreateInfo, "vkCreateEvent", &vkEvent );
+  VkUtilsXBase::clPPPI( &vkEventCreateInfo, "vkCreateEvent", &vkEvent );
 }
 
 inline void BuffersX::copyBuffer( VkBuffer & dst, const size_t sized )
@@ -137,7 +136,7 @@ inline void BuffersX::setupBuffers()
                                                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
   createSetBuffer( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory );
 
-  vkMapMemory( device, stagingBufferMemory, 0, sizedsf, 0, &data );
+  vkMapMemory( VkUtilsXBase::device, stagingBufferMemory, 0, sizedsf, 0, &data );
   {
     memcpy( data, vectBuf, sizedsf );
   }
@@ -147,7 +146,7 @@ inline void BuffersX::setupBuffers()
   {
     memcpy( data, idxBuf, sizedsfIdx );
   }
-  vkUnmapMemory( device, stagingBufferMemory );
+  vkUnmapMemory( VkUtilsXBase::device, stagingBufferMemory );
   copyBuffer( indexBuffer, sizedsfIdx );
 }
 
@@ -165,10 +164,10 @@ inline void BuffersX::createSetBuffer( VkMemoryPropertyFlagBits properties,
     .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
   };
 
-  clPPPI( &allocateInfo, "vkCreateBuffer", &currentBuffer );
+  VkUtilsXBase::clPPPI( &allocateInfo, "vkCreateBuffer", &currentBuffer );
 
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements( device, currentBuffer, &memRequirements );
+  vkGetBufferMemoryRequirements( VkUtilsXBase::device, currentBuffer, &memRequirements );
 
   VkMemoryAllocateInfo allocateInfo1 = {
     .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -177,8 +176,8 @@ inline void BuffersX::createSetBuffer( VkMemoryPropertyFlagBits properties,
     .memoryTypeIndex = findMemoryType( Queues::physicalDevice, memRequirements.memoryTypeBits, properties ),
   };
   //
-  clPPPI( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
+  VkUtilsXBase::clPPPI( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
 
-  checkCall( vkBindBufferMemory( device, currentBuffer, vertexBufferMemory, 0 ) );
+  VkUtilsXBase::checkCall( vkBindBufferMemory( VkUtilsXBase::device, currentBuffer, vertexBufferMemory, 0 ) );
   // memPutLong( device.address(), a);
 }

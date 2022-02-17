@@ -16,7 +16,7 @@ private:
   static inline VkPipeline       graphicsPipeline;
 
 public:
-  static inline VkCommandBuffer commandBuffers[Frames];
+  static inline VkCommandBuffer commandBuffers[VkUtilsXBase::Frames];
   inline static void            createGraphicsPipelineLayout();
   inline static void            createCommandBuffers();
 };
@@ -73,7 +73,7 @@ inline static void createRenderPasses()
     // .pDependencies=&dependency
   };
 
-  clPPPI( &vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass );
+  VkUtilsXBase::clPPPI( &vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass );
 }
 
 inline void PipelineX::createGraphicsPipelineLayout()
@@ -127,14 +127,17 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .primitiveRestartEnable = VK_FALSE
   };
 
-  static constexpr VkViewport vkViewport{
-    .x = 0.0F, .y = 0.0F, .width = width, .height = height, .minDepth = UNormFlt, .maxDepth = 1.0F
-  };
+  static constexpr VkViewport vkViewport{ .x        = 0.0F,
+                                          .y        = 0.0F,
+                                          .width    = VkUtilsXBase::width,
+                                          .height   = VkUtilsXBase::height,
+                                          .minDepth = UNormFlt,
+                                          .maxDepth = 1.0F };
 
   static constexpr VkRect2D scissor{ //                    .offset(vkOffset2D ->vkViewport.y()) //todo: not
                                      //                    sure if correct Offset
                                      .offset = { 0, 0 },
-                                     .extent{ width, height }
+                                     .extent{ VkUtilsXBase::width, VkUtilsXBase::height }
   };
 
   constexpr VkPipelineViewportStateCreateInfo vkViewPortState = {
@@ -216,7 +219,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
                                                                       .pPushConstantRanges    = &vkPushConstantRange };
 
   std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
-  clPPPI( &vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &PipelineX::vkLayout );
+  VkUtilsXBase::clPPPI( &vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &PipelineX::vkLayout );
 
   const VkGraphicsPipelineCreateInfo pipelineInfo = {
     .sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -238,10 +241,11 @@ inline void PipelineX::createGraphicsPipelineLayout()
     // pipelineInfo.basePipelineIndex=-1;
   };
 
-  checkCall( vkCreateGraphicsPipelines( device, nullptr, 1, &pipelineInfo, nullptr, &PipelineX::graphicsPipeline ) );
+  VkUtilsXBase::checkCall( vkCreateGraphicsPipelines(
+    VkUtilsXBase::device, nullptr, 1, &pipelineInfo, nullptr, &PipelineX::graphicsPipeline ) );
 
-  vkDestroyShaderModule( device, vertShaderModule, VK_NULL_HANDLE );
-  vkDestroyShaderModule( device, fragShaderModule, VK_NULL_HANDLE );
+  vkDestroyShaderModule( VkUtilsXBase::device, vertShaderModule, VK_NULL_HANDLE );
+  vkDestroyShaderModule( VkUtilsXBase::device, fragShaderModule, VK_NULL_HANDLE );
 }
 
 inline void PipelineX::createCommandBuffers()
@@ -253,7 +257,7 @@ inline void PipelineX::createCommandBuffers()
                                                     sizeof( PipelineX::commandBuffers ) / sizeof( VkCommandBuffer ) };
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
-  checkCall( vkAllocateCommandBuffers( device, &allocateInfo, PipelineX::commandBuffers ) );
+  VkUtilsXBase::checkCall( vkAllocateCommandBuffers( VkUtilsXBase::device, &allocateInfo, PipelineX::commandBuffers ) );
 
   constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
                                                     .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT ) };
@@ -281,12 +285,13 @@ inline void PipelineX::createCommandBuffers()
   renderPassInfo.renderPass      = ( renderPass );
   renderPassInfo.renderArea      = renderArea;
   uint8_t i                      = 0;
-  vkMapMemory( device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data );
+  vkMapMemory(
+    VkUtilsXBase::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data );
   for ( const VkCommandBuffer & commandBuffer : PipelineX::commandBuffers )
   {
     // extracted(beginInfo1, renderPassInfo, commandBuffer, i);
 
-    checkCall( vkBeginCommandBuffer( commandBuffer, &beginInfo1 ) );
+    VkUtilsXBase::checkCall( vkBeginCommandBuffer( commandBuffer, &beginInfo1 ) );
 
     renderPassInfo.framebuffer = ( SwapChainSupportDetails::swapChainFramebuffers[i] );
 
@@ -312,7 +317,7 @@ inline void PipelineX::createCommandBuffers()
     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 
     vkCmdEndRenderPass( commandBuffer );
-    checkCall( vkEndCommandBuffer( commandBuffer ) );
+    VkUtilsXBase::checkCall( vkEndCommandBuffer( commandBuffer ) );
     i++;
   }
 }

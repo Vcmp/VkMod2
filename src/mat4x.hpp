@@ -1,16 +1,9 @@
 #pragma once
 
-#include "Buffers.hpp"
 #include "UniformBufferObject.hpp"
-#include "glm/ext/matrix_float2x2.hpp"
-#include "glm/ext/matrix_float2x4.hpp"
-#include "glm/ext/matrix_float4x4.hpp"
-#include "glm/ext/vector_float4.hpp"
-#include "glm/trigonometric.hpp"
 
 #include <cstdio>
 #include <immintrin.h>
-#include <xmmintrin.h>
 
 /*too lazy to do an SSE version as AVX in many cases can allow for the abilkity to the same steps in half as many stages
  e.g. Might be able to get away withput using amore explict construct arg sets and isntead just implicitly and
@@ -227,7 +220,7 @@ inline void mat4x::rotateL( const float angle /* , const glm::vec3 & v */ )
   // __m128       v1   = _mm_fmadd_ps( x1, -y, _mm_mul_ps( y1, x ) );
 
   // __a = _mm256_loadu2_m128( reinterpret_cast<float *>( &v ), reinterpret_cast<float *>( &v1 ) );
-  __a = _mm256_load_ps( ax );
+  // __a = _mm256_load_ps( ax );
 
   __a[0] = viewproj1[0][0] * c + viewproj1[1][0] * s;
   __a[1] = viewproj1[0][1] * c + viewproj1[1][1] * s;

@@ -3,6 +3,8 @@
 #define VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_64_BIT_PTR_DEFINES 1
 #define VULKAN_HPP_SUPPORT_SPAN
+
+#undef GLFW_INCLUDE_VULKAN
 // #ifdef __cplusplus
 // #define VULKAN_HPP_CPLUSPLUS 201803L
 // #endif
@@ -28,14 +30,27 @@
 
 // VkPhysicalDevicePortabilitySubsetFeaturesKHR ptr = {};
 
-inline namespace
+struct VkUtilsXBase
 {
+private:
+  typedef VkResult( __vectorcall * callPPPPI )(
+    const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
+  const typedef VkResult( __vectorcall * callPPPPI2 )(
+    const VkDevice, const void *, const VkAllocationCallbacks *, const void *, void * pHndl );
+
+public:
   static constexpr uint16_t width  = 854;
   static constexpr uint16_t height = 480;
 
   static constexpr __int128 aXX    = 0xF;
   static constexpr uint8_t  Frames = 3;
   static constexpr bool     checks = false;
+
+  template <typename T>
+  static constexpr T getAddrFuncPtr( const char * a )
+  {
+    return (T)vkGetDeviceProcAddr( device, a );
+  }
 
   // Their may seem to be an anomalous memory leak when the main render Loop/Draw
   // Call is used; howver this is mearly/primaro;y due to the Validation layers
@@ -95,124 +110,119 @@ inline namespace
       }
     }
   }
-}  // namespace
 
-typedef VkResult( __vectorcall * callPPPPI )(
-  const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
-const typedef VkResult( __vectorcall * callPPPPI2 )(
-  const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
+  /*todo: Adiitonal posible Bug: if a typeDef Cast/PointerFunction/Aslias e.g
+   * .Misc is used to allow access to .call vkPipelineLayoutCreateInfo, the
+   * Validtaion layers incorrertcly warn that VkGraphicsPipelineCreateInfo struct
+   * is mising the cprrect sType the only way to correct this is to
+   * manuall/Dierctly exempt the "pipelineCache" and "createInfoCount"
+   * Arguments/Parametsr of the call, Which causes Misiing createInfoCount  and
+   * VkPipelineCache  issues but allows the pipeline to be created
+   * properly/correctly this is possibly a Driver Bug/ NV/nSight layer Bug/issue
+   * (as a very old beta driver is being utilised [451.74]) but is unconfirmed
+   * currently
+   */
+  typedef VkResult( __vectorcall * callPPPPJI )(
+    VkDevice, const void *, uint32_t *, const void *, VkAllocationCallbacks *, const void *, PFN_vkVoidFunction pHndl );
+  // typedef const VkResult (__vectorcall *callPPI) (VkDevice,
+  //                                 //  VkPipelineCache*,
+  //                                  const void *,uint32_t*,
 
-static inline void __vectorcall doPointerAlloc2( const void * a, const void * c, const uint64_t & pHndl )
-{
-  ( reinterpret_cast<callPPPPI2>( pHndl )( device, a, nullptr, c, pHndl ) );
-}
-static inline VkResult __vectorcall doPointerAlloc( const void * a, const void * c, const uint64_t & pHndl )
-{
-  return ( reinterpret_cast<callPPPPI>( pHndl )( device, a, nullptr, c, pHndl ) );
-}
-
-/*todo: Adiitonal posible Bug: if a typeDef Cast/PointerFunction/Aslias e.g
- * .Misc is used to allow access to .call vkPipelineLayoutCreateInfo, the
- * Validtaion layers incorrertcly warn that VkGraphicsPipelineCreateInfo struct
- * is mising the cprrect sType the only way to correct this is to
- * manuall/Dierctly exempt the "pipelineCache" and "createInfoCount"
- * Arguments/Parametsr of the call, Which causes Misiing createInfoCount  and
- * VkPipelineCache  issues but allows the pipeline to be created
- * properly/correctly this is possibly a Driver Bug/ NV/nSight layer Bug/issue
- * (as a very old beta driver is being utilised [451.74]) but is unconfirmed
- * currently
- */
-typedef VkResult( __vectorcall * callPPPPJI )(
-  VkDevice, const void *, uint32_t *, const void *, VkAllocationCallbacks *, const void *, PFN_vkVoidFunction pHndl );
-// typedef const VkResult (__vectorcall *callPPI) (VkDevice,
-//                                 //  VkPipelineCache*,
-//                                  const void *,uint32_t*,
-
-//                                  const VkAllocationCallbacks *);
-inline static uint64_t getDevProd( const char * a )
-{
-  return reinterpret_cast<uint64_t>( vkGetDeviceProcAddr( device, a ) );
-}
-template <typename T>
-
-static inline constexpr T __vectorcall clPPPI2( const void * pStrct, const char * a )
-{
-  // vkGetDeviceProcAddr()
-  //  auto xx= ;
-  const uint64_t Hndl = getDevProd( a );
-  // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
-  // a)); std::cout << &x << "\n"; std::cout << &pStrct << &object<<&a<<"\n";
-  if constexpr ( checks )
+  //                                  const VkAllocationCallbacks *);
+  template <typename T>
+  inline static constexpr auto getDevProd( const char * a )
   {
-    std::cout << a << "-->" << Hndl << "\n";
+    return reinterpret_cast<T>( vkGetDeviceProcAddr( device, a ) );
   }
-  // std::cout << object<<"\n";
-  // const VkResult VkR =x(device, pStrct, nullptr, object);
-  T object = 0;
-  ( doPointerAlloc2( pStrct, &object, Hndl ) );
-  if constexpr ( checks )
+  template <typename T>
+  static inline void constexpr __vectorcall doPointerAlloc2( const void * a, const void * c, T pHndl )
   {
-    if ( object == 0 )
+    ( reinterpret_cast<callPPPPI2>( pHndl )( device, a, nullptr, c, pHndl ) );
+  }
+  static inline VkResult __vectorcall doPointerAlloc( const void * a, const void * c, const uint64_t & pHndl )
+  {
+    return ( reinterpret_cast<callPPPPI>( pHndl )( device, a, nullptr, c, pHndl ) );
+  }
+  template <typename T>
+  static inline constexpr T __vectorcall clPPPI2( const void * pStrct, const char * a )
+  {
+    // vkGetDeviceProcAddr()
+    //  auto xx= ;
+    T Hndl = getDevProd<T>( a );
+    // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
+    // a)); std::cout << &x << "\n"; std::cout << &pStrct << &object<<&a<<"\n";
+    if constexpr ( checks )
     {
-      throw std::runtime_error( "bad Alloctaion!: Null handle!" );
+      std::cout << a << "-->" << Hndl << "\n";
     }
-    std::cout << &object << "\n";
+    // std::cout << object<<"\n";
+    // const VkResult VkR =x(device, pStrct, nullptr, object);
+    T object = 0;
+    ( doPointerAlloc2( pStrct, &object, Hndl ) );
+    if constexpr ( checks )
+    {
+      if ( object == 0 )
+      {
+        throw std::runtime_error( "bad Alloctaion!: Null handle!" );
+      }
+      std::cout << &object << "\n";
+    }
+    return ( object );
+    // return VkR;
+    //  callPPPPI(device, pStrct, nullptr, a)
   }
-  return ( object );
-  // return VkR;
-  //  callPPPPI(device, pStrct, nullptr, a)
-}
-static inline void __vectorcall clPPPI( const void * pStrct, const char * a, const void * object )
-{
-  // vkGetDeviceProcAddr()
-  //  auto xx= ;
-  const auto Hndl = reinterpret_cast<uint64_t>( vkGetDeviceProcAddr( device, a ) );
-  // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
-  // a)); std::cout << &x << "\n"; std::cout << &pStrct << &object<<&a<<"\n";
-  if constexpr ( checks )
+  static inline void __vectorcall clPPPI( const void * pStrct, const char * a, const void * object )
   {
-    std::cout << a << "-->" << Hndl << "\n";
+    // vkGetDeviceProcAddr()
+    //  auto xx= ;
+    const auto Hndl = reinterpret_cast<uint64_t>( vkGetDeviceProcAddr( device, a ) );
+    // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
+    // a)); std::cout << &x << "\n"; std::cout << &pStrct << &object<<&a<<"\n";
+    if constexpr ( checks )
+    {
+      std::cout << a << "-->" << Hndl << "\n";
+    }
+    // std::cout << object<<"\n";
+    // const VkResult VkR =x(device, pStrct, nullptr, object);
+    checkCall( doPointerAlloc( pStrct, object, Hndl ) );
+    if constexpr ( checks )
+    {
+      if ( object == nullptr )
+      {
+        throw std::runtime_error( "bad Alloctaion!: Null handle!" );
+      }
+    }
+
+    //  callPPPPI(device, pStrct, nullptr, a)
   }
-  // std::cout << object<<"\n";
-  // const VkResult VkR =x(device, pStrct, nullptr, object);
-  checkCall( doPointerAlloc( pStrct, object, Hndl ) );
-  if constexpr ( checks )
+  // static inline int doSized(const void* aabs, const void* abs2x)
+  // {
+  //     return sizeof(aabs)/sizeof(abs2x);
+  // }
+  static inline void clPPPJI( void * pStrct, uint32_t * ax, const char * a, void * object )
   {
+    // vkGetDeviceProcAddr()
+    //  auto xx=PFN_vkVoidFunction(swapChain);
+
+    const PFN_vkVoidFunction Hndl = vkGetDeviceProcAddr( device, a );
+    // const callPPPPI ss=reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
+    // a));
+    //  std::cout << &x << "\n";
+    //  std::cout << &pStrct << &object<<&a<<"\n";
+    //  std::cout << a<<"\n";
+    //  std::cout << object<<"\n";
+    //  VkPipelineCache axx =nullptr;
+    //  const VkResult VkR =x(device, pStrct, nullptr, object);
+    // ss(device, pStrct, nullptr, object);
+    checkCall( ( reinterpret_cast<callPPPPJI>( Hndl ) )( device, nullptr, ax, pStrct, nullptr, object, Hndl ) );
+
     if ( object == nullptr )
     {
       throw std::runtime_error( "bad Alloctaion!: Null handle!" );
     }
+    // return VkR;
+    //  callPPPPI(device, pStrct, nullptr, a)
   }
-
-  //  callPPPPI(device, pStrct, nullptr, a)
-}
-// static inline int doSized(const void* aabs, const void* abs2x)
-// {
-//     return sizeof(aabs)/sizeof(abs2x);
-// }
-static inline void clPPPJI( void * pStrct, uint32_t * ax, const char * a, void * object )
-{
-  // vkGetDeviceProcAddr()
-  //  auto xx=PFN_vkVoidFunction(swapChain);
-
-  const PFN_vkVoidFunction Hndl = vkGetDeviceProcAddr( device, a );
-  // const callPPPPI ss=reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
-  // a));
-  //  std::cout << &x << "\n";
-  //  std::cout << &pStrct << &object<<&a<<"\n";
-  //  std::cout << a<<"\n";
-  //  std::cout << object<<"\n";
-  //  VkPipelineCache axx =nullptr;
-  //  const VkResult VkR =x(device, pStrct, nullptr, object);
-  // ss(device, pStrct, nullptr, object);
-  checkCall( ( reinterpret_cast<callPPPPJI>( Hndl ) )( device, nullptr, ax, pStrct, nullptr, object, Hndl ) );
-
-  if ( object == nullptr )
-  {
-    throw std::runtime_error( "bad Alloctaion!: Null handle!" );
-  }
-  // return VkR;
-  //  callPPPPI(device, pStrct, nullptr, a)
-}
+};  // namespace
 
 // namespace

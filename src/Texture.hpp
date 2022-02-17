@@ -86,11 +86,11 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
   imageInfo.samples           = VK_SAMPLE_COUNT_1_BIT;
   imageInfo.sharingMode       = VK_SHARING_MODE_EXCLUSIVE;
 
-  clPPPI( &imageInfo, "vkCreateImage", &Texture::vkImage );
+  VkUtilsXBase::clPPPI( &imageInfo, "vkCreateImage", &Texture::vkImage );
   constexpr VkMemoryDedicatedRequirementsKHR img2 = { VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR, nullptr };
 
   VkMemoryRequirements2 memRequirements = {};
-  vkGetImageMemoryRequirements( device, Texture::vkImage, &memRequirements.memoryRequirements );
+  vkGetImageMemoryRequirements( VkUtilsXBase::device, Texture::vkImage, &memRequirements.memoryRequirements );
 
   VkMemoryAllocateInfo allocInfo = {};
   allocInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -110,9 +110,9 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
     allocInfo.pNext = &dedicatedAllocateInfoKHR;
   }
 
-  clPPPI( &allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory );
+  VkUtilsXBase::clPPPI( &allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory );
 
-  vkBindImageMemory( device, Texture::vkImage, Texture::vkAllocMemory, 0 );
+  vkBindImageMemory( VkUtilsXBase::device, Texture::vkImage, Texture::vkAllocMemory, 0 );
 }
 
 static void Texture::transitionImageLayout( VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout )
@@ -211,7 +211,7 @@ inline void
   createInfo.subresourceRange.baseArrayLayer = ( 0 );
   createInfo.subresourceRange.layerCount     = ( 1 );
 
-  clPPPI( &createInfo, "vkCreateImageView", &a );
+  VkUtilsXBase::clPPPI( &createInfo, "vkCreateImageView", &a );
 }
 
 inline VkFormat Texture::findDepthFormat()
