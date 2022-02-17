@@ -148,8 +148,8 @@ inline void VkUtils2::createInstance()
 
   if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {
-    InstCreateInfo.ppEnabledLayerNames = ( VkUtilsXBase::validationLayers.data() );
-    InstCreateInfo.enabledLayerCount   = static_cast<uint32_t>( VkUtilsXBase::validationLayers.size() );
+    InstCreateInfo.ppEnabledLayerNames = ( &VkUtilsXBase::validationLayers );
+    InstCreateInfo.enabledLayerCount   = 1;
     InstCreateInfo.pNext               = &extValidationFeatures;
   }
   else
@@ -383,8 +383,8 @@ inline void VkUtils2::createLogicalDevice()
   createInfo.pNext                   = &deviceFeatures2;
   createInfo.queueCreateInfoCount    = 2;
   createInfo.pQueueCreateInfos       = queueCreateInfos;
-  createInfo.ppEnabledExtensionNames = ( VkUtilsXBase::deviceExtensions );
-  createInfo.enabledExtensionCount   = static_cast<uint32_t>( VkUtilsXBase::validationLayers.size() );
+  createInfo.ppEnabledExtensionNames = ( &VkUtilsXBase::deviceExtensions );
+  createInfo.enabledExtensionCount   = 1;
   // createInfo.ppEnabledLayerNames=(validationLayers.data());
   createInfo.pEnabledFeatures = nullptr;
 
@@ -394,7 +394,7 @@ inline void VkUtils2::createLogicalDevice()
   }
   if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {
-    createInfo.ppEnabledLayerNames = VkUtilsXBase::validationLayers.data();
+    createInfo.ppEnabledLayerNames = &VkUtilsXBase::validationLayers;
   }
   VkUtilsXBase::checkCall(
     vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &VkUtilsXBase::device ) );

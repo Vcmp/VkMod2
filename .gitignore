@@ -52,3 +52,5 @@
 .clang-format_11
 .clang-format_7
 /CMakeFiles
+/volk
+*.zip

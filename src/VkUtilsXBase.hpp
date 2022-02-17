@@ -10,7 +10,7 @@
 // #endif
 #define VKAPI_CALL __cdecl
 #define VKAPI_ptr  __regcall
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 // #define VK_USE_64_BIT_PTR_DEFINES 1
 //#define VK_NO_PROTOTYPES
 // #define VK_ENABLE_BETA_EXTENSIONS
@@ -64,8 +64,8 @@ public:
             // (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files
             // as having/Containing Invalid Magic Numbers
 
-  static constexpr std::array<const char *, 1> validationLayers   = { "VK_LAYER_KHRONOS_validation" };
-  static constexpr char *                      deviceExtensions[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+  static constexpr char const * validationLayers = "VK_LAYER_KHRONOS_validation";
+  static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
   static inline VkDevice device;
 

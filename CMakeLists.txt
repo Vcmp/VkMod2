@@ -14,13 +14,8 @@ set(CLANG_DEFAULT_CXX_STDLIB=libc++)
 # set(CMAKE_SHARED_LINKER_FLAGS_INIT "-fuse-ld=lld")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_COMPILER_LAUNCHER=ccache)
 
-
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
-    set(CLANG 1)
-	else()
-	set(GCC 1)
-endif()
 
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -Ofast -ferror-limit=128 -g -fverbose-asm -save-temps -masm=intel -ftime-trace -fvisibility=hidden -fno-semantic-interposition -frename-registers -pthread -lpthread -Wunused-function -ffunction-sections -fdata-sections")
@@ -38,15 +33,21 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE_FAST_MATH ON CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE_SIMD_AVX ON CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
 add_subdirectory(glfw)
 add_subdirectory(glm)
-# Add source to this project's executable.
 
+# Add source to this project's executable.
 add_executable(VkMod2
 	src/main.cpp
 	src/VkUtils2.hpp   
 	src/renderer2.hpp   
+	src/VkUtilsXBase.hpp   
 	)
+
    
    # set_target_properties (VkMod2 PROPERTIES CXX_STANDARD 20)
    # target_compile_options(${PROJECT_NAME} INTERFACE "/Zc:__cplusplus")
@@ -64,7 +65,7 @@ add_executable(VkMod2
 
 
 
-target_link_libraries(VkMod2 Vulkan::Vulkan glfw glm)
+target_link_libraries(VkMod2 PRIVATE Vulkan::Vulkan glfw glm)
 
 add_dependencies(VkMod2 Shaders)
 
