@@ -18,7 +18,7 @@ set(CMAKE_CXX_COMPILER_LAUNCHER=ccache)
 
 
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -Ofast -ferror-limit=128 -g -fverbose-asm -save-temps -masm=intel -ftime-trace -fvisibility=hidden -fno-semantic-interposition -frename-registers -pthread -lpthread -Wunused-function -ffunction-sections -fdata-sections")
+set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -ferror-limit=128 -g -fsanitize=address -fno-omit-frame-pointer -fverbose-asm -save-temps -masm=intel -ftime-trace -fvisibility=hidden -fno-semantic-interposition -frename-registers -pthread -lpthread -Wunused-function -ffunction-sections -fdata-sections")
 
 # find_package(Vulkan REQUIRED)
 

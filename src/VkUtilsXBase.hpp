@@ -136,16 +136,16 @@ public:
     return reinterpret_cast<T>( vkGetDeviceProcAddr( device, a ) );
   }
   template <typename T>
-  static inline void constexpr __vectorcall doPointerAlloc2( const void * a, const void * c, T pHndl )
+  static inline void constexpr doPointerAlloc2( const void * a, const void * c, T pHndl )
   {
     ( reinterpret_cast<callPPPPI2>( pHndl )( device, a, nullptr, c, pHndl ) );
   }
-  static inline VkResult __vectorcall doPointerAlloc( const void * a, const void * c, const uint64_t & pHndl )
+  static inline VkResult doPointerAlloc( const void * a, const void * c, const uint64_t & pHndl )
   {
     return ( reinterpret_cast<callPPPPI>( pHndl )( device, a, nullptr, c, pHndl ) );
   }
   template <typename T>
-  static inline constexpr T __vectorcall clPPPI2( const void * pStrct, const char * a )
+  static inline constexpr T clPPPI2( const void * pStrct, const char * a )
   {
     // vkGetDeviceProcAddr()
     //  auto xx= ;
@@ -172,7 +172,7 @@ public:
     // return VkR;
     //  callPPPPI(device, pStrct, nullptr, a)
   }
-  static inline void __vectorcall clPPPI( const void * pStrct, const char * a, const void * object )
+  static inline void clPPPI( const void * pStrct, const char * a, const void * object )
   {
     // vkGetDeviceProcAddr()
     //  auto xx= ;

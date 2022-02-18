@@ -51,7 +51,7 @@ inline void Queues::createCommandPool()
     const VkCommandBufferAllocateInfo allocateInfo{
       .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
       .pNext              = VK_NULL_HANDLE,
-      .commandPool        = (VkCommandPool)( Queues::commandPool2 ),
+      .commandPool        = ( Queues::commandPool2 ),
       .level              = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
       .commandBufferCount = ( 1 ),
     };
@@ -74,9 +74,7 @@ inline void Queues::endSingleTimeCommands()
   a = ( a ^ 1 );
   vkQueueSubmit( TransferQueue[a], 1, &submitInfo1, VK_NULL_HANDLE );
   vkQueueWaitIdle( TransferQueue[a] );
-  vkResetCommandPool( VkUtilsXBase::device,
-                      reinterpret_cast<VkCommandPool>( commandPool2 ),
-                      VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
+  vkResetCommandPool( VkUtilsXBase::device, ( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
   // vkFreeCommandBuffers(device, (VkCommandPool)Queues::commandPool2, 1,
   // &commandBuffer);
 }

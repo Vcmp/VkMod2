@@ -11,8 +11,8 @@ inline namespace
   static const glm::mat4 look =
     glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
-  static const glm::mat4          viewproj  = pers * look;
-  static const static glm::mat2x4 viewproj1 = ( viewproj );
+  static const glm::mat4   viewproj  = pers * look;
+  static const glm::mat2x4 viewproj1 = ( viewproj );
 };  // namespace
 
 // static inline struct alignas( ( 64 ) ) UBO

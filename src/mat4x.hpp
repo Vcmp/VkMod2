@@ -22,7 +22,7 @@ public:
   constexpr explicit mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
   // float a[2][8];
 
-  inline constexpr __m256 __vectorcall lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  inline constexpr __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
   // inline constexpr __m256 __vectorcall lud( const void * a ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
   inline void           domatFMA( mat4x *, __m256 );
   inline constexpr void domatFMA( mat4x & );
@@ -40,8 +40,7 @@ public:
   inline void              permute();
   inline void              doPerspective( float, float, float, float );
   inline void              doLook( float );
-  inline void __vectorcall rotateL( float const /* , glm::vec3 const &  */ )
-    __attribute__( ( __aligned__( 32 ), hot, flatten ) );
+  inline void rotateL( float const /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
 } m4, m5, m6;
 
@@ -122,7 +121,7 @@ inline constexpr void mat4x::domatFMA( mat4x & b )
 
 // Hide ugly casting syntax for aligned load as unlike the AVX512 intrinsics provided by intel, man Load/many intrisics
 // Functions do not include Void* by default as an Argument
-inline constexpr __m256 __vectorcall mat4x::lud( const float * a )
+inline constexpr __m256 mat4x::lud( const float * a )
 {
   return _mm256_load_ps( ( ( a ) ) );
 }
