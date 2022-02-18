@@ -136,7 +136,7 @@ inline void BuffersX::setupBuffers()
                                                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
   createSetBuffer( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory );
 
-  vkMapMemory( VkUtilsXBase::device, stagingBufferMemory, 0, sizedsf, 0, &data );
+  vkMapMemory( Queues::device, stagingBufferMemory, 0, sizedsf, 0, &data );
   {
     memcpy( data, vectBuf, sizedsf );
   }
@@ -146,7 +146,7 @@ inline void BuffersX::setupBuffers()
   {
     memcpy( data, idxBuf, sizedsfIdx );
   }
-  vkUnmapMemory( VkUtilsXBase::device, stagingBufferMemory );
+  vkUnmapMemory( Queues::device, stagingBufferMemory );
   copyBuffer( indexBuffer, sizedsfIdx );
 }
 
@@ -167,7 +167,7 @@ inline void BuffersX::createSetBuffer( VkMemoryPropertyFlagBits properties,
   VkUtilsXBase::clPPPI( &allocateInfo, "vkCreateBuffer", &currentBuffer );
 
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements( VkUtilsXBase::device, currentBuffer, &memRequirements );
+  vkGetBufferMemoryRequirements( Queues::device, currentBuffer, &memRequirements );
 
   VkMemoryAllocateInfo allocateInfo1 = {
     .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -178,6 +178,6 @@ inline void BuffersX::createSetBuffer( VkMemoryPropertyFlagBits properties,
   //
   VkUtilsXBase::clPPPI( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
 
-  VkUtilsXBase::checkCall( vkBindBufferMemory( VkUtilsXBase::device, currentBuffer, vertexBufferMemory, 0 ) );
+  VkUtilsXBase::checkCall( vkBindBufferMemory( Queues::device, currentBuffer, vertexBufferMemory, 0 ) );
   // memPutLong( device.address(), a);
 }

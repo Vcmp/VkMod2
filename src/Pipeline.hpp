@@ -241,11 +241,11 @@ inline void PipelineX::createGraphicsPipelineLayout()
     // pipelineInfo.basePipelineIndex=-1;
   };
 
-  VkUtilsXBase::checkCall( vkCreateGraphicsPipelines(
-    VkUtilsXBase::device, nullptr, 1, &pipelineInfo, nullptr, &PipelineX::graphicsPipeline ) );
+  VkUtilsXBase::checkCall(
+    vkCreateGraphicsPipelines( Queues::device, nullptr, 1, &pipelineInfo, nullptr, &PipelineX::graphicsPipeline ) );
 
-  vkDestroyShaderModule( VkUtilsXBase::device, vertShaderModule, VK_NULL_HANDLE );
-  vkDestroyShaderModule( VkUtilsXBase::device, fragShaderModule, VK_NULL_HANDLE );
+  vkDestroyShaderModule( Queues::device, vertShaderModule, VK_NULL_HANDLE );
+  vkDestroyShaderModule( Queues::device, fragShaderModule, VK_NULL_HANDLE );
 }
 
 inline void PipelineX::createCommandBuffers()
@@ -257,7 +257,7 @@ inline void PipelineX::createCommandBuffers()
                                                     sizeof( PipelineX::commandBuffers ) / sizeof( VkCommandBuffer ) };
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
-  VkUtilsXBase::checkCall( vkAllocateCommandBuffers( VkUtilsXBase::device, &allocateInfo, PipelineX::commandBuffers ) );
+  VkUtilsXBase::checkCall( vkAllocateCommandBuffers( Queues::device, &allocateInfo, PipelineX::commandBuffers ) );
 
   constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
                                                     .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT ) };
@@ -285,8 +285,7 @@ inline void PipelineX::createCommandBuffers()
   renderPassInfo.renderPass      = ( renderPass );
   renderPassInfo.renderArea      = renderArea;
   uint8_t i                      = 0;
-  vkMapMemory(
-    VkUtilsXBase::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data );
+  vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data );
   for ( const VkCommandBuffer & commandBuffer : PipelineX::commandBuffers )
   {
     // extracted(beginInfo1, renderPassInfo, commandBuffer, i);

@@ -10,9 +10,9 @@
 // #endif
 
 #define VOLK_IMPLEMENTATION
+#define VK_NO_PROTOTYPES
 #include "volk.h"
 // #define VK_USE_64_BIT_PTR_DEFINES 1
-//#define VK_NO_PROTOTYPES
 // #define VK_ENABLE_BETA_EXTENSIONS
 // #include <stdint.h>
 
@@ -37,6 +37,8 @@ private:
     const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
   const typedef VkResult( __vectorcall * callPPPPI2 )(
     const VkDevice, const void *, const VkAllocationCallbacks *, const void *, void * pHndl );
+  typedef PFN_vkVoidFunction ( *load )( void *, const char * );
+  VkDevice device = volkGetLoadedDevice();
 
 public:
   static constexpr uint16_t width  = 854;
@@ -44,13 +46,13 @@ public:
 
   static constexpr __int128 aXX    = 0xF;
   static constexpr uint8_t  Frames = 3;
-  static constexpr bool     checks = false;
+  static constexpr bool     checks = true;
 
   // not sure if auto or exlicitit(ish) templateis better for the return argument
   template <typename T>
   static constexpr auto getAddrFuncPtr( const char * a )
   {
-    return reinterpret_cast<T>( vkGetDeviceProcAddr( device, a ) );
+    return reinterpret_cast<T>( vkGetDeviceProcAddr( volkGetLoadedDevice(), a ) );
   }
 
   // Their may seem to be an anomalous memory leak when the main render Loop/Draw
@@ -67,8 +69,6 @@ public:
 
   static constexpr char const * validationLayers = "VK_LAYER_KHRONOS_validation";
   static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
-
-  static inline VkDevice device;
 
   static constexpr void checkCall( const VkResult callPPPPI )
   {
@@ -133,16 +133,16 @@ public:
   template <typename T>
   inline static constexpr auto getDevProd( const char * a )
   {
-    return reinterpret_cast<T>( vkGetDeviceProcAddr( device, a ) );
+    return reinterpret_cast<T>( vkGetDeviceProcAddr( volkGetLoadedDevice(), a ) );
   }
   template <typename T>
   static inline void constexpr doPointerAlloc2( const void * a, const void * c, T pHndl )
   {
-    ( reinterpret_cast<callPPPPI2>( pHndl )( device, a, nullptr, c, pHndl ) );
+    ( reinterpret_cast<callPPPPI2>( pHndl )( volkGetLoadedDevice(), a, nullptr, c, pHndl ) );
   }
   static inline VkResult doPointerAlloc( const void * a, const void * c, const uint64_t & pHndl )
   {
-    return ( reinterpret_cast<callPPPPI>( pHndl )( device, a, nullptr, c, pHndl ) );
+    return ( reinterpret_cast<callPPPPI>( pHndl )( volkGetLoadedDevice(), a, nullptr, c, pHndl ) );
   }
   template <typename T>
   static inline constexpr T clPPPI2( const void * pStrct, const char * a )
@@ -176,7 +176,7 @@ public:
   {
     // vkGetDeviceProcAddr()
     //  auto xx= ;
-    const auto Hndl = reinterpret_cast<uint64_t>( vkGetDeviceProcAddr( device, a ) );
+    const auto Hndl = reinterpret_cast<uint64_t>( vkGetDeviceProcAddr( volkGetLoadedDevice(), a ) );
     // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
     // a)); std::cout << &x << "\n"; std::cout << &pStrct << &object<<&a<<"\n";
     if constexpr ( checks )
@@ -205,7 +205,7 @@ public:
     // vkGetDeviceProcAddr()
     //  auto xx=PFN_vkVoidFunction(swapChain);
 
-    const PFN_vkVoidFunction Hndl = vkGetDeviceProcAddr( device, a );
+    const PFN_vkVoidFunction Hndl = vkGetDeviceProcAddr( volkGetLoadedDevice(), a );
     // const callPPPPI ss=reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
     // a));
     //  std::cout << &x << "\n";
@@ -215,7 +215,8 @@ public:
     //  VkPipelineCache axx =nullptr;
     //  const VkResult VkR =x(device, pStrct, nullptr, object);
     // ss(device, pStrct, nullptr, object);
-    checkCall( ( reinterpret_cast<callPPPPJI>( Hndl ) )( device, nullptr, ax, pStrct, nullptr, object, Hndl ) );
+    checkCall(
+      ( reinterpret_cast<callPPPPJI>( Hndl ) )( volkGetLoadedDevice(), nullptr, ax, pStrct, nullptr, object, Hndl ) );
 
     if ( object == nullptr )
     {

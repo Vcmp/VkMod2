@@ -310,6 +310,7 @@ inline void VkUtils2::createLogicalDevice()
 {
   std::cout << ( "Creating Logical Device" ) << "\n";
 
+  VkDevice device;
   uint32_t pQueueFamilyPropertyCount;
   vkGetPhysicalDeviceQueueFamilyProperties( Queues::physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE );
 
@@ -401,28 +402,29 @@ inline void VkUtils2::createLogicalDevice()
   {
     createInfo.ppEnabledLayerNames = &VkUtilsXBase::validationLayers;
   }
-  VkUtilsXBase::checkCall(
-    vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &VkUtilsXBase::device ) );
+  VkUtilsXBase::checkCall( vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ) );
+  volkLoadDevice( device );
+  VolkDeviceTable vDT{};
+  volkLoadDeviceTable( &vDT, device );
 
-  vkGetDeviceQueue( VkUtilsXBase::device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0, &Queues::GraphicsQueue );
-  vkGetDeviceQueue(
-    VkUtilsXBase::device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0, &Queues::TransferQueue[0] );
-  vkGetDeviceQueue(
-    VkUtilsXBase::device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 1, &Queues::TransferQueue[1] );
+  vDT.vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0, &Queues::GraphicsQueue );
+  vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0, &Queues::TransferQueue[0] );
+  vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 1, &Queues::TransferQueue[1] );
+  Queues::device = volkGetLoadedDevice();
 }
 
 void VkUtils2::cleanup()
 {
-  vkDeviceWaitIdle( VkUtilsXBase::device );
-  vkUnmapMemory( VkUtilsXBase::device, UniformBufferObject::uniformBuffersMemory );
-  vkDestroyCommandPool( VkUtilsXBase::device, (VkCommandPool)Queues::commandPool, nullptr );
+  vkDeviceWaitIdle( Queues::device );
+  vkUnmapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory );
+  vkDestroyCommandPool( Queues::device, (VkCommandPool)Queues::commandPool, nullptr );
   for ( auto framebuffer : swapChainFramebuffers )
   {
-    vkDestroyFramebuffer( VkUtilsXBase::device, framebuffer, nullptr );
+    vkDestroyFramebuffer( Queues::device, framebuffer, nullptr );
   }
   // vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
   // vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
 
-  vkDestroyBuffer( VkUtilsXBase::device, vertexBuffer, nullptr );
-  vkFreeMemory( VkUtilsXBase::device, vertexBufferMemory, nullptr );
+  vkDestroyBuffer( Queues::device, vertexBuffer, nullptr );
+  vkFreeMemory( Queues::device, vertexBufferMemory, nullptr );
 }

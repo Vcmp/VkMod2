@@ -138,11 +138,11 @@ inline namespace SwapChainSupportDetails
 
       .oldSwapchain = VK_NULL_HANDLE
     };
-    std::cout << VkUtilsXBase::device << "\n";
+    std::cout << Queues::device << "\n";
 
     // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
     // auto xx=PFN_vkVoidFunction(swapChain);
-    VkUtilsXBase::checkCall( vkCreateSwapchainKHR( VkUtilsXBase::device, &createInfo, nullptr, &swapChain ) );
+    VkUtilsXBase::checkCall( vkCreateSwapchainKHR( Queues::device, &createInfo, nullptr, &swapChain ) );
 
     // checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount,
     // nullptr));
@@ -152,7 +152,7 @@ inline namespace SwapChainSupportDetails
     //     throw std::runtime_error("Swapchains not equal to allocated length: Bad
     //     SwapChain");
     // }
-    VkUtilsXBase::checkCall( vkGetSwapchainImagesKHR( VkUtilsXBase::device, swapChain, &imageCount, swapchainImages ) );
+    VkUtilsXBase::checkCall( vkGetSwapchainImagesKHR( Queues::device, swapChain, &imageCount, swapchainImages ) );
   }
 
   inline void createImageViews()

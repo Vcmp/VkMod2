@@ -6,6 +6,7 @@ static constexpr struct Queues
   static inline VkCommandPool               commandPool;
   static inline VkCommandPool               commandPool2;
   static inline VkPhysicalDevice            physicalDevice;
+  static inline VkDevice                    device;
   static inline boolean                     a = false;
   static inline uint32_t                    graphicsFamily;
   static inline uint32_t                    transferFamily;
@@ -56,7 +57,7 @@ inline void Queues::createCommandPool()
       .commandBufferCount = ( 1 ),
     };
 
-    vkAllocateCommandBuffers( VkUtilsXBase::device, &allocateInfo, &commandBuffer );
+    vkAllocateCommandBuffers( device, &allocateInfo, &commandBuffer );
   }
 }
 
@@ -74,7 +75,7 @@ inline void Queues::endSingleTimeCommands()
   a = ( a ^ 1 );
   vkQueueSubmit( TransferQueue[a], 1, &submitInfo1, VK_NULL_HANDLE );
   vkQueueWaitIdle( TransferQueue[a] );
-  vkResetCommandPool( VkUtilsXBase::device, ( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
+  vkResetCommandPool( device, ( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
   // vkFreeCommandBuffers(device, (VkCommandPool)Queues::commandPool2, 1,
   // &commandBuffer);
 }

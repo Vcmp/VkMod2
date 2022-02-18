@@ -90,7 +90,7 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
   constexpr VkMemoryDedicatedRequirementsKHR img2 = { VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR, nullptr };
 
   VkMemoryRequirements2 memRequirements = {};
-  vkGetImageMemoryRequirements( VkUtilsXBase::device, Texture::vkImage, &memRequirements.memoryRequirements );
+  vkGetImageMemoryRequirements( Queues::device, Texture::vkImage, &memRequirements.memoryRequirements );
 
   VkMemoryAllocateInfo allocInfo = {};
   allocInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -112,7 +112,7 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
 
   VkUtilsXBase::clPPPI( &allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory );
 
-  vkBindImageMemory( VkUtilsXBase::device, Texture::vkImage, Texture::vkAllocMemory, 0 );
+  vkBindImageMemory( Queues::device, Texture::vkImage, Texture::vkAllocMemory, 0 );
 }
 
 static void Texture::transitionImageLayout( VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout )

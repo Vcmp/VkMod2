@@ -89,7 +89,7 @@ struct UniformBufferObject
                                                                   .maxSets       = 1,
                                                                   .poolSizeCount = 1,
                                                                   .pPoolSizes    = &poolSize };
-      ( vkCreateDescriptorPool( VkUtilsXBase::device, &poolCreateInfo, nullptr, &descriptorPool ) );
+      ( vkCreateDescriptorPool( Queues::device, &poolCreateInfo, nullptr, &descriptorPool ) );
       //               descriptorPool=aLong[0];
     }
   }
@@ -133,7 +133,7 @@ struct UniformBufferObject
                                                    .descriptorSetCount = 1,
                                                    .pSetLayouts        = &descriptorSetLayout };
 
-      vkAllocateDescriptorSets( VkUtilsXBase::device, &allocInfo, &descriptorSets );
+      vkAllocateDescriptorSets( Queues::device, &allocInfo, &descriptorSets );
 
       {
         VkDescriptorBufferInfo bufferInfo{ .buffer = uniformBuffers, .offset = 0, .range = ( Sized ) };
@@ -156,7 +156,7 @@ struct UniformBufferObject
 
           /*  */
         };
-        vkUpdateDescriptorSets( VkUtilsXBase::device, 1, &descriptorWrites, 0, nullptr );
+        vkUpdateDescriptorSets( Queues::device, 1, &descriptorWrites, 0, nullptr );
       }
     }
   }
