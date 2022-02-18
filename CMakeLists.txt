@@ -20,7 +20,7 @@ set(CMAKE_CXX_COMPILER_LAUNCHER=ccache)
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -Ofast -ferror-limit=128 -g -fverbose-asm -save-temps -masm=intel -ftime-trace -fvisibility=hidden -fno-semantic-interposition -frename-registers -pthread -lpthread -Wunused-function -ffunction-sections -fdata-sections")
 
-find_package(Vulkan REQUIRED)
+# find_package(Vulkan REQUIRED)
 
 
 #add_subdirectory(third_party)
@@ -39,6 +39,7 @@ set(GLM_TEST_ENABLE_SIMD_AVX ON CACHE BOOL "" FORCE)
 set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
 add_subdirectory(glfw)
 add_subdirectory(glm)
+add_subdirectory(volk)
 
 # Add source to this project's executable.
 add_executable(VkMod2
@@ -65,7 +66,7 @@ add_executable(VkMod2
 
 
 
-target_link_libraries(VkMod2 PRIVATE Vulkan::Vulkan glfw glm)
+target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 
 add_dependencies(VkMod2 Shaders)
 

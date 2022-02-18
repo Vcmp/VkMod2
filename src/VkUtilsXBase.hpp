@@ -8,9 +8,9 @@
 // #ifdef __cplusplus
 // #define VULKAN_HPP_CPLUSPLUS 201803L
 // #endif
-#define VKAPI_CALL __cdecl
-#define VKAPI_ptr  __regcall
-#include <vulkan/vulkan.h>
+
+#define VOLK_IMPLEMENTATION
+#include "volk.h"
 // #define VK_USE_64_BIT_PTR_DEFINES 1
 //#define VK_NO_PROTOTYPES
 // #define VK_ENABLE_BETA_EXTENSIONS
@@ -46,10 +46,11 @@ public:
   static constexpr uint8_t  Frames = 3;
   static constexpr bool     checks = false;
 
+  // not sure if auto or exlicitit(ish) templateis better for the return argument
   template <typename T>
-  static constexpr T getAddrFuncPtr( const char * a )
+  static constexpr auto getAddrFuncPtr( const char * a )
   {
-    return (T)vkGetDeviceProcAddr( device, a );
+    return reinterpret_cast<T>( vkGetDeviceProcAddr( device, a ) );
   }
 
   // Their may seem to be an anomalous memory leak when the main render Loop/Draw

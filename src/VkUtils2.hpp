@@ -21,8 +21,8 @@ struct VkUtils2
   static constexpr VkResult createDebugUtilsMessengerEXT( const VkInstance,
                                                           const VkDebugUtilsMessengerCreateInfoEXT * );
 
-  static constexpr bool isDeviceSuitable( VkPhysicalDevice );
-  static void           checkDeviceExtensionSupport( VkPhysicalDevice );
+  static bool isDeviceSuitable( VkPhysicalDevice );
+  static void checkDeviceExtensionSupport( VkPhysicalDevice );
 
   static const VkSurfaceFormatKHR querySwapChainSupport( VkPhysicalDevice );
 
@@ -93,7 +93,7 @@ long permuteMat( long, long );
 inline void VkUtils2::setupWindow()
 {
   glfwInit();
-
+  VkUtilsXBase::checkCall( volkInitialize() );
   glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
   glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
   // glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_NO_ROBUSTNESS);
@@ -159,6 +159,7 @@ inline void VkUtils2::createInstance()
   // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
 
   VkUtilsXBase::checkCall( vkCreateInstance( &InstCreateInfo, VK_NULL_HANDLE, &vkInstance ) );
+  volkLoadInstance( vkInstance );
   // getVersion();
 }
 
@@ -234,7 +235,7 @@ inline constexpr VkResult
                                           const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo )
 {
   constexpr VkDebugUtilsMessengerEXT debugUtils = {};
-  auto func = (PFN_vkCreateDebugUtilsMessengerEXT2)vkGetInstanceProcAddr( instance, "vkCreateDebugUtilsMessengerEXT" );
+  auto func = VkUtilsXBase::getAddrFuncPtr<PFN_vkCreateDebugUtilsMessengerEXT2>( "vkCreateDebugUtilsMessengerEXT" );
   if ( func != VK_NULL_HANDLE )
   {
     return func( instance, pCreateInfo, VK_NULL_HANDLE, &debugUtils );
@@ -275,10 +276,14 @@ inline void VkUtils2::pickPhysicalDevice()
 }
 // Use VK Tutorial refernce as that sems to be far m re replable that the prior
 // java approach used
-inline constexpr bool VkUtils2::isDeviceSuitable( const VkPhysicalDevice device )
+inline bool VkUtils2::isDeviceSuitable( const VkPhysicalDevice device )
 {
   VkPhysicalDeviceProperties deviceProperties;
   VkPhysicalDeviceFeatures   deviceFeatures;
+  /*   VkUtilsXBase::getAddrFuncPtr<PFN_vkGetPhysicalDeviceProperties>( "vkGetPhysicalDeviceProperties" )(
+      device, &deviceProperties );
+    auto b = VkUtilsXBase::getAddrFuncPtr<PFN_vkGetPhysicalDeviceFeatures>( "vkGetPhysicalDeviceFeatures" );
+    b( device, &deviceFeatures );*/
   vkGetPhysicalDeviceProperties( device, &deviceProperties );
   vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
   checkDeviceExtensionSupport( device );

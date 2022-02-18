@@ -3,6 +3,7 @@
 #include "renderer2.hpp"
 
 #include <istream>
+#include <omp.h>
 #include <pthread.h>
 #include <unistd.h>
 
@@ -73,6 +74,7 @@ int __cdecl main()  // __attribute__( ( __aligned__( 32 ) ) )
   {
     glfwPollEvents();
     // glfwWaitEventsTimeout(1);
+
     renderer2::drawFrame();
     aa++;
   }
