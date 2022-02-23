@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SwapChainSupportDetails.hpp"
-
 // = (&set + sizeof(set));
 
 inline namespace BuffersX

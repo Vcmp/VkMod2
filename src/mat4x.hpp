@@ -20,6 +20,7 @@ private:
 
 public:
   constexpr explicit mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
+  constexpr explicit mat4x( const void * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
   // float a[2][8];
 
   inline constexpr __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
@@ -202,7 +203,7 @@ inline void mat4x::rotateL( const float angle /* , const glm::vec3 & v */ )
   //   float const a = angle;
   float const c = glm::cos( angle );
   float const s = glm::sin( angle );
-  __builtin_prefetch( BuffersX::data );
+
   // const float aa[4] = { c, s, -s, c };
 
   // // loadAligned( &m );
@@ -220,16 +221,34 @@ inline void mat4x::rotateL( const float angle /* , const glm::vec3 & v */ )
 
   // __a = _mm256_loadu2_m128( reinterpret_cast<float *>( &v ), reinterpret_cast<float *>( &v1 ) );
   // __a = _mm256_load_ps( ax );
+  __m256 xc = _mm256_broadcast_ss( &c );
+  __m256 xs = _mm256_broadcast_ss( &s );
 
-  __a[0] = viewproj1[0][0] * c + viewproj1[1][0] * s;
-  __a[1] = viewproj1[0][1] * c + viewproj1[1][1] * s;
-  __a[2] = viewproj1[0][2] * c + viewproj1[1][2] * s;
-  __a[3] = viewproj1[0][3] * c + viewproj1[1][3] * s;
+  /*
+    Oddly using
+        __a[4] = m5.__a[4] * -c + m5.__a[0] * s; Reverses the winding order
+    comapired TO?Rleative to
+    __a[4] = m5.__a[4] * c - m5.__a[0] * s;
+  */
 
-  __a[4] = viewproj1[0][0] * -s + viewproj1[1][0] * c;
-  __a[5] = viewproj1[0][1] * -s + viewproj1[1][1] * c;
-  __a[6] = viewproj1[0][2] * -s + viewproj1[1][2] * c;
-  __a[7] = viewproj1[0][3] * -s + viewproj1[1][3] * c;
+  __a[0] = m5.__a[0] * c + m5.__a[4] * s;
+  __a[1] = m5.__a[1] * c + m5.__a[5] * s;
+  __a[2] = m5.__a[2] * c + m5.__a[6] * s;
+  __a[3] = m5.__a[3] * c + m5.__a[7] * s;
+
+  __a[4] = m5.__a[4] - c * m5.__a[0] * s;
+  __a[5] = m5.__a[5] - c * m5.__a[1] * s;
+  __a[6] = m5.__a[6] - c * m5.__a[2] * s;
+  __a[7] = m5.__a[7] - c * m5.__a[3] * s;
+
+  // m5.__a[0] *= m5.__a[0];  __a[0] *= m5.__a[7];
+  // m5.__a[1] *= m5.__a[1];   __a[1] *= m5.__a[6];
+  // m5.__a[2] *= m5.__a[2];   __a[2] *= m5.__a[5];
+  // m5.__a[3] *= m5.__a[3];   __a[3] *= m5.__a[4];
+  // m5.__a[4] *= m5.__a[4];   __a[4] *= m5.__a[3];
+  // m5.__a[5] *= m5.__a[5];   __a[5] *= m5.__a[2];
+  // m5.__a[6] *= m5.__a[6];   __a[6] *= m5.__a[1];
+  // m5.__a[7] *= m5.__a[7];   __a[7] *= m5.__a[0];
 
   _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), __a );
 

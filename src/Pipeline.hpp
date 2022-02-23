@@ -163,7 +163,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
                                                        // with no transforms and withixed
                                                        // Const/Pre-Determined Runtime
                                                        // Variables
-    .frontFace       = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+    .frontFace       = VK_FRONT_FACE_CLOCKWISE,
     .depthBiasEnable = VK_FALSE
     // VkPipeLineRasterization.pNext=VK_NULL_HANDLE;
   };
@@ -309,7 +309,8 @@ inline void PipelineX::createCommandBuffers()
                              &UniformBufferObject::descriptorSets,
                              0,
                              nullptr );
-    m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
+    m4.loadAligned(
+      &viewproj2 );  // NoS ure on best order............................................................->
 
     memcpy( ( data ), ( &m4 ), sizeof( mat4x ) );
 

@@ -4,6 +4,8 @@
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
+#include "mat4x.hpp"
+
 inline namespace
 {
   static const glm::mat4 pers = glm::perspectiveLH_ZO(
@@ -11,8 +13,9 @@ inline namespace
   static const glm::mat4 look =
     glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
-  static const glm::mat4   viewproj  = pers * look;
-  static const glm::mat2x4 viewproj1 = ( viewproj );
+  static const glm::mat4 viewproj = pers * look;
+  static const mat4x     viewproj2( &viewproj );
+
 };  // namespace
 
 // static inline struct alignas( ( 64 ) ) UBO
@@ -32,6 +35,8 @@ struct UniformBufferObject
 
   static void createDescriptorSetLayout()
   {
+    m5.loadAligned( &viewproj2 );
+
     {
       static constexpr VkDescriptorSetLayoutBinding bindings = {
         .binding         = 0,

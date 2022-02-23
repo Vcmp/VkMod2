@@ -69,7 +69,7 @@ inline void renderer2::drawFrame()
   // m4.loadAligned( &m5 );
   VkUtilsXBase::checkCall(
     vkAcquireNextImageKHR( Queues::device, swapChain, TmUt, AvailableSemaphore, VK_NULL_HANDLE, &currentFrame ) );
-
+  __builtin_prefetch( BuffersX::data );
   updateUniformBuffer();
   info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
 
