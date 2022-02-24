@@ -56,7 +56,8 @@ struct UniformBufferObject
         .pBindings    = &bindings,
 
       };
-      VkUtilsXBase::clPPPI( &a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout );
+      VkUtilsXBase::clPPPI3<PFN_vkCreateDescriptorSetLayout>(
+        &a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout );
       // return MemSysm.doPointerAllocSafe(a,
       // device.getCapabilities().vkCreateDescriptorSetLayout);
     }
@@ -121,7 +122,7 @@ struct UniformBufferObject
       .unnormalizedCoordinates = false,
     };
     VkSampler sampler = nullptr;
-    VkUtilsXBase::clPPPI( &samplerInfo, "vkCreateSampler", &sampler );
+    VkUtilsXBase::clPPPI3<PFN_vkCreateSampler>( &samplerInfo, "vkCreateSampler", &sampler );
     return sampler;
     // nmemFree(samplerInfo.address());
   }

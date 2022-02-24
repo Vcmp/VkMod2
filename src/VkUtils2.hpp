@@ -5,6 +5,9 @@
 #include "SwapChainSupportDetails.hpp"
 #include "Texture.hpp"
 #include "UniformBufferObject.hpp"
+
+#include <cstdint>
+
 // #include <stdint.h>
 
 struct VkUtils2
@@ -159,7 +162,7 @@ inline void VkUtils2::createInstance()
   // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
 
   VkUtilsXBase::checkCall( vkCreateInstance( &InstCreateInfo, VK_NULL_HANDLE, &vkInstance ) );
-  volkLoadInstance( vkInstance );
+  volkLoadInstanceOnly( vkInstance );
   // getVersion();
 }
 
@@ -404,12 +407,16 @@ inline void VkUtils2::createLogicalDevice()
   }
   VkUtilsXBase::checkCall( vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ) );
   volkLoadDevice( device );
-  VolkDeviceTable vDT{};
-  volkLoadDeviceTable( &vDT, device );
+  // VolkDeviceTable vDT{};
+  // volkLoadDeviceTable( &vDT, device );
+  VtTable2x( device );
 
-  vDT.vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0, &Queues::GraphicsQueue );
-  vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0, &Queues::TransferQueue[0] );
-  vkGetDeviceQueue( device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 1, &Queues::TransferQueue[1] );
+  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>(
+    createInfo.pQueueCreateInfos[0].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::GraphicsQueue );
+  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>(
+    createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::TransferQueue[0] );
+  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>(
+    createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 1, &Queues::TransferQueue[1] );
   Queues::device = volkGetLoadedDevice();
 }
 

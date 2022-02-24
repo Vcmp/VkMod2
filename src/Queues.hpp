@@ -1,6 +1,8 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
 
+#include <vulkan/vulkan_core.h>
+
 static constexpr struct Queues
 {
   static inline VkCommandPool               commandPool;
@@ -27,26 +29,26 @@ static constexpr struct Queues
   static void createCommandPool();
   static void beginSingleTimeCommands();
   static void endSingleTimeCommands();
-} inline queues;
+} inline const queues;
 
 inline void Queues::createCommandPool()
 {
-  const VkCommandPoolCreateInfo poolInfo = {
+  constexpr VkCommandPoolCreateInfo poolInfo = {
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext            = nullptr,
     .queueFamilyIndex = 0,
   };
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);
-  commandPool = VkUtilsXBase::clPPPI2<VkCommandPool_T *>( &poolInfo, "vkCreateCommandPool" );
-  const VkCommandPoolCreateInfo poolInfo2 = {
+  VkUtilsXBase::clPPPI3<PFN_vkCreateCommandPool>( &poolInfo, "vkCreateCommandPool", &commandPool );
+  constexpr VkCommandPoolCreateInfo poolInfo2 = {
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext            = nullptr,
     .queueFamilyIndex = 1,
   };
   // poolInfo.flags=0;
   // Memsys2.free(poolInfo);RRRR
-  commandPool2 = VkUtilsXBase::clPPPI2<VkCommandPool>( &poolInfo2, "vkCreateCommandPool" );
+  VkUtilsXBase::clPPPI3<PFN_vkCreateCommandPool>( &poolInfo2, "vkCreateCommandPool", &commandPool2 );
   if ( commandBuffer == nullptr )
   {
     const VkCommandBufferAllocateInfo allocateInfo{
@@ -57,19 +59,19 @@ inline void Queues::createCommandPool()
       .commandBufferCount = ( 1 ),
     };
 
-    vkAllocateCommandBuffers( device, &allocateInfo, &commandBuffer );
+    VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>( &allocateInfo, "vkAllocateCommandBuffers", &commandBuffer );
   }
 }
 
 inline void Queues::beginSingleTimeCommands()
 {
-  vkBeginCommandBuffer( commandBuffer, &vkCommandBufferBeginInfo );
+  VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>( commandBuffer, "vkBeginCommandBuffer", &vkCommandBufferBeginInfo );
   // return commandBuffer;
 }
 
 inline void Queues::endSingleTimeCommands()
 {
-  vkEndCommandBuffer( commandBuffer );
+  VkUtilsXBase::clP<PFN_vkEndCommandBuffer>( commandBuffer, "vkEndCommandBuffer" );
 
   //            VkSubmitInfo.ncommandBufferCount(submitInfo1, 1);
   a = ( a ^ 1 );

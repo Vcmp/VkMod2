@@ -1,6 +1,9 @@
 #pragma once
 
 #include "SwapChainSupportDetails.hpp"
+
+#include <vulkan/vulkan_core.h>
+
 // = (&set + sizeof(set));
 
 inline namespace BuffersX
@@ -100,7 +103,7 @@ inline void BuffersX::createVkEvents()
   vkEventCreateInfo.sType             = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
   vkEventCreateInfo.pNext             = nullptr;
 
-  VkUtilsXBase::clPPPI( &vkEventCreateInfo, "vkCreateEvent", &vkEvent );
+  VkUtilsXBase::clPPPI3<PFN_vkCreateEvent>( &vkEventCreateInfo, "vkCreateEvent", &vkEvent );
 }
 
 inline void BuffersX::copyBuffer( VkBuffer & dst, const size_t sized )
@@ -163,7 +166,7 @@ inline void BuffersX::createSetBuffer( VkMemoryPropertyFlagBits properties,
     .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
   };
 
-  VkUtilsXBase::clPPPI( &allocateInfo, "vkCreateBuffer", &currentBuffer );
+  VkUtilsXBase::clPPPI3<PFN_vkCreateBuffer>( &allocateInfo, "vkCreateBuffer", &currentBuffer );
 
   VkMemoryRequirements memRequirements;
   vkGetBufferMemoryRequirements( Queues::device, currentBuffer, &memRequirements );
@@ -175,7 +178,7 @@ inline void BuffersX::createSetBuffer( VkMemoryPropertyFlagBits properties,
     .memoryTypeIndex = findMemoryType( Queues::physicalDevice, memRequirements.memoryTypeBits, properties ),
   };
   //
-  VkUtilsXBase::clPPPI( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
+  VkUtilsXBase::clPPPI3<PFN_vkAllocateMemory>( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
 
   VkUtilsXBase::checkCall( vkBindBufferMemory( Queues::device, currentBuffer, vertexBufferMemory, 0 ) );
   // memPutLong( device.address(), a);

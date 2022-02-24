@@ -3,6 +3,8 @@
 #include "Pipeline.hpp"
 #include "UniformBufferObject.hpp"
 
+#include <vulkan/vulkan_core.h>
+
 // #include "mat4x.hpp"
 
 // trick to use builtins+Attributes to treat a blob of memory as a vector type
@@ -52,7 +54,7 @@ inline constexpr void renderer2::setupRenderDraw()
   constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
                                                       .pNext = nullptr };
 
-  ( AvailableSemaphore = VkUtilsXBase::clPPPI2<VkSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore" ) );
+  ( VkUtilsXBase::clPPPI3<PFN_vkCreateSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore ) );
 }
 
 inline static void memPutLong( void * a, void const * b )
@@ -67,17 +69,16 @@ inline static void memPutLong( void * a, void const * b )
 inline void renderer2::drawFrame()
 {
   // m4.loadAligned( &m5 );
-  VkUtilsXBase::checkCall(
-    vkAcquireNextImageKHR( Queues::device, swapChain, TmUt, AvailableSemaphore, VK_NULL_HANDLE, &currentFrame ) );
-  __builtin_prefetch( BuffersX::data );
+  vkAcquireNextImageKHR2( Queues::device, swapChain, TmUt, AvailableSemaphore, nullptr, &currentFrame );
+  // __builtin_prefetch( BuffersX::data );
   updateUniformBuffer();
   info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
 
-  VkUtilsXBase::checkCall( vkQueueSubmit( Queues::GraphicsQueue, 1, &info, VK_NULL_HANDLE ) );
+  vkQueueSubmit2( Queues::GraphicsQueue, 1, &info, nullptr );
 
   //  info.pWaitSemaphores = &AvailableSemaphore;
 
-  VkUtilsXBase::checkCall( vkQueuePresentKHR( Queues::GraphicsQueue, &VkPresentInfoKHR1 ) );
+  vkQueuePresentKHR2( Queues::GraphicsQueue, &VkPresentInfoKHR1 );
 
   currentFrame = ( currentFrame + 1 ) % VkUtilsXBase::Frames;
 }

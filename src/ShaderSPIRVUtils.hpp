@@ -49,7 +49,7 @@ inline VkShaderModule ShaderSPIRVUtils::compileShaderFile( const char * shaderNa
   VsMCI.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   VsMCI.pNext    = VK_NULL_HANDLE;
 
-  VkUtilsXBase::clPPPI( &VsMCI, "vkCreateShaderModule", &axx );
+  VkUtilsXBase::clPPPI3<PFN_vkCreateShaderModule>( &VsMCI, "vkCreateShaderModule", &axx );
   const VkShaderModule axx2 = axx;
   return axx2;
 }

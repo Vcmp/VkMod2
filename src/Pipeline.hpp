@@ -4,6 +4,8 @@
 #include "UniformBufferObject.hpp"
 #include "mat4x.hpp"
 
+#include <cstdint>
+
 struct PipelineX
 {
 private:
@@ -73,7 +75,8 @@ inline static void createRenderPasses()
     // .pDependencies=&dependency
   };
 
-  VkUtilsXBase::clPPPI( &vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass );
+  VkUtilsXBase::clPPPI3<PFN_vkCreateRenderPass>(
+    &vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass );
 }
 
 inline void PipelineX::createGraphicsPipelineLayout()
@@ -219,7 +222,8 @@ inline void PipelineX::createGraphicsPipelineLayout()
                                                                       .pPushConstantRanges    = &vkPushConstantRange };
 
   std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
-  VkUtilsXBase::clPPPI( &vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &PipelineX::vkLayout );
+  VkUtilsXBase::clPPPI3<PFN_vkCreatePipelineLayout>(
+    &vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &PipelineX::vkLayout );
 
   const VkGraphicsPipelineCreateInfo pipelineInfo = {
     .sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -240,9 +244,8 @@ inline void PipelineX::createGraphicsPipelineLayout()
     //    pipelineInfo.basePipelineHandle=VK_NULL_HANDLE;
     // pipelineInfo.basePipelineIndex=-1;
   };
-
-  VkUtilsXBase::checkCall(
-    vkCreateGraphicsPipelines( Queues::device, nullptr, 1, &pipelineInfo, nullptr, &PipelineX::graphicsPipeline ) );
+  VkUtilsXBase::clPPPJI<PFN_vkCreateGraphicsPipelines>(
+    &pipelineInfo, 1, "vkCreateGraphicsPipelines", &PipelineX::graphicsPipeline );
 
   vkDestroyShaderModule( Queues::device, vertShaderModule, VK_NULL_HANDLE );
   vkDestroyShaderModule( Queues::device, fragShaderModule, VK_NULL_HANDLE );
@@ -257,7 +260,8 @@ inline void PipelineX::createCommandBuffers()
                                                     sizeof( PipelineX::commandBuffers ) / sizeof( VkCommandBuffer ) };
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
-  VkUtilsXBase::checkCall( vkAllocateCommandBuffers( Queues::device, &allocateInfo, PipelineX::commandBuffers ) );
+  VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>(
+    &allocateInfo, "vkAllocateCommandBuffers", PipelineX::commandBuffers );
 
   constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
                                                     .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT ) };

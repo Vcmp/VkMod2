@@ -1,16 +1,25 @@
 #pragma once
+#include <cstddef>
+#include <vulkan/vulkan_core.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
-#define VK_USE_PLATFORM_WIN32_KHR
+// #define VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_64_BIT_PTR_DEFINES 1
 #define VULKAN_HPP_SUPPORT_SPAN
-
+// #undef VK_KHR_acceleration_structure
+// #undef VK_INTEL_performance_query
+// #undef VK_EXT_extended_dynamic_state
+// #undef VK_VERSION_1_3
+// #undef VK_GOOGLE_display_timing
+// #undef VK_AMD_buffer_marker
+// #undef VK_NV_ray_tracing
+// #undef VK_KHR_device_group
 #undef GLFW_INCLUDE_VULKAN
 // #ifdef __cplusplus
 // #define VULKAN_HPP_CPLUSPLUS 201803L
 // #endif
 
-#define VOLK_IMPLEMENTATION
-#define VK_NO_PROTOTYPES
+// #define VOLK_IMPLEMENTATION
+// #define VK_NO_PROTOTYPES
 #include "volk.h"
 // #define VK_USE_64_BIT_PTR_DEFINES 1
 // #define VK_ENABLE_BETA_EXTENSIONS
@@ -19,7 +28,7 @@
 #ifdef _MSVC_LANG
 #  define _MSVC_LANG 201803L
 #endif
-#define GLFW_INCLUDE_NONE
+// #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
@@ -30,6 +39,21 @@
 
 // VkPhysicalDevicePortabilitySubsetFeaturesKHR ptr = {};
 
+inline namespace
+{
+  static inline PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR2;
+  static inline PFN_vkQueueSubmit         vkQueueSubmit2;
+  static inline __vectorcall PFN_vkQueuePresentKHR     vkQueuePresentKHR2;
+
+  static inline constexpr void VtTable2x( auto aa )
+  {
+    vkAcquireNextImageKHR2 =
+      reinterpret_cast<PFN_vkAcquireNextImageKHR>( vkGetDeviceProcAddr( aa, "vkAcquireNextImageKHR" ) );
+    vkQueueSubmit2     = reinterpret_cast<PFN_vkQueueSubmit>( vkGetDeviceProcAddr( aa, "vkQueueSubmit" ) );
+    vkQueuePresentKHR2 = reinterpret_cast<PFN_vkQueuePresentKHR>( vkGetDeviceProcAddr( aa, "vkQueuePresentKHR" ) );
+  }
+}  // namespace
+
 struct VkUtilsXBase
 {
 private:
@@ -37,6 +61,10 @@ private:
     const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
   const typedef VkResult( __vectorcall * callPPPPI2 )(
     const VkDevice, const void *, const VkAllocationCallbacks *, const void *, void * pHndl );
+  const typedef VkResult( __vectorcall * callPPPPI3 )( const VkDevice,
+                                                       const void *,
+                                                       const VkAllocationCallbacks *,
+                                                       const void * );
   typedef PFN_vkVoidFunction ( *load )( void *, const char * );
   VkDevice device = volkGetLoadedDevice();
 
@@ -135,6 +163,10 @@ public:
   {
     return reinterpret_cast<T>( vkGetDeviceProcAddr( volkGetLoadedDevice(), a ) );
   }
+  static inline void doPointerAlloc3( const void * a, const void * c, void * pHndl )
+  {
+    ( reinterpret_cast<callPPPPI3>( pHndl )( volkGetLoadedDevice(), a, nullptr, c ) );
+  }
   template <typename T>
   static inline void constexpr doPointerAlloc2( const void * a, const void * c, T pHndl )
   {
@@ -144,6 +176,68 @@ public:
   {
     return ( reinterpret_cast<callPPPPI>( pHndl )( volkGetLoadedDevice(), a, nullptr, c, pHndl ) );
   }
+  template <typename T>
+  static inline constexpr void clP( auto * __restrict__ pStrct, const char * __restrict__ a )
+  {
+    const VkDevice aa = volkGetLoadedDevice();
+    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
+    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
+    // doPointerAlloc( pStrct, object, Hndl );
+    T( vkGetDeviceProcAddr( aa, a ) )( pStrct );
+  }
+  template <typename T>
+  static inline constexpr void clPII( VkDevice __restrict__ & aa,
+                                      auto * __restrict__ pStrct,
+                                      const char * __restrict__ a,
+                                      auto * __restrict__ object )
+  {
+    // const VkDevice aa = volkGetLoadedDevice();
+    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
+    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
+    // doPointerAlloc( pStrct, object, Hndl );
+    T( vkGetDeviceProcAddr( aa, a ) )( pStrct, 1, object, nullptr );
+  }
+  template <typename T>
+  static inline constexpr void
+    clPI( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
+  {
+    const VkDevice aa = volkGetLoadedDevice();
+    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
+    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
+    // doPointerAlloc( pStrct, object, Hndl );
+    T( vkGetDeviceProcAddr( aa, a ) )( pStrct, object );
+  }
+  template <typename T>
+  static inline constexpr void
+    clPPJI3( uint32_t y, const char * __restrict__ a, uint32_t x, auto * __restrict__ object )
+  {
+    const VkDevice aa = volkGetLoadedDevice();
+    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
+    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
+    // doPointerAlloc( pStrct, object, Hndl );
+    T( vkGetDeviceProcAddr( aa, a ) )( aa, y, x, object );
+  }
+  template <typename T>
+  static inline constexpr void
+    clPPI3( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
+  {
+    const VkDevice aa = volkGetLoadedDevice();
+    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
+    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
+    // doPointerAlloc( pStrct, object, Hndl );
+    T( vkGetDeviceProcAddr( aa, a ) )( aa, pStrct, object );
+  }
+  template <typename T>
+  static inline constexpr void
+    clPPPI3( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
+  {
+    const VkDevice aa = volkGetLoadedDevice();
+    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
+    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
+    // doPointerAlloc( pStrct, object, Hndl );
+    T( vkGetDeviceProcAddr( aa, a ) )( aa, pStrct, nullptr, object );
+  }
+
   template <typename T>
   static inline constexpr T clPPPI2( const void * pStrct, const char * a )
   {
@@ -200,12 +294,27 @@ public:
   // {
   //     return sizeof(aabs)/sizeof(abs2x);
   // }
-  static inline void clPPPJI( void * pStrct, uint32_t * ax, const char * a, void * object )
+  template <typename T>
+  static inline constexpr void VtTable2( auto aa )
   {
+    vkAcquireNextImageKHR2 =
+      reinterpret_cast<PFN_vkAcquireNextImageKHR>( vkGetDeviceProcAddr( aa, "vkAcquireNextImageKHR" ) );
+    vkQueueSubmit2     = reinterpret_cast<PFN_vkQueueSubmit>( vkGetDeviceProcAddr( aa, "vkQueueSubmit" ) );
+    vkQueuePresentKHR2 = reinterpret_cast<PFN_vkQueuePresentKHR>( vkGetDeviceProcAddr( aa, "vkQueuePresentKHR" ) );
+  }
+  template <typename T>
+  static inline constexpr void clPPPPJ( VkDevice __restrict__ aa,
+                                        auto * __restrict__ pStrct,
+                                        uint32_t z,
+                                        auto * __restrict__ zy,
+                                        const char * a,
+                                        uint32_t * __restrict__ object )
+  {
+    // VkDevice aa = volkGetLoadedDevice();
     // vkGetDeviceProcAddr()
     //  auto xx=PFN_vkVoidFunction(swapChain);
 
-    const PFN_vkVoidFunction Hndl = vkGetDeviceProcAddr( volkGetLoadedDevice(), a );
+    // const T Hndl = (T)vkGetDeviceProcAddr( volkGetLoadedDevice(), a );
     // const callPPPPI ss=reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
     // a));
     //  std::cout << &x << "\n";
@@ -215,13 +324,30 @@ public:
     //  VkPipelineCache axx =nullptr;
     //  const VkResult VkR =x(device, pStrct, nullptr, object);
     // ss(device, pStrct, nullptr, object);
-    checkCall(
-      ( reinterpret_cast<callPPPPJI>( Hndl ) )( volkGetLoadedDevice(), nullptr, ax, pStrct, nullptr, object, Hndl ) );
+    T( vkGetDeviceProcAddr( aa, a ) )( aa, pStrct, z, zy, nullptr, object );
 
-    if ( object == nullptr )
-    {
-      throw std::runtime_error( "bad Alloctaion!: Null handle!" );
-    }
+    // return VkR;
+    //  callPPPPI(device, pStrct, nullptr, a)
+  }
+  template <typename T>
+  static inline constexpr void clPPPJI( auto * pStrct, int ax, const char * a, auto * object )
+  {
+    VkDevice aa = volkGetLoadedDevice();
+    // vkGetDeviceProcAddr()
+    //  auto xx=PFN_vkVoidFunction(swapChain);
+
+    // const T Hndl = (T)vkGetDeviceProcAddr( volkGetLoadedDevice(), a );
+    // const callPPPPI ss=reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
+    // a));
+    //  std::cout << &x << "\n";
+    //  std::cout << &pStrct << &object<<&a<<"\n";
+    //  std::cout << a<<"\n";
+    //  std::cout << object<<"\n";
+    //  VkPipelineCache axx =nullptr;
+    //  const VkResult VkR =x(device, pStrct, nullptr, object);
+    // ss(device, pStrct, nullptr, object);
+    T( vkGetDeviceProcAddr( aa, a ) )( aa, nullptr, 1, pStrct, nullptr, object );
+
     // return VkR;
     //  callPPPPI(device, pStrct, nullptr, a)
   }

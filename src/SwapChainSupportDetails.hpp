@@ -142,7 +142,7 @@ inline namespace SwapChainSupportDetails
 
     // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
     // auto xx=PFN_vkVoidFunction(swapChain);
-    VkUtilsXBase::checkCall( vkCreateSwapchainKHR( Queues::device, &createInfo, nullptr, &swapChain ) );
+    VkUtilsXBase::clPPPI3<PFN_vkCreateSwapchainKHR>( &createInfo, "vkCreateSwapchainKHR", &swapChain );
 
     // checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount,
     // nullptr));
@@ -180,7 +180,7 @@ inline namespace SwapChainSupportDetails
 
       createInfo.image = swapchainImage;
 
-      VkUtilsXBase::clPPPI(
+      VkUtilsXBase::clPPPI3<PFN_vkCreateImageView>(
         &createInfo,
         "vkCreateImageView",
         &SwapChainSupportDetails::swapChainImageViews[i++] );  // BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
@@ -202,7 +202,8 @@ inline namespace SwapChainSupportDetails
     {
       framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 
-      VkUtilsXBase::clPPPI( &framebufferCreateInfo, "vkCreateFramebuffer", &swapChainFramebuffers[i] );
+      VkUtilsXBase::clPPPI3<PFN_vkCreateFramebuffer>(
+        &framebufferCreateInfo, "vkCreateFramebuffer", &swapChainFramebuffers[i] );
     }
   }
 

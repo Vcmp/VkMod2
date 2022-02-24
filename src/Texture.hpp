@@ -86,7 +86,7 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
   imageInfo.samples           = VK_SAMPLE_COUNT_1_BIT;
   imageInfo.sharingMode       = VK_SHARING_MODE_EXCLUSIVE;
 
-  VkUtilsXBase::clPPPI( &imageInfo, "vkCreateImage", &Texture::vkImage );
+  VkUtilsXBase::clPPPI3<PFN_vkCreateImage>( &imageInfo, "vkCreateImage", &Texture::vkImage );
   constexpr VkMemoryDedicatedRequirementsKHR img2 = { VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR, nullptr };
 
   VkMemoryRequirements2 memRequirements = {};
@@ -110,7 +110,7 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
     allocInfo.pNext = &dedicatedAllocateInfoKHR;
   }
 
-  VkUtilsXBase::clPPPI( &allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory );
+  // VkUtilsXBase::clPPPI3<PFN_vkAllocateMemory>( &allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory );
 
   vkBindImageMemory( Queues::device, Texture::vkImage, Texture::vkAllocMemory, 0 );
 }
