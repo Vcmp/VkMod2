@@ -27,23 +27,23 @@ private:
 
   static void updateUniformBuffer();  // __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
 
-  static inline VkSemaphore AvailableSemaphore;
+  static constinit inline VkSemaphore AvailableSemaphore;
 
-  static inline uint32_t                   currentFrame;
-  static constexpr uint32_t                TmUt = 1000000000;
-  static inline constexpr VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-                                                              // .pWaitSemaphores=&FinishedSemaphore,
-                                                              .swapchainCount = 1,
-                                                              .pSwapchains    = &swapChain,
-                                                              .pImageIndices  = &currentFrame,
-                                                              .pResults       = nullptr };
-  static constexpr VkPipelineStageFlags    waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-  static inline VkSubmitInfo               info{
-                  .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-                  .waitSemaphoreCount = 1,
-                  .pWaitSemaphores    = &AvailableSemaphore,
-                  .pWaitDstStageMask  = &waitStages,
-                  .commandBufferCount = 1,
+  static constinit inline uint32_t               currentFrame;
+  static constexpr const uint32_t                TmUt = 1000000000;
+  static inline constinit const VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+                                                                    // .pWaitSemaphores=&FinishedSemaphore,
+                                                                    .swapchainCount = 1,
+                                                                    .pSwapchains    = &swapChain,
+                                                                    .pImageIndices  = &currentFrame,
+                                                                    .pResults       = nullptr };
+  static constexpr VkPipelineStageFlags          waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+  static constinit inline VkSubmitInfo           info{
+              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+              .waitSemaphoreCount = 1,
+              .pWaitSemaphores    = &AvailableSemaphore,
+              .pWaitDstStageMask  = &waitStages,
+              .commandBufferCount = 1,
   };
 };
 

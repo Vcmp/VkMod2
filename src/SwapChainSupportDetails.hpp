@@ -4,44 +4,46 @@
 
 inline namespace SwapChainSupportDetails
 {
-  static inline VkSurfaceCapabilitiesKHR capabilities{};
+  static constinit inline VkSurfaceCapabilitiesKHR capabilities{};
 
-  static inline VkImageLayout  depthImageView;
-  static inline VkSwapchainKHR swapChain;
-  static inline uint32_t       count;
-  static inline uint32_t       imageCount;
+  static constinit inline VkImageLayout  depthImageView;
+  static constinit inline VkSwapchainKHR swapChain;
+  static constinit inline uint32_t       count;
+  static constinit inline uint32_t       imageCount;
 
-  static inline VkSurfaceFormatKHR swapChainImageFormat;
-  static inline VkPresentModeKHR   presentMode;
-  static inline VkImageView        swapChainImageViews[Frames];
-  static inline VkRenderPass       renderPass;
-  static inline VkExtent2D         swapChainExtent;
-  static inline VkImage            swapchainImages[Frames];
-  static inline VkFramebuffer      swapChainFramebuffers[Frames];
+  static inline VkSurfaceFormatKHR         swapChainImageFormat;
+  static constinit inline VkPresentModeKHR presentMode;
+  static constinit inline VkImageView      swapChainImageViews[Frames];
+  static constinit inline VkRenderPass     renderPass;
+
+  static inline constexpr const VkExtent2D swapChainExtent{ width, height };
+
+  static constinit inline VkImage       swapchainImages[Frames];
+  static constinit inline VkFramebuffer swapChainFramebuffers[Frames];
 
   inline uint32_t clamp( uint32_t min, uint32_t max, uint32_t value )
   {
     const uint32_t a = ( max < value ? max : value );
     return ( min > a ? min : a );
   }
-  inline VkExtent2D chooseSwapExtent()
-  // todo: May not Detect Acutal Extent Correctly"
-  {
-    if ( capabilities.currentExtent.width != 0xFFFFFFFF )
-    {
-      return capabilities.currentExtent;
-    }
+  // inline VkExtent2D chooseSwapExtent()
+  // // todo: May not Detect Acutal Extent Correctly"
+  // {
+  //   if ( capabilities.currentExtent.width != 0xFFFFFFFF )
+  //   {
+  //     return capabilities.currentExtent;
+  //   }
 
-    VkExtent2D actualExtent = { width, height };
+  //   VkExtent2D actualExtent = { width, height };
 
-    VkExtent2D minExtent = capabilities.minImageExtent;
-    VkExtent2D maxExtent = capabilities.maxImageExtent;
+  //   VkExtent2D minExtent = capabilities.minImageExtent;
+  //   VkExtent2D maxExtent = capabilities.maxImageExtent;
 
-    actualExtent.width  = clamp( minExtent.width, maxExtent.width, actualExtent.width );
-    actualExtent.height = clamp( minExtent.height, maxExtent.height, actualExtent.height );
+  //   actualExtent.width  = clamp( minExtent.width, maxExtent.width, actualExtent.width );
+  //   actualExtent.height = clamp( minExtent.height, maxExtent.height, actualExtent.height );
 
-    return actualExtent;
-  }
+  //   return actualExtent;
+  // }
 
   inline void setupImageFormats()
   {
@@ -88,8 +90,8 @@ inline namespace SwapChainSupportDetails
 
     // return VK_PRESENT_MODE_FIFO_KHR;
 
-    VkExtent2D extent = SwapChainSupportDetails::chooseSwapExtent();
-    imageCount        = ( SwapChainSupportDetails::capabilities.minImageCount + 1 );
+    // swapChainExtent = SwapChainSupportDetails::chooseSwapExtent();
+    imageCount = ( SwapChainSupportDetails::capabilities.minImageCount + 1 );
 
     if ( SwapChainSupportDetails::capabilities.maxImageCount > 0 &&
          imageCount > SwapChainSupportDetails::capabilities.maxImageCount )
@@ -98,7 +100,7 @@ inline namespace SwapChainSupportDetails
     }
 
     SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
-    SwapChainSupportDetails::swapChainExtent      = extent;
+    // SwapChainSupportDetails::swapChainExtent      = extent;
   }
   inline void createSwapChain()
   {

@@ -41,10 +41,10 @@
 */
 inline namespace
 {
-  static inline bool      a = true;
-  static inline uint16_t  aa;
-  static inline pthread_t sys;
-  static inline pthread_t rThrd;
+  static constinit inline bool      a = true;
+  static constinit inline uint16_t  aa;
+  static constinit inline pthread_t sys;
+  // static inline pthread_t rThrd;
 
 }  // namespace
 // Apparently Threads other main main therad have much smaller stall alloctaion Sizes...<Query-> Confirm>

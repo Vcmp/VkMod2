@@ -6,7 +6,7 @@
 #include "Texture.hpp"
 #include "UniformBufferObject.hpp"
 
-#include <cstdint>
+#include <cassert>
 
 // #include <stdint.h>
 
@@ -21,8 +21,7 @@ struct VkUtils2
                                                         const VkDebugUtilsMessengerCallbackDataEXT *,
                                                         void * );
 
-  static constexpr VkResult createDebugUtilsMessengerEXT( const VkInstance,
-                                                          const VkDebugUtilsMessengerCreateInfoEXT * );
+  static VkResult createDebugUtilsMessengerEXT( const VkInstance, const VkDebugUtilsMessengerCreateInfoEXT * );
 
   static bool isDeviceSuitable( VkPhysicalDevice );
   static void checkDeviceExtensionSupport( VkPhysicalDevice );
@@ -105,8 +104,8 @@ inline void VkUtils2::setupWindow()
 
   window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
 
-  if ( window == NULL )
-    exit( 1 );
+  assert( !window );
+  // exit( 1 );
 
   glfwSetWindowShouldClose( ( window ), false );
   glfwMakeContextCurrent( ( window ) );
@@ -233,15 +232,14 @@ inline void VkUtils2::setupDebugMessenger()
   // debugMessenger = pDebugMessenger[0];
 }
 
-inline constexpr VkResult
-  VkUtils2::createDebugUtilsMessengerEXT( const VkInstance                           instance,
-                                          const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo )
+inline VkResult VkUtils2::createDebugUtilsMessengerEXT( const VkInstance                           instance,
+                                                        const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo )
 {
-  constexpr VkDebugUtilsMessengerEXT debugUtils = {};
-  auto func = VkUtilsXBase::getAddrFuncPtr<PFN_vkCreateDebugUtilsMessengerEXT2>( "vkCreateDebugUtilsMessengerEXT" );
-  if ( func != VK_NULL_HANDLE )
+  VkDebugUtilsMessengerEXT debugUtils = {};
+  // auto func = VkUtilsXBase::getAddrFuncPtr<PFN_vkCreateDebugUtilsMessengerEXT2>( "vkCreateDebugUtilsMessengerEXT" );
+  if ( vkCreateDebugUtilsMessengerEXT != VK_NULL_HANDLE )
   {
-    return func( instance, pCreateInfo, VK_NULL_HANDLE, &debugUtils );
+    return vkCreateDebugUtilsMessengerEXT( instance, pCreateInfo, VK_NULL_HANDLE, &debugUtils );
   }
   else
   {

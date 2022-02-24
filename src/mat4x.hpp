@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Buffers.hpp"
-#include "glm/trigonometric.hpp"
 
+#include <cmath>
 #include <cstdio>
 #include <immintrin.h>
 
@@ -44,7 +44,7 @@ public:
   inline void              doLook( float );
   inline void rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
-} m4, m5, m6;
+} m4;
 
 // inline constexpr void __vectorcall mat4x::loadAligned( float a[16] )
 // {
@@ -175,7 +175,7 @@ void mat4x::doPerspective( float fovy, float aspect, float zFar, float zNear )
   __b[2] = zFar / ( zFar - zNear );
   __b[3] = 1;
   __b[6] = -( zFar * zNear ) / ( zFar - zNear );
-  m6.doLook( 1 );
+  // m6.doLook( 1 );
 }
 
 void mat4x::doLook( float a )
@@ -202,8 +202,12 @@ void mat4x::doLook( float a )
 inline void mat4x::rotateL( const float & __restrict__ angle /* , const glm::vec3 & v */ )
 {
   //   float const a = angle;
-  float const c = glm::cos( angle );
-  float const s = glm::sin( angle );
+  float const c   = cos( angle );
+  float const c2  = -cos( angle );
+  const auto  cc  = _mm_broadcast_ss( &c );
+  const auto  c2x = _mm_broadcast_ss( &c2 );
+  float const s   = sin( angle );
+  const auto  s2x = _mm_broadcast_ss( &s );
   // __builtin_prefetch( &m5.__a );
   // __a = m5.__a;
   // __c           = m5.__a;
@@ -248,6 +252,11 @@ inline void mat4x::rotateL( const float & __restrict__ angle /* , const glm::vec
 
   // __a = _mm256_fmsubadd_ps( __a, _mm256_broadcast_ss( &s ), _mm256_mul_ps( __a, zyx ) );  // m5.__a * zyx + m5.__a *
   // xs;
+  // const auto a = _mm256_insertf128_ps( _mm256_broadcast_ss( &c ), -_mm_broadcast_ss( &c ), 1 );
+  const auto x = _mm256_fmaddsub_ps(
+    __a,
+    _mm256_broadcast_ss( &s ),
+    _mm256_mul_ps( __a, _mm256_insertf128_ps( _mm256_broadcast_ss( &c ), _mm_broadcast_ss( &c2 ), 1 ) ) );
 
   // m5.__a[0] *= m5.__a[0];  __a[0] *= m5.__a[7];
   // m5.__a[1] *= m5.__a[1];   __a[1] *= m5.__a[6];
@@ -258,14 +267,7 @@ inline void mat4x::rotateL( const float & __restrict__ angle /* , const glm::vec
   // m5.__a[6] *= m5.__a[6];   __a[6] *= m5.__a[1];
   // m5.__a[7] *= m5.__a[7];   __a[7] *= m5.__a[0];
 
-  _mm256_store_ps(
-    reinterpret_cast<float *>( BuffersX::data ),
-    _mm256_fmsubadd_ps(
-      __a,
-      _mm256_broadcast_ss( &s ),
-      _mm256_mul_ps( __a,
-                     /* zyx1 * */ __builtin_ia32_vinsertf128_ps256(
-                       _mm256_broadcast_ss( &c ), -_mm_broadcast_ss( &c ), 1 ) ) ) );  // m5.__a * zyx + m5.__a * xs;
+  _mm256_store_ps( (float *)( BuffersX::data ), x );
 
   // __a = _mm256_mul_ps( __a; _mm256_broadcast_ss( aa ) );
 

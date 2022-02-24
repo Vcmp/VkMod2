@@ -8,13 +8,16 @@
 
 inline namespace
 {
-  static const glm::mat4 pers =
-    glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 1.7f, 90.0f );
-  static const glm::mat4 look =
-    glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
+  // static const auto pers =
+  //   glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 1.7f, 90.0f );
+  // static const auto look =
+  //   glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
-  static const glm::mat4 viewproj = pers * look;
-  static const mat4x     viewproj2( &viewproj );
+  static auto const viewproj =
+    glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 1.7f, 90.0f ) *
+    glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
+  ;
+  static const mat4x viewproj2( &viewproj );
 
 };  // namespace
 
@@ -25,13 +28,13 @@ inline namespace
 // } ubo;
 struct UniformBufferObject
 {
-  static constinit const size_t       Sized = ( sizeof( viewproj ) );
-  static inline VkDescriptorSet       descriptorSets;
-  static inline VkDescriptorSetLayout descriptorSetLayout;
-  static inline VkDescriptorPool      descriptorPool;
-  static inline VkImageView           textureImageView;
-  static inline VkBuffer              uniformBuffers;
-  static inline VkDeviceMemory        uniformBuffersMemory;
+  static constinit const size_t                 Sized = ( sizeof( viewproj ) );
+  static constinit inline VkDescriptorSet       descriptorSets;
+  static constinit inline VkDescriptorSetLayout descriptorSetLayout;
+  static constinit inline VkDescriptorPool      descriptorPool;
+  static constinit inline VkImageView           textureImageView;
+  static constinit inline VkBuffer              uniformBuffers;
+  static constinit inline VkDeviceMemory        uniformBuffersMemory;
 
   static constexpr void createDescriptorSetLayout()
   {

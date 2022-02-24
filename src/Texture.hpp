@@ -5,14 +5,14 @@
 
 inline namespace Texture
 {
-  static VkImage        vkImage;
-  static VkDeviceMemory vkAllocMemory;
-  static void           createTextureImage();
-  static VkFormat       findDepthFormat();
-  static void           createDepthResources();
-  static void           createImage( VkExtent2D, VkFormat, VkImageUsageFlagBits );
-  static void           transitionImageLayout( VkFormat, VkImageLayout, VkImageLayout );
-  static void           createImageView( VkFormat, VkImageAspectFlagBits, VkImageLayout );
+  static constinit VkImage        vkImage;
+  static constinit VkDeviceMemory vkAllocMemory;
+  static void                     createTextureImage();
+  static VkFormat                 findDepthFormat();
+  static void                     createDepthResources();
+  static void                     createImage( VkExtent2D, VkFormat, VkImageUsageFlagBits );
+  static void                     transitionImageLayout( VkFormat, VkImageLayout, VkImageLayout );
+  static void                     createImageView( VkFormat, VkImageAspectFlagBits, VkImageLayout );
 };  // namespace Texture
 
 inline void Texture::createDepthResources()

@@ -12,15 +12,15 @@ private:
   static constexpr int OFFSETOF_COLOR = 3 * sizeof( float );
   static constexpr int OFFSET_POS     = 0;
 
-  static constexpr int           OFFSETOF_TEXTCOORDS = ( 3 + 3 ) * sizeof( float );
-  static constexpr float         UNormFlt            = 0.1F;
-  static inline VkPipelineLayout vkLayout;
-  static inline VkPipeline       graphicsPipeline;
+  static constexpr int                     OFFSETOF_TEXTCOORDS = ( 3 + 3 ) * sizeof( float );
+  static constexpr float                   UNormFlt            = 0.1F;
+  static constinit inline VkPipelineLayout vkLayout;
+  static constinit inline VkPipeline       graphicsPipeline;
 
 public:
-  static inline VkCommandBuffer commandBuffers[Frames];
-  inline static void            createGraphicsPipelineLayout();
-  inline static void            createCommandBuffers();
+  static constinit inline VkCommandBuffer commandBuffers[Frames];
+  inline static void                      createGraphicsPipelineLayout();
+  inline static void                      createCommandBuffers();
 };
 
 VkFormat findDepthFormat()

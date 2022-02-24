@@ -43,10 +43,10 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(glfw)
-add_subdirectory(glm)
-add_subdirectory(volk)
-add_subdirectory(sleef)
+add_subdirectory(glfw EXCLUDE_FROM_ALL)
+add_subdirectory(glm EXCLUDE_FROM_ALL)
+add_subdirectory(volk EXCLUDE_FROM_ALL)
+add_subdirectory(sleef EXCLUDE_FROM_ALL)
 	
 target_link_libraries(VkMod2 PRIVATE volk glfw sleef glm)
 

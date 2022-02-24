@@ -7,17 +7,17 @@
 inline namespace BuffersX
 {
 
-  static inline void * data = nullptr;  // Similar to the Hardcodes Address Field in the Memory Allocation
-                                        // System used in the Java Version
+  static constinit inline void * data = nullptr;  // Similar to the Hardcodes Address Field in the Memory Allocation
+                                                  // System used in the Java Version
 
-  static inline VkBuffer       vertexBuffer;
-  static inline VkDeviceMemory vertexBufferMemory;
+  static constinit inline VkBuffer       vertexBuffer;
+  static constinit inline VkDeviceMemory vertexBufferMemory;
 
-  static inline VkBuffer       Bufferstaging;
-  static inline VkDeviceMemory stagingBufferMemory;
+  static constinit inline VkBuffer       Bufferstaging;
+  static constinit inline VkDeviceMemory stagingBufferMemory;
 
-  static inline VkBuffer       indexBuffer;
-  static inline VkDeviceMemory indexBufferMemory;
+  static constinit inline VkBuffer       indexBuffer;
+  static constinit inline VkDeviceMemory indexBufferMemory;
 
   inline namespace
   {

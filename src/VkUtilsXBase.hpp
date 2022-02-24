@@ -39,16 +39,16 @@
 
 inline namespace
 {
-  static constinit const uint16_t width  = 854;
-  static constinit const uint16_t height = 480;
+  static constexpr const uint16_t width  = 854;
+  static constexpr const uint16_t height = 480;
 
-  static constinit __int128                        aXX    = 0xF;
-  static constinit const uint8_t                   Frames = 3;
-  static constinit const bool                      checks = true;
-  static inline PFN_vkAcquireNextImageKHR          vkAcquireNextImageKHR2;
-  static inline PFN_vkQueueSubmit                  vkQueueSubmit2;
-  static inline __vectorcall PFN_vkQueuePresentKHR vkQueuePresentKHR2;
-  static inline PFN_vkCreateSemaphore              vkCreateSemaphore2;
+  static constinit __int128                                  aXX    = 0xF;
+  static constexpr uint8_t                                   Frames = 3;
+  static constinit const bool                                checks = true;
+  static constinit inline PFN_vkAcquireNextImageKHR          vkAcquireNextImageKHR2;
+  static constinit inline PFN_vkQueueSubmit                  vkQueueSubmit2;
+  static constinit inline __vectorcall PFN_vkQueuePresentKHR vkQueuePresentKHR2;
+  static constinit inline PFN_vkCreateSemaphore              vkCreateSemaphore2;
 
   static inline constexpr void VtTable2x( auto aa )
   {
@@ -87,7 +87,7 @@ public:
   // being enabled, however if said Validation Layers are disabled, the memeory
   // leak virtually entirely disappears and at least thus far does not seem to be
   // an issue thankfully
-  static constexpr bool debug = false;
+  static constexpr bool debug = true;
 
   static constexpr bool ENABLE_VALIDATION_LAYERS =
     debug;  // todo: Posible Bug: ValidationLayersBreak Shader Compilation due to
