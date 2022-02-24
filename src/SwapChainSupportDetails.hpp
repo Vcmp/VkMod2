@@ -13,11 +13,11 @@ inline namespace SwapChainSupportDetails
 
   static inline VkSurfaceFormatKHR swapChainImageFormat;
   static inline VkPresentModeKHR   presentMode;
-  static inline VkImageView        swapChainImageViews[VkUtilsXBase::Frames];
+  static inline VkImageView        swapChainImageViews[Frames];
   static inline VkRenderPass       renderPass;
   static inline VkExtent2D         swapChainExtent;
-  static inline VkImage            swapchainImages[VkUtilsXBase::Frames];
-  static inline VkFramebuffer      swapChainFramebuffers[VkUtilsXBase::Frames];
+  static inline VkImage            swapchainImages[Frames];
+  static inline VkFramebuffer      swapChainFramebuffers[Frames];
 
   inline uint32_t clamp( uint32_t min, uint32_t max, uint32_t value )
   {
@@ -32,7 +32,7 @@ inline namespace SwapChainSupportDetails
       return capabilities.currentExtent;
     }
 
-    VkExtent2D actualExtent = { VkUtilsXBase::width, VkUtilsXBase::height };
+    VkExtent2D actualExtent = { width, height };
 
     VkExtent2D minExtent = capabilities.minImageExtent;
     VkExtent2D maxExtent = capabilities.maxImageExtent;
@@ -198,7 +198,7 @@ inline namespace SwapChainSupportDetails
 
     framebufferCreateInfo.attachmentCount = 1;  //(framebufferCreateInfo.address(), (attachments).remaining());
                                                 //    framebufferCreateInfo.pAttachments= swapChainImageViews;
-    for ( size_t i = 0; i < VkUtilsXBase::Frames; i++ )
+    for ( size_t i = 0; i < Frames; i++ )
     {
       framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 

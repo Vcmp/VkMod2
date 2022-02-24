@@ -1,8 +1,6 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
 
-#include <vulkan/vulkan_core.h>
-
 static constexpr struct Queues
 {
   static inline VkCommandPool               commandPool;

@@ -2,8 +2,6 @@
 
 #include "SwapChainSupportDetails.hpp"
 
-#include <vulkan/vulkan_core.h>
-
 // = (&set + sizeof(set));
 
 inline namespace BuffersX

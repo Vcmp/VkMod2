@@ -18,7 +18,7 @@ private:
   static inline VkPipeline       graphicsPipeline;
 
 public:
-  static inline VkCommandBuffer commandBuffers[VkUtilsXBase::Frames];
+  static inline VkCommandBuffer commandBuffers[Frames];
   inline static void            createGraphicsPipelineLayout();
   inline static void            createCommandBuffers();
 };
@@ -130,17 +130,14 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .primitiveRestartEnable = VK_FALSE
   };
 
-  static constexpr VkViewport vkViewport{ .x        = 0.0F,
-                                          .y        = 0.0F,
-                                          .width    = VkUtilsXBase::width,
-                                          .height   = VkUtilsXBase::height,
-                                          .minDepth = UNormFlt,
-                                          .maxDepth = 1.0F };
+  static constexpr VkViewport vkViewport{
+    .x = 0.0F, .y = 0.0F, .width = width, .height = height, .minDepth = UNormFlt, .maxDepth = 1.0F
+  };
 
   static constexpr VkRect2D scissor{ //                    .offset(vkOffset2D ->vkViewport.y()) //todo: not
                                      //                    sure if correct Offset
                                      .offset = { 0, 0 },
-                                     .extent{ VkUtilsXBase::width, VkUtilsXBase::height }
+                                     .extent{ width, height }
   };
 
   constexpr VkPipelineViewportStateCreateInfo vkViewPortState = {
@@ -166,7 +163,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
                                                        // with no transforms and withixed
                                                        // Const/Pre-Determined Runtime
                                                        // Variables
-    .frontFace       = VK_FRONT_FACE_CLOCKWISE,
+    .frontFace       = VK_FRONT_FACE_COUNTER_CLOCKWISE,
     .depthBiasEnable = VK_FALSE
     // VkPipeLineRasterization.pNext=VK_NULL_HANDLE;
   };

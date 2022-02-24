@@ -3,8 +3,6 @@
 #include "Pipeline.hpp"
 #include "UniformBufferObject.hpp"
 
-#include <vulkan/vulkan_core.h>
-
 // #include "mat4x.hpp"
 
 // trick to use builtins+Attributes to treat a blob of memory as a vector type
@@ -80,7 +78,7 @@ inline void renderer2::drawFrame()
 
   vkQueuePresentKHR2( Queues::GraphicsQueue, &VkPresentInfoKHR1 );
 
-  currentFrame = ( currentFrame + 1 ) % VkUtilsXBase::Frames;
+  currentFrame = ( currentFrame + 1 ) % Frames;
 }
 
 constexpr inline void

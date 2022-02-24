@@ -1,6 +1,4 @@
 #pragma once
-#include <cstddef>
-#include <vulkan/vulkan_core.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 // #define VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_64_BIT_PTR_DEFINES 1
@@ -41,9 +39,16 @@
 
 inline namespace
 {
-  static inline PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR2;
-  static inline PFN_vkQueueSubmit         vkQueueSubmit2;
-  static inline __vectorcall PFN_vkQueuePresentKHR     vkQueuePresentKHR2;
+  static constinit const uint16_t width  = 854;
+  static constinit const uint16_t height = 480;
+
+  static constinit __int128                        aXX    = 0xF;
+  static constinit const uint8_t                   Frames = 3;
+  static constinit const bool                      checks = true;
+  static inline PFN_vkAcquireNextImageKHR          vkAcquireNextImageKHR2;
+  static inline PFN_vkQueueSubmit                  vkQueueSubmit2;
+  static inline __vectorcall PFN_vkQueuePresentKHR vkQueuePresentKHR2;
+  static inline PFN_vkCreateSemaphore              vkCreateSemaphore2;
 
   static inline constexpr void VtTable2x( auto aa )
   {
@@ -51,6 +56,7 @@ inline namespace
       reinterpret_cast<PFN_vkAcquireNextImageKHR>( vkGetDeviceProcAddr( aa, "vkAcquireNextImageKHR" ) );
     vkQueueSubmit2     = reinterpret_cast<PFN_vkQueueSubmit>( vkGetDeviceProcAddr( aa, "vkQueueSubmit" ) );
     vkQueuePresentKHR2 = reinterpret_cast<PFN_vkQueuePresentKHR>( vkGetDeviceProcAddr( aa, "vkQueuePresentKHR" ) );
+    vkCreateSemaphore2 = reinterpret_cast<PFN_vkCreateSemaphore>( vkGetDeviceProcAddr( aa, "vkCreateSemaphore" ) );
   }
 }  // namespace
 
@@ -69,13 +75,6 @@ private:
   VkDevice device = volkGetLoadedDevice();
 
 public:
-  static constexpr uint16_t width  = 854;
-  static constexpr uint16_t height = 480;
-
-  static constexpr __int128 aXX    = 0xF;
-  static constexpr uint8_t  Frames = 3;
-  static constexpr bool     checks = true;
-
   // not sure if auto or exlicitit(ish) templateis better for the return argument
   template <typename T>
   static constexpr auto getAddrFuncPtr( const char * a )

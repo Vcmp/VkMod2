@@ -8,8 +8,8 @@
 
 inline namespace
 {
-  static const glm::mat4 pers = glm::perspectiveLH_ZO(
-    glm::radians( 45.0f ) * -1, VkUtilsXBase::width / static_cast<float>( VkUtilsXBase::height ), 0.7f, 90.0f );
+  static const glm::mat4 pers =
+    glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 1.7f, 90.0f );
   static const glm::mat4 look =
     glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
@@ -25,7 +25,7 @@ inline namespace
 // } ubo;
 struct UniformBufferObject
 {
-  static constexpr size_t             Sized = ( sizeof( viewproj ) );
+  static constinit const size_t       Sized = ( sizeof( viewproj ) );
   static inline VkDescriptorSet       descriptorSets;
   static inline VkDescriptorSetLayout descriptorSetLayout;
   static inline VkDescriptorPool      descriptorPool;
@@ -33,12 +33,12 @@ struct UniformBufferObject
   static inline VkBuffer              uniformBuffers;
   static inline VkDeviceMemory        uniformBuffersMemory;
 
-  static void createDescriptorSetLayout()
+  static constexpr void createDescriptorSetLayout()
   {
-    m5.loadAligned( &viewproj2 );
+    // m5.loadAligned( &viewproj2 );
 
     {
-      static constexpr VkDescriptorSetLayoutBinding bindings = {
+      constexpr VkDescriptorSetLayoutBinding bindings = {
         .binding         = 0,
         .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
         .descriptorCount = 1,
@@ -50,7 +50,7 @@ struct UniformBufferObject
       };
       // samplerLayoutBinding
 
-      static constexpr VkDescriptorSetLayoutCreateInfo a{
+      const VkDescriptorSetLayoutCreateInfo a{
         .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .bindingCount = 1,
         .pBindings    = &bindings,

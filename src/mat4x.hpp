@@ -1,6 +1,7 @@
 #pragma once
 
-#include "UniformBufferObject.hpp"
+#include "Buffers.hpp"
+#include "glm/trigonometric.hpp"
 
 #include <cstdio>
 #include <immintrin.h>
@@ -41,7 +42,7 @@ public:
   inline void              permute();
   inline void              doPerspective( float, float, float, float );
   inline void              doLook( float );
-  inline void rotateL( float const /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
+  inline void rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
 } m4, m5, m6;
 
@@ -198,12 +199,14 @@ void mat4x::doLook( float a )
   // return Result;
 }
 
-inline void mat4x::rotateL( const float angle /* , const glm::vec3 & v */ )
+inline void mat4x::rotateL( const float & __restrict__ angle /* , const glm::vec3 & v */ )
 {
   //   float const a = angle;
   float const c = glm::cos( angle );
   float const s = glm::sin( angle );
-
+  // __builtin_prefetch( &m5.__a );
+  // __a = m5.__a;
+  // __c           = m5.__a;
   // const float aa[4] = { c, s, -s, c };
 
   // // loadAligned( &m );
@@ -221,9 +224,21 @@ inline void mat4x::rotateL( const float angle /* , const glm::vec3 & v */ )
 
   // __a = _mm256_loadu2_m128( reinterpret_cast<float *>( &v ), reinterpret_cast<float *>( &v1 ) );
   // __a = _mm256_load_ps( ax );
-  __m256 xc = _mm256_broadcast_ss( &c );
-  __m256 xs = _mm256_broadcast_ss( &s );
+  // const __m256 xc = _mm256_broadcast_ss( &c );
+  // const __v8sf xs = _mm256_broadcast_ss( &s );
 
+  // __m128      lc = _mm_broadcast_ss( &c );
+  // __m128      ls = _mm_broadcast_ss( &s );
+  // const float cc = -glm::cos( -glm::sin( -angle ) );
+  // const float cc = -glm::cos( ( angle ) );
+  ;
+  // __m256      xy = _mm256_loadu2_m128( &cc, &s );
+  // __m256 __v256 = _mm256_broadcast_ss( &c );
+  // auto zyx1 = __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ss( &c ), _mm_broadcast_ss( &s ), 1 );
+
+  // __m256 zyx = /* zyx1 * */ __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ss( &c ), -_mm_broadcast_ss( &c ), 1
+  // );
+  // __m256 zyx = _mm256_loadu2_m128( &c, &cc );
   /*
     Oddly using
         __a[4] = m5.__a[4] * -c + m5.__a[0] * s; Reverses the winding order
@@ -231,15 +246,8 @@ inline void mat4x::rotateL( const float angle /* , const glm::vec3 & v */ )
     __a[4] = m5.__a[4] * c - m5.__a[0] * s;
   */
 
-  __a[0] = m5.__a[0] * c + m5.__a[4] * s;
-  __a[1] = m5.__a[1] * c + m5.__a[5] * s;
-  __a[2] = m5.__a[2] * c + m5.__a[6] * s;
-  __a[3] = m5.__a[3] * c + m5.__a[7] * s;
-
-  __a[4] = m5.__a[4] - c * m5.__a[0] * s;
-  __a[5] = m5.__a[5] - c * m5.__a[1] * s;
-  __a[6] = m5.__a[6] - c * m5.__a[2] * s;
-  __a[7] = m5.__a[7] - c * m5.__a[3] * s;
+  // __a = _mm256_fmsubadd_ps( __a, _mm256_broadcast_ss( &s ), _mm256_mul_ps( __a, zyx ) );  // m5.__a * zyx + m5.__a *
+  // xs;
 
   // m5.__a[0] *= m5.__a[0];  __a[0] *= m5.__a[7];
   // m5.__a[1] *= m5.__a[1];   __a[1] *= m5.__a[6];
@@ -250,7 +258,14 @@ inline void mat4x::rotateL( const float angle /* , const glm::vec3 & v */ )
   // m5.__a[6] *= m5.__a[6];   __a[6] *= m5.__a[1];
   // m5.__a[7] *= m5.__a[7];   __a[7] *= m5.__a[0];
 
-  _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), __a );
+  _mm256_store_ps(
+    reinterpret_cast<float *>( BuffersX::data ),
+    _mm256_fmsubadd_ps(
+      __a,
+      _mm256_broadcast_ss( &s ),
+      _mm256_mul_ps( __a,
+                     /* zyx1 * */ __builtin_ia32_vinsertf128_ps256(
+                       _mm256_broadcast_ss( &c ), -_mm_broadcast_ss( &c ), 1 ) ) ) );  // m5.__a * zyx + m5.__a * xs;
 
   // __a = _mm256_mul_ps( __a; _mm256_broadcast_ss( aa ) );
 

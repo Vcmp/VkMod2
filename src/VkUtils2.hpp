@@ -103,7 +103,7 @@ inline void VkUtils2::setupWindow()
   // glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
   // glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
 
-  window = glfwCreateWindow( VkUtilsXBase::width, VkUtilsXBase::height, "VKMod2", nullptr, nullptr );
+  window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
 
   if ( window == NULL )
     exit( 1 );
