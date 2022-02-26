@@ -4,11 +4,8 @@
 #include "UniformBufferObject.hpp"
 #include "mat4x.hpp"
 
-#include <cstdint>
-
-struct PipelineX
+inline namespace
 {
-private:
   static constexpr int OFFSETOF_COLOR = 3 * sizeof( float );
   static constexpr int OFFSET_POS     = 0;
 
@@ -16,11 +13,15 @@ private:
   static constexpr float                   UNormFlt            = 0.1F;
   static constinit inline VkPipelineLayout vkLayout;
   static constinit inline VkPipeline       graphicsPipeline;
+  static constinit inline VkCommandBuffer  commandBuffers[Frames];
 
+}  // namespace
+struct PipelineX
+{
+private:
 public:
-  static constinit inline VkCommandBuffer commandBuffers[Frames];
-  inline static void                      createGraphicsPipelineLayout();
-  inline static void                      createCommandBuffers();
+  inline static void createGraphicsPipelineLayout();
+  inline static void createCommandBuffers();
 };
 
 VkFormat findDepthFormat()
@@ -34,7 +35,7 @@ VkFormat findDepthFormat()
   {
     vkGetPhysicalDeviceFormatProperties( Queues::physicalDevice, format, &props );
 
-    const int i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    const uint32_t i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
     if (
       i2 ==
       VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT /* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/ )
@@ -155,7 +156,6 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .depthClampEnable        = VK_FALSE,
     .rasterizerDiscardEnable = VK_FALSE,
     .polygonMode             = VK_POLYGON_MODE_FILL,
-    .lineWidth               = 1.0f,
     .cullMode                = VK_CULL_MODE_BACK_BIT,  // WARNING: VERY IMPORTANT!:
                                                        // Make sure the culling direction is correct
                                                        // as it applies even to 2DVecs/Fixed
@@ -164,14 +164,15 @@ inline void PipelineX::createGraphicsPipelineLayout()
                                                        // Const/Pre-Determined Runtime
                                                        // Variables
     .frontFace       = VK_FRONT_FACE_COUNTER_CLOCKWISE,
-    .depthBiasEnable = VK_FALSE
+    .depthBiasEnable = VK_FALSE,
+    .lineWidth       = 1.0F,
     // VkPipeLineRasterization.pNext=VK_NULL_HANDLE;
   };
 
   constexpr VkPipelineMultisampleStateCreateInfo multisampling = {
     .sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-    .sampleShadingEnable   = VK_FALSE,
     .rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
+    .sampleShadingEnable   = VK_FALSE,
     .minSampleShading      = 1.0F,
     .pSampleMask           = VK_NULL_HANDLE,
     .alphaToCoverageEnable = VK_FALSE,
@@ -189,9 +190,9 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .stencilTestEnable = VK_FALSE,
   };
   static constexpr VkPipelineColorBlendAttachmentState colorBlendAttachment = {
+    .blendEnable = VK_FALSE,
     .colorWriteMask =
       VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
-    .blendEnable = VK_FALSE,
 
   };
   // float blendConstants[]={0.0f, 0.0f, 0.0f, 0.0f};
@@ -199,8 +200,8 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
     .logicOpEnable   = VK_FALSE,
     .logicOp         = VK_LOGIC_OP_COPY,
+    .attachmentCount = 1,
     .pAttachments    = &colorBlendAttachment,
-    .attachmentCount = 1
 
   };
 
@@ -219,8 +220,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
                                                                       .pPushConstantRanges    = &vkPushConstantRange };
 
   std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
-  VkUtilsXBase::clPPPI3<PFN_vkCreatePipelineLayout>(
-    &vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &PipelineX::vkLayout );
+  VkUtilsXBase::clPPPI3<PFN_vkCreatePipelineLayout>( &vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &vkLayout );
 
   const VkGraphicsPipelineCreateInfo pipelineInfo = {
     .sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -242,7 +242,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
     // pipelineInfo.basePipelineIndex=-1;
   };
   VkUtilsXBase::clPPPJI<PFN_vkCreateGraphicsPipelines>(
-    &pipelineInfo, 1, "vkCreateGraphicsPipelines", &PipelineX::graphicsPipeline );
+    &pipelineInfo, 1, "vkCreateGraphicsPipelines", &graphicsPipeline );
 
   vkDestroyShaderModule( Queues::device, vertShaderModule, VK_NULL_HANDLE );
   vkDestroyShaderModule( Queues::device, fragShaderModule, VK_NULL_HANDLE );
@@ -251,27 +251,26 @@ inline void PipelineX::createGraphicsPipelineLayout()
 inline void PipelineX::createCommandBuffers()
 {
   const VkCommandBufferAllocateInfo allocateInfo{ .sType       = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
-                                                  .commandPool = (VkCommandPool)( Queues::commandPool ),
+                                                  .commandPool = ( Queues::commandPool ),
                                                   .level       = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
                                                   .commandBufferCount =
-                                                    sizeof( PipelineX::commandBuffers ) / sizeof( VkCommandBuffer ) };
+                                                    sizeof( commandBuffers ) / sizeof( VkCommandBuffer ) };
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
-  VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>(
-    &allocateInfo, "vkAllocateCommandBuffers", PipelineX::commandBuffers );
+  VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>( &allocateInfo, "vkAllocateCommandBuffers", commandBuffers );
 
   constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
                                                     .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT ) };
 
-  VkRenderPassAttachmentBeginInfo attachmentsbeginInfo{ .sType = VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO,
-                                                        .attachmentCount = 1,
-                                                        .pAttachments =
-                                                          &SwapChainSupportDetails::swapChainImageViews[0] };
+  /*   VkRenderPassAttachmentBeginInfo attachmentsbeginInfo{ .sType =
+     VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO, .attachmentCount = 1, .pAttachments =
+                                                            &SwapChainSupportDetails::swapChainImageViews[0] };
 
+   */
   const VkRect2D renderArea = { .offset = { 0, 0 }, .extent = SwapChainSupportDetails::swapChainExtent };
 
   constexpr VkClearValue clearValues[2] = {
-    [0].color = { { UNormFlt, UNormFlt, UNormFlt, 1.0f } }, [1].depthStencil = { 1.0f, 0 }
+    [0].color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } }, [1].depthStencil = { 1.0F, 0 }
   };
 
   // VkClearValue clearColour = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
@@ -287,38 +286,37 @@ inline void PipelineX::createCommandBuffers()
   renderPassInfo.renderArea      = renderArea;
   uint8_t i                      = 0;
   vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data );
-  for ( const VkCommandBuffer & commandBuffer : PipelineX::commandBuffers )
+  static constexpr VkDeviceSize offsets[] = { 0 };
+  m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
+  for ( const VkCommandBuffer & commandBuffer : commandBuffers )
   {
     // extracted(beginInfo1, renderPassInfo, commandBuffer, i);
 
-    VkUtilsXBase::checkCall( vkBeginCommandBuffer( commandBuffer, &beginInfo1 ) );
+    VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>( commandBuffer, "vkBeginCommandBuffer", &beginInfo1 );
 
     renderPassInfo.framebuffer = ( SwapChainSupportDetails::swapChainFramebuffers[i] );
 
     vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineX::graphicsPipeline );
-    constexpr VkDeviceSize offsets[] = { 0 };
+    vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline );
     vkCmdBindVertexBuffers( commandBuffer, 0, 1, &vertexBuffer, offsets );
     vkCmdBindIndexBuffer( commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
 
     vkCmdBindDescriptorSets( commandBuffer,
                              VK_PIPELINE_BIND_POINT_GRAPHICS,
-                             PipelineX::vkLayout,
+                             vkLayout,
                              0,
                              1,
                              &UniformBufferObject::descriptorSets,
                              0,
                              nullptr );
-    m4.loadAligned(
-      &viewproj2 );  // NoS ure on best order............................................................->
 
     memcpy( ( data ), ( &m4 ), sizeof( mat4x ) );
 
     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 
     vkCmdEndRenderPass( commandBuffer );
-    VkUtilsXBase::checkCall( vkEndCommandBuffer( commandBuffer ) );
+    VkUtilsXBase::clP<PFN_vkEndCommandBuffer>( commandBuffer, "vkEndCommandBuffer" );
     i++;
   }
 }

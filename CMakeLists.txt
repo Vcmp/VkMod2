@@ -25,8 +25,8 @@ add_executable(VkMod2 "")
 
 message(STATUS "${CMAKE_CXX_COMPILE_FEATURES}")
 message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
-target_compile_features(VkMod2 PUBLIC cxx_std_23)
-target_compile_features(VkMod2 PUBLIC c_std_23)
+target_compile_features(VkMod2 PRIVATE cxx_std_23)
+target_compile_features(VkMod2 PRIVATE c_std_23)
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -fverbose-asm -save-temps -masm=intel -fvisibility=hidden -fno-semantic-interposition -pthread -lpthread")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} -std=c2x ${CMAKE_CXX_FLAGS}")
@@ -46,9 +46,9 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(glfw EXCLUDE_FROM_ALL)
 add_subdirectory(glm EXCLUDE_FROM_ALL)
 add_subdirectory(volk EXCLUDE_FROM_ALL)
-add_subdirectory(sleef EXCLUDE_FROM_ALL)
+# add_subdirectory(sleef EXCLUDE_FROM_ALL)
 	
-target_link_libraries(VkMod2 PRIVATE volk glfw sleef glm)
+target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 
 # add_dependencies(VkMod2 Shaders)
 

@@ -15,11 +15,11 @@ inline namespace
   //   glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
   static auto const viewproj =
-    glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 1.7f, 90.0f ) *
-    glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
+    glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
+    glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
   ;
-  static const mat4x  viewproj2( &viewproj );
-  static const __m256 viewproj2x = viewproj2.__a;
+  // static const mat4x  viewproj2( &viewproj );
+  static const __m256 viewproj2x = mat4x( &viewproj ).__a;
   // static constexpr __m256 axvZXLI    = __extension__( __m256 ){ 0x0, 1, 0x0, 1, 1, 1, 0x0, 1 };
   static constexpr __m256 axvZXLI = __extension__( __m256 ){ -1, -1, -1, 0, 0, 0, 0, 0 };
 

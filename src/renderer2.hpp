@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Pipeline.hpp"
-#include "UniformBufferObject.hpp"
+#include "VkUtils2.ixx"
 
 #include <cstdint>
 #include <immintrin.h>
@@ -75,7 +74,7 @@ inline void renderer2::drawFrame()
   __builtin_prefetch( BuffersX::data );
   __builtin_prefetch( &viewproj2x );
   updateUniformBuffer();
-  info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
+  info.pCommandBuffers = &commandBuffers[currentFrame];
 
   vkQueueSubmit2( Queues::GraphicsQueue, 1, &info, nullptr );
 

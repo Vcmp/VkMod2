@@ -42,13 +42,13 @@ inline namespace
   static constexpr const uint16_t width  = 854;
   static constexpr const uint16_t height = 480;
 
-  static constinit __int128                                  aXX    = 0xF;
-  static constexpr uint8_t                                   Frames = 3;
-  static constinit const bool                                checks = true;
-  static constinit inline PFN_vkAcquireNextImageKHR          vkAcquireNextImageKHR2;
-  static constinit inline PFN_vkQueueSubmit                  vkQueueSubmit2;
-  static constinit inline __vectorcall PFN_vkQueuePresentKHR vkQueuePresentKHR2;
-  static constinit inline PFN_vkCreateSemaphore              vkCreateSemaphore2;
+  static constinit __int128                         aXX    = 0xF;
+  static constexpr uint8_t                          Frames = 3;
+  static constinit const bool                       checks = true;
+  static constinit inline PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR2;
+  static constinit inline PFN_vkQueueSubmit         vkQueueSubmit2;
+  static constinit inline PFN_vkQueuePresentKHR     vkQueuePresentKHR2;
+  static constinit inline PFN_vkCreateSemaphore     vkCreateSemaphore2;
 
   static inline constexpr void VtTable2x( auto aa )
   {
@@ -72,7 +72,6 @@ private:
                                                        const VkAllocationCallbacks *,
                                                        const void * );
   typedef PFN_vkVoidFunction ( *load )( void *, const char * );
-  VkDevice device = volkGetLoadedDevice();
 
 public:
   // not sure if auto or exlicitit(ish) templateis better for the return argument
