@@ -1,4 +1,5 @@
 #pragma once
+#include <immintrin.h>
 #define GLM_FORCE_LEFT_HANDED
 #include "Buffers.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
@@ -17,7 +18,10 @@ inline namespace
     glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 1.7f, 90.0f ) *
     glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
   ;
-  static const mat4x viewproj2( &viewproj );
+  static const mat4x  viewproj2( &viewproj );
+  static const __m256 viewproj2x = viewproj2.__a;
+  // static constexpr __m256 axvZXLI    = __extension__( __m256 ){ 0x0, 1, 0x0, 1, 1, 1, 0x0, 1 };
+  static constexpr __m256 axvZXLI = __extension__( __m256 ){ -1, -1, -1, 0, 0, 0, 0, 0 };
 
 };  // namespace
 

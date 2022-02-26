@@ -3,6 +3,10 @@
 #include "Pipeline.hpp"
 #include "UniformBufferObject.hpp"
 
+#include <cstdint>
+#include <immintrin.h>
+#include <xmmintrin.h>
+
 // #include "mat4x.hpp"
 
 // trick to use builtins+Attributes to treat a blob of memory as a vector type
@@ -25,7 +29,7 @@ private:
     __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   ;
 
-  static void updateUniformBuffer();  // __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
+  static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
 
   static constinit inline VkSemaphore AvailableSemaphore;
 
@@ -67,8 +71,9 @@ inline static void memPutLong( void * a, void const * b )
 inline void renderer2::drawFrame()
 {
   // m4.loadAligned( &m5 );
-  vkAcquireNextImageKHR2( Queues::device, swapChain, TmUt, AvailableSemaphore, nullptr, &currentFrame );
-  // __builtin_prefetch( BuffersX::data );
+  vkAcquireNextImageKHR2( Queues::device, swapChain, -1, AvailableSemaphore, nullptr, &currentFrame );
+  __builtin_prefetch( BuffersX::data );
+  __builtin_prefetch( &viewproj2x );
   updateUniformBuffer();
   info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
 
@@ -93,7 +98,30 @@ static inline void * __movsb( void * d, const void * s, size_t n )
 }
 inline void renderer2::updateUniformBuffer()
 {
-  const float time = static_cast<float>( glfwGetTime() ) * ah;
+  // const float time = static_cast<float>( glfwGetTime() ) * ah;
+
+  static constinit float c;
+  static constinit float s;
+  static constexpr float xs = 1;
+  sincosf( glfwGetTime() * ah, &c, &s );
+
+  // const __m128 ones    = _mm_broadcast_ss( &xs );
+  // _mm256_storeu2_m128i();
+
+  const __m256 aaa     = viewproj2x;
+  const __m256 osx     = _mm256_broadcast_ss( &c );
+  const __m256 osxyzsZ = _mm256_broadcast_ss( &s );
+  const __m128 o1sx    = -_mm256_extractf128_ps( osx, 0 );
+  // const __m256 osxyzsZ2 = _mm256_movehdup_ps( osxyzsZ );
+  __m256 a =
+    // viewproj2x * __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ps( &osx ), _mm_xor_ps( osx, axv ), 1 );
+    viewproj2x * __builtin_ia32_vinsertf128_ps256( osx, o1sx, 1 );
+  // _mm256_xor_ps( osx, axvZXLI );
+  // _mm256_storeu2_m128( &c, &c2, a );
+
+  const auto x = _mm256_fmsubadd_ps( aaa, osxyzsZ, a );
+
+  _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
 
   // ubo.model = glm::rotate( viewproj, time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
   //  ubo.proj[1][1] *= -1;
@@ -107,7 +135,7 @@ inline void renderer2::updateUniformBuffer()
   // m5.loadTmp( ax2 );
   // m4.loadAligned( &ubo.model );
 
-  m4.rotateL( time /* , glm::vec3( 0.0F, 0.0F, 1.0F ) */ );
+  // m4.rotateL( time /* , glm::vec3( 0.0F, 0.0F, 1.0F ) */ );
   // m4.domatFMA( m5 );
   /*Should Ideally Peristently map the Uniberform buffer allocation instead
    *Howver don't currently know of a method to carry this out in C++ without

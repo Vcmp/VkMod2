@@ -5,21 +5,22 @@
 #include <cmath>
 #include <cstdio>
 #include <immintrin.h>
+#include <xmmintrin.h>
 
 /*too lazy to do an SSE version as AVX in many cases can allow for the abilkity to the same steps in half as many stages
  e.g. Might be able to get away withput using amore explict construct arg sets and isntead just implicitly and
  Automatically intialise the struct iwth a constexpr Identify Maxtrix Struct.Blob/StandIn Instead _read(int _FileHandle,
  void *_DstBuf, unsigned int _MaxCharCount)
 */
+
 static inline constexpr float ax[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 inline static struct __attribute__( ( __vector_size__( 64 ), __aligned__( 64 ) ) ) mat4x
 {
-private:
+public:
   //__m256 __ab[2];
   __v8sf __a;
   __v8sf __b;
 
-public:
   constexpr explicit mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
   constexpr explicit mat4x( const void * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
   // float a[2][8];
@@ -199,100 +200,128 @@ void mat4x::doLook( float a )
   // return Result;
 }
 
-inline void mat4x::rotateL( const float & __restrict__ angle /* , const glm::vec3 & v */ )
-{
-  //   float const a = angle;
-  float const c   = cos( angle );
-  float const c2  = -cos( angle );
-  const auto  cc  = _mm_broadcast_ss( &c );
-  const auto  c2x = _mm_broadcast_ss( &c2 );
-  float const s   = sin( angle );
-  const auto  s2x = _mm_broadcast_ss( &s );
-  // __builtin_prefetch( &m5.__a );
-  // __a = m5.__a;
-  // __c           = m5.__a;
-  // const float aa[4] = { c, s, -s, c };
+// inline void mat4x::rotateL( const float & __restrict__ angle /* , const glm::vec3 & v */ )
+// {
+//   //   float const a = angle;
+//   static constinit float c;
+//   static constinit float s;
+//   sincosf( angle, &c, &s );
 
-  // // loadAligned( &m );
+//   // __builtin_prefetch( &m5.__a );
+//   // __a = m5.__a;
+//   // __c           = m5.__a;
+//   // const float aa[4] = { c, s, -s, c };
 
-  // const __m128 x = _mm_broadcast_ss( &aa[0] );
-  // const __m128 y = _mm_broadcast_ss( &aa[1] );
+//   // // loadAligned( &m );
 
-  // // __m256 z = _mm256_loadu2_m128( &aa[0], &aa[1] );
-  // const float  t[4] = { viewproj1[0][0], viewproj1[0][1], viewproj1[0][2], viewproj1[0][3] };
-  // const float  r[4] = { viewproj1[1][0], viewproj1[1][1], viewproj1[1][2], viewproj1[1][3] };
-  // const __m128 x1   = _mm_broadcast_ss( t );
-  // const __m128 y1   = _mm_broadcast_ss( r );
-  // __m128       v    = _mm_fmadd_ps( x1, x, _mm_mul_ps( y1, y ) );
-  // __m128       v1   = _mm_fmadd_ps( x1, -y, _mm_mul_ps( y1, x ) );
+//   // const __m128 x = _mm_broadcast_ss( &aa[0] );
+//   // const __m128 y = _mm_broadcast_ss( &aa[1] );
 
-  // __a = _mm256_loadu2_m128( reinterpret_cast<float *>( &v ), reinterpret_cast<float *>( &v1 ) );
-  // __a = _mm256_load_ps( ax );
-  // const __m256 xc = _mm256_broadcast_ss( &c );
-  // const __v8sf xs = _mm256_broadcast_ss( &s );
+//   // // __m256 z = _mm256_loadu2_m128( &aa[0], &aa[1] );
+//   // const float  t[4] = { viewproj1[0][0], viewproj1[0][1], viewproj1[0][2], viewproj1[0][3] };
+//   // const float  r[4] = { viewproj1[1][0], viewproj1[1][1], viewproj1[1][2], viewproj1[1][3] };
+//   // const __m128 x1   = _mm_broadcast_ss( t );
+//   // const __m128 y1   = _mm_broadcast_ss( r );
+//   // __m128       v    = _mm_fmadd_ps( x1, x, _mm_mul_ps( y1, y ) );
+//   // __m128       v1   = _mm_fmadd_ps( x1, -y, _mm_mul_ps( y1, x ) );
 
-  // __m128      lc = _mm_broadcast_ss( &c );
-  // __m128      ls = _mm_broadcast_ss( &s );
-  // const float cc = -glm::cos( -glm::sin( -angle ) );
-  // const float cc = -glm::cos( ( angle ) );
-  ;
-  // __m256      xy = _mm256_loadu2_m128( &cc, &s );
-  // __m256 __v256 = _mm256_broadcast_ss( &c );
-  // auto zyx1 = __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ss( &c ), _mm_broadcast_ss( &s ), 1 );
+//   // __a = _mm256_loadu2_m128( reinterpret_cast<float *>( &v ), reinterpret_cast<float *>( &v1 ) );
+//   // __a = _mm256_load_ps( ax );
+//   // const __m256 xc = _mm256_broadcast_ss( &c );
+//   // const __v8sf xs = _mm256_broadcast_ss( &s );
 
-  // __m256 zyx = /* zyx1 * */ __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ss( &c ), -_mm_broadcast_ss( &c ), 1
-  // );
-  // __m256 zyx = _mm256_loadu2_m128( &c, &cc );
-  /*
-    Oddly using
-        __a[4] = m5.__a[4] * -c + m5.__a[0] * s; Reverses the winding order
-    comapired TO?Rleative to
-    __a[4] = m5.__a[4] * c - m5.__a[0] * s;
-  */
+//   // __m128      lc = _mm_broadcast_ss( &c );
+//   // __m128      ls = _mm_broadcast_ss( &s );
+//   // const float cc = -glm::cos( -glm::sin( -angle ) );
+//   // const float cc = -glm::cos( ( angle ) );
+//   ;
+//   // __m256      xy = _mm256_loadu2_m128( &cc, &s );
+//   // __m256 __v256 = _mm256_broadcast_ss( &c );
+//   // auto zyx1 = __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ss( &c ), _mm_broadcast_ss( &s ), 1 );
 
-  // __a = _mm256_fmsubadd_ps( __a, _mm256_broadcast_ss( &s ), _mm256_mul_ps( __a, zyx ) );  // m5.__a * zyx + m5.__a *
-  // xs;
-  // const auto a = _mm256_insertf128_ps( _mm256_broadcast_ss( &c ), -_mm_broadcast_ss( &c ), 1 );
-  const auto x = _mm256_fmaddsub_ps(
-    __a,
-    _mm256_broadcast_ss( &s ),
-    _mm256_mul_ps( __a, _mm256_insertf128_ps( _mm256_broadcast_ss( &c ), _mm_broadcast_ss( &c2 ), 1 ) ) );
+//   // __m256 zyx = /* zyx1 * */ __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ss( &c ), -_mm_broadcast_ss( &c ),
+//   1
+//   // );
+//   // __m256 zyx = _mm256_loadu2_m128( &c, &cc );
+//   /*
+//     Oddly using
+//         __a[4] = m5.__a[4] * -c + m5.__a[0] * s; Reverses the winding order
+//     comapired TO?Rleative to
+//     __a[4] = m5.__a[4] * c - m5.__a[0] * s;
+//   */
 
-  // m5.__a[0] *= m5.__a[0];  __a[0] *= m5.__a[7];
-  // m5.__a[1] *= m5.__a[1];   __a[1] *= m5.__a[6];
-  // m5.__a[2] *= m5.__a[2];   __a[2] *= m5.__a[5];
-  // m5.__a[3] *= m5.__a[3];   __a[3] *= m5.__a[4];
-  // m5.__a[4] *= m5.__a[4];   __a[4] *= m5.__a[3];
-  // m5.__a[5] *= m5.__a[5];   __a[5] *= m5.__a[2];
-  // m5.__a[6] *= m5.__a[6];   __a[6] *= m5.__a[1];
-  // m5.__a[7] *= m5.__a[7];   __a[7] *= m5.__a[0];
+//   // __a = _mm256_fmsubadd_ps( __a, _mm256_broadcast_ss( &s ), _mm256_mul_ps( __a, zyx ) );  // m5.__a * zyx + m5.__a
+//   *
+//   // xs;
+//   // __m256     xx = _mm256_broadcast_ss( &c ) * _mm256_broadcast_ss( &s );
+//   // __m128     i  = _mm_mul_ss( -_mm_broadcast_ss( &c ), _mm_broadcast_ss( &s ) );
+//   // __m256     ss = _mm256_broadcast_ps( &i );
+//   // const auto a  = _mm256_insertf128_ps( _mm256_broadcast_ss( &c ), -_mm_broadcast_ss( &c ), 1 );
+//   // const auto x  = _mm256_fmaddsub_ps( __a, a, ( xx ) );
 
-  _mm256_store_ps( (float *)( BuffersX::data ), x );
+//   /* __m256     xx = _mm256_broadcast_ss( &c ) * _mm256_broadcast_ss( &s );
+//   __m128     i  = _mm_mul_ss( -_mm_broadcast_ss( &s ), -_mm_broadcast_ss( &s ) );
+//   __m256     ss = _mm256_broadcast_ps( &i );
+//   const auto a  = _mm256_insertf128_ps( _mm256_broadcast_ss( &c ), i, 1 );
+//   const auto x  = _mm256_fmaddsub_ps( __a, _mm256_broadcast_ss( &s ), ( a ) ); */
+//   // const auto osx = _mm_broadcast_ss( &s );
+//   // const auto tsx = -osx;
+//   // const auto a   = _mm256_shuffle_ps( _mm256_broadcast_ss( &c ), __a, 4 );
+//   // const __m128 osx  = _mm_broadcast_ss( &c );
+//   // const __m128 osxa = -_mm_broadcast_ss( &c );
+//   // const __m128 osx2 = _mm_mul_ss( osx, osxa );
+//   // const __m128 tsx  = -osx;
+//   // const auto   a    = __a * _mm256_insertf128_ps( _mm256_broadcast_ps( &osx ), tsx, 1 );
+//   // float        xl   = ( c *= -c );
+//   // const auto a = _mm256_fmsubadd_ps( __a, _mm256_broadcast_ss( &c ), _mm256_broadcast_ss( &c ) );
+//   // auto         xla   = _mm_broadcast_ss( &c );
+//   // auto         xls   = _mm_broadcast_ss( &s );
+//   // auto         xlssa = _mm_mul_ss( xla, xls );
+//   // float        aa    = 1;
+//   // auto         aas   = _mm_fmsub_ps( xlssa, xla, xls );
+//   // const auto   x     = _mm256_fmaddsub_ps( __a, _mm256_broadcast_ss( &s ), _mm256_broadcast_ps( &xlssa ) );
 
-  // __a = _mm256_mul_ps( __a; _mm256_broadcast_ss( aa ) );
+//   const __m128 osx     = _mm_broadcast_ss( &c );
+//   const __m256 osxyzsZ = _mm256_broadcast_ss( &s );
+//   const auto   a       = __a * _mm256_insertf128_ps( _mm256_broadcast_ps( &osx ), -osx, 1 );
 
-  // constexpr glm::vec3 axis = { 0, 0, 1 };
-  // glm::vec3           temp( ( float( 1 ) - c ) * axis );
+//   const auto x = _mm256_fmsubadd_ps( __a, osxyzsZ, a );
 
-  // glm::mat2 Rotate;
-  // Rotate[0][0] = c;
-  // Rotate[0][1] = s;
-  // // Rotate[0][2] = 0;
+//   // m5.__a[0] *= m5.__a[0];  __a[0] *= m5.__a[7];
+//   // m5.__a[1] *= m5.__a[1];   __a[1] *= m5.__a[6];
+//   // m5.__a[2] *= m5.__a[2];   __a[2] *= m5.__a[5];
+//   // m5.__a[3] *= m5.__a[3];   __a[3] *= m5.__a[4];
+//   // m5.__a[4] *= m5.__a[4];   __a[4] *= m5.__a[3];
+//   // m5.__a[5] *= m5.__a[5];   __a[5] *= m5.__a[2];
+//   // m5.__a[6] *= m5.__a[6];   __a[6] *= m5.__a[1];
+//   // m5.__a[7] *= m5.__a[7];   __a[7] *= m5.__a[0];
 
-  // Rotate[1][0] = -s;
-  // Rotate[1][1] = c;
-  // Rotate[1][2] = 0;
+//   _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
 
-  // Rotate[2][0] = 0;
-  // Rotate[2][1] = 0;
-  // Rotate[2][2] = c + temp[2];
+//   // __a = _mm256_mul_ps( __a; _mm256_broadcast_ss( aa ) );
 
-  // const glm::mat2x4 Result{                                       // Rotate.transpos
-  //                           viewproj1[0] * c + viewproj1[1] * s,  // + m[2] * Rotate[0][2];
-  //                           viewproj1[0] * -s + viewproj1[1] * c
-  // };  // + m[2] * Rotate[1][2];
-  // Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] * Rotate[2][2];
-  // Result[3] = m[3];
+//   // constexpr glm::vec3 axis = { 0, 0, 1 };
+//   // glm::vec3           temp( ( float( 1 ) - c ) * axis );
 
-  // loadAligned( &Result );
-}
+//   // glm::mat2 Rotate;
+//   // Rotate[0][0] = c;
+//   // Rotate[0][1] = s;
+//   // // Rotate[0][2] = 0;
+
+//   // Rotate[1][0] = -s;
+//   // Rotate[1][1] = c;
+//   // Rotate[1][2] = 0;
+
+//   // Rotate[2][0] = 0;
+//   // Rotate[2][1] = 0;
+//   // Rotate[2][2] = c + temp[2];
+
+//   // const glm::mat2x4 Result{                                       // Rotate.transpos
+//   //                           viewproj1[0] * c + viewproj1[1] * s,  // + m[2] * Rotate[0][2];
+//   //                           viewproj1[0] * -s + viewproj1[1] * c
+//   // };  // + m[2] * Rotate[1][2];
+//   // Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] * Rotate[2][2];
+//   // Result[3] = m[3];
+
+//   // loadAligned( &Result );
+// }

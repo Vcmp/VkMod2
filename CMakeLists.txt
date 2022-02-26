@@ -28,7 +28,7 @@ message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
 target_compile_features(VkMod2 PUBLIC cxx_std_23)
 target_compile_features(VkMod2 PUBLIC c_std_23)
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -ferror-limit=128 -g -fverbose-asm -save-temps -masm=intel -ftime-trace -fvisibility=hidden -fno-semantic-interposition -frename-registers -pthread -lpthread -Wunused-function -ffunction-sections -fdata-sections")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -fverbose-asm -save-temps -masm=intel -fvisibility=hidden -fno-semantic-interposition -pthread -lpthread")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} -std=c2x ${CMAKE_CXX_FLAGS}")
 
 
