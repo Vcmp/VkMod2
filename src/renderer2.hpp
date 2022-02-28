@@ -70,17 +70,17 @@ inline static void memPutLong( void * a, void const * b )
 inline void renderer2::drawFrame()
 {
   // m4.loadAligned( &m5 );
-  vkAcquireNextImageKHR2( Queues::device, swapChain, -1, AvailableSemaphore, nullptr, &currentFrame );
+  vkAcquireNextImageKHR( Queues::device, swapChain, -1, AvailableSemaphore, nullptr, &currentFrame );
   __builtin_prefetch( BuffersX::data );
   __builtin_prefetch( &viewproj2x );
   updateUniformBuffer();
   info.pCommandBuffers = &commandBuffers[currentFrame];
 
-  vkQueueSubmit2( Queues::GraphicsQueue, 1, &info, nullptr );
+  vkQueueSubmit( Queues::GraphicsQueue, 1, &info, nullptr );
 
   //  info.pWaitSemaphores = &AvailableSemaphore;
 
-  vkQueuePresentKHR2( Queues::GraphicsQueue, &VkPresentInfoKHR1 );
+  vkQueuePresentKHR( Queues::GraphicsQueue, &VkPresentInfoKHR1 );
 
   currentFrame = ( currentFrame + 1 ) % Frames;
 }

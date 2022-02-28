@@ -78,30 +78,30 @@ target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 
 
 
-# find_program(GLSLC glslc HINTS $ENV{VULKAN_SDK}/Bin/)
+find_program(GLSLC glslc HINTS $ENV{VULKAN_SDK}/Bin/)
 
 ## TODO: make this recompile shader files if they are changed/do not match checksums instead of having to mnaully delete them each time
-# file(GLOB_RECURSE GLSL_SOURCE_FILES
-    # "${PROJECT_SOURCE_DIR}/shaders/*.frag"
-    # "${PROJECT_SOURCE_DIR}/shaders/*.vert"
-    # "${PROJECT_SOURCE_DIR}/shaders/*.comp"
-    # )
+file(GLOB_RECURSE GLSL_SOURCE_FILES
+    "${PROJECT_SOURCE_DIR}/shaders/*.frag"
+    "${PROJECT_SOURCE_DIR}/shaders/*.vert"
+    "${PROJECT_SOURCE_DIR}/shaders/*.comp"
+    )
 
-# ## iterate each shader
-# foreach(GLSL ${GLSL_SOURCE_FILES})
-  # message(STATUS "BUILDING SHADER")
-  # get_filename_component(FILE_NAME ${GLSL} NAME)
-  # set(SPIRV "${PROJECT_SOURCE_DIR}/bin/shaders/${FILE_NAME}.spv")
-  # message(STATUS ${GLSL})
-  # ##execute glslang command to compile that specific shader
-  # add_custom_command(
-    # OUTPUT ${SPIRV}
-    # COMMAND ${GLSLC} ${GLSL} -O -o ${SPIRV}
-    # DEPENDS "${PROJECT_SOURCE_DIR}/bin/shaders/")
-  # list(APPEND SPIRV_BINARY_FILES ${SPIRV})
-# endforeach(GLSL)
+## iterate each shader
+foreach(GLSL ${GLSL_SOURCE_FILES})
+  message(STATUS "BUILDING SHADER")
+  get_filename_component(FILE_NAME ${GLSL} NAME)
+  set(SPIRV "${PROJECT_SOURCE_DIR}/bin/shaders/${FILE_NAME}.spv")
+  message(STATUS ${GLSL})
+  ##execute glslang command to compile that specific shader
+  add_custom_command(
+    OUTPUT ${SPIRV}
+    COMMAND ${GLSLC} ${GLSL} -O -o ${SPIRV}
+    DEPENDS "${PROJECT_SOURCE_DIR}/bin/shaders/")
+  list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+endforeach(GLSL)
 
-# add_custom_target(
-    # Shaders 
-    # DEPENDS ${SPIRV_BINARY_FILES}
-    # )
+add_custom_target(
+    Shaders 
+    DEPENDS ${SPIRV_BINARY_FILES}
+    )

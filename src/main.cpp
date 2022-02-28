@@ -5,7 +5,6 @@
 #include <pthread.h>
 #include <unistd.h>
 
-
 // #define ASAN_OPTIONS = debug=true
 
 /*
@@ -437,7 +436,6 @@ inline void VkUtils2::createLogicalDevice()
   volkLoadDevice( device );
   // VolkDeviceTable vDT{};
   // volkLoadDeviceTable( &vDT, device );
-  VtTable2x( device );
 
   VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>(
     createInfo.pQueueCreateInfos[0].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::GraphicsQueue );

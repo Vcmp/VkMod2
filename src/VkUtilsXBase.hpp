@@ -42,22 +42,22 @@ inline namespace
   static constexpr const uint16_t width  = 854;
   static constexpr const uint16_t height = 480;
 
-  static constinit __int128                         aXX    = 0xF;
-  static constexpr uint8_t                          Frames = 3;
-  static constinit const bool                       checks = true;
-  static constinit inline PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR2;
-  static constinit inline PFN_vkQueueSubmit         vkQueueSubmit2;
-  static constinit inline PFN_vkQueuePresentKHR     vkQueuePresentKHR2;
-  static constinit inline PFN_vkCreateSemaphore     vkCreateSemaphore2;
+  static constinit __int128   aXX    = 0xF;
+  static constexpr uint8_t    Frames = 3;
+  static constinit const bool checks = true;
+  // static constinit inline PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR2;
+  // static constinit inline PFN_vkQueueSubmit         vkQueueSubmit2;
+  // static constinit inline PFN_vkQueuePresentKHR     vkQueuePresentKHR2;
+  // static constinit inline PFN_vkCreateSemaphore     vkCreateSemaphore2;
 
-  static inline constexpr void VtTable2x( auto aa )
-  {
-    vkAcquireNextImageKHR2 =
-      reinterpret_cast<PFN_vkAcquireNextImageKHR>( vkGetDeviceProcAddr( aa, "vkAcquireNextImageKHR" ) );
-    vkQueueSubmit2     = reinterpret_cast<PFN_vkQueueSubmit>( vkGetDeviceProcAddr( aa, "vkQueueSubmit" ) );
-    vkQueuePresentKHR2 = reinterpret_cast<PFN_vkQueuePresentKHR>( vkGetDeviceProcAddr( aa, "vkQueuePresentKHR" ) );
-    vkCreateSemaphore2 = reinterpret_cast<PFN_vkCreateSemaphore>( vkGetDeviceProcAddr( aa, "vkCreateSemaphore" ) );
-  }
+  // static inline constexpr void VtTable2x( auto aa )
+  // {
+  //   vkAcquireNextImageKHR2 =
+  //     reinterpret_cast<PFN_vkAcquireNextImageKHR>( vkGetDeviceProcAddr( aa, "vkAcquireNextImageKHR" ) );
+  //   vkQueueSubmit2     = reinterpret_cast<PFN_vkQueueSubmit>( vkGetDeviceProcAddr( aa, "vkQueueSubmit" ) );
+  //   vkQueuePresentKHR2 = reinterpret_cast<PFN_vkQueuePresentKHR>( vkGetDeviceProcAddr( aa, "vkQueuePresentKHR" ) );
+  //   vkCreateSemaphore2 = reinterpret_cast<PFN_vkCreateSemaphore>( vkGetDeviceProcAddr( aa, "vkCreateSemaphore" ) );
+  // }
 }  // namespace
 
 struct VkUtilsXBase
@@ -71,7 +71,7 @@ private:
                                                        const void *,
                                                        const VkAllocationCallbacks *,
                                                        const void * );
-  typedef PFN_vkVoidFunction ( *load )( void *, const char * );
+  // typedef PFN_vkVoidFunction ( *load )( void *, const char * );
 
 public:
   // not sure if auto or exlicitit(ish) templateis better for the return argument
@@ -292,14 +292,7 @@ public:
   // {
   //     return sizeof(aabs)/sizeof(abs2x);
   // }
-  template <typename T>
-  static inline constexpr void VtTable2( auto aa )
-  {
-    vkAcquireNextImageKHR2 =
-      reinterpret_cast<PFN_vkAcquireNextImageKHR>( vkGetDeviceProcAddr( aa, "vkAcquireNextImageKHR" ) );
-    vkQueueSubmit2     = reinterpret_cast<PFN_vkQueueSubmit>( vkGetDeviceProcAddr( aa, "vkQueueSubmit" ) );
-    vkQueuePresentKHR2 = reinterpret_cast<PFN_vkQueuePresentKHR>( vkGetDeviceProcAddr( aa, "vkQueuePresentKHR" ) );
-  }
+
   template <typename T>
   static inline constexpr void clPPPPJ( VkDevice __restrict__ aa,
                                         auto * __restrict__ pStrct,
