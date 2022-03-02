@@ -56,8 +56,7 @@ inline namespace BuffersX
 
     };
     static constexpr short idxBuf[] = {
-      0,  1,  2,  2,  3,  0,  4,  5,  6,  6,  7,  4,  8,  9,  10, 10, 11, 8,
-      12, 13, 14, 14, 15, 12, 16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20,
+      0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4, 8, 9, 10, 10, 11, 8, 12, 13, 14, 14, 15, 12, 16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20,
     };
 
     constexpr size_t sizedsf    = sizeof( vectBuf );
@@ -75,12 +74,11 @@ inline namespace BuffersX
   static uint32_t findMemoryType( VkPhysicalDevice, uint32_t, VkMemoryPropertyFlagBits );
   static void     createVkEvents();
   static void     setupBuffers();
-  static void createSetBuffer( VkMemoryPropertyFlagBits, VkBuffer &, VkBufferUsageFlagBits, size_t, VkDeviceMemory & );
+  static void     createSetBuffer( VkMemoryPropertyFlagBits, VkBuffer &, VkBufferUsageFlagBits, size_t, VkDeviceMemory & );
 
 };  // namespace BuffersX
 
-inline uint32_t
-  BuffersX::findMemoryType( VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlagBits properties )
+inline uint32_t BuffersX::findMemoryType( VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlagBits properties )
 {
   VkPhysicalDeviceMemoryProperties memProperties = {};
   vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
@@ -119,21 +117,17 @@ inline void BuffersX::copyBuffer( VkBuffer & dst, const size_t sized )
 
 inline void BuffersX::setupBuffers()
 {
-  auto x1 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
-                                                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
-  VkMemoryPropertyFlagBits p1 = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+  auto x1 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
+  auto p1 = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
   createSetBuffer( p1, vertexBuffer, x1, sizedsf, vertexBufferMemory );
   // vertexBufferMemory=createBuffer2(p1, vertexBuffer);
 
-  auto x2 =
-    static_cast<VkBufferUsageFlagBits>( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT );
-  constexpr auto p =
-    static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
+  auto           x2 = static_cast<VkBufferUsageFlagBits>( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT );
+  constexpr auto p  = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
   createSetBuffer( p, Bufferstaging, x2, sizedsf, stagingBufferMemory );
 
   // stagingBufferMemory= createBuffer2(p, Bufferstaging);
-  auto x3 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
-                                                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
+  auto x3 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
   createSetBuffer( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory );
 
   vkMapMemory( Queues::device, stagingBufferMemory, 0, sizedsf, 0, &data );
@@ -150,11 +144,8 @@ inline void BuffersX::setupBuffers()
   copyBuffer( indexBuffer, sizedsfIdx );
 }
 
-inline void BuffersX::createSetBuffer( VkMemoryPropertyFlagBits properties,
-                                       VkBuffer &               currentBuffer,
-                                       VkBufferUsageFlagBits    usage,
-                                       size_t                   sized,
-                                       VkDeviceMemory &         vertexBufferMemory )
+inline void BuffersX::createSetBuffer(
+  VkMemoryPropertyFlagBits properties, VkBuffer & currentBuffer, VkBufferUsageFlagBits usage, size_t sized, VkDeviceMemory & vertexBufferMemory )
 {
   const VkBufferCreateInfo allocateInfo = {
     .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,

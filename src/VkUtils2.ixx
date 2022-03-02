@@ -6,7 +6,9 @@
 #include "Texture.hpp"
 #include "UniformBufferObject.hpp"
 
-#include <cassert>
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+
 
 // #include <stdint.h>
 
@@ -28,11 +30,10 @@ struct VkUtils2
 
   static const VkSurfaceFormatKHR querySwapChainSupport( VkPhysicalDevice );
 
-  typedef VkResult( VKAPI_PTR * PFN_vkCreateDebugUtilsMessengerEXT2 )(
-    VkInstance                                 instance,
-    const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo,
-    const VkAllocationCallbacks *              pAllocator,
-    const VkDebugUtilsMessengerEXT *           pMessenger );
+  typedef VkResult( VKAPI_PTR * PFN_vkCreateDebugUtilsMessengerEXT2 )( VkInstance                                 instance,
+                                                                       const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo,
+                                                                       const VkAllocationCallbacks *              pAllocator,
+                                                                       const VkDebugUtilsMessengerEXT *           pMessenger );
 
   //    private static final long[] pDebugMessenger = new long[1];
   //    X(),

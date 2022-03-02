@@ -11,6 +11,7 @@
 // #undef VK_AMD_buffer_marker
 // #undef VK_NV_ray_tracing
 // #undef VK_KHR_device_group
+
 #undef GLFW_INCLUDE_VULKAN
 // #ifdef __cplusplus
 // #define VULKAN_HPP_CPLUSPLUS 201803L
@@ -27,8 +28,6 @@
 #  define _MSVC_LANG 201803L
 #endif
 // #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 
 // #include <vcruntime.h>
 
@@ -39,12 +38,12 @@
 
 inline namespace
 {
-  static constexpr const uint16_t width  = 854;
-  static constexpr const uint16_t height = 480;
+  static inline constexpr const uint16_t width  = 854;
+  static inline constexpr const uint16_t height = 480;
 
-  static constinit __int128   aXX    = 0xF;
-  static constexpr uint8_t    Frames = 3;
-  static constinit const bool checks = true;
+  static inline constexpr __int128   aXX    = 0xF;
+  static inline constexpr uint8_t    Frames = 3;
+  static inline constexpr const bool checks = true;
   // static constinit inline PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR2;
   // static constinit inline PFN_vkQueueSubmit         vkQueueSubmit2;
   // static constinit inline PFN_vkQueuePresentKHR     vkQueuePresentKHR2;
@@ -63,14 +62,9 @@ inline namespace
 struct VkUtilsXBase
 {
 private:
-  typedef VkResult( __vectorcall * callPPPPI )(
-    const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
-  const typedef VkResult( __vectorcall * callPPPPI2 )(
-    const VkDevice, const void *, const VkAllocationCallbacks *, const void *, void * pHndl );
-  const typedef VkResult( __vectorcall * callPPPPI3 )( const VkDevice,
-                                                       const void *,
-                                                       const VkAllocationCallbacks *,
-                                                       const void * );
+  typedef VkResult( __vectorcall * callPPPPI )( const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
+  const typedef VkResult( __vectorcall * callPPPPI2 )( const VkDevice, const void *, const VkAllocationCallbacks *, const void *, void * pHndl );
+  const typedef VkResult( __vectorcall * callPPPPI3 )( const VkDevice, const void *, const VkAllocationCallbacks *, const void * );
   // typedef PFN_vkVoidFunction ( *load )( void *, const char * );
 
 public:
@@ -88,10 +82,9 @@ public:
   // an issue thankfully
   static constexpr bool debug = false;
 
-  static constexpr bool ENABLE_VALIDATION_LAYERS =
-    debug;  // todo: Posible Bug: ValidationLayersBreak Shader Compilation due to
-            // (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files
-            // as having/Containing Invalid Magic Numbers
+  static constexpr bool ENABLE_VALIDATION_LAYERS = debug;  // todo: Posible Bug: ValidationLayersBreak Shader Compilation due to
+                                                           // (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files
+                                                           // as having/Containing Invalid Magic Numbers
 
   static constexpr char const * validationLayers = "VK_LAYER_KHRONOS_validation";
   static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
@@ -184,10 +177,7 @@ public:
     T( vkGetDeviceProcAddr( aa, a ) )( pStrct );
   }
   template <typename T>
-  static inline constexpr void clPII( VkDevice __restrict__ & aa,
-                                      auto * __restrict__ pStrct,
-                                      const char * __restrict__ a,
-                                      auto * __restrict__ object )
+  static inline constexpr void clPII( VkDevice __restrict__ & aa, auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
   {
     // const VkDevice aa = volkGetLoadedDevice();
     // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
@@ -196,8 +186,7 @@ public:
     T( vkGetDeviceProcAddr( aa, a ) )( pStrct, 1, object, nullptr );
   }
   template <typename T>
-  static inline constexpr void
-    clPI( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
+  static inline constexpr void clPI( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
   {
     const VkDevice aa = volkGetLoadedDevice();
     // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
@@ -206,8 +195,7 @@ public:
     T( vkGetDeviceProcAddr( aa, a ) )( pStrct, object );
   }
   template <typename T>
-  static inline constexpr void
-    clPPJI3( uint32_t y, const char * __restrict__ a, uint32_t x, auto * __restrict__ object )
+  static inline constexpr void clPPJI3( uint32_t y, const char * __restrict__ a, uint32_t x, auto * __restrict__ object )
   {
     const VkDevice aa = volkGetLoadedDevice();
     // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
@@ -216,8 +204,7 @@ public:
     T( vkGetDeviceProcAddr( aa, a ) )( aa, y, x, object );
   }
   template <typename T>
-  static inline constexpr void
-    clPPI3( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
+  static inline constexpr void clPPI3( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
   {
     const VkDevice aa = volkGetLoadedDevice();
     // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
@@ -226,8 +213,7 @@ public:
     T( vkGetDeviceProcAddr( aa, a ) )( aa, pStrct, object );
   }
   template <typename T>
-  static inline constexpr void
-    clPPPI3( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
+  static inline constexpr void clPPPI3( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
   {
     const VkDevice aa = volkGetLoadedDevice();
     // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
@@ -294,12 +280,8 @@ public:
   // }
 
   template <typename T>
-  static inline constexpr void clPPPPJ( VkDevice __restrict__ aa,
-                                        auto * __restrict__ pStrct,
-                                        uint32_t z,
-                                        auto * __restrict__ zy,
-                                        const char * a,
-                                        uint32_t * __restrict__ object )
+  static inline constexpr void
+    clPPPPJ( VkDevice __restrict__ aa, auto * __restrict__ pStrct, uint32_t z, auto * __restrict__ zy, const char * a, uint32_t * __restrict__ object )
   {
     // VkDevice aa = volkGetLoadedDevice();
     // vkGetDeviceProcAddr()

@@ -24,8 +24,7 @@ struct /* __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__(
   static void            drawFrame() __attribute__( ( hot, flatten, preserve_most ) );
 
 private:
-  constexpr static void memcpy2( __int256 *, __int256 const *, size_t )
-    __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
+  constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   ;
 
   static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
@@ -52,8 +51,7 @@ private:
 
 inline constexpr void renderer2::setupRenderDraw()
 {
-  constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                                                      .pNext = nullptr };
+  constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr };
 
   ( VkUtilsXBase::clPPPI3<PFN_vkCreateSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore ) );
 }
@@ -85,8 +83,7 @@ inline void renderer2::drawFrame()
   currentFrame = ( currentFrame + 1 ) % Frames;
 }
 
-constexpr inline void
-  renderer2::memcpy2( __int256 * __restrict__ _Dst, __int256 const * __restrict__ _Src, size_t _MaxCount )
+constexpr inline void renderer2::memcpy2( __int256 * __restrict__ _Dst, __int256 const * __restrict__ _Src, size_t _MaxCount )
 {
   *_Dst = *_Src;
 }

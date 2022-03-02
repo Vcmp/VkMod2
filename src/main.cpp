@@ -123,8 +123,8 @@ long permuteMat( long, long );
 
 inline void VkUtils2::setupWindow()
 {
-  glfwInit();
   VkUtilsXBase::checkCall( volkInitialize() );
+  glfwInit();
   glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
   glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
   // glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_NO_ROBUSTNESS);
@@ -133,11 +133,11 @@ inline void VkUtils2::setupWindow()
 
   window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
 
-  assert( !window );
+  assert( !std::is_constant_evaluated( window ) );
   // exit( 1 );
 
   glfwSetWindowShouldClose( ( window ), false );
-  glfwMakeContextCurrent( ( window ) );
+  // glfwMakeContextCurrent( ( window ) );
 }
 
 inline void VkUtils2::createInstance()
@@ -152,9 +152,7 @@ inline void VkUtils2::createInstance()
                                                                    VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
                                                                    VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT };
   constexpr VkValidationFeaturesEXT             extValidationFeatures = {
-                .sType                         = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
-                .enabledValidationFeatureCount = 3,
-                .pEnabledValidationFeatures    = valdFeatures,
+                .sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT, .enabledValidationFeatureCount = 3, .pEnabledValidationFeatures = valdFeatures,
     // extValidationFeatures.pEnabledValidationFeatures=&a;
   };
 
@@ -203,8 +201,7 @@ inline void VkUtils2::createSurface()
   createSurfaceInfo.hinstance                   = GetModuleHandle( nullptr );
   createSurfaceInfo.pNext                       = VK_NULL_HANDLE;
 
-  VkUtilsXBase::checkCall( vkCreateWin32SurfaceKHR(
-    vkInstance, &createSurfaceInfo, nullptr, const_cast<VkSurfaceKHR *>( &Queues::surface ) ) );
+  VkUtilsXBase::checkCall( vkCreateWin32SurfaceKHR( vkInstance, &createSurfaceInfo, nullptr, const_cast<VkSurfaceKHR *>( &Queues::surface ) ) );
 }
 
 inline bool VkUtils2::checkValidationLayerSupport()
@@ -230,11 +227,10 @@ inline const std::vector<const char *> VkUtils2::getRequiredExtensions()
   return extensions;
 }
 
-VKAPI_ATTR inline VkBool32 VKAPI_CALL
-  VkUtils2::debugCallback( VkDebugUtilsMessageSeverityFlagBitsEXT       messageSeverity,
-                           VkDebugUtilsMessageTypeFlagsEXT              messageType,
-                           const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData,
-                           void *                                       pUserData )
+VKAPI_ATTR inline VkBool32 VKAPI_CALL VkUtils2::debugCallback( VkDebugUtilsMessageSeverityFlagBitsEXT       messageSeverity,
+                                                               VkDebugUtilsMessageTypeFlagsEXT              messageType,
+                                                               const VkDebugUtilsMessengerCallbackDataEXT * pCallbackData,
+                                                               void *                                       pUserData )
 {
   std::cerr << "validation layer: " << pCallbackData->pMessage << "\n\n";
 
@@ -250,9 +246,8 @@ inline void VkUtils2::setupDebugMessenger()
 
   constexpr VkDebugUtilsMessengerCreateInfoEXT createInfo{
     .sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-    .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                       VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
-                       VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT,
+    .messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                       VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT,
     .messageType     = VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
     .pfnUserCallback = VkUtils2::debugCallback,
     .pUserData       = VK_NULL_HANDLE,
@@ -261,8 +256,7 @@ inline void VkUtils2::setupDebugMessenger()
   // debugMessenger = pDebugMessenger[0];
 }
 
-inline VkResult VkUtils2::createDebugUtilsMessengerEXT( const VkInstance                           instance,
-                                                        const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo )
+inline VkResult VkUtils2::createDebugUtilsMessengerEXT( const VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo )
 {
   VkDebugUtilsMessengerEXT debugUtils = {};
   // auto func = VkUtilsXBase::getAddrFuncPtr<PFN_vkCreateDebugUtilsMessengerEXT2>( "vkCreateDebugUtilsMessengerEXT" );
@@ -340,7 +334,6 @@ inline void VkUtils2::createLogicalDevice()
 {
   std::cout << ( "Creating Logical Device" ) << "\n";
 
-  VkDevice device;
   uint32_t pQueueFamilyPropertyCount;
   vkGetPhysicalDeviceQueueFamilyProperties( Queues::physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE );
 
@@ -357,6 +350,7 @@ inline void VkUtils2::createLogicalDevice()
       Queues::graphicsFamily = i;
       continue;
     }
+    // Check that Video Tranfer Queues are not Accidentally selected if the Vulkan beta Drivers from Nvidia are used
     VkBool32 presentSupport = false;
     vkGetPhysicalDeviceSurfaceSupportKHR( Queues::physicalDevice, i, Queues::surface, &presentSupport );
     if ( uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !presentSupport )
@@ -432,18 +426,14 @@ inline void VkUtils2::createLogicalDevice()
   {
     createInfo.ppEnabledLayerNames = &VkUtilsXBase::validationLayers;
   }
-  VkUtilsXBase::checkCall( vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &device ) );
-  volkLoadDevice( device );
+  VkUtilsXBase::checkCall( vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &Queues::device ) );
+  volkLoadDevice( Queues::device );
   // VolkDeviceTable vDT{};
   // volkLoadDeviceTable( &vDT, device );
 
-  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>(
-    createInfo.pQueueCreateInfos[0].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::GraphicsQueue );
-  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>(
-    createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::TransferQueue[0] );
-  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>(
-    createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 1, &Queues::TransferQueue[1] );
-  Queues::device = volkGetLoadedDevice();
+  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[0].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::GraphicsQueue );
+  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::TransferQueue[0] );
+  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 1, &Queues::TransferQueue[1] );
 }
 
 void VkUtils2::cleanup()
