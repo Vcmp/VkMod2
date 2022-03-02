@@ -1,40 +1,13 @@
 #pragma once
 #define GLFW_EXPOSE_NATIVE_WIN32
-// #define VK_USE_PLATFORM_WIN32_KHR
 #define VK_USE_64_BIT_PTR_DEFINES 1
 #define VULKAN_HPP_SUPPORT_SPAN
-// #undef VK_KHR_acceleration_structure
-// #undef VK_INTEL_performance_query
-// #undef VK_EXT_extended_dynamic_state
-// #undef VK_VERSION_1_3
-// #undef VK_GOOGLE_display_timing
-// #undef VK_AMD_buffer_marker
-// #undef VK_NV_ray_tracing
-// #undef VK_KHR_device_group
 
 #undef GLFW_INCLUDE_VULKAN
-// #ifdef __cplusplus
-// #define VULKAN_HPP_CPLUSPLUS 201803L
-// #endif
-
-// #define VOLK_IMPLEMENTATION
-// #define VK_NO_PROTOTYPES
 #include "volk.h"
-// #define VK_USE_64_BIT_PTR_DEFINES 1
-// #define VK_ENABLE_BETA_EXTENSIONS
-// #include <stdint.h>
-
-#ifdef _MSVC_LANG
-#  define _MSVC_LANG 201803L
-#endif
-// #define GLFW_INCLUDE_NONE
-
-// #include <vcruntime.h>
 
 #include <iostream>
 #include <vector>
-
-// VkPhysicalDevicePortabilitySubsetFeaturesKHR ptr = {};
 
 inline namespace
 {
@@ -44,19 +17,6 @@ inline namespace
   static inline constexpr __int128   aXX    = 0xF;
   static inline constexpr uint8_t    Frames = 3;
   static inline constexpr const bool checks = true;
-  // static constinit inline PFN_vkAcquireNextImageKHR vkAcquireNextImageKHR2;
-  // static constinit inline PFN_vkQueueSubmit         vkQueueSubmit2;
-  // static constinit inline PFN_vkQueuePresentKHR     vkQueuePresentKHR2;
-  // static constinit inline PFN_vkCreateSemaphore     vkCreateSemaphore2;
-
-  // static inline constexpr void VtTable2x( auto aa )
-  // {
-  //   vkAcquireNextImageKHR2 =
-  //     reinterpret_cast<PFN_vkAcquireNextImageKHR>( vkGetDeviceProcAddr( aa, "vkAcquireNextImageKHR" ) );
-  //   vkQueueSubmit2     = reinterpret_cast<PFN_vkQueueSubmit>( vkGetDeviceProcAddr( aa, "vkQueueSubmit" ) );
-  //   vkQueuePresentKHR2 = reinterpret_cast<PFN_vkQueuePresentKHR>( vkGetDeviceProcAddr( aa, "vkQueuePresentKHR" ) );
-  //   vkCreateSemaphore2 = reinterpret_cast<PFN_vkCreateSemaphore>( vkGetDeviceProcAddr( aa, "vkCreateSemaphore" ) );
-  // }
 }  // namespace
 
 struct VkUtilsXBase
@@ -82,9 +42,7 @@ public:
   // an issue thankfully
   static constexpr bool debug = false;
 
-  static constexpr bool ENABLE_VALIDATION_LAYERS = debug;  // todo: Posible Bug: ValidationLayersBreak Shader Compilation due to
-                                                           // (Presumably) incorerctly marking the cimpiled Spir-V Shaders/Files
-                                                           // as having/Containing Invalid Magic Numbers
+  static constexpr bool ENABLE_VALIDATION_LAYERS = debug;
 
   static constexpr char const * validationLayers = "VK_LAYER_KHRONOS_validation";
   static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
@@ -131,24 +89,8 @@ public:
     }
   }
 
-  /*todo: Adiitonal posible Bug: if a typeDef Cast/PointerFunction/Aslias e.g
-   * .Misc is used to allow access to .call vkPipelineLayoutCreateInfo, the
-   * Validtaion layers incorrertcly warn that VkGraphicsPipelineCreateInfo struct
-   * is mising the cprrect sType the only way to correct this is to
-   * manuall/Dierctly exempt the "pipelineCache" and "createInfoCount"
-   * Arguments/Parametsr of the call, Which causes Misiing createInfoCount  and
-   * VkPipelineCache  issues but allows the pipeline to be created
-   * properly/correctly this is possibly a Driver Bug/ NV/nSight layer Bug/issue
-   * (as a very old beta driver is being utilised [451.74]) but is unconfirmed
-   * currently
-   */
   typedef VkResult( __vectorcall * callPPPPJI )(
     VkDevice, const void *, uint32_t *, const void *, VkAllocationCallbacks *, const void *, PFN_vkVoidFunction pHndl );
-  // typedef const VkResult (__vectorcall *callPPI) (VkDevice,
-  //                                 //  VkPipelineCache*,
-  //                                  const void *,uint32_t*,
-
-  //                                  const VkAllocationCallbacks *);
   template <typename T>
   inline static constexpr auto getDevProd( const char * a )
   {
@@ -171,71 +113,46 @@ public:
   static inline constexpr void clP( auto * __restrict__ pStrct, const char * __restrict__ a )
   {
     const VkDevice aa = volkGetLoadedDevice();
-    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
-    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
-    // doPointerAlloc( pStrct, object, Hndl );
     T( vkGetDeviceProcAddr( aa, a ) )( pStrct );
   }
   template <typename T>
   static inline constexpr void clPII( VkDevice __restrict__ & aa, auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
   {
-    // const VkDevice aa = volkGetLoadedDevice();
-    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
-    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
-    // doPointerAlloc( pStrct, object, Hndl );
     T( vkGetDeviceProcAddr( aa, a ) )( pStrct, 1, object, nullptr );
   }
   template <typename T>
   static inline constexpr void clPI( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
   {
     const VkDevice aa = volkGetLoadedDevice();
-    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
-    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
-    // doPointerAlloc( pStrct, object, Hndl );
     T( vkGetDeviceProcAddr( aa, a ) )( pStrct, object );
   }
   template <typename T>
   static inline constexpr void clPPJI3( uint32_t y, const char * __restrict__ a, uint32_t x, auto * __restrict__ object )
   {
     const VkDevice aa = volkGetLoadedDevice();
-    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
-    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
-    // doPointerAlloc( pStrct, object, Hndl );
     T( vkGetDeviceProcAddr( aa, a ) )( aa, y, x, object );
   }
   template <typename T>
   static inline constexpr void clPPI3( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
   {
     const VkDevice aa = volkGetLoadedDevice();
-    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
-    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
-    // doPointerAlloc( pStrct, object, Hndl );
     T( vkGetDeviceProcAddr( aa, a ) )( aa, pStrct, object );
   }
   template <typename T>
   static inline constexpr void clPPPI3( auto * __restrict__ pStrct, const char * __restrict__ a, auto * __restrict__ object )
   {
     const VkDevice aa = volkGetLoadedDevice();
-    // auto           Hndl = reinterpret_cast<T>( vkGetDeviceProcAddr( aa, a ) );
-    // auto Hndl = reinterpret_cast<T /* uint64_t */>( vkGetDeviceProcAddr( aa, a ) );
-    // doPointerAlloc( pStrct, object, Hndl );
     T( vkGetDeviceProcAddr( aa, a ) )( aa, pStrct, nullptr, object );
   }
 
   template <typename T>
   static inline constexpr T clPPPI2( const void * pStrct, const char * a )
   {
-    // vkGetDeviceProcAddr()
-    //  auto xx= ;
     T Hndl = getDevProd<T>( a );
-    // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
-    // a)); std::cout << &x << "\n"; std::cout << &pStrct << &object<<&a<<"\n";
     if constexpr ( checks )
     {
       std::cout << a << "-->" << Hndl << "\n";
     }
-    // std::cout << object<<"\n";
-    // const VkResult VkR =x(device, pStrct, nullptr, object);
     T object = 0;
     ( doPointerAlloc2( pStrct, &object, Hndl ) );
     if constexpr ( checks )
@@ -247,22 +164,14 @@ public:
       std::cout << &object << "\n";
     }
     return ( object );
-    // return VkR;
-    //  callPPPPI(device, pStrct, nullptr, a)
   }
   static inline void clPPPI( const void * pStrct, const char * a, const void * object )
   {
-    // vkGetDeviceProcAddr()
-    //  auto xx= ;
     const auto Hndl = reinterpret_cast<uint64_t>( vkGetDeviceProcAddr( volkGetLoadedDevice(), a ) );
-    // const callPPPPI x =reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
-    // a)); std::cout << &x << "\n"; std::cout << &pStrct << &object<<&a<<"\n";
     if constexpr ( checks )
     {
       std::cout << a << "-->" << Hndl << "\n";
     }
-    // std::cout << object<<"\n";
-    // const VkResult VkR =x(device, pStrct, nullptr, object);
     checkCall( doPointerAlloc( pStrct, object, Hndl ) );
     if constexpr ( checks )
     {
@@ -271,58 +180,19 @@ public:
         throw std::runtime_error( "bad Alloctaion!: Null handle!" );
       }
     }
-
-    //  callPPPPI(device, pStrct, nullptr, a)
   }
-  // static inline int doSized(const void* aabs, const void* abs2x)
-  // {
-  //     return sizeof(aabs)/sizeof(abs2x);
-  // }
 
   template <typename T>
   static inline constexpr void
     clPPPPJ( VkDevice __restrict__ aa, auto * __restrict__ pStrct, uint32_t z, auto * __restrict__ zy, const char * a, uint32_t * __restrict__ object )
   {
-    // VkDevice aa = volkGetLoadedDevice();
-    // vkGetDeviceProcAddr()
-    //  auto xx=PFN_vkVoidFunction(swapChain);
-
-    // const T Hndl = (T)vkGetDeviceProcAddr( volkGetLoadedDevice(), a );
-    // const callPPPPI ss=reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
-    // a));
-    //  std::cout << &x << "\n";
-    //  std::cout << &pStrct << &object<<&a<<"\n";
-    //  std::cout << a<<"\n";
-    //  std::cout << object<<"\n";
-    //  VkPipelineCache axx =nullptr;
-    //  const VkResult VkR =x(device, pStrct, nullptr, object);
-    // ss(device, pStrct, nullptr, object);
     T( vkGetDeviceProcAddr( aa, a ) )( aa, pStrct, z, zy, nullptr, object );
-
-    // return VkR;
-    //  callPPPPI(device, pStrct, nullptr, a)
   }
   template <typename T>
   static inline constexpr void clPPPJI( auto * pStrct, int ax, const char * a, auto * object )
   {
     VkDevice aa = volkGetLoadedDevice();
-    // vkGetDeviceProcAddr()
-    //  auto xx=PFN_vkVoidFunction(swapChain);
-
-    // const T Hndl = (T)vkGetDeviceProcAddr( volkGetLoadedDevice(), a );
-    // const callPPPPI ss=reinterpret_cast<callPPPPI>(vkGetDeviceProcAddr(device,
-    // a));
-    //  std::cout << &x << "\n";
-    //  std::cout << &pStrct << &object<<&a<<"\n";
-    //  std::cout << a<<"\n";
-    //  std::cout << object<<"\n";
-    //  VkPipelineCache axx =nullptr;
-    //  const VkResult VkR =x(device, pStrct, nullptr, object);
-    // ss(device, pStrct, nullptr, object);
     T( vkGetDeviceProcAddr( aa, a ) )( aa, nullptr, 1, pStrct, nullptr, object );
-
-    // return VkR;
-    //  callPPPPI(device, pStrct, nullptr, a)
   }
 };  // namespace
 

@@ -26,24 +26,6 @@ inline namespace SwapChainSupportDetails
     const uint32_t a = ( max < value ? max : value );
     return ( min > a ? min : a );
   }
-  // inline VkExtent2D chooseSwapExtent()
-  // // todo: May not Detect Acutal Extent Correctly"
-  // {
-  //   if ( capabilities.currentExtent.width != 0xFFFFFFFF )
-  //   {
-  //     return capabilities.currentExtent;
-  //   }
-
-  //   VkExtent2D actualExtent = { width, height };
-
-  //   VkExtent2D minExtent = capabilities.minImageExtent;
-  //   VkExtent2D maxExtent = capabilities.maxImageExtent;
-
-  //   actualExtent.width  = clamp( minExtent.width, maxExtent.width, actualExtent.width );
-  //   actualExtent.height = clamp( minExtent.height, maxExtent.height, actualExtent.height );
-
-  //   return actualExtent;
-  // }
 
   inline void setupImageFormats()
   {
@@ -67,8 +49,7 @@ inline namespace SwapChainSupportDetails
     VkSurfaceFormatKHR surfaceFormat;
     for ( const VkSurfaceFormatKHR & surfaceFormat1 : surfaceFormats )
     {
-      if ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_SRGB &&
-           surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR )
+      if ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR )
       {
         surfaceFormat = surfaceFormat1;
         break;
@@ -93,8 +74,7 @@ inline namespace SwapChainSupportDetails
     // swapChainExtent = SwapChainSupportDetails::chooseSwapExtent();
     imageCount = ( SwapChainSupportDetails::capabilities.minImageCount + 1 );
 
-    if ( SwapChainSupportDetails::capabilities.maxImageCount > 0 &&
-         imageCount > SwapChainSupportDetails::capabilities.maxImageCount )
+    if ( SwapChainSupportDetails::capabilities.maxImageCount > 0 && imageCount > SwapChainSupportDetails::capabilities.maxImageCount )
     {
       imageCount = SwapChainSupportDetails::capabilities.maxImageCount;
     }
@@ -142,18 +122,7 @@ inline namespace SwapChainSupportDetails
     };
     std::cout << Queues::device << "\n";
 
-    // vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapChain);
-    // auto xx=PFN_vkVoidFunction(swapChain);
     VkUtilsXBase::clPPPI3<PFN_vkCreateSwapchainKHR>( &createInfo, "vkCreateSwapchainKHR", &swapChain );
-
-    // checkCall(vkGetSwapchainImagesKHR(device, swapChain, &imageCount,
-    // nullptr));
-
-    // if(imageCount!=Frames)
-    // {
-    //     throw std::runtime_error("Swapchains not equal to allocated length: Bad
-    //     SwapChain");
-    // }
     VkUtilsXBase::checkCall( vkGetSwapchainImagesKHR( Queues::device, swapChain, &imageCount, swapchainImages ) );
   }
 
@@ -182,10 +151,7 @@ inline namespace SwapChainSupportDetails
 
       createInfo.image = swapchainImage;
 
-      VkUtilsXBase::clPPPI3<PFN_vkCreateImageView>(
-        &createInfo,
-        "vkCreateImageView",
-        &SwapChainSupportDetails::swapChainImageViews[i++] );  // BUGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG!
+      VkUtilsXBase::clPPPI3<PFN_vkCreateImageView>( &createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews[i++] );
     }
   }
 
@@ -198,14 +164,13 @@ inline namespace SwapChainSupportDetails
     framebufferCreateInfo.height                  = swapChainExtent.height;
     framebufferCreateInfo.layers                  = 1;
 
-    framebufferCreateInfo.attachmentCount = 1;  //(framebufferCreateInfo.address(), (attachments).remaining());
-                                                //    framebufferCreateInfo.pAttachments= swapChainImageViews;
+    framebufferCreateInfo.attachmentCount = 1;
+
     for ( size_t i = 0; i < Frames; i++ )
     {
       framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 
-      VkUtilsXBase::clPPPI3<PFN_vkCreateFramebuffer>(
-        &framebufferCreateInfo, "vkCreateFramebuffer", &swapChainFramebuffers[i] );
+      VkUtilsXBase::clPPPI3<PFN_vkCreateFramebuffer>( &framebufferCreateInfo, "vkCreateFramebuffer", &swapChainFramebuffers[i] );
     }
   }
 

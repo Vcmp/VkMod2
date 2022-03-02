@@ -26,9 +26,7 @@ public:
 
 VkFormat findDepthFormat()
 {
-  constexpr VkFormat formatCandidates[3] = { VK_FORMAT_D32_SFLOAT,
-                                             VK_FORMAT_D32_SFLOAT_S8_UINT,
-                                             VK_FORMAT_D24_UNORM_S8_UINT };
+  constexpr VkFormat formatCandidates[3] = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
   VkFormatProperties props;
 
   for ( const VkFormat & format : formatCandidates )
@@ -36,9 +34,7 @@ VkFormat findDepthFormat()
     vkGetPhysicalDeviceFormatProperties( Queues::physicalDevice, format, &props );
 
     const uint32_t i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    if (
-      i2 ==
-      VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT /* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/ )
+    if ( i2 == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT /* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/ )
     {
       return format;
     }
@@ -59,8 +55,7 @@ inline static void createRenderPasses()
     .initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED,
     .finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
   };
-  static constexpr VkAttachmentReference colorAttachmentRef{ .attachment = 0,
-                                                             .layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+  static constexpr VkAttachmentReference colorAttachmentRef{ .attachment = 0, .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
   static constexpr VkSubpassDescription  subpass{ .pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS,
                                                   .colorAttachmentCount = 1,
                                                   .pColorAttachments    = &colorAttachmentRef };
@@ -76,19 +71,17 @@ inline static void createRenderPasses()
     // .pDependencies=&dependency
   };
 
-  VkUtilsXBase::clPPPI3<PFN_vkCreateRenderPass>(
-    &vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass );
+  VkUtilsXBase::clPPPI3<PFN_vkCreateRenderPass>( &vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass );
 }
 
 inline void PipelineX::createGraphicsPipelineLayout()
 {
   // Thankfully Dont; need to worry about compiling the Shader Files AnyMore due
-  // to
+  // to teh ability to premptively use the SPRI-V Compielr (e.g.GLSLC) prior to compile time...
   std::cout << ( "Setting up PipeLine" ) << "\n";
 
   const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile( "shaders/21_shader_ubo.vert.spv" );
   const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile( "shaders/21_shader_ubo.frag.spv" );
-  // constexpr char entryPoint[]={"main"};
 
   const VkPipelineShaderStageCreateInfo vertexStage = {
     .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
@@ -98,10 +91,9 @@ inline void PipelineX::createGraphicsPipelineLayout()
 
   };
 
-  const VkPipelineShaderStageCreateInfo fragStage = { .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                                                      .stage  = VK_SHADER_STAGE_FRAGMENT_BIT,
-                                                      .module = fragShaderModule,
-                                                      .pName  = "main" };
+  const VkPipelineShaderStageCreateInfo fragStage = {
+    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .stage = VK_SHADER_STAGE_FRAGMENT_BIT, .module = fragShaderModule, .pName = "main"
+  };
 
   const VkPipelineShaderStageCreateInfo shaderStages[2] = { fragStage, vertexStage };
 
@@ -110,10 +102,6 @@ inline void PipelineX::createGraphicsPipelineLayout()
   static constexpr VkVertexInputAttributeDescription attributeDescriptions[]{
     { .location = 0, .binding = 0, VK_FORMAT_R32G32B32_SFLOAT, OFFSET_POS },
     { .location = 1, .binding = 0, VK_FORMAT_R32G32B32_SFLOAT, OFFSETOF_COLOR },
-    /* {0,
-    2,
-    VK_FORMAT_R32G32_SFLOAT,
-    OFFSETOF_TEXTCOORDS} */
 
   };
 
@@ -125,30 +113,16 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .pVertexAttributeDescriptions    = attributeDescriptions
   };
 
-  static constexpr VkPipelineInputAssemblyStateCreateInfo inputAssembly = {
-    .sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-    .topology               = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-    .primitiveRestartEnable = VK_FALSE
-  };
+  static constexpr VkPipelineInputAssemblyStateCreateInfo inputAssembly = { .sType    = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+                                                                            .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                                                                            .primitiveRestartEnable = VK_FALSE };
 
-  static constexpr VkViewport vkViewport{
-    .x = 0.0F, .y = 0.0F, .width = width, .height = height, .minDepth = UNormFlt, .maxDepth = 1.0F
-  };
+  static constexpr VkViewport vkViewport{ .x = 0.0F, .y = 0.0F, .width = width, .height = height, .minDepth = UNormFlt, .maxDepth = 1.0F };
 
-  static constexpr VkRect2D scissor{ //                    .offset(vkOffset2D ->vkViewport.y()) //todo: not
-                                     //                    sure if correct Offset
-                                     .offset = { 0, 0 },
-                                     .extent{ width, height }
-  };
+  static constexpr VkRect2D scissor{ .offset = { 0, 0 }, .extent{ width, height } };
 
   constexpr VkPipelineViewportStateCreateInfo vkViewPortState = {
-    .sType         = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-    .viewportCount = 1,
-    .pViewports    = &vkViewport,
-    //                    .pScissors(vkrect2DBuffer);
-    .scissorCount = 1,
-    .pScissors    = &scissor
-    // vkViewPortState.pNext=VK_NULL_HANDLE;
+    .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO, .viewportCount = 1, .pViewports = &vkViewport, .scissorCount = 1, .pScissors = &scissor
   };
 
   constexpr VkPipelineRasterizationStateCreateInfo VkPipeLineRasterization = {
@@ -160,24 +134,21 @@ inline void PipelineX::createGraphicsPipelineLayout()
                                                        // Make sure the culling direction is correct
                                                        // as it applies even to 2DVecs/Fixed
                                                        // Function Runtime/Evaluated Shaders
-                                                       // with no transforms and withixed
+                                                       // with no transforms and with fixed
                                                        // Const/Pre-Determined Runtime
                                                        // Variables
     .frontFace       = VK_FRONT_FACE_COUNTER_CLOCKWISE,
     .depthBiasEnable = VK_FALSE,
     .lineWidth       = 1.0F,
-    // VkPipeLineRasterization.pNext=VK_NULL_HANDLE;
   };
 
-  constexpr VkPipelineMultisampleStateCreateInfo multisampling = {
-    .sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-    .rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
-    .sampleShadingEnable   = VK_FALSE,
-    .minSampleShading      = 1.0F,
-    .pSampleMask           = VK_NULL_HANDLE,
-    .alphaToCoverageEnable = VK_FALSE,
-    .alphaToOneEnable      = VK_FALSE
-  };
+  constexpr VkPipelineMultisampleStateCreateInfo multisampling = { .sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+                                                                   .rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
+                                                                   .sampleShadingEnable   = VK_FALSE,
+                                                                   .minSampleShading      = 1.0F,
+                                                                   .pSampleMask           = VK_NULL_HANDLE,
+                                                                   .alphaToCoverageEnable = VK_FALSE,
+                                                                   .alphaToOneEnable      = VK_FALSE };
 
   constexpr VkPipelineDepthStencilStateCreateInfo depthStencil = {
     .sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
@@ -185,17 +156,13 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .depthWriteEnable      = VK_FALSE,
     .depthCompareOp        = VK_COMPARE_OP_LESS,
     .depthBoundsTestEnable = VK_FALSE,
-    //                    .minDepthBounds(0) //Optional
-    //                    .maxDepthBounds(1) //Optional
-    .stencilTestEnable = VK_FALSE,
+    .stencilTestEnable     = VK_FALSE,
   };
   static constexpr VkPipelineColorBlendAttachmentState colorBlendAttachment = {
-    .blendEnable = VK_FALSE,
-    .colorWriteMask =
-      VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
+    .blendEnable    = VK_FALSE,
+    .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
 
   };
-  // float blendConstants[]={0.0f, 0.0f, 0.0f, 0.0f};
   constexpr VkPipelineColorBlendStateCreateInfo colorBlending = {
     .sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
     .logicOpEnable   = VK_FALSE,
@@ -211,38 +178,29 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .size       = sizeof( mat4x ),
   };
 
-  constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = { .sType =
-                                                                        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-                                                                      .setLayoutCount = 1,
-                                                                      .pSetLayouts =
-                                                                        &UniformBufferObject::descriptorSetLayout,
+  constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = { .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                                                                      .setLayoutCount         = 1,
+                                                                      .pSetLayouts            = &UniformBufferObject::descriptorSetLayout,
                                                                       .pushConstantRangeCount = 1,
                                                                       .pPushConstantRanges    = &vkPushConstantRange };
 
   std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
   VkUtilsXBase::clPPPI3<PFN_vkCreatePipelineLayout>( &vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &vkLayout );
 
-  const VkGraphicsPipelineCreateInfo pipelineInfo = {
-    .sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-    .stageCount = 2,
-    .pStages    = shaderStages,
-    // .pNext=VK_NULL_HANDLE,
-    .pVertexInputState   = &vkPipelineVertexInputStateCreateInfo,
-    .pInputAssemblyState = &inputAssembly,
-    .pViewportState      = &vkViewPortState,
-    .pRasterizationState = &VkPipeLineRasterization,
-    .pMultisampleState   = &multisampling,
-    .pDepthStencilState  = &depthStencil,
-    .pColorBlendState    = &colorBlending,
-    //                    .pDynamicState(null,
-    .layout     = vkLayout,
-    .renderPass = renderPass
-    // pipelineInfo.subpass=0;
-    //    pipelineInfo.basePipelineHandle=VK_NULL_HANDLE;
-    // pipelineInfo.basePipelineIndex=-1;
-  };
-  VkUtilsXBase::clPPPJI<PFN_vkCreateGraphicsPipelines>(
-    &pipelineInfo, 1, "vkCreateGraphicsPipelines", &graphicsPipeline );
+  const VkGraphicsPipelineCreateInfo pipelineInfo{ .sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+                                                   .stageCount = 2,
+                                                   .pStages    = shaderStages,
+                                                   // .pNext=VK_NULL_HANDLE,
+                                                   .pVertexInputState   = &vkPipelineVertexInputStateCreateInfo,
+                                                   .pInputAssemblyState = &inputAssembly,
+                                                   .pViewportState      = &vkViewPortState,
+                                                   .pRasterizationState = &VkPipeLineRasterization,
+                                                   .pMultisampleState   = &multisampling,
+                                                   .pDepthStencilState  = &depthStencil,
+                                                   .pColorBlendState    = &colorBlending,
+                                                   .layout              = vkLayout,
+                                                   .renderPass          = renderPass };
+  VkUtilsXBase::clPPPJI<PFN_vkCreateGraphicsPipelines>( &pipelineInfo, 1, "vkCreateGraphicsPipelines", &graphicsPipeline );
 
   vkDestroyShaderModule( Queues::device, vertShaderModule, VK_NULL_HANDLE );
   vkDestroyShaderModule( Queues::device, fragShaderModule, VK_NULL_HANDLE );
@@ -250,11 +208,10 @@ inline void PipelineX::createGraphicsPipelineLayout()
 
 inline void PipelineX::createCommandBuffers()
 {
-  const VkCommandBufferAllocateInfo allocateInfo{ .sType       = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
-                                                  .commandPool = ( Queues::commandPool ),
-                                                  .level       = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
-                                                  .commandBufferCount =
-                                                    sizeof( commandBuffers ) / sizeof( VkCommandBuffer ) };
+  const VkCommandBufferAllocateInfo allocateInfo{ .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
+                                                  .commandPool        = ( Queues::commandPool ),
+                                                  .level              = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
+                                                  .commandBufferCount = sizeof( commandBuffers ) / sizeof( VkCommandBuffer ) };
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
   VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>( &allocateInfo, "vkAllocateCommandBuffers", commandBuffers );
@@ -269,29 +226,20 @@ inline void PipelineX::createCommandBuffers()
    */
   const VkRect2D renderArea = { .offset = { 0, 0 }, .extent = SwapChainSupportDetails::swapChainExtent };
 
-  constexpr VkClearValue clearValues[2] = {
-    [0].color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } }, [1].depthStencil = { 1.0F, 0 }
-  };
-
-  // VkClearValue clearColour = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-
-  // VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+  constexpr VkClearValue clearValues[2] = { [0].color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } }, [1].depthStencil = { 1.0F, 0 } };
 
   VkRenderPassBeginInfo renderPassInfo = {};
   renderPassInfo.sType                 = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO );
-  //   renderPassInfo.pNext =&attachmentsbeginInfo;
-  renderPassInfo.pClearValues    = clearValues;
-  renderPassInfo.clearValueCount = 2;
-  renderPassInfo.renderPass      = ( renderPass );
-  renderPassInfo.renderArea      = renderArea;
-  uint8_t i                      = 0;
+  renderPassInfo.pClearValues          = clearValues;
+  renderPassInfo.clearValueCount       = 2;
+  renderPassInfo.renderPass            = ( renderPass );
+  renderPassInfo.renderArea            = renderArea;
+  uint8_t i                            = 0;
   vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data );
   static constexpr VkDeviceSize offsets[] = { 0 };
   m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
   for ( const VkCommandBuffer & commandBuffer : commandBuffers )
   {
-    // extracted(beginInfo1, renderPassInfo, commandBuffer, i);
-
     VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>( commandBuffer, "vkBeginCommandBuffer", &beginInfo1 );
 
     renderPassInfo.framebuffer = ( SwapChainSupportDetails::swapChainFramebuffers[i] );
@@ -302,14 +250,7 @@ inline void PipelineX::createCommandBuffers()
     vkCmdBindVertexBuffers( commandBuffer, 0, 1, &vertexBuffer, offsets );
     vkCmdBindIndexBuffer( commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
 
-    vkCmdBindDescriptorSets( commandBuffer,
-                             VK_PIPELINE_BIND_POINT_GRAPHICS,
-                             vkLayout,
-                             0,
-                             1,
-                             &UniformBufferObject::descriptorSets,
-                             0,
-                             nullptr );
+    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
 
     memcpy( ( data ), ( &m4 ), sizeof( mat4x ) );
 

@@ -2,21 +2,17 @@
 
 #include "VkUtils2.ixx"
 
-#include <cstdint>
 #include <immintrin.h>
-#include <xmmintrin.h>
 
-// #include "mat4x.hpp"
-
-// trick to use builtins+Attributes to treat a blob of memory as a vector type
-// which compiles more cleanly into slightly better asm with vmovps (At least
-// with Clang)
-// static __int256 *__restrict__ ax = reinterpret_cast<__int256 *>(&ubo);
+/*
+ trick to use builtins+Attributes to treat a blob of memory as a vector type
+ which compiles more cleanly into slightly better asm with vmovps (At least
+ with Clang)
+ static __int256 *__restrict__ ax = reinterpret_cast<__int256 *>(&ubo);
+*/
 
 typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( m4 ) ), __aligned__( 64 ) ) );
 
-// const PFN_vkAcquireNextImageKHR * vckANI =
-//   VkUtilsXBase::getAddrFuncPtr<PFN_vkAcquireNextImageKHR>( "vkAcquireNextImageKHR" );
 struct /* __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) */ renderer2
 {
   static constexpr float ah = glm::radians( 90.0F );
@@ -118,32 +114,4 @@ inline void renderer2::updateUniformBuffer()
   const auto x = _mm256_fmsubadd_ps( aaa, osxyzsZ, a );
 
   _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
-
-  // ubo.model = glm::rotate( viewproj, time, glm::vec3( 0.0F, 0.0F, 1.0F ) );
-  //  ubo.proj[1][1] *= -1;
-  //     __m512 a =(__m512)&data+0x200;
-  // const float ax[16] = {
-  //   time, time, time, time, time, time, time, time, time, time, time, time, time, time, time, time
-  // };
-  // const float ax2[16] = { time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2,
-  //                         time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2, time * 2 };
-  // m4.loadTmp( ax2 );
-  // m5.loadTmp( ax2 );
-  // m4.loadAligned( &ubo.model );
-
-  // m4.rotateL( time /* , glm::vec3( 0.0F, 0.0F, 1.0F ) */ );
-  // m4.domatFMA( m5 );
-  /*Should Ideally Peristently map the Uniberform buffer allocation instead
-   *Howver don't currently know of a method to carry this out in C++ without
-   *Java Unsafe API Black Magic (Write to mem addresses dierctly without Type
-   *checking)
-   */
-  // vkMapMemory(device, UniformBufferObject::uniformBuffersMemory, 0,
-  // UniformBufferObject::Sized, 0, &data);
-  {
-    // memcpy2( reinterpret_cast<__int256 *>( data ), reinterpret_cast<__int256 *>( &m4 ), sizeof( m4 ) );
-    // memcpy2( reinterpret_cast<__int256 *>( data ), reinterpret_cast<__int256 *>( &m4 ), UniformBufferObject::Sized );
-  }
-  // vkUnmapMemory(device, UniformBufferObject::uniformBuffersMemory);
-  //  data=nullptr;
 }

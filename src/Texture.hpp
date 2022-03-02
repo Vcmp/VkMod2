@@ -3,71 +3,17 @@
 // #include "Buffers.hpp"
 #include "Buffers.hpp"
 
+#include <cstdint>
+
 inline namespace Texture
 {
   static constinit VkImage        vkImage;
   static constinit VkDeviceMemory vkAllocMemory;
-  static void                     createTextureImage();
   static VkFormat                 findDepthFormat();
-  static void                     createDepthResources();
   static void                     createImage( VkExtent2D, VkFormat, VkImageUsageFlagBits );
   static void                     transitionImageLayout( VkFormat, VkImageLayout, VkImageLayout );
   static void                     createImageView( VkFormat, VkImageAspectFlagBits, VkImageLayout );
 };  // namespace Texture
-
-inline void Texture::createDepthResources()
-{
-  std::cout << "--->CreateDepthResources"
-            << "\n";
-  VkFormat depthFormat = findDepthFormat();
-  Texture::createImage(
-    SwapChainSupportDetails::swapChainExtent, depthFormat, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT );
-
-  createImageView( depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, depthImageView );
-  transitionImageLayout( depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL );
-}
-
-inline void Texture::createTextureImage()
-{
-  // const char a[] = ("bin/shaders/terrain.png");
-  // std::cout << (a);
-
-  // const size_t size = 0;
-
-  // uint8_t pixels[size];
-
-  // size_t imageSize = sizeof(pixels) * 3;
-
-  // if (pixels == nullptr) {
-  //   throw std::runtime_error("No Image!");
-  // }
-
-  // VkBuffer stagingBufferImg = {0};
-  // /* BuffersX::setBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, imageSize,
-  //                     stagingBufferImg); */
-  // VkDeviceMemory stagingBufferMemoryImg = {0};
-  // // BuffersX::createBuffer(stagingBufferImg, stagingBufferMemoryImg);
-
-  // // vkMapMemory(device, stagingBufferMemoryImg, 0, imageSize, 0,
-  // // MemSysm.address);
-  // {
-  //   //                        memByteBuffer(getHandle(),
-  //   imageSize).put(pixels);
-  //   //    memcpy((pixels), MemSysm.getHandle(), imageSize);
-  // }
-  // vkUnmapMemory(device, stagingBufferMemoryImg);
-  // // STBImage.stbi_image_free(pixels);
-
-  // // Texture::createImage(1024, 1024,
-  // //         VK_FORMAT_R8G8B8A8_SRGB,
-  // //         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
-  // // );
-
-  // // copyBufferToImage(stagingBufferImg, 1024, 1024);
-  // Texture::transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB,
-  //                                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-  //                                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-}
 
 inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsageFlagBits usage )
 {
@@ -94,10 +40,9 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
 
   VkMemoryAllocateInfo allocInfo = {};
   allocInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-  //    allocInfo.pNext=vkMemoryDedicatedAllocateInfoKHR;
-  allocInfo.allocationSize  = memRequirements.memoryRequirements.size;
-  allocInfo.memoryTypeIndex = BuffersX::findMemoryType(
-    Queues::physicalDevice, memRequirements.memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+  allocInfo.allocationSize       = memRequirements.memoryRequirements.size;
+  allocInfo.memoryTypeIndex =
+    BuffersX::findMemoryType( Queues::physicalDevice, memRequirements.memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
   allocInfo.pNext = VK_NULL_HANDLE;
 
   if constexpr ( img2.prefersDedicatedAllocation | img2.requiresDedicatedAllocation )
@@ -110,14 +55,11 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
     allocInfo.pNext = &dedicatedAllocateInfoKHR;
   }
 
-  // VkUtilsXBase::clPPPI3<PFN_vkAllocateMemory>( &allocInfo, "vkAllocateMemory", &Texture::vkAllocMemory );
-
   vkBindImageMemory( Queues::device, Texture::vkImage, Texture::vkAllocMemory, 0 );
 }
 
 static void Texture::transitionImageLayout( VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout )
 {
-  // VkCommandBuffer commandBuffer= Queues::beginSingleTimeCommands();
   Queues::beginSingleTimeCommands();
 
   VkImageMemoryBarrier barrier = {
@@ -143,8 +85,8 @@ static void Texture::transitionImageLayout( VkFormat format, VkImageLayout oldLa
     }
   }
 
-  VkPipelineStageFlags sourceStage;
-  VkPipelineStageFlags destinationStage;
+  VkPipelineStageFlags sourceStage      = 0;
+  VkPipelineStageFlags destinationStage = 0;
   switch ( oldLayout )
   {
     case VK_IMAGE_LAYOUT_UNDEFINED:
@@ -165,10 +107,9 @@ static void Texture::transitionImageLayout( VkFormat format, VkImageLayout oldLa
       {
         barrier.subresourceRange.aspectMask = ( VK_IMAGE_ASPECT_DEPTH_BIT );
 
-        barrier.dstAccessMask =
-          ( VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT );
-        sourceStage      = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-        destinationStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+        barrier.dstAccessMask = ( VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT );
+        sourceStage           = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage      = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
         break;
       }
     case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
@@ -183,52 +124,38 @@ static void Texture::transitionImageLayout( VkFormat format, VkImageLayout oldLa
     default: throw std::runtime_error( "Unsupported layout transition" );
   }
 
-  vkCmdPipelineBarrier( queues.commandBuffer,
-                        sourceStage /* TODO */,
-                        destinationStage /* TODO */,
-                        0,
-                        0,
-                        VK_NULL_HANDLE,
-                        0,
-                        VK_NULL_HANDLE,
-                        1,
-                        &barrier );
+  vkCmdPipelineBarrier( queues.commandBuffer, sourceStage /* TODO */, destinationStage /* TODO */, 0, 0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, 1, &barrier );
   Queues::endSingleTimeCommands();
 }
 
-inline void
-  Texture::createImageView( VkFormat swapChainImageFormat, VkImageAspectFlagBits vkImageAspect, VkImageLayout a )
+inline void Texture::createImageView( VkFormat swapChainImageFormat, VkImageAspectFlagBits vkImageAspect, VkImageLayout a )
 {
-  VkImageViewCreateInfo createInfo = {};
-  createInfo.sType                 = ( VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO );
-  createInfo.image                 = ( vkImage );
-  createInfo.viewType              = ( VK_IMAGE_VIEW_TYPE_2D );
-  createInfo.format                = ( swapChainImageFormat );
+  const VkImageViewCreateInfo createInfo = { .sType    = ( VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO ),
+                                             .image    = ( vkImage ),
+                                             .viewType = ( VK_IMAGE_VIEW_TYPE_2D ),
+                                             .format   = ( swapChainImageFormat ),
 
-  createInfo.subresourceRange.aspectMask     = vkImageAspect;
-  createInfo.subresourceRange.baseMipLevel   = ( 0 );
-  createInfo.subresourceRange.levelCount     = ( 1 );
-  createInfo.subresourceRange.baseArrayLayer = ( 0 );
-  createInfo.subresourceRange.layerCount     = ( 1 );
-
+                                             .subresourceRange{
+                                               .aspectMask     = vkImageAspect,
+                                               .baseMipLevel   = ( 0 ),
+                                               .levelCount     = ( 1 ),
+                                               .baseArrayLayer = ( 0 ),
+                                               .layerCount     = ( 1 ),
+                                             } };
   VkUtilsXBase::clPPPI( &createInfo, "vkCreateImageView", &a );
 }
 
 inline VkFormat Texture::findDepthFormat()
 {
-  constexpr VkFormat formatCandidates[3] = { VK_FORMAT_D32_SFLOAT,
-                                             VK_FORMAT_D32_SFLOAT_S8_UINT,
-                                             VK_FORMAT_D24_UNORM_S8_UINT };
+  constexpr VkFormat formatCandidates[3] = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
   VkFormatProperties props;
 
-  for ( VkFormat format : formatCandidates )
+  for ( const VkFormat & format : formatCandidates )
   {
     vkGetPhysicalDeviceFormatProperties( Queues::physicalDevice, format, &props );
 
-    const int i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
-    if (
-      i2 ==
-      VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT /* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/ )
+    const uint32_t i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    if ( i2 == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT /* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/ )
     {
       return format;
     }

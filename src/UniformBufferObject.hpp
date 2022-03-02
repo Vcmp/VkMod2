@@ -9,19 +9,12 @@
 
 inline namespace
 {
-  // static const auto pers =
-  //   glm::perspectiveLH_ZO( glm::radians( 45.0f ) * -1, width / static_cast<float>( height ), 1.7f, 90.0f );
-  // static const auto look =
-  //   glm::lookAtLH( glm::vec3( 2.0f, 2.0f, 2.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
 
-  static auto const viewproj =
-    glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
-    glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
+  static auto const viewproj = glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
+                               glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
   ;
-  // static const mat4x  viewproj2( &viewproj );
-  static const __m256 viewproj2x = mat4x( &viewproj ).__a;
-  // static constexpr __m256 axvZXLI    = __extension__( __m256 ){ 0x0, 1, 0x0, 1, 1, 1, 0x0, 1 };
-  static constexpr __m256 axvZXLI = __extension__( __m256 ){ -1, -1, -1, 0, 0, 0, 0, 0 };
+  static const __m256     viewproj2x = mat4x( &viewproj ).__a;
+  static constexpr __m256 axvZXLI    = __extension__( __m256 ){ -1, -1, -1, 0, 0, 0, 0, 0 };
 
 };  // namespace
 
@@ -46,10 +39,7 @@ struct UniformBufferObject
 
     {
       constexpr VkDescriptorSetLayoutBinding bindings = {
-        .binding         = 0,
-        .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1,
-        .stageFlags      = VK_SHADER_STAGE_VERTEX_BIT,
+        .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
         /* { .binding = 1,
           .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
           .descriptorCount = 1,
@@ -63,10 +53,7 @@ struct UniformBufferObject
         .pBindings    = &bindings,
 
       };
-      VkUtilsXBase::clPPPI3<PFN_vkCreateDescriptorSetLayout>(
-        &a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout );
-      // return MemSysm.doPointerAllocSafe(a,
-      // device.getCapabilities().vkCreateDescriptorSetLayout);
+      VkUtilsXBase::clPPPI3<PFN_vkCreateDescriptorSetLayout>( &a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout );
     }
   }
 
@@ -74,8 +61,7 @@ struct UniformBufferObject
   {
     for ( int i = 0; i < 1; i++ )
     {
-      BuffersX::createSetBuffer( static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                                                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ),
+      BuffersX::createSetBuffer( static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ),
                                  uniformBuffers,
                                  VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                                  Sized,
@@ -88,39 +74,29 @@ struct UniformBufferObject
     {
       static constexpr VkDescriptorPoolSize poolSize{
 
-        /* uniformBufferPoolSize */
-        .type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .descriptorCount = 1
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1
 
       };
-      //                        .type(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
-      //                        .descriptorCount(PipeLine.swapChainImages.length);
 
-      static constexpr VkDescriptorPoolCreateInfo poolCreateInfo{ .sType =
-                                                                    VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-                                                                  .pNext         = nullptr,
-                                                                  .maxSets       = 1,
-                                                                  .poolSizeCount = 1,
-                                                                  .pPoolSizes    = &poolSize };
+      static constexpr VkDescriptorPoolCreateInfo poolCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, .pNext = nullptr, .maxSets = 1, .poolSizeCount = 1, .pPoolSizes = &poolSize
+      };
       ( vkCreateDescriptorPool( Queues::device, &poolCreateInfo, nullptr, &descriptorPool ) );
-      //               descriptorPool=aLong[0];
     }
   }
 
   static VkSampler createTextureSampler()
   {
-    //                    System.out.println(properties.limits());
     constexpr VkSamplerCreateInfo samplerInfo{
-      .sType            = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
-      .magFilter        = VK_FILTER_NEAREST,
-      .minFilter        = VK_FILTER_NEAREST,
-      .mipmapMode       = VK_SAMPLER_MIPMAP_MODE_NEAREST,
-      .addressModeU     = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-      .addressModeV     = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-      .addressModeW     = VK_SAMPLER_ADDRESS_MODE_REPEAT,
-      .mipLodBias       = 0,
-      .anisotropyEnable = false,
-      //                    .maxAnisotropy=properties.limits=).maxSamplerAnisotropy=),
+      .sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+      .magFilter               = VK_FILTER_NEAREST,
+      .minFilter               = VK_FILTER_NEAREST,
+      .mipmapMode              = VK_SAMPLER_MIPMAP_MODE_NEAREST,
+      .addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .mipLodBias              = 0,
+      .anisotropyEnable        = false,
       .compareEnable           = false,
       .compareOp               = VK_COMPARE_OP_ALWAYS,
       .minLod                  = 0,
@@ -137,9 +113,6 @@ struct UniformBufferObject
   static void createDescriptorSets()
   {
     {
-      // VkDescriptorSetLayout layouts[Frames];
-      //  std::vector<VkDescriptorSetLayout> layouts(1, descriptorSetLayout);
-
       const VkDescriptorSetAllocateInfo allocInfo{ .sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
                                                    .pNext              = nullptr,
                                                    .descriptorPool     = descriptorPool,

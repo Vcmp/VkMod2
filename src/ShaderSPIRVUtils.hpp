@@ -7,18 +7,8 @@
 
 inline namespace ShaderSPIRVUtils
 {
-  // char shaderNamePath;
-
-  // enum ShaderKind
-  // {
-  //     VERTEX_SHADER=0,
-  //     FRAGMENT_SHADER=1
-  // };
   static VkShaderModule compileShaderFile( const char * );
-  // extern constexpr VkShaderModule createShaderModule(VkDevice, const char*,
-  // size_t);
-};  // namespace ShaderSPIRVUtils
-    // typedef ShaderSPIRVUtils SPRIV;
+};
 
 inline std::vector<char> doRead( const char * shaderNamePath1 )
 {

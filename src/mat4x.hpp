@@ -3,21 +3,18 @@
 #include "Buffers.hpp"
 
 #include <array>
-#include <cstdio>
 #include <immintrin.h>
 #include <math.h>
 
-/*too lazy to do an SSE version as AVX in many cases can allow for the abilkity to the same steps in half as many stages
- e.g. Might be able to get away withput using amore explict construct arg sets and isntead just implicitly and
- Automatically intialise the struct iwth a constexpr Identify Maxtrix Struct.Blob/StandIn Instead _read(int _FileHandle,
- void *_DstBuf, unsigned int _MaxCharCount)
-*/
+
+/*
+ *too lazy to do an SSE version as AVX in many cases can allow for the ability to the same steps in half as many stages
+ */
 
 static constexpr std::array<float, 16> ax = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 inline static struct __attribute__( ( __vector_size__( 64 ), __aligned__( 64 ) ) ) mat4x
 {
 public:
-  //__m256 ___ab[2];
   __v8sf __a;
   __v8sf __b;
 
@@ -26,13 +23,10 @@ public:
   // float a[2][8];
 
   inline constexpr __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
-  // inline constexpr __m256 __vectorcall lud( const void * a ) ___attribute__( ( ___aligned__( sizeof( __m256 ) ) ) );
-  inline void           domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
-  inline constexpr void domatFMA( mat4x & /*b*/ );
+  inline void             domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
+  inline constexpr void   domatFMA( mat4x & /*b*/ );
 
-  // inline constexpr void __vectorcall loadAligned( float a[16] );
   inline constexpr void __vectorcall loadTmp( const float[] );
-  // inline void              loadAligned( mat4x ) __declspec( preserve_most );
   inline constexpr void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
   inline constexpr void    loadAligned( const mat4x * a ) __attribute__( ( preserve_most ) );
   inline constexpr mat4x * identity();
@@ -43,16 +37,9 @@ public:
   inline void              permute();
   inline void              doPerspective( float, float, float, float );
   inline void              doLook( float );
-  inline void rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
+  inline void              rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
 } m4;
-
-// inline constexpr void __vectorcall mat4x::loadAligned( float a[16] )
-// {
-//   //_mm_storeu_si128((__m128*)aa, mat4x::a);
-//   ___a = ( lud( a ) );
-//   ___b = ( lud( &a + 8 ) );
-// }
 
 inline void mat4x::permute()
 {
@@ -65,43 +52,19 @@ inline void mat4x::permute()
 
 inline constexpr void mat4x::loadTmp( const float * a )
 {
-  //_mm_storeu_si128((__m128*)aa, mat4x::a);
   __a = _mm256_load_ps( a );
   __b = _mm256_load_ps( a + 8 );
 }
 inline constexpr void mat4x::loadAligned( const void * a )
 {
-  //_mm_storeu_si128((__m128*)aa, mat4x::a);
   mat4x::__a = ( _mm256_load_ps( static_cast<float const *>( a ) ) );
   mat4x::__b = ( _mm256_load_ps( static_cast<float const *>( a ) + 8 ) );
-
-  // ___a = _mm256__andnot_ps( ___b, ___a );
-  // ___b[4]     = 1.0F;
-  // ___b[5]     = 1.0F;
-  // ___b[7] += 10.0F;
 }
 inline constexpr void mat4x::loadAligned( const mat4x * a )
 {
-  //_mm_storeu_si128((__m128*)aa, mat4x::a);
   mat4x::__a = a->__a;
   mat4x::__b = a->__b;
-
-  // ___a = _mm256__andnot_ps( ___b, ___a );
-  // ___b[4]     = 1.0F;
-  // ___b[5]     = 1.0F;
-  // ___b[7] += 10.0F;
 }
-// inline void mat4x::loadAligned( mat4x b )
-// {
-//   //_mm_storeu_si128((__m128*)aa, mat4x::a);
-//   ___a = b.___a;
-//   ___b = b.___b;
-
-//   // ___a = _mm256__andnot_ps( ___b, ___a );
-//   // ___b[4]     = 1.0F;
-//   // ___b[5]     = 1.0F;
-//   // ___b[7] += 10.0F;
-// }
 // Try to add a translation before Multiplying the matrix as an attempted Optimisation
 inline void mat4x::domatFMA( mat4x * b, __m256 __Trans )
 {
@@ -111,9 +74,9 @@ inline void mat4x::domatFMA( mat4x * b, __m256 __Trans )
   b->__b = __builtin_ia32_vfmaddps256( mat4x::__b, b->__b, __Trans );
 }
 /*
- * Might be useful to retain teh expected side-effetcs.bugs.oversoght.ineicincpted efeftcs of Pure by reusing the last
- * resuls if passed by pointer?refernce as it effectivley allows the state of the Matrix to be '"reset"' between each
- * isteal. Mul.Operation>Modifictaion>Writeing to
+ * Might be useful to exploit the 'Pure' attribute to by 'reusing' the last
+ * results if passed by pointer?refernce as it effectivley allows the state of the Matrix to be '"reset"'
+
  */
 inline constexpr void mat4x::domatFMA( mat4x & b )
 {
@@ -122,8 +85,10 @@ inline constexpr void mat4x::domatFMA( mat4x & b )
   __b = _mm256_mul_ps( __b, b.__b );
 }
 
-// Hide ugly casting syntax for aligned load as unlike the AVX512 intrinsics provided by intel, man Load/many intrisics
-// Functions do not include Void* by default as an Argument
+/*
+ * Note* casting issues usually mostly only occur with the AVX2 instrincis function delcarations  available
+ * and while teh AVX counterparts for floats also do not supprot void* they instead supprot *float insetad which is till a great/considerable improvement
+ */
 inline constexpr __m256 mat4x::lud( const float * a )
 {
   return _mm256_load_ps( ( ( a ) ) );
@@ -140,11 +105,6 @@ inline void mat4x::neg()
   __a = _mm256_andnot_ps( __a, __b );
   __b = _mm256_andnot_ps( __b, __a );
 }
-// Very heavily based from the Java Joml Library:
-//  void setPerspective(float fovy, float aspect, float zNear, float zFar, bool zZeroToOne)
-//  {
-
-// }
 
 inline constexpr mat4x mat4x::copyOf()
 {
@@ -164,11 +124,9 @@ inline void mat4x::show()
   printf( "\n" );
 }
 
-// Very heavily based from the Java Joml Library:
+// Very heavily based from the Java Joml/ C++ GLM Library:
 void mat4x::doPerspective( float fovy, float aspect, float zFar, float zNear )
 {
-  // assert( abs( aspect - std::numeric_limits<float>::epsilon() ) > static_cast<float>( 0 ) );
-
   float const tanHalfFovy = tan( fovy / static_cast<float>( 2 ) );
 
   __a[0] = 1 / ( aspect * tanHalfFovy );
@@ -181,15 +139,6 @@ void mat4x::doPerspective( float fovy, float aspect, float zFar, float zNear )
 
 void mat4x::doLook( float a )
 {
-  // vec<3, T, Q> const f( normalize( center - eye ) );
-  // vec<3, T, Q> const s( normalize( cross( up, f ) ) );
-  // vec<3, T, Q> const u( cross( f, s ) );
-
-  // Result[0][0] = s.x;
-  // Result[1][0] = s.y;
-  // Result[2][0] = s.z;
-  // Result[0][1] = u.x;
-  // Result[1][1] = u.y;
   __b[1] = 1;
   __a[2] = 2;
   __a[6] = 2;
@@ -199,131 +148,3 @@ void mat4x::doLook( float a )
   __b[6] = -( 2.F * 2.F );
   // return Result;
 }
-
-// inline void mat4x::rotateL( const float & __restrict__ angle /* , const glm::vec3 & v */ )
-// {
-//   //   float const a = angle;
-//   static constinit float c;
-//   static constinit float s;
-//   sincosf( angle, &c, &s );
-
-//   // ___builtin_prefetch( &m5.___a );
-//   // ___a = m5.___a;
-//   // __c           = m5.___a;
-//   // const float aa[4] = { c, s, -s, c };
-
-//   // // loadAligned( &m );
-
-//   // const __m128 x = _mm__broadcast_ss( &aa[0] );
-//   // const __m128 y = _mm__broadcast_ss( &aa[1] );
-
-//   // // __m256 z = _mm256_loadu2_m128( &aa[0], &aa[1] );
-//   // const float  t[4] = { viewproj1[0][0], viewproj1[0][1], viewproj1[0][2], viewproj1[0][3] };
-//   // const float  r[4] = { viewproj1[1][0], viewproj1[1][1], viewproj1[1][2], viewproj1[1][3] };
-//   // const __m128 x1   = _mm__broadcast_ss( t );
-//   // const __m128 y1   = _mm__broadcast_ss( r );
-//   // __m128       v    = _mm_fmadd_ps( x1, x, _mm_mul_ps( y1, y ) );
-//   // __m128       v1   = _mm_fmadd_ps( x1, -y, _mm_mul_ps( y1, x ) );
-
-//   // ___a = _mm256_loadu2_m128( reinterpret_cast<float *>( &v ), reinterpret_cast<float *>( &v1 ) );
-//   // ___a = _mm256_load_ps( ax );
-//   // const __m256 xc = _mm256__broadcast_ss( &c );
-//   // const __v8sf xs = _mm256__broadcast_ss( &s );
-
-//   // __m128      lc = _mm__broadcast_ss( &c );
-//   // __m128      ls = _mm__broadcast_ss( &s );
-//   // const float cc = -glm::cos( -glm::sin( -angle ) );
-//   // const float cc = -glm::cos( ( angle ) );
-//   ;
-//   // __m256      xy = _mm256_loadu2_m128( &cc, &s );
-//   // __m256 __v256 = _mm256__broadcast_ss( &c );
-//   // auto zyx1 = ___builtin_ia32_vinsertf128_ps256( _mm256__broadcast_ss( &c ), _mm__broadcast_ss( &s ), 1 );
-
-//   // __m256 zyx = /* zyx1 * */ ___builtin_ia32_vinsertf128_ps256( _mm256__broadcast_ss( &c ), -_mm__broadcast_ss( &c
-//   ),
-//   1
-//   // );
-//   // __m256 zyx = _mm256_loadu2_m128( &c, &cc );
-//   /*
-//     Oddly using
-//         ___a[4] = m5.___a[4] * -c + m5.___a[0] * s; Reverses the winding order
-//     comapired TO?Rleative to
-//     ___a[4] = m5.___a[4] * c - m5.___a[0] * s;
-//   */
-
-//   // ___a = _mm256_fmsubadd_ps( ___a, _mm256__broadcast_ss( &s ), _mm256_mul_ps( ___a, zyx ) );  // m5.___a * zyx +
-//   m5.___a
-//   *
-//   // xs;
-//   // __m256     xx = _mm256__broadcast_ss( &c ) * _mm256__broadcast_ss( &s );
-//   // __m128     i  = _mm_mul_ss( -_mm__broadcast_ss( &c ), _mm__broadcast_ss( &s ) );
-//   // __m256     ss = _mm256__broadcast_ps( &i );
-//   // const auto a  = _mm256_insertf128_ps( _mm256__broadcast_ss( &c ), -_mm__broadcast_ss( &c ), 1 );
-//   // const auto x  = _mm256_fmaddsub_ps( ___a, a, ( xx ) );
-
-//   /* __m256     xx = _mm256__broadcast_ss( &c ) * _mm256__broadcast_ss( &s );
-//   __m128     i  = _mm_mul_ss( -_mm__broadcast_ss( &s ), -_mm__broadcast_ss( &s ) );
-//   __m256     ss = _mm256__broadcast_ps( &i );
-//   const auto a  = _mm256_insertf128_ps( _mm256__broadcast_ss( &c ), i, 1 );
-//   const auto x  = _mm256_fmaddsub_ps( ___a, _mm256__broadcast_ss( &s ), ( a ) ); */
-//   // const auto osx = _mm__broadcast_ss( &s );
-//   // const auto tsx = -osx;
-//   // const auto a   = _mm256_shuffle_ps( _mm256__broadcast_ss( &c ), ___a, 4 );
-//   // const __m128 osx  = _mm__broadcast_ss( &c );
-//   // const __m128 osxa = -_mm__broadcast_ss( &c );
-//   // const __m128 osx2 = _mm_mul_ss( osx, osxa );
-//   // const __m128 tsx  = -osx;
-//   // const auto   a    = ___a * _mm256_insertf128_ps( _mm256__broadcast_ps( &osx ), tsx, 1 );
-//   // float        xl   = ( c *= -c );
-//   // const auto a = _mm256_fmsubadd_ps( ___a, _mm256__broadcast_ss( &c ), _mm256__broadcast_ss( &c ) );
-//   // auto         xla   = _mm__broadcast_ss( &c );
-//   // auto         xls   = _mm__broadcast_ss( &s );
-//   // auto         xlssa = _mm_mul_ss( xla, xls );
-//   // float        aa    = 1;
-//   // auto         aas   = _mm_fmsub_ps( xlssa, xla, xls );
-//   // const auto   x     = _mm256_fmaddsub_ps( ___a, _mm256__broadcast_ss( &s ), _mm256__broadcast_ps( &xlssa ) );
-
-//   const __m128 osx     = _mm__broadcast_ss( &c );
-//   const __m256 osxyzsZ = _mm256__broadcast_ss( &s );
-//   const auto   a       = ___a * _mm256_insertf128_ps( _mm256__broadcast_ps( &osx ), -osx, 1 );
-
-//   const auto x = _mm256_fmsubadd_ps( ___a, osxyzsZ, a );
-
-//   // m5.___a[0] *= m5.___a[0];  ___a[0] *= m5.___a[7];
-//   // m5.___a[1] *= m5.___a[1];   ___a[1] *= m5.___a[6];
-//   // m5.___a[2] *= m5.___a[2];   ___a[2] *= m5.___a[5];
-//   // m5.___a[3] *= m5.___a[3];   ___a[3] *= m5.___a[4];
-//   // m5.___a[4] *= m5.___a[4];   ___a[4] *= m5.___a[3];
-//   // m5.___a[5] *= m5.___a[5];   ___a[5] *= m5.___a[2];
-//   // m5.___a[6] *= m5.___a[6];   ___a[6] *= m5.___a[1];
-//   // m5.___a[7] *= m5.___a[7];   ___a[7] *= m5.___a[0];
-
-//   _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
-
-//   // ___a = _mm256_mul_ps( ___a; _mm256__broadcast_ss( aa ) );
-
-//   // constexpr glm::vec3 axis = { 0, 0, 1 };
-//   // glm::vec3           temp( ( float( 1 ) - c ) * axis );
-
-//   // glm::mat2 Rotate;
-//   // Rotate[0][0] = c;
-//   // Rotate[0][1] = s;
-//   // // Rotate[0][2] = 0;
-
-//   // Rotate[1][0] = -s;
-//   // Rotate[1][1] = c;
-//   // Rotate[1][2] = 0;
-
-//   // Rotate[2][0] = 0;
-//   // Rotate[2][1] = 0;
-//   // Rotate[2][2] = c + temp[2];
-
-//   // const glm::mat2x4 Result{                                       // Rotate.transpos
-//   //                           viewproj1[0] * c + viewproj1[1] * s,  // + m[2] * Rotate[0][2];
-//   //                           viewproj1[0] * -s + viewproj1[1] * c
-//   // };  // + m[2] * Rotate[1][2];
-//   // Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] * Rotate[2][2];
-//   // Result[3] = m[3];
-
-//   // loadAligned( &Result );
-// }

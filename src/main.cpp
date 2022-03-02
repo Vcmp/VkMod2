@@ -32,10 +32,13 @@
    Different on MSVC vs other Compilers/headers.Standardisations e.g. .Misc.Etc. I.E.)
 
         BuGS:
-            If valditaion layers are not enbaled, the Vertex Buffers/Uniform buffers do not seem to be
-   initialised/Added/Implemenetd curertcly with the Pipeline and etehrfore cannot be Boudn proeprly: No issue were
-   detected Asvertained.verifies witH AddressSantitiser so may ne anull,alignemnt,struct intilaistaion issue with
-   mising/null-Initialised/Incorretcly Initilaised Fields
+
+
+
+        Fixes:
+    Linking is still slow but has been creately improved with the use of the Dynamic loader Volk livrary which uses more efficient linking setup that the native
+   /raw Vulkan Headers on their own; also much of the linking overehad is also was also foun to be due to G:FW which without PCH will be diifuclt to work around
+   due to its neccesitation as a Window Libraty/Framework
 */
 inline namespace
 {
@@ -45,7 +48,7 @@ inline namespace
   // static inline pthread_t rThrd;
 
 }  // namespace
-// Apparently Threads other main main therad have much smaller stall alloctaion Sizes...<Query-> Confirm>
+// Apparently Threads other than the  main thread have much smaller stall alloctaion Sizes... (Can't/Unable to confirm this however (this far/Currently))
 inline void * Sysm( void * pv_unused )
 {
   // _mm256_zeroall();
@@ -133,7 +136,7 @@ inline void VkUtils2::setupWindow()
 
   window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
 
-  assert( !std::is_constant_evaluated( window ) );
+  assert( window );
   // exit( 1 );
 
   glfwSetWindowShouldClose( ( window ), false );
@@ -428,8 +431,6 @@ inline void VkUtils2::createLogicalDevice()
   }
   VkUtilsXBase::checkCall( vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &Queues::device ) );
   volkLoadDevice( Queues::device );
-  // VolkDeviceTable vDT{};
-  // volkLoadDeviceTable( &vDT, device );
 
   VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[0].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::GraphicsQueue );
   VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::TransferQueue[0] );
@@ -445,8 +446,6 @@ void VkUtils2::cleanup()
   {
     vkDestroyFramebuffer( Queues::device, framebuffer, nullptr );
   }
-  // vkDestroyPipeline(device, PipelineX::graphicsPipeline, nullptr);
-  // vkDestroyPipelineLayout(device, PipelineX::vkLayout, nullptr);
 
   vkDestroyBuffer( Queues::device, vertexBuffer, nullptr );
   vkFreeMemory( Queues::device, vertexBufferMemory, nullptr );
