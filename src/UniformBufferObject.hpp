@@ -10,11 +10,12 @@
 inline namespace
 {
 
-  static auto const viewproj = glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
-                               glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
+  glm::mat4 viewproj = glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
+                       glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
   ;
-  static const __m256     viewproj2x = mat4x( &viewproj ).__a;
-  static constexpr __m256 axvZXLI    = __extension__( __m256 ){ -1, -1, -1, 0, 0, 0, 0, 0 };
+  // glm::mat4 rot;
+  static const __m256     viewproj2x = m5.loadAlignedA( &viewproj ).__a;
+  static constexpr __m256 axvZXLI    = __extension__( __m256 ){ -1, -1, -1, -1, 0, 0, 0, 0 };
 
 };  // namespace
 

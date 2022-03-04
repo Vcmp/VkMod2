@@ -6,21 +6,20 @@
 #include <immintrin.h>
 #include <math.h>
 
-
 /*
  *too lazy to do an SSE version as AVX in many cases can allow for the ability to the same steps in half as many stages
  */
 
-static constexpr std::array<float, 16> ax = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+static constexpr float ax[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 inline static struct __attribute__( ( __vector_size__( 64 ), __aligned__( 64 ) ) ) mat4x
 {
 public:
-  __v8sf __a;
-  __v8sf __b;
+  __m256 __a;
+  __m256 __b;
 
-  constexpr explicit mat4x() : __a( lud( ax.data() ) ), __b( lud( ax.data() + 8 ) ) {}
-  constexpr explicit mat4x( const void * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
-  // float a[2][8];
+  constexpr mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
+  // constexpr explicit mat4x( auto * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
+  //  float a[2][8];
 
   inline constexpr __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
   inline void             domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
@@ -28,6 +27,7 @@ public:
 
   inline constexpr void __vectorcall loadTmp( const float[] );
   inline constexpr void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
+  inline constexpr mat4x   loadAlignedA( const void * a ) __attribute__( ( preserve_most ) );
   inline constexpr void    loadAligned( const mat4x * a ) __attribute__( ( preserve_most ) );
   inline constexpr mat4x * identity();
   inline void              neg();
@@ -39,7 +39,7 @@ public:
   inline void              doLook( float );
   inline void              rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
-} m4;
+} m4, m5;
 
 inline void mat4x::permute()
 {
@@ -54,6 +54,12 @@ inline constexpr void mat4x::loadTmp( const float * a )
 {
   __a = _mm256_load_ps( a );
   __b = _mm256_load_ps( a + 8 );
+}
+inline constexpr mat4x mat4x::loadAlignedA( const void * a )
+{
+  mat4x::__a = ( _mm256_load_ps( static_cast<float const *>( a ) ) );
+  mat4x::__b = ( _mm256_load_ps( static_cast<float const *>( a ) + 8 ) );
+  return *this;
 }
 inline constexpr void mat4x::loadAligned( const void * a )
 {

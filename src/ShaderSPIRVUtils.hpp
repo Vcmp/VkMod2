@@ -2,40 +2,47 @@
 #pragma once
 
 #include "Queues.hpp"
+#include "test.hpp"
 
-#include <fstream>
+#include <cstdint>
 
-inline namespace ShaderSPIRVUtils
+struct ShaderSPIRVUtils
 {
-  static VkShaderModule compileShaderFile( const char * );
-};
-
-inline std::vector<char> doRead( const char * shaderNamePath1 )
-{
-  std::ifstream file( shaderNamePath1, std::ios::ate | std::ios::binary );
-
-  if ( !file.is_open() )
+  const VkShaderModule frags;
+  const VkShaderModule verts;
+  // constexpr ShaderSPIRVUtils() : frags( compileShaderFile() ), verts( compileShaderFile1() ){};
+  static constexpr VkShaderModule compileShaderFile();
+  static constexpr VkShaderModule compileShaderFile1();
+  ~ShaderSPIRVUtils()
   {
-    throw std::runtime_error( "failed to open file!" );
+    vkDestroyShaderModule( Queues::device, frags, VK_NULL_HANDLE );
+    vkDestroyShaderModule( Queues::device, verts, VK_NULL_HANDLE );
   }
-  size_t            fileSize = (size_t)file.tellg();
-  std::vector<char> buffer( fileSize );
-  file.seekg( 0 );
-  file.read( buffer.data(), fileSize );
-  file.close();
+};  // namespace ShaderSPIRVUtils
 
-  return buffer;
-}
-
-inline VkShaderModule ShaderSPIRVUtils::compileShaderFile( const char * shaderNamePath1 )
+inline constexpr VkShaderModule ShaderSPIRVUtils::compileShaderFile()
 {
-  auto axl = doRead( shaderNamePath1 );
+  // auto axl = doRead( shaderNamePath1 );
+  VkShaderModule           axx   = {};
+  VkShaderModuleCreateInfo VsMCI = {};
+
+  VsMCI.codeSize = vert.size();
+  VsMCI.pCode    = (uint32_t *)( vert.data() );
+  VsMCI.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+  VsMCI.pNext    = VK_NULL_HANDLE;
+
+  VkUtilsXBase::clPPPI3<PFN_vkCreateShaderModule>( &VsMCI, "vkCreateShaderModule", &axx );
+  return axx;
+}
+inline constexpr VkShaderModule ShaderSPIRVUtils::compileShaderFile1()
+{
+  // auto axl = doRead( shaderNamePath1 );
 
   VkShaderModule           axx   = {};
   VkShaderModuleCreateInfo VsMCI = {};
 
-  VsMCI.codeSize = axl.size();
-  VsMCI.pCode    = reinterpret_cast<const uint32_t *>( axl.data() );
+  VsMCI.codeSize = frag.size();
+  VsMCI.pCode    = (uint32_t *)( frag.data() );
   VsMCI.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   VsMCI.pNext    = VK_NULL_HANDLE;
 

@@ -40,8 +40,14 @@
    /raw Vulkan Headers on their own; also much of the linking overehad is also was also foun to be due to G:FW which without PCH will be diifuclt to work around
    due to its neccesitation as a Window Libraty/Framework
 */
+// asm( "fileData:    .incbin \"21_shader_ubo.frag.spv\"" );
+// // asm( "fileDataEnd: db 0x00" );
+// extern const char fileData[];
+// extern const char fileDataEnd[];
+// const int   fileDataSize = fileDataEnd - fileData + 1;
 inline namespace
 {
+
   static constinit inline bool      a = true;
   static constinit inline uint16_t  aa;
   static constinit inline pthread_t sys;
@@ -55,7 +61,7 @@ inline void * Sysm( void * pv_unused )
   while ( a )
   {
     std::cout << aa /* <<"--->"<< duration  */ << "\n";
-    m4.loadAligned( BuffersX::data );
+    // m4.loadAligned( BuffersX::data );
     // m4.show();
     aa = 0;
     sleep( 1 );
@@ -136,8 +142,8 @@ inline void VkUtils2::setupWindow()
 
   window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
 
-  assert( window );
-  // exit( 1 );
+  // assert( window );
+  //  exit( 1 );
 
   glfwSetWindowShouldClose( ( window ), false );
   // glfwMakeContextCurrent( ( window ) );

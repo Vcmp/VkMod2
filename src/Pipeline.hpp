@@ -80,20 +80,21 @@ inline void PipelineX::createGraphicsPipelineLayout()
   // to teh ability to premptively use the SPRI-V Compielr (e.g.GLSLC) prior to compile time...
   std::cout << ( "Setting up PipeLine" ) << "\n";
 
-  const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile( "shaders/21_shader_ubo.vert.spv" );
-  const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile( "shaders/21_shader_ubo.frag.spv" );
+  // const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile();
+  // const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile1();
 
   const VkPipelineShaderStageCreateInfo vertexStage = {
     .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
     .stage  = VK_SHADER_STAGE_VERTEX_BIT,
-    .module = vertShaderModule,
+    .module = ShaderSPIRVUtils::compileShaderFile(),
     .pName  = "main",
 
   };
 
-  const VkPipelineShaderStageCreateInfo fragStage = {
-    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO, .stage = VK_SHADER_STAGE_FRAGMENT_BIT, .module = fragShaderModule, .pName = "main"
-  };
+  const VkPipelineShaderStageCreateInfo fragStage = { .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                                                      .stage  = VK_SHADER_STAGE_FRAGMENT_BIT,
+                                                      .module = ShaderSPIRVUtils::compileShaderFile1(),
+                                                      .pName  = "main" };
 
   const VkPipelineShaderStageCreateInfo shaderStages[2] = { fragStage, vertexStage };
 
@@ -201,9 +202,6 @@ inline void PipelineX::createGraphicsPipelineLayout()
                                                    .layout              = vkLayout,
                                                    .renderPass          = renderPass };
   VkUtilsXBase::clPPPJI<PFN_vkCreateGraphicsPipelines>( &pipelineInfo, 1, "vkCreateGraphicsPipelines", &graphicsPipeline );
-
-  vkDestroyShaderModule( Queues::device, vertShaderModule, VK_NULL_HANDLE );
-  vkDestroyShaderModule( Queues::device, fragShaderModule, VK_NULL_HANDLE );
 }
 
 inline void PipelineX::createCommandBuffers()

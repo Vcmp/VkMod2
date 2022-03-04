@@ -40,7 +40,7 @@ public:
   // being enabled, however if said Validation Layers are disabled, the memeory
   // leak virtually entirely disappears and at least thus far does not seem to be
   // an issue thankfully
-  static constexpr bool debug = false;
+  static constexpr bool debug = true;
 
   static constexpr bool ENABLE_VALIDATION_LAYERS = debug;
 

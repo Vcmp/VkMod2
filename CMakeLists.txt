@@ -20,8 +20,8 @@ set(VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_
 # set(GLM_TEST_ENABLE_FAST_MATH ON CACHE BOOL "" FORCE)
 # set(GLM_TEST_ENABLE_SIMD_AVX ON CACHE BOOL "" FORCE)
 # set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
-
-add_executable(VkMod2 "")
+add_subdirectory(brcxxc ENABLE_EXPORTS)
+add_executable(VkMod2 brcxxc )
 
 message(STATUS "${CMAKE_CXX_COMPILE_FEATURES}")
 message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
@@ -42,11 +42,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE_FAST_MATH ON CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE_SIMD_AVX ON CACHE BOOL "" FORCE)
+set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
+
 
 add_subdirectory(glfw EXCLUDE_FROM_ALL)
 add_subdirectory(glm EXCLUDE_FROM_ALL)
 add_subdirectory(volk EXCLUDE_FROM_ALL)
-# add_subdirectory(sleef EXCLUDE_FROM_ALL)
+# add_subdirectory(sleef)
+# add_subdirectory(brcxxc EXCLUDE_FROM_ALL)
 	
 target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 
@@ -77,7 +83,6 @@ target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 
 
 
-
 find_program(GLSLC glslc HINTS $ENV{VULKAN_SDK}/Bin/)
 
 ## TODO: make this recompile shader files if they are changed/do not match checksums instead of having to mnaully delete them each time
@@ -99,6 +104,11 @@ foreach(GLSL ${GLSL_SOURCE_FILES})
     COMMAND ${GLSLC} ${GLSL} -O -o ${SPIRV}
     DEPENDS "${PROJECT_SOURCE_DIR}/bin/shaders/")
   list(APPEND SPIRV_BINARY_FILES ${SPIRV})
+  add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/binary_resources.hpp ${CMAKE_CURRENT_BINARY_DIR}/binary_resources.cpp
+  COMMAND brcc ${CMAKE_CURRENT_BINARY_DIR}/binary_resources RGAME_BINARY_RESOURCES_HH txt_vertex_shader ${CMAKE_CURRENT_BINARY_DIR}/bin/21_shader_ubo.frag.spv
+  DEPENDS bin/21_shader_ubo.frag.spv)
+
 endforeach(GLSL)
 
 add_custom_target(

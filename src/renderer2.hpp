@@ -1,6 +1,9 @@
 #pragma once
 
 #include "VkUtils2.ixx"
+#include "glm/ext/matrix_float4x4.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/vector_float3.hpp"
 
 #include <immintrin.h>
 
@@ -65,8 +68,8 @@ inline void renderer2::drawFrame()
 {
   // m4.loadAligned( &m5 );
   vkAcquireNextImageKHR( Queues::device, swapChain, -1, AvailableSemaphore, nullptr, &currentFrame );
-  __builtin_prefetch( BuffersX::data );
-  __builtin_prefetch( &viewproj2x );
+  // __builtin_prefetch( BuffersX::data );
+  // __builtin_prefetch( &viewproj2x );
   updateUniformBuffer();
   info.pCommandBuffers = &commandBuffers[currentFrame];
 
@@ -76,7 +79,7 @@ inline void renderer2::drawFrame()
 
   vkQueuePresentKHR( Queues::GraphicsQueue, &VkPresentInfoKHR1 );
 
-  currentFrame = ( currentFrame + 1 ) % Frames;
+  currentFrame = currentFrame + __builtin_parity( Frames );
 }
 
 constexpr inline void renderer2::memcpy2( __int256 * __restrict__ _Dst, __int256 const * __restrict__ _Src, size_t _MaxCount )
@@ -95,15 +98,21 @@ inline void renderer2::updateUniformBuffer()
   static constinit float c;
   static constinit float s;
   static constexpr float xs = 1;
-  sincosf( glfwGetTime() * ah, &c, &s );
 
-  // const __m128 ones    = _mm_broadcast_ss( &xs );
+  sincosf( glfwGetTime() * ah, &c, &s );
+  __builtin_prefetch( BuffersX::data, 1, 3 );
+
+  // const float ax = glfwGetTime() * ah;
+
+  // rot = viewproj * glm::rotate( glm::identity<glm::mat4>(), ax, glm::vec3( 1, 0, 0 ) );
+
+  const __m128 ones = _mm_broadcast_ss( &xs );
   // _mm256_storeu2_m128i();
 
   const __m256 aaa     = viewproj2x;
   const __m256 osx     = _mm256_broadcast_ss( &c );
   const __m256 osxyzsZ = _mm256_broadcast_ss( &s );
-  const __m128 o1sx    = -_mm256_extractf128_ps( osx, 0 );
+  const __m128 o1sx    = -_mm_broadcast_ss( &c );
   // const __m256 osxyzsZ2 = _mm256_movehdup_ps( osxyzsZ );
   __m256 a =
     // viewproj2x * __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ps( &osx ), _mm_xor_ps( osx, axv ), 1 );
@@ -111,7 +120,10 @@ inline void renderer2::updateUniformBuffer()
   // _mm256_xor_ps( osx, axvZXLI );
   // _mm256_storeu2_m128( &c, &c2, a );
 
-  const auto x = _mm256_fmsubadd_ps( aaa, osxyzsZ, a );
+  const auto x = __builtin_ia32_vfmaddsubps256( viewproj2x, osxyzsZ, a );
 
   _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
+  _mm256_zeroupper();
+
+  // memcpy( BuffersX::data, &x, sizeof( x ) );
 }
