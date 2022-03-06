@@ -24,6 +24,14 @@ static constexpr struct Queues
   static void createCommandPool();
   static void beginSingleTimeCommands();
   static void endSingleTimeCommands();
+  template <typename X, typename T>
+  static constexpr auto clPPPI3A( const auto * __restrict__ pStrct, const char * __restrict__ a )
+  {
+    // const VkDevice aa = volkGetLoadedDevice();
+    X object;
+    T( vkGetDeviceProcAddr( Queues::device, a ) )( Queues::device, pStrct, nullptr, &object );
+    return object;
+  }
 } inline const queues;
 
 inline void Queues::createCommandPool()
@@ -33,13 +41,13 @@ inline void Queues::createCommandPool()
     .pNext            = nullptr,
     .queueFamilyIndex = 0,
   };
-  VkUtilsXBase::clPPPI3<PFN_vkCreateCommandPool>( &poolInfo, "vkCreateCommandPool", &commandPool );
-  constexpr VkCommandPoolCreateInfo poolInfo2 = {
+  commandPool = clPPPI3A<VkCommandPool, PFN_vkCreateCommandPool>( &poolInfo, "vkCreateCommandPool" );
+  constexpr VkCommandPoolCreateInfo poolInfo2{
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext            = nullptr,
     .queueFamilyIndex = 1,
   };
-  VkUtilsXBase::clPPPI3<PFN_vkCreateCommandPool>( &poolInfo2, "vkCreateCommandPool", &commandPool2 );
+  commandPool2 = clPPPI3A<VkCommandPool, PFN_vkCreateCommandPool>( &poolInfo2, "vkCreateCommandPool" );
   if ( commandBuffer == nullptr )
   {
     const VkCommandBufferAllocateInfo allocateInfo{

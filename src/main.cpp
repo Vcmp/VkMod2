@@ -61,17 +61,49 @@ inline void * Sysm( void * pv_unused )
   while ( a )
   {
     std::cout << aa /* <<"--->"<< duration  */ << "\n";
-    // m4.loadAligned( BuffersX::data );
-    // m4.show();
+    std::cout << cc /* <<"--->"<< duration  */ << "\n";
+    m4.loadAligned( BuffersX::data );
+    m4.show();
     aa = 0;
     sleep( 1 );
   }
   return NULL;
 }
 
-int __cdecl main()  // __attribute__( ( __aligned__( 32 ) ) )
+int __cdecl main( int argc, char * argv[] )  // __attribute__( ( __aligned__( 32 ) ) )
 {
   std::iostream::sync_with_stdio( false );
+
+  std::cout << argv << "-->"
+            << "\n";
+  for ( int a = 0; a < argc; a++ )
+  {
+    std::cout << argv[a] << "\n";
+  }
+  int r;
+
+  r = pthread_create( &sys, nullptr, Sysm, nullptr );
+  renderer2::setupRenderDraw();
+  while ( !glfwWindowShouldClose( ( VkUtils2::window ) ) )
+  {
+    glfwPollEvents();
+    // glfwWaitEventsTimeout(1);
+
+    renderer2::drawFrame();
+    aa++;
+  }
+  a = false;
+  glfwPostEmptyEvent();
+  pthread_join( sys, nullptr );
+
+  glfwDestroyWindow( VkUtils2::window );
+  glfwTerminate();
+}
+
+// todo: Wake from callBack...
+
+inline void VkUtils2::extracted()
+{
   VkUtils2::setupWindow();
   VkUtils2::createInstance();
   VkUtils2::setupDebugMessenger();
@@ -98,41 +130,12 @@ int __cdecl main()  // __attribute__( ( __aligned__( 32 ) ) )
   UniformBufferObject::createDescriptorPool();
   UniformBufferObject::createDescriptorSets();
   PipelineX::createCommandBuffers();
-  int r;
-
-  r = pthread_create( &sys, nullptr, Sysm, nullptr );
-  renderer2::setupRenderDraw();
-  _mm256_zeroall();
-  while ( !glfwWindowShouldClose( ( VkUtils2::window ) ) )
-  {
-    glfwPollEvents();
-    // glfwWaitEventsTimeout(1);
-
-    renderer2::drawFrame();
-    aa++;
-  }
-  a = false;
-  glfwPostEmptyEvent();
-  pthread_join( sys, nullptr );
-
-  VkUtils2::cleanup();
-  glfwDestroyWindow( VkUtils2::window );
-  glfwTerminate();
-}
-
-// todo: Wake from callBack...
-
-inline void VkUtils2::extracted()
-{
-  //    BuffersX::createVkEvents();
-
-  // VkUtils2::createInstance;
 }
 long permuteMat( long, long );
 
 inline void VkUtils2::setupWindow()
 {
-  VkUtilsXBase::checkCall( volkInitialize() );
+  volkInitialize();
   glfwInit();
   glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
   glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
@@ -195,8 +198,9 @@ inline void VkUtils2::createInstance()
 
   // PointerBuffer instancePtr = memPointerBuffer(MemSysm.address, 1);
   // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
+  auto cl = reinterpret_cast<PFN_vkCreateInstance>( vkGetInstanceProcAddr( vkInstance, "vkCreateInstance" ) );
 
-  VkUtilsXBase::checkCall( vkCreateInstance( &InstCreateInfo, VK_NULL_HANDLE, &vkInstance ) );
+  VkUtilsXBase::checkCall( cl( &InstCreateInfo, VK_NULL_HANDLE, &vkInstance ) );
   volkLoadInstanceOnly( vkInstance );
   // getVersion();
 }

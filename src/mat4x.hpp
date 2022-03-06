@@ -3,6 +3,7 @@
 #include "Buffers.hpp"
 
 #include <array>
+#include <cstdio>
 #include <immintrin.h>
 #include <math.h>
 
@@ -11,33 +12,33 @@
  */
 
 static constexpr float ax[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
-inline static struct __attribute__( ( __vector_size__( 64 ), __aligned__( 64 ) ) ) mat4x
+inline static struct mat4x
 {
 public:
   __m256 __a;
   __m256 __b;
 
-  constexpr mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
+ mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
   // constexpr explicit mat4x( auto * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
   //  float a[2][8];
 
-  inline constexpr __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
-  inline void             domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
-  inline constexpr void   domatFMA( mat4x & /*b*/ );
+  inline __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  inline void domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
+  inline void domatFMA( mat4x & /*b*/ );
 
-  inline constexpr void __vectorcall loadTmp( const float[] );
-  inline constexpr void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
-  inline constexpr mat4x   loadAlignedA( const void * a ) __attribute__( ( preserve_most ) );
-  inline constexpr void    loadAligned( const mat4x * a ) __attribute__( ( preserve_most ) );
-  inline constexpr mat4x * identity();
-  inline void              neg();
-  inline void              setPerspective( float, float, float, float, bool );
-  inline constexpr mat4x   copyOf() __attribute__( ( pure ) );
-  inline void              show();
-  inline void              permute();
-  inline void              doPerspective( float, float, float, float );
-  inline void              doLook( float );
-  inline void              rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
+  inline void    loadTmp( const float[] );
+  inline void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
+  inline mat4x   loadAlignedA( const void * a ) __attribute__( ( preserve_most ) );
+  inline void    loadAligned( const mat4x * a ) __attribute__( ( preserve_most ) );
+  inline mat4x * identity();
+  inline void    neg();
+  inline void    setPerspective( float, float, float, float, bool );
+  inline mat4x   copyOf() __attribute__( ( pure ) );
+  inline void    show();
+  inline void    permute();
+  inline void    doPerspective( float, float, float, float );
+  inline void    doLook( float );
+  inline void    rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
 } m4, m5;
 
@@ -50,23 +51,23 @@ inline void mat4x::permute()
   x[2] = y[2];
 }
 
-inline constexpr void mat4x::loadTmp( const float * a )
+inline void mat4x::loadTmp( const float * a )
 {
   __a = _mm256_load_ps( a );
   __b = _mm256_load_ps( a + 8 );
 }
-inline constexpr mat4x mat4x::loadAlignedA( const void * a )
+inline mat4x mat4x::loadAlignedA( const void * a )
 {
   mat4x::__a = ( _mm256_load_ps( static_cast<float const *>( a ) ) );
   mat4x::__b = ( _mm256_load_ps( static_cast<float const *>( a ) + 8 ) );
   return *this;
 }
-inline constexpr void mat4x::loadAligned( const void * a )
+inline void mat4x::loadAligned( const void * a )
 {
   mat4x::__a = ( _mm256_load_ps( static_cast<float const *>( a ) ) );
   mat4x::__b = ( _mm256_load_ps( static_cast<float const *>( a ) + 8 ) );
 }
-inline constexpr void mat4x::loadAligned( const mat4x * a )
+inline void mat4x::loadAligned( const mat4x * a )
 {
   mat4x::__a = a->__a;
   mat4x::__b = a->__b;
@@ -84,7 +85,7 @@ inline void mat4x::domatFMA( mat4x * b, __m256 __Trans )
  * results if passed by pointer?refernce as it effectivley allows the state of the Matrix to be '"reset"'
 
  */
-inline constexpr void mat4x::domatFMA( mat4x & b )
+inline void mat4x::domatFMA( mat4x & b )
 {
   // _mm256_fmadd_ps
   __a = _mm256_mul_ps( __a, b.__a );
@@ -95,12 +96,12 @@ inline constexpr void mat4x::domatFMA( mat4x & b )
  * Note* casting issues usually mostly only occur with the AVX2 instrincis function delcarations  available
  * and while teh AVX counterparts for floats also do not supprot void* they instead supprot *float insetad which is till a great/considerable improvement
  */
-inline constexpr __m256 mat4x::lud( const float * a )
+inline __m256 mat4x::lud( const float * a )
 {
   return _mm256_load_ps( ( ( a ) ) );
 }
 
-inline constexpr mat4x * mat4x::identity()
+inline mat4x * mat4x::identity()
 {
   loadAligned( &( ax ) );
   return this;
@@ -112,7 +113,7 @@ inline void mat4x::neg()
   __b = _mm256_andnot_ps( __b, __a );
 }
 
-inline constexpr mat4x mat4x::copyOf()
+inline mat4x mat4x::copyOf()
 {
   return *this;
 }

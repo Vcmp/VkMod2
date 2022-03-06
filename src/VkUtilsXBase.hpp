@@ -1,4 +1,9 @@
 #pragma once
+#include <libloaderapi.h>
+#include <minwindef.h>
+#include <stdexcept>
+#include <vulkan/vulkan_core.h>
+
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_64_BIT_PTR_DEFINES 1
 #define VULKAN_HPP_SUPPORT_SPAN
@@ -17,14 +22,14 @@ inline namespace
   static inline constexpr __int128   aXX    = 0xF;
   static inline constexpr uint8_t    Frames = 3;
   static inline constexpr const bool checks = true;
-}  // namespace
 
+}  // namespace
 struct VkUtilsXBase
 {
 private:
-  typedef VkResult( __vectorcall * callPPPPI )( const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
-  const typedef VkResult( __vectorcall * callPPPPI2 )( const VkDevice, const void *, const VkAllocationCallbacks *, const void *, void * pHndl );
-  const typedef VkResult( __vectorcall * callPPPPI3 )( const VkDevice, const void *, const VkAllocationCallbacks *, const void * );
+  typedef VkResult ( *callPPPPI )( const VkDevice, const void *, const VkAllocationCallbacks *, const void *, const uint64_t & pHndl );
+  const typedef VkResult ( *callPPPPI2 )( const VkDevice, const void *, const VkAllocationCallbacks *, const void *, void * pHndl );
+  const typedef VkResult ( *callPPPPI3 )( const VkDevice, const void *, const VkAllocationCallbacks *, const void * );
   // typedef PFN_vkVoidFunction ( *load )( void *, const char * );
 
 public:
@@ -40,7 +45,7 @@ public:
   // being enabled, however if said Validation Layers are disabled, the memeory
   // leak virtually entirely disappears and at least thus far does not seem to be
   // an issue thankfully
-  static constexpr bool debug = true;
+  static constexpr bool debug = false;
 
   static constexpr bool ENABLE_VALIDATION_LAYERS = debug;
 
@@ -89,8 +94,7 @@ public:
     }
   }
 
-  typedef VkResult( __vectorcall * callPPPPJI )(
-    VkDevice, const void *, uint32_t *, const void *, VkAllocationCallbacks *, const void *, PFN_vkVoidFunction pHndl );
+  typedef VkResult ( *callPPPPJI )( VkDevice, const void *, uint32_t *, const void *, VkAllocationCallbacks *, const void *, PFN_vkVoidFunction pHndl );
   template <typename T>
   inline static constexpr auto getDevProd( const char * a )
   {

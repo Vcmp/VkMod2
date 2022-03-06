@@ -9,10 +9,9 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-
 // #include <stdint.h>
 
-struct VkUtils2
+static inline const struct VkUtils2
 {
   static constinit inline GLFWwindow *   window;
   static constinit inline GLFWmonitor *  monitor;
@@ -39,7 +38,12 @@ struct VkUtils2
   //    X(),
   //    Y
   //    KEY(1)
+  VkUtils2() __attribute__( ( cold ) )
+  {
+    extracted();
+  }
 
+  static void extracted();
   static void setupWindow();
 
   static void createInstance();
@@ -51,8 +55,11 @@ struct VkUtils2
   static void pickPhysicalDevice();
   static void createLogicalDevice();
   static void cleanup() __attribute__( ( cold ) );
+  ~VkUtils2()
+  {
+    cleanup();
+  }
   // static void createSwapChain();
   // static void createImageViews();
   // static void createPipeLine();
-  static void extracted();  // __attribute__( ( cold ) );
-};
+} VKU2;

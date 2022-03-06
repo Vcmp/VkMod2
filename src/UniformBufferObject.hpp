@@ -14,8 +14,8 @@ inline namespace
                        glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
   ;
   // glm::mat4 rot;
-  static const __m256     viewproj2x = m5.loadAlignedA( &viewproj ).__a;
-  static constexpr __m256 axvZXLI    = __extension__( __m256 ){ -1, -1, -1, -1, 0, 0, 0, 0 };
+  static const __m256     viewproj2x = *(const __m256 *)&viewproj;
+  static constexpr __m128 axvZXLI    = __extension__( __m128 ){ /*  -1, -1, -1, -1,  */ 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
 
 };  // namespace
 

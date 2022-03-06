@@ -13,12 +13,12 @@
  with Clang)
  static __int256 *__restrict__ ax = reinterpret_cast<__int256 *>(&ubo);
 */
-
+uint64_t       cc = 0;
 typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( m4 ) ), __aligned__( 64 ) ) );
 
 struct /* __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) */ renderer2
 {
-  static constexpr float ah = glm::radians( 90.0F );
+  static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
   static void            drawFrame() __attribute__( ( hot, flatten, preserve_most ) );
 
@@ -52,7 +52,7 @@ inline constexpr void renderer2::setupRenderDraw()
 {
   constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr };
 
-  ( VkUtilsXBase::clPPPI3<PFN_vkCreateSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore", &AvailableSemaphore ) );
+  ( AvailableSemaphore = Queues::clPPPI3A<VkSemaphore, PFN_vkCreateSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore" ) );
 }
 
 inline static void memPutLong( void * a, void const * b )
@@ -98,29 +98,28 @@ inline void renderer2::updateUniformBuffer()
   static constinit float c;
   static constinit float s;
   static constexpr float xs = 1;
-
   sincosf( glfwGetTime() * ah, &c, &s );
   __builtin_prefetch( BuffersX::data, 1, 3 );
-
   // const float ax = glfwGetTime() * ah;
 
   // rot = viewproj * glm::rotate( glm::identity<glm::mat4>(), ax, glm::vec3( 1, 0, 0 ) );
 
-  const __m128 ones = _mm_broadcast_ss( &xs );
+  // const __m128 ones = _mm_broadcast_ss( &xs );
   // _mm256_storeu2_m128i();
 
-  const __m256 aaa     = viewproj2x;
+  // const __m256 aa = viewproj2x;
+  // const __m256 osx2    = _mm256_set_ps( c, c, c, c, 0, 0, 0, 0 );
+  const __m128 osx2    = _mm_broadcast_ss( &c );
   const __m256 osx     = _mm256_broadcast_ss( &c );
   const __m256 osxyzsZ = _mm256_broadcast_ss( &s );
-  const __m128 o1sx    = -_mm_broadcast_ss( &c );
-  // const __m256 osxyzsZ2 = _mm256_movehdup_ps( osxyzsZ );
-  __m256 a =
-    // viewproj2x * __builtin_ia32_vinsertf128_ps256( _mm256_broadcast_ps( &osx ), _mm_xor_ps( osx, axv ), 1 );
-    viewproj2x * __builtin_ia32_vinsertf128_ps256( osx, o1sx, 1 );
+  // const __m256 XORS    = _mm256_sub_ps( _mm256_xor_ps( osx, osx2 ), osx2 );
+  const __m128 XORS = _mm_sub_ps( _mm_sub_ps( osx2, osx2 ), osx2 );
+
+  const __m256 a = viewproj2x * _mm256_insertf128_ps( osx, XORS, 1 );
   // _mm256_xor_ps( osx, axvZXLI );
   // _mm256_storeu2_m128( &c, &c2, a );
 
-  const auto x = __builtin_ia32_vfmaddsubps256( viewproj2x, osxyzsZ, a );
+  const auto x = _mm256_fmaddsub_ps( viewproj2x, osxyzsZ, a );
 
   _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
   _mm256_zeroupper();

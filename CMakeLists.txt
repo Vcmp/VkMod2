@@ -20,15 +20,15 @@ set(VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_
 # set(GLM_TEST_ENABLE_FAST_MATH ON CACHE BOOL "" FORCE)
 # set(GLM_TEST_ENABLE_SIMD_AVX ON CACHE BOOL "" FORCE)
 # set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
-add_subdirectory(brcxxc ENABLE_EXPORTS)
-add_executable(VkMod2 brcxxc )
+# add_subdirectory(brcxxc ENABLE_EXPORTS)
+add_executable(VkMod2 )
 
 message(STATUS "${CMAKE_CXX_COMPILE_FEATURES}")
 message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
 target_compile_features(VkMod2 PRIVATE cxx_std_23)
 target_compile_features(VkMod2 PRIVATE c_std_23)
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -fverbose-asm -save-temps -masm=intel -fvisibility=hidden -fno-semantic-interposition -pthread -lpthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -v -fverbose-asm -save-temps -masm=intel -fvisibility=hidden -fno-semantic-interposition -pthread -lpthread")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} -std=c2x ${CMAKE_CXX_FLAGS}")
 
 
@@ -53,7 +53,6 @@ add_subdirectory(glm EXCLUDE_FROM_ALL)
 add_subdirectory(volk EXCLUDE_FROM_ALL)
 # add_subdirectory(sleef)
 # add_subdirectory(brcxxc EXCLUDE_FROM_ALL)
-	
 target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 
 # add_dependencies(VkMod2 Shaders)
@@ -73,7 +72,7 @@ target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 # target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb_image")
 # target_include_directories(VkMod2 PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm")
 # target_include_directories(VkMod2 PUBLIC "$ENV{VULKAN_SDK}/Include")
-# target_include_directories("${PROJECT_SOURCE_DIR}/third_party/stb_image" INTERFACE stb_image)
+# target_include_directories("${PROJECT_CURRENT_SOURCE_DIR}/third_party/stb_image" INTERFACE stb_image)
 # target_link_libraries(VkMod2 stb_image)
 
 
@@ -87,22 +86,22 @@ find_program(GLSLC glslc HINTS $ENV{VULKAN_SDK}/Bin/)
 
 ## TODO: make this recompile shader files if they are changed/do not match checksums instead of having to mnaully delete them each time
 file(GLOB_RECURSE GLSL_SOURCE_FILES
-    "${PROJECT_SOURCE_DIR}/shaders/*.frag"
-    "${PROJECT_SOURCE_DIR}/shaders/*.vert"
-    "${PROJECT_SOURCE_DIR}/shaders/*.comp"
+    "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.frag"
+    "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.vert"
+    "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.comp"
     )
 
 ## iterate each shader
 foreach(GLSL ${GLSL_SOURCE_FILES})
   message(STATUS "BUILDING SHADER")
   get_filename_component(FILE_NAME ${GLSL} NAME)
-  set(SPIRV "${PROJECT_SOURCE_DIR}/bin/shaders/${FILE_NAME}.spv")
+  set(SPIRV "${PROJECT_CURRENT_SOURCE_DIR}/bin/shaders/${FILE_NAME}.spv")
   message(STATUS ${GLSL})
   ##execute glslang command to compile that specific shader
   add_custom_command(
     OUTPUT ${SPIRV}
     COMMAND ${GLSLC} ${GLSL} -O -o ${SPIRV}
-    DEPENDS "${PROJECT_SOURCE_DIR}/bin/shaders/")
+    DEPENDS "${PROJECT_CURRENT_SOURCE_DIR}/bin/shaders/")
   list(APPEND SPIRV_BINARY_FILES ${SPIRV})
   add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/binary_resources.hpp ${CMAKE_CURRENT_BINARY_DIR}/binary_resources.cpp

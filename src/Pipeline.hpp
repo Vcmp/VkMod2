@@ -4,6 +4,9 @@
 #include "UniformBufferObject.hpp"
 #include "mat4x.hpp"
 
+#include <iostream>
+
+
 inline namespace
 {
   static constexpr int OFFSETOF_COLOR = 3 * sizeof( float );
@@ -101,8 +104,8 @@ inline void PipelineX::createGraphicsPipelineLayout()
   static constexpr VkVertexInputBindingDescription VxL{ 0, ( 24 ), VK_VERTEX_INPUT_RATE_VERTEX };
 
   static constexpr VkVertexInputAttributeDescription attributeDescriptions[]{
-    { .location = 0, .binding = 0, VK_FORMAT_R32G32B32_SFLOAT, OFFSET_POS },
-    { .location = 1, .binding = 0, VK_FORMAT_R32G32B32_SFLOAT, OFFSETOF_COLOR },
+    { .location = 0, .binding = 0, .format=VK_FORMAT_R32G32B32_SFLOAT, .offset=OFFSET_POS },
+    { .location = 1, .binding = 0, .format=VK_FORMAT_R32G32B32_SFLOAT, .offset=OFFSETOF_COLOR },
 
   };
 
@@ -224,7 +227,9 @@ inline void PipelineX::createCommandBuffers()
    */
   const VkRect2D renderArea = { .offset = { 0, 0 }, .extent = SwapChainSupportDetails::swapChainExtent };
 
-  constexpr VkClearValue clearValues[2] = { [0].color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } }, [1].depthStencil = { 1.0F, 0 } };
+   VkClearValue clearValues[2] = { };
+   clearValues[0].color = { UNormFlt, UNormFlt, UNormFlt, 1.0F  };
+    clearValues[1].depthStencil = { 1.0F, 0 };
 
   VkRenderPassBeginInfo renderPassInfo = {};
   renderPassInfo.sType                 = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO );
