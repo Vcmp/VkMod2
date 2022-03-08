@@ -84,7 +84,7 @@ inline uint32_t BuffersX::findMemoryType( VkPhysicalDevice physicalDevice, uint3
   vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
   for ( uint32_t i = 0; i < memProperties.memoryTypeCount; i++ )
   {
-    if ( ( typeFilter & ( 1 << i ) ) != 0 && ( memProperties.memoryTypes[i].propertyFlags & properties ) == properties )
+    if ( ( typeFilter & ( 1U << i ) ) != 0 && ( memProperties.memoryTypes[i].propertyFlags & properties ) == properties )
     {
       return i;
     }
@@ -110,7 +110,6 @@ inline void BuffersX::copyBuffer( VkBuffer & dst, const size_t sized )
     .dstOffset = 0,
     .size      = sized,
   };
-  // MemSysm.Memsys2.free(vkBufferCopy);
   vkCmdCopyBuffer( queues.commandBuffer, Bufferstaging, dst, 1, &vkBufferCopy );
   Queues::endSingleTimeCommands();
 }
@@ -120,13 +119,11 @@ inline void BuffersX::setupBuffers()
   auto x1 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
   auto p1 = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
   createSetBuffer( p1, vertexBuffer, x1, sizedsf, vertexBufferMemory );
-  // vertexBufferMemory=createBuffer2(p1, vertexBuffer);
 
-  auto           x2 = static_cast<VkBufferUsageFlagBits>( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT );
-  constexpr auto p  = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT );
+  VkBufferUsageFlagBits x2 = { VK_BUFFER_USAGE_TRANSFER_SRC_BIT };
+  constexpr auto        p  = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
   createSetBuffer( p, Bufferstaging, x2, sizedsf, stagingBufferMemory );
 
-  // stagingBufferMemory= createBuffer2(p, Bufferstaging);
   auto x3 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
   createSetBuffer( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory );
 
@@ -170,5 +167,4 @@ inline void BuffersX::createSetBuffer(
   VkUtilsXBase::clPPPI3<PFN_vkAllocateMemory>( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
 
   VkUtilsXBase::checkCall( vkBindBufferMemory( Queues::device, currentBuffer, vertexBufferMemory, 0 ) );
-  // memPutLong( device.address(), a);
 }

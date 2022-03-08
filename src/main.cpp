@@ -6,45 +6,8 @@
 #include <unistd.h>
 
 // #define ASAN_OPTIONS = debug=true
+using BuffersX::data;
 
-/*
-    This is horribly Ported from  Prior Java version written with LWJGL 3 so May Suffer/Incur Considerable Breakage
-    Assumed to compile and run with a 4790K and a GTX 1080Ti and may not be gurenteed to function on all  hardware
-   configurations
-    TODO:
-        Use Imageless Framebuffers to cleanup the ugly setups used for the FrameBuffer/SwapChain
-        Setup a proper VBO/Instancing setup tomallow seperage "Chunks" to be Added, removed and updated incrementally as
-   needed Change GLM MAtrix Functions/Handling for built-in native setup with AVX/FMA3 Allow Simple
-   text.Temetry>Diganostics/Other data to be Displayed/Composited/rendered on Screen to avoid the need for the poential
-   overhead needed for dedicated threads just to print to stdout
-
-        Find a better setup than the Simulatneous submission used currently for Command Buffers to avoid additonal cpu
-   overhead from submissions e.g. Setup dedicated Transfer Queue: (Apparently at least on Nvidia Thrasfer queus have a
-   slightly higher Peak throught and effciency than the pther queue families )
-
-    ISSUES:
-        Slow Linking/COmpile Speed on incremental Changes/Compilations: nut sue if a CMAke/COmpiler/Clang64 /.Misc
-   confiogurtaion ssue or due to the poor Linking layout/Hieracy.Namespace spam Used.utilsied which may be bogigng donw
-   the linked eg. Should try on GCC.ICC and not just Clang Likely not gurenteed to Wokr/Compule;Function witH MSVC:-> as
-   while this has been compiled on Windows thsi was done however witH MSys2+ Clang64+ libc++ isnetad of teh more
-   conventional MSVC+WIn10/8.1/7 SDk with libstdc++ Also some specific extentions/Cpaboltirs/Macros/may not evaluate /Be
-   Detected.Impleemt priperly (e.g. __int128, some specific intrinic hearer functions suchas __BiTScanForward64 Being
-   Different on MSVC vs other Compilers/headers.Standardisations e.g. .Misc.Etc. I.E.)
-
-        BuGS:
-
-
-
-        Fixes:
-    Linking is still slow but has been creately improved with the use of the Dynamic loader Volk livrary which uses more efficient linking setup that the native
-   /raw Vulkan Headers on their own; also much of the linking overehad is also was also foun to be due to G:FW which without PCH will be diifuclt to work around
-   due to its neccesitation as a Window Libraty/Framework
-*/
-// asm( "fileData:    .incbin \"21_shader_ubo.frag.spv\"" );
-// // asm( "fileDataEnd: db 0x00" );
-// extern const char fileData[];
-// extern const char fileDataEnd[];
-// const int   fileDataSize = fileDataEnd - fileData + 1;
 inline namespace
 {
 
@@ -54,7 +17,7 @@ inline namespace
   // static inline pthread_t rThrd;
 
 }  // namespace
-// Apparently Threads other than the  main thread have much smaller stall alloctaion Sizes... (Can't/Unable to confirm this however (this far/Currently))
+// Apparently Threads other than the  main thread have much smaller stacl alloctaion Sizes... (Can't/Unable to confirm this however (thus far/Currently))
 inline void * Sysm( void * pv_unused )
 {
   // _mm256_zeroall();
@@ -62,8 +25,8 @@ inline void * Sysm( void * pv_unused )
   {
     std::cout << aa /* <<"--->"<< duration  */ << "\n";
     std::cout << cc /* <<"--->"<< duration  */ << "\n";
-    m4.loadAligned( BuffersX::data );
-    m4.show();
+    // m4.loadAligned( BuffersX::data );
+    // m4.show();
     aa = 0;
     sleep( 1 );
   }
@@ -117,14 +80,9 @@ inline void VkUtils2::extracted()
   UniformBufferObject::createDescriptorSetLayout();
   PipelineX::createGraphicsPipelineLayout();
   Queues::createCommandPool();
-  //   Texture::createDepthResources();
   BuffersX::setupBuffers();
-  //   BuffersX::createVertexBuffer();
-  //   BuffersX::createStagingBuffer();
-  //   BuffersX::createIndexBuffer();
   SwapChainSupportDetails::createFramebuffers();
 
-  //   Texture::createDepthResources();
   UniformBufferObject::createUniformBuffers();
 
   UniformBufferObject::createDescriptorPool();
@@ -145,11 +103,9 @@ inline void VkUtils2::setupWindow()
 
   window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
 
-  // assert( window );
-  //  exit( 1 );
+  assert( window );
 
   glfwSetWindowShouldClose( ( window ), false );
-  // glfwMakeContextCurrent( ( window ) );
 }
 
 inline void VkUtils2::createInstance()
@@ -164,20 +120,21 @@ inline void VkUtils2::createInstance()
                                                                    VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
                                                                    VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT };
   constexpr VkValidationFeaturesEXT             extValidationFeatures = {
-                .sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT, .enabledValidationFeatureCount = 3, .pEnabledValidationFeatures = valdFeatures,
-    // extValidationFeatures.pEnabledValidationFeatures=&a;
+                .sType                         = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
+                .enabledValidationFeatureCount = 3,
+                .pEnabledValidationFeatures    = valdFeatures,
   };
 
-  constexpr VkApplicationInfo vkApplInfo = { // memSet(vkApplInfo, 0,VkApplicationInfo.SIZEOF);
+  constexpr VkApplicationInfo vkApplInfo = {
 
-                                             .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-                                             .pNext              = VK_NULL_HANDLE,
-                                             .pApplicationName   = "VKMod2",
-                                             .applicationVersion = VK_MAKE_VERSION( 1, 2, 0 ),
-                                             .pEngineName        = "No Engine",
-                                             .engineVersion      = VK_MAKE_VERSION( 1, 2, 0 ),
+    .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+    .pNext              = VK_NULL_HANDLE,
+    .pApplicationName   = "VKMod2",
+    .applicationVersion = VK_MAKE_VERSION( 1, 2, 0 ),
+    .pEngineName        = "No Engine",
+    .engineVersion      = VK_MAKE_VERSION( 1, 2, 0 ),
 
-                                             .apiVersion = VK_API_VERSION_1_2
+    .apiVersion = VK_API_VERSION_1_2
   };
   VkInstanceCreateInfo InstCreateInfo    = {};
   InstCreateInfo.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -196,13 +153,10 @@ inline void VkUtils2::createInstance()
   else
     InstCreateInfo.enabledLayerCount = 0;
 
-  // PointerBuffer instancePtr = memPointerBuffer(MemSysm.address, 1);
-  // vkCreateInstance(InstCreateInfo, MemSysm.pAllocator, instancePtr);
   auto cl = reinterpret_cast<PFN_vkCreateInstance>( vkGetInstanceProcAddr( vkInstance, "vkCreateInstance" ) );
 
   VkUtilsXBase::checkCall( cl( &InstCreateInfo, VK_NULL_HANDLE, &vkInstance ) );
   volkLoadInstanceOnly( vkInstance );
-  // getVersion();
 }
 
 inline void VkUtils2::createSurface()
@@ -266,7 +220,6 @@ inline void VkUtils2::setupDebugMessenger()
     .pUserData       = VK_NULL_HANDLE,
   };
   VkUtilsXBase::checkCall( createDebugUtilsMessengerEXT( vkInstance, &createInfo ) );
-  // debugMessenger = pDebugMessenger[0];
 }
 
 inline VkResult VkUtils2::createDebugUtilsMessengerEXT( const VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT * pCreateInfo )
@@ -292,7 +245,6 @@ inline void VkUtils2::pickPhysicalDevice()
     std::runtime_error( "Failed to find GPUs with Vulkan support" );
   VkPhysicalDevice ppPhysicalDevices[deviceCount];
 
-  // VkPhysicalDevice device;
   std::cout << ( "Enumerate Physical Device" ) << "\n";
   VkUtilsXBase::checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, ppPhysicalDevices ) );
   for ( const VkPhysicalDevice & d : ppPhysicalDevices )
@@ -311,7 +263,7 @@ inline void VkUtils2::pickPhysicalDevice()
     std::runtime_error( "Failed to find a suitable GPU" );
   }
 }
-// Use VK Tutorial refernce as that sems to be far m re replable that the prior
+// Use VK Tutorial refernce as that sems to be far more reliable that the prior
 // java approach used
 inline bool VkUtils2::isDeviceSuitable( const VkPhysicalDevice device )
 {
@@ -339,8 +291,6 @@ inline void VkUtils2::checkDeviceExtensionSupport( VkPhysicalDevice device )
   vkEnumerateDeviceExtensionProperties( device, VK_NULL_HANDLE, &extensionCount, availableExtensions );
   std::cout << extensionCount << "->Extensions"
             << "\n";
-  // delete[] &availableExtensions;
-  // return requiredExtensions.;
 }
 
 inline void VkUtils2::createLogicalDevice()
@@ -354,7 +304,7 @@ inline void VkUtils2::createLogicalDevice()
   vkGetPhysicalDeviceQueueFamilyProperties( Queues::physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies );
 
   uint32_t i = 0;
-  // todo: Likley/Prop won;t work with AMD properly
+  // todo: Likley/Prop won't work with AMD properly and/or specific GPUs with differing Queue Family layouts
   for ( VkQueueFamilyProperties & uniqueQueue : uniqueQueueFamilies )
   {
     std::cout << ( uniqueQueue.queueCount ) << "\n";

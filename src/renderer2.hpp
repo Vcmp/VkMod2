@@ -5,6 +5,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
 
+#include <cmath>
 #include <immintrin.h>
 
 /*
@@ -20,7 +21,7 @@ struct /* __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__(
 {
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  static void            drawFrame() __attribute__( ( hot, flatten, preserve_most ) );
+  static void            drawFrame();
 
 private:
   constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
@@ -94,9 +95,9 @@ static inline void * __movsb( void * d, const void * s, size_t n )
 inline void renderer2::updateUniformBuffer()
 {
   // const float time = static_cast<float>( glfwGetTime() ) * ah;
-
-  static constinit float c;
-  static constinit float s;
+  // static constinit float            tm;// = glfwGetTime() * ah;
+  static constinit float c;  // = cosf( tm );
+  static constinit float s;  // = sinf( tm );
   static constexpr float xs = 1;
   sincosf( glfwGetTime() * ah, &c, &s );
   __builtin_prefetch( BuffersX::data, 1, 3 );
@@ -109,9 +110,9 @@ inline void renderer2::updateUniformBuffer()
 
   // const __m256 aa = viewproj2x;
   // const __m256 osx2    = _mm256_set_ps( c, c, c, c, 0, 0, 0, 0 );
-  const __m128 osx2    = _mm_broadcast_ss( &c );
-  const __m256 osx     = _mm256_broadcast_ss( &c );
-  const __m256 osxyzsZ = _mm256_broadcast_ss( &s );
+  const __m128 osx2    = _mm_set1_ps( c );
+  const __m256 osx     = _mm256_set1_ps( c );
+  const __m256 osxyzsZ = _mm256_set1_ps( s );
   // const __m256 XORS    = _mm256_sub_ps( _mm256_xor_ps( osx, osx2 ), osx2 );
   const __m128 XORS = _mm_sub_ps( _mm_sub_ps( osx2, osx2 ), osx2 );
 
@@ -121,7 +122,7 @@ inline void renderer2::updateUniformBuffer()
 
   const auto x = _mm256_fmaddsub_ps( viewproj2x, osxyzsZ, a );
 
-  _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
+  _mm256_store_ps( reinterpret_cast<float *>( data ), x );
   _mm256_zeroupper();
 
   // memcpy( BuffersX::data, &x, sizeof( x ) );

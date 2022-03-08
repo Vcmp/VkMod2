@@ -3,9 +3,9 @@
 #include "Buffers.hpp"
 
 #include <array>
+#include <cmath>
 #include <cstdio>
 #include <immintrin.h>
-#include <math.h>
 
 /*
  *too lazy to do an SSE version as AVX in many cases can allow for the ability to the same steps in half as many stages
@@ -18,13 +18,13 @@ public:
   __m256 __a;
   __m256 __b;
 
- mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
+  constexpr mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
   // constexpr explicit mat4x( auto * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
   //  float a[2][8];
 
-  inline __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
-  inline void domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
-  inline void domatFMA( mat4x & /*b*/ );
+  inline constexpr __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  inline void             domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
+  inline void             domatFMA( mat4x & /*b*/ );
 
   inline void    loadTmp( const float[] );
   inline void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
@@ -96,9 +96,9 @@ inline void mat4x::domatFMA( mat4x & b )
  * Note* casting issues usually mostly only occur with the AVX2 instrincis function delcarations  available
  * and while teh AVX counterparts for floats also do not supprot void* they instead supprot *float insetad which is till a great/considerable improvement
  */
-inline __m256 mat4x::lud( const float * a )
+inline constexpr __m256 mat4x::lud( const float * a )
 {
-  return _mm256_load_ps( ( ( a ) ) );
+  return *(const __m256 *)( ( ( a ) ) );
 }
 
 inline mat4x * mat4x::identity()

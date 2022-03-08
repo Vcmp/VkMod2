@@ -2,9 +2,10 @@
 
 
 cmake_minimum_required (VERSION 3.22)
+set(CMAKE_C_COMPILER_TARGET x86_64-w64-windows-gnu)
+set(CMAKE_CXX_COMPILER_TARGET x86_64-w64-windows-gnu)
 
 project ("VkMod2")
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
@@ -28,10 +29,10 @@ message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
 target_compile_features(VkMod2 PRIVATE cxx_std_23)
 target_compile_features(VkMod2 PRIVATE c_std_23)
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -v -fverbose-asm -save-temps -masm=intel -fvisibility=hidden -fno-semantic-interposition -pthread -lpthread")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -save-temps=temps -masm=intel -fvisibility=hidden -fno-semantic-interposition -pthread -lpthread -Wall -Wextra -Wpedantic")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} -std=c2x ${CMAKE_CXX_FLAGS}")
-
-
+message(STATUS ${CMAKE_CXX_FLAGS_INIT})
+message(STATUS ${CMAKE_CXX_FLAGS})
 # Add source to this project's executable.
 
 	target_sources(VkMod2 

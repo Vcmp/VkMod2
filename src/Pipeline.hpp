@@ -6,14 +6,13 @@
 
 #include <iostream>
 
-
 inline namespace
 {
   static constexpr int OFFSETOF_COLOR = 3 * sizeof( float );
   static constexpr int OFFSET_POS     = 0;
 
   static constexpr int                     OFFSETOF_TEXTCOORDS = ( 3 + 3 ) * sizeof( float );
-  static constexpr float                   UNormFlt            = 0.1F;
+  static constexpr float                   UNormFlt            = 0.0F;
   static constinit inline VkPipelineLayout vkLayout;
   static constinit inline VkPipeline       graphicsPipeline;
   static constinit inline VkCommandBuffer  commandBuffers[Frames];
@@ -103,9 +102,9 @@ inline void PipelineX::createGraphicsPipelineLayout()
 
   static constexpr VkVertexInputBindingDescription VxL{ 0, ( 24 ), VK_VERTEX_INPUT_RATE_VERTEX };
 
-  static constexpr VkVertexInputAttributeDescription attributeDescriptions[]{
-    { .location = 0, .binding = 0, .format=VK_FORMAT_R32G32B32_SFLOAT, .offset=OFFSET_POS },
-    { .location = 1, .binding = 0, .format=VK_FORMAT_R32G32B32_SFLOAT, .offset=OFFSETOF_COLOR },
+  static constexpr VkVertexInputAttributeDescription attributeDescriptions[2]{
+    { .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = OFFSET_POS },
+    { .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = OFFSETOF_COLOR },
 
   };
 
@@ -225,19 +224,29 @@ inline void PipelineX::createCommandBuffers()
                                                             &SwapChainSupportDetails::swapChainImageViews[0] };
 
    */
-  const VkRect2D renderArea = { .offset = { 0, 0 }, .extent = SwapChainSupportDetails::swapChainExtent };
+  constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = SwapChainSupportDetails::swapChainExtent };
 
-   VkClearValue clearValues[2] = { };
-   clearValues[0].color = { UNormFlt, UNormFlt, UNormFlt, 1.0F  };
-    clearValues[1].depthStencil = { 1.0F, 0 };
+  // constexpr VkClearColorValue aa[] = { { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } };
+  // // constexpr VkClearDepthStencilValue aaa[] = { { { 0.0F, 1.0F } } };
+  // constexpr VkClearValue clearValues = {
+  //   .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } }
+  //   // .depthStencil = { 0.0F, static_cast<uint32_t>( 1.0F ) },
+  // };
+  constexpr VkClearValue clearValues2[2] = { { .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } }, { .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } } };
 
-  VkRenderPassBeginInfo renderPassInfo = {};
-  renderPassInfo.sType                 = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO );
-  renderPassInfo.pClearValues          = clearValues;
-  renderPassInfo.clearValueCount       = 2;
-  renderPassInfo.renderPass            = ( renderPass );
-  renderPassInfo.renderArea            = renderArea;
-  uint8_t i                            = 0;
+  // {
+  //   .color        = { UNormFlt, UNormFlt, UNormFlt, 1.0F },
+  //   .depthStencil = { 0.0F, static_cast<uint32_t>( 1.0F ) },
+  // },
+
+  static VkRenderPassBeginInfo renderPassInfo = {
+    .sType           = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO ),
+    .renderPass      = ( renderPass ),
+    .renderArea      = renderArea,
+    .clearValueCount = 2,
+    .pClearValues    = clearValues2,
+  };
+  static uint8_t i = 0;
   vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &data );
   static constexpr VkDeviceSize offsets[] = { 0 };
   m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
@@ -255,7 +264,7 @@ inline void PipelineX::createCommandBuffers()
 
     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
 
-    memcpy( ( data ), ( &m4 ), sizeof( mat4x ) );
+    __builtin_memcpy_inline( ( data ), ( &m4 ), sizeof( mat4x ) );
 
     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 

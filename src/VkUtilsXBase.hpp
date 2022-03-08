@@ -1,8 +1,6 @@
 #pragma once
-#include <libloaderapi.h>
-#include <minwindef.h>
+
 #include <stdexcept>
-#include <vulkan/vulkan_core.h>
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_64_BIT_PTR_DEFINES 1
@@ -19,7 +17,7 @@ inline namespace
   static inline constexpr const uint16_t width  = 854;
   static inline constexpr const uint16_t height = 480;
 
-  static inline constexpr __int128   aXX    = 0xF;
+  //  static inline constexpr __int128   aXX    = 0xF;
   static inline constexpr uint8_t    Frames = 3;
   static inline constexpr const bool checks = true;
 
@@ -41,7 +39,7 @@ public:
   }
 
   // Their may seem to be an anomalous memory leak when the main render Loop/Draw
-  // Call is used; howver this is mearly/primaro;y due to the Validation layers
+  // Call is used; howver this is primarily due to the Validation layers
   // being enabled, however if said Validation Layers are disabled, the memeory
   // leak virtually entirely disappears and at least thus far does not seem to be
   // an issue thankfully
