@@ -1,12 +1,6 @@
-// #include "mat4.hpp"
-#include "VkUtils2.ixx"
-#include "renderer2.hpp"
-
-#include <pthread.h>
-#include <unistd.h>
+#include "Interface.hpp"
 
 // #define ASAN_OPTIONS = debug=true
-using BuffersX::data;
 
 inline namespace
 {
@@ -63,6 +57,85 @@ int __cdecl main( int argc, char * argv[] )  // __attribute__( ( __aligned__( 32
   glfwTerminate();
 }
 
+inline constexpr void renderer2::setupRenderDraw()
+{
+  constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr };
+
+  ( AvailableSemaphore = Queues::clPPPI3A<VkSemaphore, PFN_vkCreateSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore" ) );
+}
+
+inline static void memPutLong( void * a, void const * b )
+{
+  a = &b;
+}
+
+// Lazy way to avoid having to deal with fences via use of SIMULTANEOUS USE BIT
+// which depsote the apparent ineffciency of redundant submision is drastically
+// more performant than a considrrable degree of more contventional
+// fence/Synchronisation setups
+inline void renderer2::drawFrame()
+{
+  // m4.loadAligned( &m5 );
+  vkAcquireNextImageKHR( Queues::device, swapChain, -1, AvailableSemaphore, nullptr, &currentFrame );
+  // __builtin_prefetch( BuffersX::data );
+  // __builtin_prefetch( &viewproj2x );
+  updateUniformBuffer();
+  info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
+
+  vkQueueSubmit( Queues::GraphicsQueue, 1, &info, nullptr );
+
+  //  info.pWaitSemaphores = &AvailableSemaphore;
+
+  vkQueuePresentKHR( Queues::GraphicsQueue, &VkPresentInfoKHR1 );
+
+  currentFrame = currentFrame + __builtin_parity( Frames );
+}
+
+constexpr inline void renderer2::memcpy2( __int256 * __restrict__ _Dst, __int256 const * __restrict__ _Src, size_t _MaxCount )
+{
+  *_Dst = *_Src;
+}
+static inline void * __movsb( void * d, const void * s, size_t n )
+{
+  asm volatile( "rep movsb" : "=D"( d ), "=S"( s ), "=c"( n ) : "0"( d ), "1"( s ), "2"( n ) : "memory" );
+  return d;
+}
+inline void renderer2::updateUniformBuffer()
+{
+  // const float time = static_cast<float>( glfwGetTime() ) * ah;
+  // static constinit float            tm;// = glfwGetTime() * ah;
+  static constinit float c;  // = cosf( tm );
+  static constinit float s;  // = sinf( tm );
+  static constexpr float xs = 1;
+  sincosf( glfwGetTime() * ah, &c, &s );
+  __builtin_prefetch( BuffersX::data, 1, 3 );
+  // const float ax = glfwGetTime() * ah;
+
+  // rot = viewproj * glm::rotate( glm::identity<glm::mat4>(), ax, glm::vec3( 1, 0, 0 ) );
+
+  // const __m128 ones = _mm_broadcast_ss( &xs );
+  // _mm256_storeu2_m128i();
+
+  // const __m256 aa = viewproj2x;
+  // const __m256 osx2    = _mm256_set_ps( c, c, c, c, 0, 0, 0, 0 );
+  const __m128 osx2    = _mm_set1_ps( c );
+  const __m256 osx     = _mm256_set1_ps( c );
+  const __m256 osxyzsZ = _mm256_set1_ps( s );
+  // const __m256 XORS    = _mm256_sub_ps( _mm256_xor_ps( osx, osx2 ), osx2 );
+  const __m128 XORS = _mm_sub_ps( _mm_sub_ps( osx2, osx2 ), osx2 );
+
+  const __m256 a = viewproj2x * _mm256_insertf128_ps( osx, XORS, 1 );
+  // _mm256_xor_ps( osx, axvZXLI );
+  // _mm256_storeu2_m128( &c, &c2, a );
+
+  const auto x = _mm256_fmaddsub_ps( viewproj2x, osxyzsZ, a );
+
+  _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
+  _mm256_zeroupper();
+
+  // memcpy( BuffersX::data, &x, sizeof( x ) );
+}
+
 // todo: Wake from callBack...
 
 inline void VkUtils2::extracted()
@@ -76,9 +149,9 @@ inline void VkUtils2::extracted()
   SwapChainSupportDetails::setupImageFormats();
   SwapChainSupportDetails::createSwapChain();
   SwapChainSupportDetails::createImageViews();
-  createRenderPasses();
+  PX.createRenderPasses();
   UniformBufferObject::createDescriptorSetLayout();
-  PipelineX::createGraphicsPipelineLayout();
+  PX.createGraphicsPipelineLayout();
   Queues::createCommandPool();
   BuffersX::setupBuffers();
   SwapChainSupportDetails::createFramebuffers();
@@ -407,6 +480,6 @@ void VkUtils2::cleanup()
     vkDestroyFramebuffer( Queues::device, framebuffer, nullptr );
   }
 
-  vkDestroyBuffer( Queues::device, vertexBuffer, nullptr );
-  vkFreeMemory( Queues::device, vertexBufferMemory, nullptr );
+  vkDestroyBuffer( Queues::device, BuffersX::vertexBuffer, nullptr );
+  vkFreeMemory( Queues::device, BuffersX::vertexBufferMemory, nullptr );
 }

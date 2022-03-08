@@ -2,11 +2,20 @@
 
 #include "SwapChainSupportDetails.hpp"
 
+#include <immintrin.h>
+
+#define GLM_FORCE_LEFT_HANDED
+
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_float4x4.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "mat4x.hpp"
+
 // = (&set + sizeof(set));
 
-inline namespace BuffersX
+// Can't use inetrnal Linkage anyMore unfortuately due to need to link to Main/Pooled/Addregated Implemenaion/.CPP File
+struct BuffersX
 {
-
   static constinit inline void * data = nullptr;  // Similar to the Hardcodes Address Field in the Memory Allocation
                                                   // System used in the Java Version
 
@@ -19,51 +28,48 @@ inline namespace BuffersX
   static constinit inline VkBuffer       indexBuffer;
   static constinit inline VkDeviceMemory indexBufferMemory;
 
-  inline namespace
-  {
-    inline constexpr float        x         = 0;
-    inline constexpr float        y         = 1;
-    static inline constexpr float vectBuf[] = {
-      /*0  -->*/ x,  x, x, 1, 0, 0,
-      /*1  -->*/ y,  y, x, x, y, x,
-      /*2  -->*/ y,  y, x, x, x, y,
-      /*3  -->*/ x,  y, x, y, y, y,
+  static inline constexpr float x         = 0;
+  static inline constexpr float y         = 1;
+  static inline constexpr float vectBuf[] = {
+    /*0  -->*/ x,  x, x, 1, 0, 0,
+    /*1  -->*/ y,  y, x, x, y, x,
+    /*2  -->*/ y,  y, x, x, x, y,
+    /*3  -->*/ x,  y, x, y, y, y,
 
-      /*4  -->*/ x,  x, y, y, x, x,
-      /*5  -->*/ y,  x, y, x, y, x,
-      /*6  -->*/ y,  y, y, x, x, y,
-      /*7  -->*/ x,  y, y, y, y, y,
+    /*4  -->*/ x,  x, y, y, x, x,
+    /*5  -->*/ y,  x, y, x, y, x,
+    /*6  -->*/ y,  y, y, x, x, y,
+    /*7  -->*/ x,  y, y, y, y, y,
 
-      /*8  -->*/ x,  x, x, y, x, x,
-      /*9  -->*/ y,  x, x, x, y, x,
-      /*10  -->*/ y, x, y, x, x, y,
-      /*11  -->*/ x, x, y, y, y, y,
+    /*8  -->*/ x,  x, x, y, x, x,
+    /*9  -->*/ y,  x, x, x, y, x,
+    /*10  -->*/ y, x, y, x, x, y,
+    /*11  -->*/ x, x, y, y, y, y,
 
-      /*12  -->*/ x, y, y, y, x, x,
-      /*13  -->*/ y, y, y, x, y, x,
-      /*14  -->*/ y, y, x, x, x, y,
-      /*15  -->*/ x, y, x, y, y, y,
+    /*12  -->*/ x, y, y, y, x, x,
+    /*13  -->*/ y, y, y, x, y, x,
+    /*14  -->*/ y, y, x, x, x, y,
+    /*15  -->*/ x, y, x, y, y, y,
 
-      /*16  -->*/ x, x, y, y, x, x,
-      /*17  -->*/ x, y, y, x, y, x,
-      /*18  -->*/ x, y, x, x, x, y,
-      /*19  -->*/ x, x, x, y, y, y,
+    /*16  -->*/ x, x, y, y, x, x,
+    /*17  -->*/ x, y, y, x, y, x,
+    /*18  -->*/ x, y, x, x, x, y,
+    /*19  -->*/ x, x, x, y, y, y,
 
-      /*20  -->*/ y, x, x, y, x, x,
-      /*21  -->*/ y, y, x, x, y, x,
-      /*22  -->*/ y, y, y, x, x, y,
-      /*23  -->*/ y, x, y, y, y, y,
+    /*20  -->*/ y, x, x, y, x, x,
+    /*21  -->*/ y, y, x, x, y, x,
+    /*22  -->*/ y, y, y, x, x, y,
+    /*23  -->*/ y, x, y, y, y, y,
 
-    };
-    static constexpr short idxBuf[] = {
-      0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4, 8, 9, 10, 10, 11, 8, 12, 13, 14, 14, 15, 12, 16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20,
-    };
+  };
+  static constexpr short idxBuf[] = {
+    0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4, 8, 9, 10, 10, 11, 8, 12, 13, 14, 14, 15, 12, 16, 17, 18, 18, 19, 16, 20, 21, 22, 22, 23, 20,
+  };
 
-    constexpr size_t sizedsf    = sizeof( vectBuf );
-    constexpr size_t sizedsfIdx = sizeof( idxBuf );
+  static constexpr size_t sizedsf    = sizeof( vectBuf );
+  static constexpr size_t sizedsfIdx = sizeof( idxBuf );
 
-    static void copyBuffer( VkBuffer &, const size_t );
-  }  // namespace
+  static void copyBuffer( VkBuffer &, const size_t );
 
   // static VkOffset2D set{.x = 0, .y = 0};
 
@@ -78,93 +84,144 @@ inline namespace BuffersX
 
 };  // namespace BuffersX
 
-inline uint32_t BuffersX::findMemoryType( VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlagBits properties )
+inline namespace
 {
-  VkPhysicalDeviceMemoryProperties memProperties = {};
-  vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
-  for ( uint32_t i = 0; i < memProperties.memoryTypeCount; i++ )
+
+  glm::mat4 viewproj = glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
+                       glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
+  ;
+  // glm::mat4 rot;
+  static const __m256     viewproj2x = *(const __m256 *)&viewproj;
+  static constexpr __m128 axvZXLI    = __extension__( __m128 ){ /*  -1, -1, -1, -1,  */ 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
+
+};  // namespace
+
+// static inline struct alignas( ( 64 ) ) UBO
+// {
+//   glm::mat4 model = viewproj;
+//   // mat4 Trans;
+// } ubo;
+struct UniformBufferObject
+{
+  static constinit const size_t                 Sized = ( sizeof( viewproj ) );
+  static constinit inline VkDescriptorSet       descriptorSets;
+  static constinit inline VkDescriptorSetLayout descriptorSetLayout;
+  static constinit inline VkDescriptorPool      descriptorPool;
+  static constinit inline VkImageView           textureImageView;
+  static constinit inline VkBuffer              uniformBuffers;
+  static constinit inline VkDeviceMemory        uniformBuffersMemory;
+
+  static constexpr void createDescriptorSetLayout()
   {
-    if ( ( typeFilter & ( 1U << i ) ) != 0 && ( memProperties.memoryTypes[i].propertyFlags & properties ) == properties )
+    // m5.loadAligned( &viewproj2 );
+
     {
-      return i;
+      constexpr VkDescriptorSetLayoutBinding bindings = {
+        .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        /* { .binding = 1,
+          .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+          .descriptorCount = 1,
+          .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT} */
+      };
+      // samplerLayoutBinding
+
+      const VkDescriptorSetLayoutCreateInfo a{
+        .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = 1,
+        .pBindings    = &bindings,
+
+      };
+      VkUtilsXBase::clPPPI3<PFN_vkCreateDescriptorSetLayout>( &a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout );
     }
   }
 
-  throw std::runtime_error( "Failed to find suitable memory type" );
-}
-
-inline void BuffersX::createVkEvents()
-{
-  VkEventCreateInfo vkEventCreateInfo = {};
-  vkEventCreateInfo.sType             = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
-  vkEventCreateInfo.pNext             = nullptr;
-
-  VkUtilsXBase::clPPPI3<PFN_vkCreateEvent>( &vkEventCreateInfo, "vkCreateEvent", &vkEvent );
-}
-
-inline void BuffersX::copyBuffer( VkBuffer & dst, const size_t sized )
-{
-  Queues::beginSingleTimeCommands();
-  const VkBufferCopy vkBufferCopy{
-    .srcOffset = 0,
-    .dstOffset = 0,
-    .size      = sized,
-  };
-  vkCmdCopyBuffer( queues.commandBuffer, Bufferstaging, dst, 1, &vkBufferCopy );
-  Queues::endSingleTimeCommands();
-}
-
-inline void BuffersX::setupBuffers()
-{
-  auto x1 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
-  auto p1 = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
-  createSetBuffer( p1, vertexBuffer, x1, sizedsf, vertexBufferMemory );
-
-  VkBufferUsageFlagBits x2 = { VK_BUFFER_USAGE_TRANSFER_SRC_BIT };
-  constexpr auto        p  = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
-  createSetBuffer( p, Bufferstaging, x2, sizedsf, stagingBufferMemory );
-
-  auto x3 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
-  createSetBuffer( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory );
-
-  vkMapMemory( Queues::device, stagingBufferMemory, 0, sizedsf, 0, &data );
+  static void createUniformBuffers()
   {
-    memcpy( data, vectBuf, sizedsf );
+    for ( int i = 0; i < 1; i++ )
+    {
+      BuffersX::createSetBuffer( static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ),
+                                 uniformBuffers,
+                                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                 Sized,
+                                 uniformBuffersMemory );
+    }
   }
 
-  BuffersX::copyBuffer( vertexBuffer, sizedsf );
-
+  static void createDescriptorPool()
   {
-    memcpy( data, idxBuf, sizedsfIdx );
+    {
+      static constexpr VkDescriptorPoolSize poolSize{
+
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1
+
+      };
+
+      static constexpr VkDescriptorPoolCreateInfo poolCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, .pNext = nullptr, .maxSets = 1, .poolSizeCount = 1, .pPoolSizes = &poolSize
+      };
+      ( vkCreateDescriptorPool( Queues::device, &poolCreateInfo, nullptr, &descriptorPool ) );
+    }
   }
-  vkUnmapMemory( Queues::device, stagingBufferMemory );
-  copyBuffer( indexBuffer, sizedsfIdx );
-}
 
-inline void BuffersX::createSetBuffer(
-  VkMemoryPropertyFlagBits properties, VkBuffer & currentBuffer, VkBufferUsageFlagBits usage, size_t sized, VkDeviceMemory & vertexBufferMemory )
-{
-  const VkBufferCreateInfo allocateInfo = {
-    .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-    .pNext       = nullptr,
-    .size        = sized,
-    .usage       = usage,
-    .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-  };
+  static VkSampler createTextureSampler()
+  {
+    constexpr VkSamplerCreateInfo samplerInfo{
+      .sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+      .magFilter               = VK_FILTER_NEAREST,
+      .minFilter               = VK_FILTER_NEAREST,
+      .mipmapMode              = VK_SAMPLER_MIPMAP_MODE_NEAREST,
+      .addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .mipLodBias              = 0,
+      .anisotropyEnable        = false,
+      .compareEnable           = false,
+      .compareOp               = VK_COMPARE_OP_ALWAYS,
+      .minLod                  = 0,
+      .maxLod                  = 0,
+      .borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+      .unnormalizedCoordinates = false,
+    };
+    VkSampler sampler = nullptr;
+    VkUtilsXBase::clPPPI3<PFN_vkCreateSampler>( &samplerInfo, "vkCreateSampler", &sampler );
+    return sampler;
+    // nmemFree(samplerInfo.address());
+  }
 
-  VkUtilsXBase::clPPPI3<PFN_vkCreateBuffer>( &allocateInfo, "vkCreateBuffer", &currentBuffer );
+  static void createDescriptorSets()
+  {
+    {
+      const VkDescriptorSetAllocateInfo allocInfo{ .sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+                                                   .pNext              = nullptr,
+                                                   .descriptorPool     = descriptorPool,
+                                                   .descriptorSetCount = 1,
+                                                   .pSetLayouts        = &descriptorSetLayout };
 
-  VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements( Queues::device, currentBuffer, &memRequirements );
+      vkAllocateDescriptorSets( Queues::device, &allocInfo, &descriptorSets );
 
-  VkMemoryAllocateInfo allocateInfo1 = {
-    .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-    .pNext           = nullptr,
-    .allocationSize  = memRequirements.size,
-    .memoryTypeIndex = findMemoryType( Queues::physicalDevice, memRequirements.memoryTypeBits, properties ),
-  };
-  //
-  VkUtilsXBase::clPPPI3<PFN_vkAllocateMemory>( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
+      {
+        VkDescriptorBufferInfo bufferInfo{ .buffer = uniformBuffers, .offset = 0, .range = ( Sized ) };
 
-  VkUtilsXBase::checkCall( vkBindBufferMemory( Queues::device, currentBuffer, vertexBufferMemory, 0 ) );
-}
+        // const VkDescriptorImageInfo imageInfo{
+        //         .sampler=createTextureSampler(),
+        //         .imageView=textureImageView,
+        //         .imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        // };
+
+        VkWriteDescriptorSet descriptorWrites{
+
+          .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          .dstSet          = descriptorSets,
+          .dstBinding      = 0,
+          .dstArrayElement = 0,
+          .descriptorCount = 1,
+          .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+          .pBufferInfo     = &bufferInfo,
+
+          /*  */
+        };
+        vkUpdateDescriptorSets( Queues::device, 1, &descriptorWrites, 0, nullptr );
+      }
+    }
+  }
+};
