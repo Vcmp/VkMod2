@@ -1,3 +1,4 @@
+#pragma once
 #include "Buffers.hpp"
 #include "ShaderSPIRVUtils.hpp"
 #include "mat4x.hpp"
