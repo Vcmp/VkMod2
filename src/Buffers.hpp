@@ -16,7 +16,7 @@
 // Can't use inetrnal Linkage anyMore unfortuately due to need to link to Main/Pooled/Addregated Implemenaion/.CPP File
 struct BuffersX
 {
-  static constinit inline void * data = nullptr;  // Similar to the Hardcodes Address Field in the Memory Allocation
+  static  inline __m256*  data = nullptr;  // Similar to the Hardcodes Address Field in the Memory Allocation
                                                   // System used in the Java Version
 
   static constinit inline VkBuffer       vertexBuffer;
@@ -91,7 +91,7 @@ inline namespace
                        glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
   ;
   // glm::mat4 rot;
-  static const __m256     viewproj2x = *(const __m256 *)&viewproj;
+  static const __m256     viewproj2x = *(const __m256 *)(&viewproj);
   static constexpr __m128 axvZXLI    = __extension__( __m128 ){ /*  -1, -1, -1, -1,  */ 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
 
 };  // namespace

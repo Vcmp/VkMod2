@@ -99,7 +99,7 @@ static void Texture::transitionImageLayout( VkFormat format, VkImageLayout oldLa
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         break;
       };
-    default: throw std::runtime_error( "Unsupported layout transition" );
+    default:  std::runtime_error( "Unsupported layout transition" );
   }
   switch ( newLayout )
   {
@@ -121,7 +121,7 @@ static void Texture::transitionImageLayout( VkFormat format, VkImageLayout oldLa
         destinationStage      = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
         break;
       }
-    default: throw std::runtime_error( "Unsupported layout transition" );
+    default:  std::runtime_error( "Unsupported layout transition" );
   }
 
   vkCmdPipelineBarrier( queues.commandBuffer, sourceStage /* TODO */, destinationStage /* TODO */, 0, 0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, 1, &barrier );
@@ -161,5 +161,5 @@ inline VkFormat Texture::findDepthFormat()
     }
   }
 
-  throw std::runtime_error( "failed to find supported format!" );
+  std::runtime_error( "failed to find supported format!" );
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <cmath>
 #include <cstdio>
 #include <immintrin.h>
 
@@ -24,6 +23,7 @@ public:
   inline void             domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
   inline void             domatFMA( mat4x & /*b*/ );
 
+  inline constexpr void    toAddress(const __m256* a );
   inline void    loadTmp( const float[] );
   inline void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
   inline mat4x   loadAlignedA( const void * a ) __attribute__( ( preserve_most ) );
@@ -132,13 +132,13 @@ inline void mat4x::show()
 // Very heavily based from the Java Joml/ C++ GLM Library:
 void mat4x::doPerspective( float fovy, float aspect, float zFar, float zNear )
 {
-  float const tanHalfFovy = tan( fovy / static_cast<float>( 2 ) );
+  // float const tanHalfFovy = tan( fovy / static_cast<float>( 2 ) );
 
-  __a[0] = 1 / ( aspect * tanHalfFovy );
-  __a[5] = 1 / ( tanHalfFovy );
-  __b[2] = zFar / ( zFar - zNear );
-  __b[3] = 1;
-  __b[6] = -( zFar * zNear ) / ( zFar - zNear );
+  // __a[0] = 1 / ( aspect * tanHalfFovy );
+  // __a[5] = 1 / ( tanHalfFovy );
+  // __b[2] = zFar / ( zFar - zNear );
+  // __b[3] = 1;
+  // __b[6] = -( zFar * zNear ) / ( zFar - zNear );
   // m6.doLook( 1 );
 }
 
@@ -153,3 +153,10 @@ void mat4x::doLook( float a )
   __b[6] = -( 2.F * 2.F );
   // return Result;
 }
+
+
+  inline constexpr void     mat4x::toAddress(const __m256* a )
+  {
+     *(__m256 *)a = __a;
+     *(__m256 *)(a+1) = __b;
+  }

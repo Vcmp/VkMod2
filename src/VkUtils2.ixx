@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Pipeline.hpp"
 #include "Queues.hpp"
 #include "SwapChainSupportDetails.hpp"
@@ -82,7 +81,7 @@ VkFormat PipelineX::findDepthFormat()
     }
   }
 
-  throw std::runtime_error( "failed to find supported format!" );
+   std::runtime_error( "failed to find supported format!" );
 }
 
 inline void PipelineX::createRenderPasses()
@@ -287,7 +286,7 @@ inline void PipelineX::createCommandBuffers()
     .pClearValues    = clearValues2,
   };
   static uint8_t i = 0;
-  vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, &BuffersX::data );
+  vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
   static constexpr VkDeviceSize offsets[] = { 0 };
   m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
   for ( const VkCommandBuffer & commandBuffer : commandBuffers )
@@ -304,7 +303,7 @@ inline void PipelineX::createCommandBuffers()
 
     vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
 
-    __builtin_memcpy_inline( ( BuffersX::data ), ( &m4 ), sizeof( mat4x ) );
+    m4.toAddress(BuffersX::data);
 
     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 
@@ -326,7 +325,7 @@ inline void BuffersX::setupBuffers()
   auto x3 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
   createSetBuffer( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory );
 
-  vkMapMemory( Queues::device, stagingBufferMemory, 0, sizedsf, 0, &data );
+  vkMapMemory( Queues::device, stagingBufferMemory, 0, sizedsf, 0, (void**)&data );
   {
     memcpy( data, vectBuf, sizedsf );
   }
@@ -380,7 +379,7 @@ inline uint32_t BuffersX::findMemoryType( VkPhysicalDevice physicalDevice, uint3
     }
   }
 
-  throw std::runtime_error( "Failed to find suitable memory type" );
+  std::runtime_error( "Failed to find suitable memory type" );
 }
 
 inline void BuffersX::createVkEvents()

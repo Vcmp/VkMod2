@@ -4,8 +4,8 @@
 cmake_minimum_required (VERSION 3.22)
 
 project ("VkMod2")
-set(CMAKE_C_COMPILER_TARGET x86_64-w64-windows-gnu)
-set(CMAKE_CXX_COMPILER_TARGET x86_64-w64-windows-gnu)
+# set(CMAKE_C_COMPILER_TARGET x86_64-w64-windows-gnu)
+# set(CMAKE_CXX_COMPILER_TARGET x86_64-w64-windows-gnu)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set (CMAKE_SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -13,7 +13,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 #include_directories($ENV{VULKAN_SDK}/include)
 #add_subdirectory(src)
-set(VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_NONE)
+# set(VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_NONE TRACY_IMPORTS TRACY_ENABLE)
 
 # set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 # set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -29,21 +29,27 @@ message(STATUS "${CMAKE_CXX_COMPILE_FEATURES}")
 message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
 target_compile_features(VkMod2 PRIVATE cxx_std_23)
 target_compile_features(VkMod2 PRIVATE c_std_23)
+target_compile_definitions(VkMod2 PUBLIC VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_NONE TRACY_IMPORTS TRACY_ENABLE )
+target_compile_options(VkMod2 PRIVATE -march=native -mtune=native -Ofast -fno-exceptions -fvisibility=hidden)
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -save-temps=temps -masm=intel -fvisibility=hidden -fno-semantic-interposition -pthread -lpthread -Wall -Wextra -Wpedantic")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -fno-plt -fmerge-all-constants -fno-exceptions -save-temps -masm=intel -fpic -fvisibility=hidden -pthread -lpthread")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} -std=c2x ${CMAKE_CXX_FLAGS}")
 message(STATUS ${CMAKE_CXX_FLAGS_INIT})
 message(STATUS ${CMAKE_CXX_FLAGS})
 # Add source to this project's executable.
-
 	target_sources(VkMod2 
 		PRIVATE 
 			"${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
+			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/TracyClient.cpp"
+			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/Tracy.hpp"
 	)  
+
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(USE_MSVC_RUNTIME_LIBRARY_DLL OFF CACHE BOOL "" FORCE)
+set(GLFW_VULKAN_STATIC ON CACHE BOOL "" FORCE)
 set(GLM_TEST_ENABLE_CXX_20 ON CACHE BOOL "" FORCE)
 set(GLM_TEST_ENABLE_FAST_MATH ON CACHE BOOL "" FORCE)
 set(GLM_TEST_ENABLE_SIMD_AVX ON CACHE BOOL "" FORCE)
@@ -53,6 +59,7 @@ set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
 add_subdirectory(glfw EXCLUDE_FROM_ALL)
 add_subdirectory(glm EXCLUDE_FROM_ALL)
 add_subdirectory(volk EXCLUDE_FROM_ALL)
+# add_subdirectory(Tracy)
 # add_subdirectory(sleef)
 # add_subdirectory(brcxxc EXCLUDE_FROM_ALL)
 target_link_libraries(VkMod2 PRIVATE volk glfw glm)

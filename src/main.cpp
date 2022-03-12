@@ -1,5 +1,4 @@
 #include "Interface.hpp"
-
 // #define ASAN_OPTIONS = debug=true
 
 inline namespace
@@ -26,11 +25,12 @@ inline void * Sysm( void * pv_unused )
   }
   return NULL;
 }
-
 int __cdecl main( int argc, char * argv[] )  // __attribute__( ( __aligned__( 32 ) ) )
 {
+  #if TRACY_ENABLE!=1 // TRACY_IMPORTS
+    exit(0)
+  #endif
   std::iostream::sync_with_stdio( false );
-
   std::cout << argv << "-->"
             << "\n";
   for ( int a = 0; a < argc; a++ )
@@ -40,7 +40,7 @@ int __cdecl main( int argc, char * argv[] )  // __attribute__( ( __aligned__( 32
   int r;
 
   r = pthread_create( &sys, nullptr, Sysm, nullptr );
-  renderer2::setupRenderDraw();
+  // renderer2::setupRenderDraw();
   while ( !glfwWindowShouldClose( ( VkUtils2::window ) ) )
   {
     glfwPollEvents();
@@ -59,9 +59,6 @@ int __cdecl main( int argc, char * argv[] )  // __attribute__( ( __aligned__( 32
 
 inline constexpr void renderer2::setupRenderDraw()
 {
-  constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr };
-
-  ( AvailableSemaphore = Queues::clPPPI3A<VkSemaphore, PFN_vkCreateSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore" ) );
 }
 
 inline static void memPutLong( void * a, void const * b )
@@ -76,13 +73,13 @@ inline static void memPutLong( void * a, void const * b )
 inline void renderer2::drawFrame()
 {
   // m4.loadAligned( &m5 );
-  vkAcquireNextImageKHR( Queues::device, swapChain, -1, AvailableSemaphore, nullptr, &currentFrame );
+  vkAcquireNextImageKHR( Queues::device, swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
   // __builtin_prefetch( BuffersX::data );
   // __builtin_prefetch( &viewproj2x );
   updateUniformBuffer();
-  info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
+  R2.info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
 
-  vkQueueSubmit( Queues::GraphicsQueue, 1, &info, nullptr );
+  vkQueueSubmit( Queues::GraphicsQueue, 1, &R2.info, nullptr );
 
   //  info.pWaitSemaphores = &AvailableSemaphore;
 
@@ -97,15 +94,14 @@ constexpr inline void renderer2::memcpy2( __int256 * __restrict__ _Dst, __int256
 }
 static inline void * __movsb( void * d, const void * s, size_t n )
 {
-  asm volatile( "rep movsb" : "=D"( d ), "=S"( s ), "=c"( n ) : "0"( d ), "1"( s ), "2"( n ) : "memory" );
+  asm volatile( "rep movsb" : "=D"( d ), "=S"( s ), "=c"( n ) : "0"( d ), "1"( s ), "2"( 32 ) : "memory" );
   return d;
 }
 inline void renderer2::updateUniformBuffer()
 {
   // const float time = static_cast<float>( glfwGetTime() ) * ah;
-  // static constinit float            tm;// = glfwGetTime() * ah;
-  static constinit float c;  // = cosf( tm );
-  static constinit float s;  // = sinf( tm );
+  static float c;
+  static float s;
   static constexpr float xs = 1;
   sincosf( glfwGetTime() * ah, &c, &s );
   __builtin_prefetch( BuffersX::data, 1, 3 );
@@ -118,20 +114,21 @@ inline void renderer2::updateUniformBuffer()
 
   // const __m256 aa = viewproj2x;
   // const __m256 osx2    = _mm256_set_ps( c, c, c, c, 0, 0, 0, 0 );
-  const __m128 osx2    = _mm_set1_ps( c );
-  const __m256 osx     = _mm256_set1_ps( c );
-  const __m256 osxyzsZ = _mm256_set1_ps( s );
+  // const __m128 osx2    = _mm_set1_ps( c );
+  // const __m256 osx     = _mm256_set1_ps( c );
+  // const __m256 osxyzsZ = _mm256_set1_ps( s );
   // const __m256 XORS    = _mm256_sub_ps( _mm256_xor_ps( osx, osx2 ), osx2 );
-  const __m128 XORS = _mm_sub_ps( _mm_sub_ps( osx2, osx2 ), osx2 );
+  // const __m128 XORS = _mm_sub_ps( _mm_sub_ps( osx2, osx2 ), osx2 );
 
-  const __m256 a = viewproj2x * _mm256_insertf128_ps( osx, XORS, 1 );
+  // const __m256 a = viewproj2x * _mm256_insertf128_ps( osx, XORS, 1 );
   // _mm256_xor_ps( osx, axvZXLI );
   // _mm256_storeu2_m128( &c, &c2, a );
 
-  const auto x = _mm256_fmaddsub_ps( viewproj2x, osxyzsZ, a );
+  // const auto x = _mm256_fmaddsub_ps( viewproj2x, osxyzsZ, a );
 
-  _mm256_store_ps( reinterpret_cast<float *>( BuffersX::data ), x );
-  _mm256_zeroupper();
+   const auto x=_mm256_fmaddsub_ps( viewproj2x, _mm256_set1_ps( s ), viewproj2x * _mm256_insertf128_ps( _mm256_set1_ps( c ), -_mm_set1_ps( c ) , 1 ) );
+   *BuffersX::data=x;
+  // _mm256_zeroupper();
 
   // memcpy( BuffersX::data, &x, sizeof( x ) );
 }
@@ -456,7 +453,7 @@ inline void VkUtils2::createLogicalDevice()
 
   if ( !deviceVulkan12Features.imagelessFramebuffer )
   {
-    throw std::runtime_error( "Failed Enumeration!" );
+     std::runtime_error( "Failed Enumeration!" );
   }
   if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {

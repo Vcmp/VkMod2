@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdexcept>
+
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_64_BIT_PTR_DEFINES 1
@@ -11,7 +11,8 @@
 
 #include <iostream>
 #include <vector>
-
+#ifdef HAVE_CXX_VARIADIC_TEMPLATES
+#endif
 inline namespace
 {
   static inline constexpr const uint16_t width  = 854;
@@ -19,7 +20,7 @@ inline namespace
 
   //  static inline constexpr __int128   aXX    = 0xF;
   static inline constexpr uint8_t    Frames = 3;
-  static inline constexpr const bool checks = true;
+  static inline constexpr const bool checks = false;
 
 }  // namespace
 struct VkUtilsXBase
@@ -57,37 +58,37 @@ public:
       switch ( callPPPPI )
       {
         case VK_SUCCESS: /* std::cout<<("OK!")<< "\n"; */ break;
-        case VK_NOT_READY: throw std::runtime_error( "Not ready!" );
-        case VK_TIMEOUT: throw std::runtime_error( "Bad TimeOut!" );
-        case VK_INCOMPLETE: throw std::runtime_error( "Incomplete!" );
-        case VK_ERROR_INITIALIZATION_FAILED: throw std::runtime_error( "Error: bad Initialisation!" );
-        case VK_ERROR_DEVICE_LOST: throw std::runtime_error( "Error: Device Failed/Lost!" );
-        case VK_ERROR_FRAGMENTED_POOL: throw std::runtime_error( "Error: bad Mem Alloc" );
-        case VK_ERROR_OUT_OF_HOST_MEMORY: throw std::runtime_error( "No Host Memory" );
-        case VK_ERROR_OUT_OF_DEVICE_MEMORY: throw std::runtime_error( "No Device Memory" );
-        case VK_ERROR_MEMORY_MAP_FAILED: throw std::runtime_error( "Bad Memory map!" );
-        case VK_ERROR_UNKNOWN: throw std::runtime_error( "Unknown Error!|" );
-        case VK_ERROR_OUT_OF_POOL_MEMORY: throw std::runtime_error( "Out of PooL Memory" );
-        case VK_ERROR_INVALID_EXTERNAL_HANDLE: throw std::runtime_error( "VK_ERROR_INVALID_EXTERNAL_HANDLE" );
-        case VK_ERROR_FRAGMENTATION: throw std::runtime_error( "VK_ERROR_INVALID_EXTERNAL_HANDLE" );
-        case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS: throw std::runtime_error( "VK_ERROR_FRAGMENTATION" );
-        case VK_ERROR_SURFACE_LOST_KHR: throw std::runtime_error( "VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS" );
-        case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR: throw std::runtime_error( "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR" );
-        case VK_ERROR_OUT_OF_DATE_KHR: throw std::runtime_error( "" );
-        case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR: throw std::runtime_error( "" );
-        case VK_ERROR_VALIDATION_FAILED_EXT: throw std::runtime_error( "" );
-        case VK_ERROR_INVALID_SHADER_NV: throw std::runtime_error( "" );
-        case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT: throw std::runtime_error( "" );
-        case VK_ERROR_NOT_PERMITTED_EXT: throw std::runtime_error( "" );
-        case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT: throw std::runtime_error( "" );
-        case VK_THREAD_IDLE_KHR: throw std::runtime_error( "" );
-        case VK_THREAD_DONE_KHR: throw std::runtime_error( "" );
-        case VK_OPERATION_DEFERRED_KHR: throw std::runtime_error( "" );
-        case VK_OPERATION_NOT_DEFERRED_KHR: throw std::runtime_error( "" );
-        case VK_PIPELINE_COMPILE_REQUIRED_EXT: throw std::runtime_error( "" ); break;
-        case VK_SUBOPTIMAL_KHR: throw std::runtime_error( "VK_SUBOPTIMAL_KHR" );
+        case VK_NOT_READY:  std::runtime_error( "Not ready!" );
+        case VK_TIMEOUT:  std::runtime_error( "Bad TimeOut!" );
+        case VK_INCOMPLETE:  std::runtime_error( "Incomplete!" );
+        case VK_ERROR_INITIALIZATION_FAILED:  std::runtime_error( "Error: bad Initialisation!" );
+        case VK_ERROR_DEVICE_LOST:  std::runtime_error( "Error: Device Failed/Lost!" );
+        case VK_ERROR_FRAGMENTED_POOL:  std::runtime_error( "Error: bad Mem Alloc" );
+        case VK_ERROR_OUT_OF_HOST_MEMORY:  std::runtime_error( "No Host Memory" );
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:  std::runtime_error( "No Device Memory" );
+        case VK_ERROR_MEMORY_MAP_FAILED:  std::runtime_error( "Bad Memory map!" );
+        case VK_ERROR_UNKNOWN:  std::runtime_error( "Unknown Error!|" );
+        case VK_ERROR_OUT_OF_POOL_MEMORY:  std::runtime_error( "Out of PooL Memory" );
+        case VK_ERROR_INVALID_EXTERNAL_HANDLE:  std::runtime_error( "VK_ERROR_INVALID_EXTERNAL_HANDLE" );
+        case VK_ERROR_FRAGMENTATION:  std::runtime_error( "VK_ERROR_INVALID_EXTERNAL_HANDLE" );
+        case VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS:  std::runtime_error( "VK_ERROR_FRAGMENTATION" );
+        case VK_ERROR_SURFACE_LOST_KHR:  std::runtime_error( "VK_ERROR_INVALID_OPAQUE_CAPTURE_ADDRESS" );
+        case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:  std::runtime_error( "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR" );
+        case VK_ERROR_OUT_OF_DATE_KHR:  std::runtime_error( "" );
+        case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:  std::runtime_error( "" );
+        case VK_ERROR_VALIDATION_FAILED_EXT:  std::runtime_error( "" );
+        case VK_ERROR_INVALID_SHADER_NV:  std::runtime_error( "" );
+        case VK_ERROR_INVALID_DRM_FORMAT_MODIFIER_PLANE_LAYOUT_EXT:  std::runtime_error( "" );
+        case VK_ERROR_NOT_PERMITTED_EXT:  std::runtime_error( "" );
+        case VK_ERROR_FULL_SCREEN_EXCLUSIVE_MODE_LOST_EXT:  std::runtime_error( "" );
+        case VK_THREAD_IDLE_KHR:  std::runtime_error( "" );
+        case VK_THREAD_DONE_KHR:  std::runtime_error( "" );
+        case VK_OPERATION_DEFERRED_KHR:  std::runtime_error( "" );
+        case VK_OPERATION_NOT_DEFERRED_KHR:  std::runtime_error( "" );
+        case VK_PIPELINE_COMPILE_REQUIRED_EXT:  std::runtime_error( "" ); break;
+        case VK_SUBOPTIMAL_KHR:  std::runtime_error( "VK_SUBOPTIMAL_KHR" );
 
-        default: std::cout << callPPPPI << "\n"; throw std::runtime_error( "Unknown Error!" );
+        default: std::cout << callPPPPI << "\n";  std::runtime_error( "Unknown Error!" );
       }
     }
   }
@@ -161,7 +162,7 @@ public:
     {
       if ( object == 0 )
       {
-        throw std::runtime_error( "bad Alloctaion!: Null handle!" );
+         std::runtime_error( "bad Alloctaion!: Null handle!" );
       }
       std::cout << &object << "\n";
     }
@@ -179,7 +180,7 @@ public:
     {
       if ( object == nullptr )
       {
-        throw std::runtime_error( "bad Alloctaion!: Null handle!" );
+         std::runtime_error( "bad Alloctaion!: Null handle!" );
       }
     }
   }
