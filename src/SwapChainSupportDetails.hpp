@@ -34,6 +34,21 @@ inline namespace SwapChainSupportDetails
     vkGetPhysicalDeviceSurfaceFormatsKHR( Queues::physicalDevice, Queues::surface, &count, nullptr );
     VkSurfaceFormatKHR surfaceFormats[count];
 
+    // vkGetPhysicalDeviceSurfaceCapabilitiesKHR( Queues::physicalDevice, Queues::surface, &capabilities );
+
+    // vkGetPhysicalDeviceSurfaceFormatsKHR( Queues::physicalDevice, Queues::surface, &count, nullptr );
+    // VkSurfaceFormatKHR surfaceFormats[count];
+
+    // VkPresentModeKHR presentModes[count];
+    // vkGetPhysicalDeviceSurfacePresentModesKHR( Queues::physicalDevice, Queues::surface, &count, nullptr );
+    
+    // if ( count != 0 )
+    // {
+    //   vkGetPhysicalDeviceSurfaceFormatsKHR( Queues::physicalDevice, Queues::surface, &count, surfaceFormats );
+    //   vkGetPhysicalDeviceSurfacePresentModesKHR( Queues::physicalDevice, Queues::surface, &count, presentModes );
+    // }
+
+
     if ( count != 0 )
     {
       vkGetPhysicalDeviceSurfaceFormatsKHR( Queues::physicalDevice, Queues::surface, &count, surfaceFormats );
@@ -46,12 +61,12 @@ inline namespace SwapChainSupportDetails
       vkGetPhysicalDeviceSurfacePresentModesKHR( Queues::physicalDevice, Queues::surface, &count, presentModes );
     }
 
-    VkSurfaceFormatKHR surfaceFormat;
+    // VkSurfaceFormatKHR surfaceFormat;
     for ( const VkSurfaceFormatKHR & surfaceFormat1 : surfaceFormats )
     {
       if ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR )
       {
-        surfaceFormat = surfaceFormat1;
+        swapChainImageFormat = surfaceFormat1;
         break;
       }
     }
@@ -79,7 +94,7 @@ inline namespace SwapChainSupportDetails
       imageCount = SwapChainSupportDetails::capabilities.maxImageCount;
     }
 
-    SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
+    // SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
     // SwapChainSupportDetails::swapChainExtent      = extent;
   }
   inline void createSwapChain()

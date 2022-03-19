@@ -4,5 +4,5 @@
     
 Diagnostics:
   ClangTidy:
-    Add: [google*, bugprone*, performance*]
+    Add: [core*, google*, bugprone*, performance*, hicpp*]
     

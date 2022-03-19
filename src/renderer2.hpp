@@ -1,6 +1,7 @@
 #pragma once
 
-#include "VkUtils2.ixx"
+//I will have to assume that this works without needing explicit includes due to forward declarations
+
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
@@ -9,12 +10,9 @@
 #include <immintrin.h>
 
 /*
- trick to use builtins+Attributes to treat a blob of memory as a vector type
- which compiles more cleanly into slightly better asm with vmovps (At least
- with Clang)
+ trick to use builtins+Attributes to treat a blob of memory as a vector type which compiles more cleanly into slightly better asm with vmovps (At least with Clang)
  static __int256 *__restrict__ ax = reinterpret_cast<__int256 *>(&ubo);
 */
-uint64_t       cc = 0;
 typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( m4 ) ), __aligned__( 64 ) ) );
 
 static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) renderer2 : Queues
@@ -42,7 +40,7 @@ private:
   static inline constinit const VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
                                                                     // .pWaitSemaphores=&FinishedSemaphore,
                                                                     .swapchainCount = 1,
-                                                                    .pSwapchains    = &swapChain,
+                                                                    .pSwapchains    = &SwapChainSupportDetails::swapChain,
                                                                     .pImageIndices  = &currentFrame,
                                                                     .pResults       = nullptr };
   static constexpr VkPipelineStageFlags          waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;

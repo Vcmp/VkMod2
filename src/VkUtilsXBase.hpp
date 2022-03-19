@@ -9,8 +9,9 @@
 #undef GLFW_INCLUDE_VULKAN
 #include "volk.h"
 
-#include <iostream>
 #include <vector>
+#include <iostream>
+
 #ifdef HAVE_CXX_VARIADIC_TEMPLATES
 #endif
 inline namespace

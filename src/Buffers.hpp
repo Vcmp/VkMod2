@@ -101,18 +101,3 @@ inline namespace
 //   glm::mat4 model = viewproj;
 //   // mat4 Trans;
 // } ubo;
-struct UniformBufferObject
-{
-  static constinit const size_t                 Sized = ( sizeof( viewproj ) );
-  static constinit inline VkDescriptorSet       descriptorSets;
-  static constinit inline VkDescriptorSetLayout descriptorSetLayout;
-  static constinit inline VkDescriptorPool      descriptorPool;
-  static constinit inline VkImageView           textureImageView;
-  static constinit inline VkBuffer              uniformBuffers;
-  static constinit inline VkDeviceMemory        uniformBuffersMemory;
-
-  static constexpr void createDescriptorSetLayout();
-static void createUniformBuffers();
-static void createDescriptorPool();
-static void createDescriptorSets();
-};

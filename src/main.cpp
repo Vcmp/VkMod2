@@ -1,5 +1,15 @@
-#include "Interface.hpp"
-// #define ASAN_OPTIONS = debug=true
+#include "VkUtils2.hpp"
+#include "renderer2.hpp"
+
+#include <pthread.h>
+#include <unistd.h>
+
+
+/*
+  Unfortuately the Linking Structure in this project/Repo is absolutely terrible/Sucks/is Hot Garbage:
+    and their was a signficant issue with undefined references with both variables and functions but priamirly the Latter; 
+  ideally implemtaions would be compartmentalised and structured more cleanly, but as a result functiom implementations will ahve to be dumped ehere for now to avoid the linker having a fit
+*/
 
 inline namespace
 {
@@ -9,15 +19,17 @@ inline namespace
   static constinit inline pthread_t sys;
   // static inline pthread_t rThrd;
 
-}  // namespace
-// Apparently Threads other than the  main thread have much smaller stacl alloctaion Sizes... (Can't/Unable to confirm this however (thus far/Currently))
+} 
+
+// Apparently Threads other than the  main thread have much smaller stack allocation sizes, whether this is true is completely unconfirmed however
+// thsi also has a bug with GCC ATM where the stdout log putput from thsi therad is not displayed untill the thread is joined at termination/exit.close
 inline void * Sysm( void * pv_unused )
 {
   // _mm256_zeroall();
   while ( a )
   {
     std::cout << aa /* <<"--->"<< duration  */ << "\n";
-    std::cout << cc /* <<"--->"<< duration  */ << "\n";
+    // std::cout << cc /* <<"--->"<< duration  */ << "\n";
     // m4.loadAligned( BuffersX::data );
     // m4.show();
     aa = 0;
@@ -25,11 +37,9 @@ inline void * Sysm( void * pv_unused )
   }
   return NULL;
 }
-int __cdecl main( int argc, char * argv[] )  // __attribute__( ( __aligned__( 32 ) ) )
+int __cdecl main( int argc, char * argv[] )
 {
-  #if TRACY_ENABLE!=1 // TRACY_IMPORTS
-    exit(0)
-  #endif
+
   std::iostream::sync_with_stdio( false );
   std::cout << argv << "-->"
             << "\n";
@@ -40,16 +50,14 @@ int __cdecl main( int argc, char * argv[] )  // __attribute__( ( __aligned__( 32
   int r;
 
   r = pthread_create( &sys, nullptr, Sysm, nullptr );
-  // renderer2::setupRenderDraw();
   while ( !glfwWindowShouldClose( ( VkUtils2::window ) ) )
   {
     glfwPollEvents();
-    // glfwWaitEventsTimeout(1);
-
     renderer2::drawFrame();
     aa++;
   }
   a = false;
+
   glfwPostEmptyEvent();
   pthread_join( sys, nullptr );
 
@@ -57,13 +65,21 @@ int __cdecl main( int argc, char * argv[] )  // __attribute__( ( __aligned__( 32
   glfwTerminate();
 }
 
-inline constexpr void renderer2::setupRenderDraw()
+inline void VkUtils2::setupWindow()
 {
-}
+  volkInitialize();
+  glfwInit();
+  glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
+  glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
+  // glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_NO_ROBUSTNESS);
+  // glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
+  // glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
 
-inline static void memPutLong( void * a, void const * b )
-{
-  a = &b;
+  window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
+
+  assert( window );
+
+  glfwSetWindowShouldClose( ( window ), false );
 }
 
 // Lazy way to avoid having to deal with fences via use of SIMULTANEOUS USE BIT
@@ -73,7 +89,7 @@ inline static void memPutLong( void * a, void const * b )
 inline void renderer2::drawFrame()
 {
   // m4.loadAligned( &m5 );
-  vkAcquireNextImageKHR( Queues::device, swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
+  vkAcquireNextImageKHR( Queues::device, SwapChainSupportDetails::swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
   // __builtin_prefetch( BuffersX::data );
   // __builtin_prefetch( &viewproj2x );
   updateUniformBuffer();
@@ -133,50 +149,8 @@ inline void renderer2::updateUniformBuffer()
   // memcpy( BuffersX::data, &x, sizeof( x ) );
 }
 
-// todo: Wake from callBack...
 
-inline void VkUtils2::extracted()
-{
-  VkUtils2::setupWindow();
-  VkUtils2::createInstance();
-  VkUtils2::setupDebugMessenger();
-  VkUtils2::createSurface();
-  VkUtils2::pickPhysicalDevice();
-  VkUtils2::createLogicalDevice();
-  SwapChainSupportDetails::setupImageFormats();
-  SwapChainSupportDetails::createSwapChain();
-  SwapChainSupportDetails::createImageViews();
-  PX.createRenderPasses();
-  UniformBufferObject::createDescriptorSetLayout();
-  PX.createGraphicsPipelineLayout();
-  Queues::createCommandPool();
-  BuffersX::setupBuffers();
-  SwapChainSupportDetails::createFramebuffers();
 
-  UniformBufferObject::createUniformBuffers();
-
-  UniformBufferObject::createDescriptorPool();
-  UniformBufferObject::createDescriptorSets();
-  PipelineX::createCommandBuffers();
-}
-long permuteMat( long, long );
-
-inline void VkUtils2::setupWindow()
-{
-  volkInitialize();
-  glfwInit();
-  glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
-  glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
-  // glfwWindowHint(GLFW_CONTEXT_ROBUSTNESS, GLFW_NO_ROBUSTNESS);
-  // glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
-  // glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR , GLFW_RELEASE_BEHAVIOR_NONE);
-
-  window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
-
-  assert( window );
-
-  glfwSetWindowShouldClose( ( window ), false );
-}
 
 inline void VkUtils2::createInstance()
 {
@@ -274,7 +248,7 @@ VKAPI_ATTR inline VkBool32 VKAPI_CALL VkUtils2::debugCallback( VkDebugUtilsMessa
   return VK_FALSE;
 }
 
-inline void VkUtils2::setupDebugMessenger()
+inline constexpr void VkUtils2::setupDebugMessenger()
 {
   if constexpr ( !VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {
@@ -469,14 +443,502 @@ inline void VkUtils2::createLogicalDevice()
 
 void VkUtils2::cleanup()
 {
-  vkDeviceWaitIdle( Queues::device );
-  vkUnmapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory );
-  vkDestroyCommandPool( Queues::device, (VkCommandPool)Queues::commandPool, nullptr );
-  for ( auto framebuffer : swapChainFramebuffers )
+ 
+}
+
+#include "Pipeline.hpp"
+VkFormat PipelineX::findDepthFormat()
+{
+  constexpr VkFormat formatCandidates[3] = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
+  VkFormatProperties props;
+
+  for ( const VkFormat & format : formatCandidates )
   {
-    vkDestroyFramebuffer( Queues::device, framebuffer, nullptr );
+    vkGetPhysicalDeviceFormatProperties( Queues::physicalDevice, format, &props );
+
+    const uint32_t i2 = props.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    if ( i2 == VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT /* && VK10.VK_IMAGE_TILING_OPTIMAL == VK_IMAGE_TILING_OPTIMAL*/ )
+    {
+      return format;
+    }
   }
 
-  vkDestroyBuffer( Queues::device, BuffersX::vertexBuffer, nullptr );
-  vkFreeMemory( Queues::device, BuffersX::vertexBufferMemory, nullptr );
+   std::runtime_error( "failed to find supported format!" );
+}
+
+inline void PipelineX::createRenderPasses()
+{
+  static const VkAttachmentDescription colorAttachment{
+    .format         = VK_FORMAT_B8G8R8A8_SRGB,  // SwapChainSupportDetails::swapChainImageFormat,
+    .samples        = VK_SAMPLE_COUNT_1_BIT,
+    .loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    .storeOp        = VK_ATTACHMENT_STORE_OP_STORE,
+    .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    .initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED,
+    .finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+  };
+  static constexpr VkAttachmentReference colorAttachmentRef{ .attachment = 0, .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+  static constexpr VkSubpassDescription  subpass{ .pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                                  .colorAttachmentCount = 1,
+                                                  .pColorAttachments    = &colorAttachmentRef };
+
+  constexpr VkRenderPassCreateInfo vkRenderPassCreateInfo1 = {
+    .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+    //   .flags=VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT,
+    .attachmentCount = 1,
+    .pAttachments    = &colorAttachment,
+    .subpassCount    = 1,
+    .pSubpasses      = &subpass,
+    // .dependencyCount=1,
+    // .pDependencies=&dependency
+  };
+
+  VkUtilsXBase::clPPPI3<PFN_vkCreateRenderPass>( &vkRenderPassCreateInfo1, "vkCreateRenderPass", &SwapChainSupportDetails::renderPass );
+}
+
+inline void PipelineX::createGraphicsPipelineLayout()
+{
+  // Thankfully Dont; need to worry about compiling the Shader Files AnyMore due
+  // to teh ability to premptively use the SPRI-V Compielr (e.g.GLSLC) prior to compile time...
+  std::cout << ( "Setting up PipeLine" ) << "\n";
+
+  // const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile();
+  // const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile1();
+
+  const VkPipelineShaderStageCreateInfo vertexStage = {
+    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+    .stage  = VK_SHADER_STAGE_VERTEX_BIT,
+    .module = SPV.compileShaderFile(),
+    .pName  = "main",
+
+  };
+
+  const VkPipelineShaderStageCreateInfo fragStage = { .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+                                                      .stage  = VK_SHADER_STAGE_FRAGMENT_BIT,
+                                                      .module = SPV.compileShaderFile1(),
+                                                      .pName  = "main" };
+
+  const VkPipelineShaderStageCreateInfo shaderStages[2] = { fragStage, vertexStage };
+
+  static constexpr VkVertexInputBindingDescription VxL{ 0, ( 24 ), VK_VERTEX_INPUT_RATE_VERTEX };
+
+  static constexpr VkVertexInputAttributeDescription attributeDescriptions[2]{
+    { .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = OFFSET_POS },
+    { .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = OFFSETOF_COLOR },
+
+  };
+
+  static constexpr VkPipelineVertexInputStateCreateInfo vkPipelineVertexInputStateCreateInfo = {
+    .sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+    .vertexBindingDescriptionCount   = 1,
+    .pVertexBindingDescriptions      = &VxL,
+    .vertexAttributeDescriptionCount = sizeof( attributeDescriptions ) / sizeof( VkVertexInputAttributeDescription ),
+    .pVertexAttributeDescriptions    = attributeDescriptions
+  };
+
+  static constexpr VkPipelineInputAssemblyStateCreateInfo inputAssembly = { .sType    = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+                                                                            .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                                                                            .primitiveRestartEnable = VK_FALSE };
+
+  static constexpr VkViewport vkViewport{ .x = 0.0F, .y = 0.0F, .width = width, .height = height, .minDepth = UNormFlt, .maxDepth = 1.0F };
+
+  static constexpr VkRect2D scissor{ .offset = { 0, 0 }, .extent{ width, height } };
+
+  constexpr VkPipelineViewportStateCreateInfo vkViewPortState = {
+    .sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO, .viewportCount = 1, .pViewports = &vkViewport, .scissorCount = 1, .pScissors = &scissor
+  };
+
+  constexpr VkPipelineRasterizationStateCreateInfo VkPipeLineRasterization = {
+    .sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+    .depthClampEnable        = VK_FALSE,
+    .rasterizerDiscardEnable = VK_FALSE,
+    .polygonMode             = VK_POLYGON_MODE_FILL,
+    .cullMode                = VK_CULL_MODE_BACK_BIT,  // WARNING: VERY IMPORTANT!:
+                                                       // Make sure the culling direction is correct
+                                                       // as it applies even to 2DVecs/Fixed
+                                                       // Function Runtime/Evaluated Shaders
+                                                       // with no transforms and with fixed
+                                                       // Const/Pre-Determined Runtime
+                                                       // Variables
+    .frontFace       = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+    .depthBiasEnable = VK_FALSE,
+    .lineWidth       = 1.0F,
+  };
+
+  constexpr VkPipelineMultisampleStateCreateInfo multisampling = { .sType                 = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+                                                                   .rasterizationSamples  = VK_SAMPLE_COUNT_1_BIT,
+                                                                   .sampleShadingEnable   = VK_FALSE,
+                                                                   .minSampleShading      = 1.0F,
+                                                                   .pSampleMask           = VK_NULL_HANDLE,
+                                                                   .alphaToCoverageEnable = VK_FALSE,
+                                                                   .alphaToOneEnable      = VK_FALSE };
+
+  constexpr VkPipelineDepthStencilStateCreateInfo depthStencil = {
+    .sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+    .depthTestEnable       = VK_FALSE,
+    .depthWriteEnable      = VK_FALSE,
+    .depthCompareOp        = VK_COMPARE_OP_LESS,
+    .depthBoundsTestEnable = VK_FALSE,
+    .stencilTestEnable     = VK_FALSE,
+  };
+  static constexpr VkPipelineColorBlendAttachmentState colorBlendAttachment = {
+    .blendEnable    = VK_FALSE,
+    .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
+
+  };
+  constexpr VkPipelineColorBlendStateCreateInfo colorBlending = {
+    .sType           = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+    .logicOpEnable   = VK_FALSE,
+    .logicOp         = VK_LOGIC_OP_COPY,
+    .attachmentCount = 1,
+    .pAttachments    = &colorBlendAttachment,
+
+  };
+
+  static constexpr VkPushConstantRange vkPushConstantRange{
+    .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+    .offset     = 0,
+    .size       = sizeof( mat4x ),
+  };
+
+  constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = { .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+                                                                      .setLayoutCount         = 1,
+                                                                      .pSetLayouts            = &UniformBufferObject::descriptorSetLayout,
+                                                                      .pushConstantRangeCount = 1,
+                                                                      .pPushConstantRanges    = &vkPushConstantRange };
+
+  std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
+  VkUtilsXBase::clPPPI3<PFN_vkCreatePipelineLayout>( &vkPipelineLayoutCreateInfo, "vkCreatePipelineLayout", &vkLayout );
+
+  const VkGraphicsPipelineCreateInfo pipelineInfo{ .sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+                                                   .stageCount = 2,
+                                                   .pStages    = shaderStages,
+                                                   // .pNext=VK_NULL_HANDLE,
+                                                   .pVertexInputState   = &vkPipelineVertexInputStateCreateInfo,
+                                                   .pInputAssemblyState = &inputAssembly,
+                                                   .pViewportState      = &vkViewPortState,
+                                                   .pRasterizationState = &VkPipeLineRasterization,
+                                                   .pMultisampleState   = &multisampling,
+                                                   .pDepthStencilState  = &depthStencil,
+                                                   .pColorBlendState    = &colorBlending,
+                                                   .layout              = vkLayout,
+                                                   .renderPass          = SwapChainSupportDetails::renderPass };
+  VkUtilsXBase::clPPPJI<PFN_vkCreateGraphicsPipelines>( &pipelineInfo, 1, "vkCreateGraphicsPipelines", &graphicsPipeline );
+}
+
+inline void PipelineX::createCommandBuffers()
+{
+  const VkCommandBufferAllocateInfo allocateInfo{ .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
+                                                  .commandPool        = ( Queues::commandPool ),
+                                                  .level              = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
+                                                  .commandBufferCount = sizeof( commandBuffers ) / sizeof( VkCommandBuffer ) };
+  std::cout << allocateInfo.commandBufferCount << "Command Buffers"
+            << "\n";
+  VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>( &allocateInfo, "vkAllocateCommandBuffers", commandBuffers );
+
+  constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+                                                    .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT ) };
+
+  /*   VkRenderPassAttachmentBeginInfo attachmentsbeginInfo{ .sType =
+     VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO, .attachmentCount = 1, .pAttachments =
+                                                            &SwapChainSupportDetails::swapChainImageViews[0] };
+
+   */
+  constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = SwapChainSupportDetails::swapChainExtent };
+
+  // constexpr VkClearColorValue aa[] = { { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } };
+  // // constexpr VkClearDepthStencilValue aaa[] = { { { 0.0F, 1.0F } } };
+  // constexpr VkClearValue clearValues = {
+  //   .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } }
+  //   // .depthStencil = { 0.0F, static_cast<uint32_t>( 1.0F ) },
+  // };
+  constexpr VkClearValue clearValues2[2] = { { .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } }, { .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } } };
+
+  // {
+  //   .color        = { UNormFlt, UNormFlt, UNormFlt, 1.0F },
+  //   .depthStencil = { 0.0F, static_cast<uint32_t>( 1.0F ) },
+  // },
+
+  static VkRenderPassBeginInfo renderPassInfo = {
+    .sType           = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO ),
+    .renderPass      = ( SwapChainSupportDetails::renderPass ),
+    .renderArea      = renderArea,
+    .clearValueCount = 2,
+    .pClearValues    = clearValues2,
+  };
+  static uint8_t i = 0;
+  vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
+  static constexpr VkDeviceSize offsets[] = { 0 };
+  m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
+  for ( const VkCommandBuffer & commandBuffer : commandBuffers )
+  {
+    VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>( commandBuffer, "vkBeginCommandBuffer", &beginInfo1 );
+
+    renderPassInfo.framebuffer = ( SwapChainSupportDetails::swapChainFramebuffers[i] );
+
+    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+    vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline );
+    vkCmdBindVertexBuffers( commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
+    vkCmdBindIndexBuffer( commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
+
+    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
+
+    m4.toAddress(BuffersX::data);
+
+    vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
+
+    vkCmdEndRenderPass( commandBuffer );
+    VkUtilsXBase::clP<PFN_vkEndCommandBuffer>( commandBuffer, "vkEndCommandBuffer" );
+    i++;
+  }
+}
+inline void BuffersX::setupBuffers()
+{
+  auto x1 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
+  auto p1 = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+  createSetBuffer( p1, vertexBuffer, x1, sizedsf, vertexBufferMemory );
+
+  VkBufferUsageFlagBits x2 = { VK_BUFFER_USAGE_TRANSFER_SRC_BIT };
+  constexpr auto        p  = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+  createSetBuffer( p, Bufferstaging, x2, sizedsf, stagingBufferMemory );
+
+  auto x3 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT );
+  createSetBuffer( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory );
+
+  vkMapMemory( Queues::device, stagingBufferMemory, 0, sizedsf, 0, (void**)&data );
+  {
+    memcpy( data, vectBuf, sizedsf );
+  }
+
+  BuffersX::copyBuffer( vertexBuffer, sizedsf );
+
+  {
+    memcpy( data, idxBuf, sizedsfIdx );
+  }
+  vkUnmapMemory( Queues::device, stagingBufferMemory );
+  copyBuffer( indexBuffer, sizedsfIdx );
+}
+
+inline void BuffersX::createSetBuffer(
+  VkMemoryPropertyFlagBits properties, VkBuffer & currentBuffer, VkBufferUsageFlagBits usage, size_t sized, VkDeviceMemory & vertexBufferMemory )
+{
+  const VkBufferCreateInfo allocateInfo = {
+    .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+    .pNext       = nullptr,
+    .size        = sized,
+    .usage       = usage,
+    .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+  };
+
+  VkUtilsXBase::clPPPI3<PFN_vkCreateBuffer>( &allocateInfo, "vkCreateBuffer", &currentBuffer );
+
+  VkMemoryRequirements memRequirements;
+  vkGetBufferMemoryRequirements( Queues::device, currentBuffer, &memRequirements );
+
+  VkMemoryAllocateInfo allocateInfo1 = {
+    .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+    .pNext           = nullptr,
+    .allocationSize  = memRequirements.size,
+    .memoryTypeIndex = findMemoryType( Queues::physicalDevice, memRequirements.memoryTypeBits, properties ),
+  };
+  //
+  VkUtilsXBase::clPPPI3<PFN_vkAllocateMemory>( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
+
+  VkUtilsXBase::checkCall( vkBindBufferMemory( Queues::device, currentBuffer, vertexBufferMemory, 0 ) );
+}
+
+inline uint32_t BuffersX::findMemoryType( VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlagBits properties )
+{
+  VkPhysicalDeviceMemoryProperties memProperties = {};
+  vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
+  for ( uint32_t i = 0; i < memProperties.memoryTypeCount; i++ )
+  {
+    if ( ( typeFilter & ( 1U << i ) ) != 0 && ( memProperties.memoryTypes[i].propertyFlags & properties ) == properties )
+    {
+      return i;
+    }
+  }
+
+  std::runtime_error( "Failed to find suitable memory type" );
+}
+
+inline void BuffersX::createVkEvents()
+{
+  VkEventCreateInfo vkEventCreateInfo = {};
+  vkEventCreateInfo.sType             = VK_STRUCTURE_TYPE_EVENT_CREATE_INFO;
+  vkEventCreateInfo.pNext             = nullptr;
+
+  VkUtilsXBase::clPPPI3<PFN_vkCreateEvent>( &vkEventCreateInfo, "vkCreateEvent", &vkEvent );
+}
+
+inline void BuffersX::copyBuffer( VkBuffer & dst, const size_t sized )
+{
+  Queues::beginSingleTimeCommands();
+  const VkBufferCopy vkBufferCopy{
+    .srcOffset = 0,
+    .dstOffset = 0,
+    .size      = sized,
+  };
+  vkCmdCopyBuffer( queues.commandBuffer, Bufferstaging, dst, 1, &vkBufferCopy );
+  Queues::endSingleTimeCommands();
+}
+
+inline constexpr void UniformBufferObject::createDescriptorSetLayout()
+  {
+    // m5.loadAligned( &viewproj2 );
+
+    {
+      constexpr VkDescriptorSetLayoutBinding bindings = {
+        .binding = 0, .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1, .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+        /* { .binding = 1,
+          .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+          .descriptorCount = 1,
+          .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT} */
+      };
+      // samplerLayoutBinding
+
+      const VkDescriptorSetLayoutCreateInfo a{
+        .sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .bindingCount = 1,
+        .pBindings    = &bindings,
+
+      };
+      VkUtilsXBase::clPPPI3<PFN_vkCreateDescriptorSetLayout>( &a, "vkCreateDescriptorSetLayout", &UniformBufferObject::descriptorSetLayout );
+    }
+  }
+
+  inline void UniformBufferObject::createUniformBuffers()
+  {
+    for ( int i = 0; i < 1; i++ )
+    {
+      BuffersX::createSetBuffer( static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT ),
+                                 UniformBufferObject::uniformBuffers,
+                                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                 Sized,
+                                 uniformBuffersMemory );
+    }
+  }
+
+  inline void UniformBufferObject::createDescriptorPool()
+  {
+    {
+      static constexpr VkDescriptorPoolSize poolSize{
+
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 1
+
+      };
+
+      static constexpr VkDescriptorPoolCreateInfo poolCreateInfo{
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO, .pNext = nullptr, .maxSets = 1, .poolSizeCount = 1, .pPoolSizes = &poolSize
+      };
+      ( vkCreateDescriptorPool( Queues::device, &poolCreateInfo, nullptr, &descriptorPool ) );
+    }
+  }
+
+  inline VkSampler createTextureSampler()
+  {
+    constexpr VkSamplerCreateInfo samplerInfo{
+      .sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+      .magFilter               = VK_FILTER_NEAREST,
+      .minFilter               = VK_FILTER_NEAREST,
+      .mipmapMode              = VK_SAMPLER_MIPMAP_MODE_NEAREST,
+      .addressModeU            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .addressModeV            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .addressModeW            = VK_SAMPLER_ADDRESS_MODE_REPEAT,
+      .mipLodBias              = 0,
+      .anisotropyEnable        = false,
+      .compareEnable           = false,
+      .compareOp               = VK_COMPARE_OP_ALWAYS,
+      .minLod                  = 0,
+      .maxLod                  = 0,
+      .borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+      .unnormalizedCoordinates = false,
+    };
+    VkSampler sampler = nullptr;
+    VkUtilsXBase::clPPPI3<PFN_vkCreateSampler>( &samplerInfo, "vkCreateSampler", &sampler );
+    return sampler;
+    // nmemFree(samplerInfo.address());
+  }
+
+  inline void UniformBufferObject::createDescriptorSets()
+  {
+    {
+      const VkDescriptorSetAllocateInfo allocInfo{ .sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+                                                   .pNext              = nullptr,
+                                                   .descriptorPool     = descriptorPool,
+                                                   .descriptorSetCount = 1,
+                                                   .pSetLayouts        = &descriptorSetLayout };
+
+      vkAllocateDescriptorSets( Queues::device, &allocInfo, &descriptorSets );
+
+      {
+        VkDescriptorBufferInfo bufferInfo{ .buffer = uniformBuffers, .offset = 0, .range = ( Sized ) };
+
+        // const VkDescriptorImageInfo imageInfo{
+        //         .sampler=createTextureSampler(),
+        //         .imageView=textureImageView,
+        //         .imageLayout=VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        // };
+
+        VkWriteDescriptorSet descriptorWrites{
+
+          .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+          .dstSet          = descriptorSets,
+          .dstBinding      = 0,
+          .dstArrayElement = 0,
+          .descriptorCount = 1,
+          .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+          .pBufferInfo     = &bufferInfo,
+
+          /*  */
+        };
+        vkUpdateDescriptorSets( Queues::device, 1, &descriptorWrites, 0, nullptr );
+      }
+    }
+  }
+
+  #include "Queues.hpp"
+inline void Queues::createCommandPool()
+{
+  constexpr VkCommandPoolCreateInfo poolInfo = {
+    .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+    .pNext            = nullptr,
+    .queueFamilyIndex = 0,
+  };
+  commandPool = clPPPI3A<VkCommandPool, PFN_vkCreateCommandPool>( &poolInfo, "vkCreateCommandPool" );
+  constexpr VkCommandPoolCreateInfo poolInfo2{
+    .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+    .pNext            = nullptr,
+    .queueFamilyIndex = 1,
+  };
+  commandPool2 = clPPPI3A<VkCommandPool, PFN_vkCreateCommandPool>( &poolInfo2, "vkCreateCommandPool" );
+  if ( commandBuffer == nullptr )
+  {
+    const VkCommandBufferAllocateInfo allocateInfo{
+      .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
+      .pNext              = VK_NULL_HANDLE,
+      .commandPool        = ( Queues::commandPool2 ),
+      .level              = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
+      .commandBufferCount = ( 1 ),
+    };
+
+    VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>( &allocateInfo, "vkAllocateCommandBuffers", &commandBuffer );
+  }
+}
+
+inline void Queues::beginSingleTimeCommands()
+{
+  VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>( commandBuffer, "vkBeginCommandBuffer", &vkCommandBufferBeginInfo );
+}
+
+inline void Queues::endSingleTimeCommands()
+{
+  VkUtilsXBase::clP<PFN_vkEndCommandBuffer>( commandBuffer, "vkEndCommandBuffer" );
+
+  a = ( a ^ 1 );
+  vkQueueSubmit( TransferQueue[a], 1, &submitInfo1, VK_NULL_HANDLE );
+  vkQueueWaitIdle( TransferQueue[a] );
+  vkResetCommandPool( device, ( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
 }

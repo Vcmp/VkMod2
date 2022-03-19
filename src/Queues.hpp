@@ -1,6 +1,9 @@
 #pragma once
 #include "VkUtilsXBase.hpp"
 
+
+//Was being quite silly anf fogt/did nt replaise that it is in aftc accpeble/even good rpatcie to iclude Heards Quelitlaly,icnlien.nSres,chais.Senu as long as impeltaions/translation units to not Overlap/Overide Eahc other and/or reudent;need/elss ?Excessive Linoing takes palces and taranltios,tcoep.moame sanoot be mitiagedenagtaited/handled/ienatces/Dlelaiatve/reonee\bd/impelmated 
+
 static constexpr struct Queues
 {
   static inline VkCommandPool               commandPool;
@@ -34,45 +37,3 @@ static constexpr struct Queues
   }
 } inline const queues;
 
-inline void Queues::createCommandPool()
-{
-  constexpr VkCommandPoolCreateInfo poolInfo = {
-    .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-    .pNext            = nullptr,
-    .queueFamilyIndex = 0,
-  };
-  commandPool = clPPPI3A<VkCommandPool, PFN_vkCreateCommandPool>( &poolInfo, "vkCreateCommandPool" );
-  constexpr VkCommandPoolCreateInfo poolInfo2{
-    .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-    .pNext            = nullptr,
-    .queueFamilyIndex = 1,
-  };
-  commandPool2 = clPPPI3A<VkCommandPool, PFN_vkCreateCommandPool>( &poolInfo2, "vkCreateCommandPool" );
-  if ( commandBuffer == nullptr )
-  {
-    const VkCommandBufferAllocateInfo allocateInfo{
-      .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
-      .pNext              = VK_NULL_HANDLE,
-      .commandPool        = ( Queues::commandPool2 ),
-      .level              = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
-      .commandBufferCount = ( 1 ),
-    };
-
-    VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>( &allocateInfo, "vkAllocateCommandBuffers", &commandBuffer );
-  }
-}
-
-inline void Queues::beginSingleTimeCommands()
-{
-  VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>( commandBuffer, "vkBeginCommandBuffer", &vkCommandBufferBeginInfo );
-}
-
-inline void Queues::endSingleTimeCommands()
-{
-  VkUtilsXBase::clP<PFN_vkEndCommandBuffer>( commandBuffer, "vkEndCommandBuffer" );
-
-  a = ( a ^ 1 );
-  vkQueueSubmit( TransferQueue[a], 1, &submitInfo1, VK_NULL_HANDLE );
-  vkQueueWaitIdle( TransferQueue[a] );
-  vkResetCommandPool( device, ( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
-}
