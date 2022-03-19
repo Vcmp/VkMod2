@@ -91,39 +91,75 @@ target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 #set(glfw3_DIR "GLFW_PATH" CACHE PATH "Path to GLFW")
 
 
-function(Dump2)
-	file(APPEND "${PROJECT_CURRENT_SOURCE_DIR}/shaders/21_shader_ubo.frag.spv" ;)
-endfunction()
-Dump2()
-find_program(GLSLC glslc HINTS $ENV{VULKAN_SDK}/Bin/)
+
+
 
 ## TODO: make this recompile shader files if they are changed/do not match checksums instead of having to mnaully delete them each time
-file(GLOB_RECURSE GLSL_SOURCE_FILES
-    "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.frag"
-    "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.vert"
-    "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.comp"
-    )
+# file(GLOB_RECURSE GLSL_SOURCE_FILES
+    # "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.frag"
+    # "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.vert"
+    # "${PROJECT_CURRENT_SOURCE_DIR}/shaders/*.comp"
+    # )
+function(Dump2 temp name)
+	file(READ ${temp} content)
+	set(content "uint32_t constexpr ${name}[] = ${content};")
+	file(WRITE ${temp}.inl "${content}")
+		
+endfunction(Dump2)
 
-## iterate each shader
-foreach(GLSL ${GLSL_SOURCE_FILES})
-  message(STATUS "BUILDING SHADER")
-  get_filename_component(FILE_NAME ${GLSL} NAME)
-  set(SPIRV "${PROJECT_CURRENT_SOURCE_DIR}/bin/shaders/${FILE_NAME}.spv")
-  message(STATUS ${GLSL})
-  ##execute glslang command to compile that specific shader
-  add_custom_command(
-    OUTPUT ${SPIRV}
-    COMMAND ${GLSLC} ${GLSL} -O -o ${SPIRV}
-    DEPENDS "${PROJECT_CURRENT_SOURCE_DIR}/bin/shaders/")
-  list(APPEND SPIRV_BINARY_FILES ${SPIRV})
-  add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/binary_resources.hpp ${CMAKE_CURRENT_BINARY_DIR}/binary_resources.cpp
-  COMMAND brcc ${CMAKE_CURRENT_BINARY_DIR}/binary_resources RGAME_BINARY_RESOURCES_HH txt_vertex_shader ${CMAKE_CURRENT_BINARY_DIR}/bin/21_shader_ubo.frag.spv
-  DEPENDS bin/21_shader_ubo.frag.spv)
+## this function  is horribly broken and has multiple issues including:
+	# not being able to enumertae files dynamically 
+	# 
+	# and failing to run before the formatting fixes are applied
+	#
+	# Implict depends is pointed to the .txt files and not the .hpp files,  
+	# 		however the custom command cannot be run before the final .hpp files are created/generated 
+	# 	    and custom commands cannot include CMake function and only command line output/commands
+	# 	    this causes the build prcoes to fail unless a dummy .temp file is included beforehand and tehfore is not fit for purpose unelss this is fixed completely
+	# 	an adiitonal isue that can ocur is that often the file is not egnerated in time before the compielr is called, causin a mising include compilation error to be incurred
+	#	the current methdo to fix this is to generate the Cmakecache then run the build generator (e.g. Ninja) and then run Cmake again to finsh/compleet teh Cache before running teh final Build again
+	find_program(GLSLC glslc)
+function(CompileShaders SHADER SHADER2)
+	set(current-shader-path ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER})
+	set(current-output-path ${CMAKE_CURRENT_SOURCE_DIR}/src/${SHADER}.txt)
+	set(current-shader-path2 ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER2})
+	set(current-output-path2 ${CMAKE_CURRENT_SOURCE_DIR}/src/${SHADER2}.txt)
+	set(final ${CMAKE_CURRENT_SOURCE_DIR}/src/${SHADER}.hpp)
+	# get_filename_component(current-output-dir ${current-output-path} DIRECTORY)
+	
+     add_custom_command(
+           OUTPUT ${current-output-path}
+           COMMAND ${GLSLC} -O -finvert-y -mfmt=c -o ${current-output-path} ${current-shader-path}
+           COMMAND ${GLSLC} -O -finvert-y -mfmt=c -o ${current-output-path2} ${current-shader-path2}
+           DEPENDS ${current-shader-path}
+		   IMPLICIT_DEPENDS CXX ${current-shader-path}
+           VERBATIM
+           )
+		   
+	# file(WRITE ${current-output-path})
+           # Dump2(${current-output-path} ${final})
+	# message(STATUS ${current-output-path})
+		   # add_custom_command(
+           # OUTPUT ${final}
+           # DEPENDS ${current-output-path}
+           # IMPLICIT_DEPENDS CXX ${current-output-path}
+           # VERBATIM)
+	# message(STATUS ${final})
+	# file(READ ${current-output-path} content)
+	# Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt frag)
+	# Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt vert)
 
-endforeach(GLSL)
+	set_source_files_properties(${current-output-path} ${current-output-path2} PROPERTIES GENERATED TRUE)
+    target_sources(VkMod2 PRIVATE ${current-output-path} ${current-output-path2})	
+	
+endfunction(CompileShaders)
 
-add_custom_target(
-    Shaders 
-    DEPENDS ${SPIRV_BINARY_FILES}
-    )
+CompileShaders(21_shader_ubo.frag 21_shader_ubo.vert)
+Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt frag)
+Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt vert)
+# add_custom_target(
+    # Shaders 
+    # DEPENDS ${SPIRV_BINARY_FILES}
+    # )
+	
+# Dump2()
