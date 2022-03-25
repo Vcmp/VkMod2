@@ -1,4 +1,4 @@
-#pragma once
+
 
 
 
@@ -14,8 +14,8 @@
 
 #ifdef HAVE_CXX_VARIADIC_TEMPLATES
 #endif
-inline namespace
-{
+
+
   static inline constexpr const uint16_t width  = 854;
   static inline constexpr const uint16_t height = 480;
 
@@ -23,7 +23,7 @@ inline namespace
   static inline constexpr uint8_t    Frames = 3;
   static inline constexpr const bool checks = false;
 
-}  // namespace
+  // namespace
 struct VkUtilsXBase
 {
 private:

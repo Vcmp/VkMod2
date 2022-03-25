@@ -1,4 +1,4 @@
-#pragma once
+
 #include "Pipeline.hpp"
 // #include "Queues.hpp"
 // #include "SwapChainSupportDetails.hpp"
@@ -45,9 +45,9 @@ static inline const struct VkUtils2
   SwapChainSupportDetails::setupImageFormats();
   SwapChainSupportDetails::createSwapChain();
   SwapChainSupportDetails::createImageViews();
-  PX.createRenderPasses();
+  PipelineX::createRenderPasses();
   UniformBufferObject::createDescriptorSetLayout();
-  PX.createGraphicsPipelineLayout();
+  PipelineX::createGraphicsPipelineLayout();
   Queues::createCommandPool();
   BuffersX::setupBuffers();
   SwapChainSupportDetails::createFramebuffers();

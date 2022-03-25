@@ -1,4 +1,4 @@
-#pragma once
+
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_64_BIT_PTR_DEFINES 1

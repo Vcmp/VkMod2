@@ -1,5 +1,5 @@
 
-#pragma once
+
 #include "Queues.hpp"
 
 inline namespace SwapChainSupportDetails

@@ -1,8 +1,15 @@
 #include "VkUtils2.hpp"
+#include "glm/ext/scalar_constants.hpp"
+#include "glm/gtc/constants.hpp"
 #include "renderer2.hpp"
 
+#include <cmath>
+#include <cstdint>
+#include <immintrin.h>
+#include <cmath>
 #include <pthread.h>
 #include <unistd.h>
+#include <xmmintrin.h>
 
 
 /*
@@ -13,7 +20,26 @@
 
 inline namespace
 {
+  constexpr double PI = glm::pi<double>();
+  constexpr uint8_t SIN_BITS = 9;
+	constexpr uint16_t SIN_MASK = ~(-1 << SIN_BITS);
+	constexpr uint16_t SIN_COUNT = SIN_MASK + 1;
+		
+	constexpr	float radFull = (float) (PI * 2.0);
+	constexpr float	radToIndex = SIN_COUNT / radFull;
+		
+	constexpr float	cosOffset = (float)(PI / 2);
 
+
+	static constinit float sint[SIN_COUNT+1];
+		
+    void setupfloat()
+    {
+		for (int i = 0; i <= SIN_COUNT; i++) {
+			sint[i] = (float) sin(PI * 2 * i / SIN_COUNT);
+		}
+    }
+	
   static constinit inline bool      a = true;
   static constinit inline uint16_t  aa;
   static constinit inline pthread_t sys;
@@ -50,6 +76,7 @@ int __cdecl main( int argc, char * argv[] )
   int r;
 
   r = pthread_create( &sys, nullptr, Sysm, nullptr );
+  setupfloat();
   while ( !glfwWindowShouldClose( ( VkUtils2::window ) ) )
   {
     glfwPollEvents();
@@ -113,14 +140,79 @@ static inline void * __movsb( void * d, const void * s, size_t n )
   asm volatile( "rep movsb" : "=D"( d ), "=S"( s ), "=c"( n ) : "0"( d ), "1"( s ), "2"( 32 ) : "memory" );
   return d;
 }
+//https://jvm-gaming.org/t/extremely-fast-sine-cosine/55153/79
+float cosfromsin(float sin, float angle) __attribute__((pure))
+{
+  __m128 A=_mm_set1_ps(sin);
+  float cos = _mm_sqrt_ps(_mm_set1_ps(1)-A*A)[0];
+       
+        float b = angle - static_cast<int>((angle / 6.2831855F)) * 6.2831855F;
+        // if ((double)b < 0.0) {
+        //     b += 6.2831855F;
+        // }
+
+        return b >= 3.1415927F ? -cos : cos;
+}
+auto sin1(const float& __restrict__ rad) {
+		float index = rad * radToIndex;
+		float index2 = rad+cosOffset * radToIndex;
+
+    __m256 aidxi=_mm256_set_ps(index, index2, index, index2, index, index2, index, index2);
+		//float floor = (float)Math.floor(index); //Correct
+		__m256i floor12x = _mm256_floor_ps(aidxi);	              //Fast, only for positive angles
+		__m256i indexedFloor = (uint32_t)(index) - floor12x;
+		// float alpha = index - floor;
+		__m256i a=_mm256_castps_si256(floor12x);
+		__m256i b=_mm256_set1_epi32(SIN_MASK);
+		uint32_t i = _mm256_and_ps(a,b)[0];
+		
+    auto x = _mm256_set_ps(sint[i+0],sint[i+0],sint[i+0],sint[i+0],sint[i+1],sint[i+1],sint[i+1],sint[i+1]);
+
+		__m128 sin1 = _mm_set1_ps(sint[i+0]);
+		__m128 sin2 = _mm_set1_ps(sint[i+1]);
+        // __m256 sin132x = _mm256_set_m128(sin1, sin2);
+  __m256 sin132x = _mm256_loadu2_m128(&sint[i+0],&sint[i+1]);
+		
+		return _mm256_fmaddsub_ps(indexedFloor, (sin132x), x);
+		// return _mm256_fmaddsub_ps(x, aidxi, _mm256_sub_ps(a, b));
+		// return sin1 + (sin2 - sin1) * (indexedFloor[0]);
+    // return indexedFloor * sin1 + (1 - indexedFloor) * sin2;
+	}
+
+
+constexpr float sinx(const float& __restrict__ rad) 
+{
+	const float index = rad * radToIndex;
+		//float floor = (float)Math.floor(index); //Correct
+	const	int floor = (int)index & SIN_MASK;	              //Fast, only for positive angles
+		
+	const	float alpha = index - (int)index; //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
+		
+		;
+		
+	const	float sin1 = sint[floor+0];
+	const	float sin2 = sint[floor+1]-sin1;
+		
+		return fma(sin2, alpha, sin1);
+	}
+	
+	
+constexpr	float cos1(const float& __restrict__  rad) {
+
+		
+		return sinx(rad+cosOffset);
+	}
 inline void renderer2::updateUniformBuffer()
 {
   // const float time = static_cast<float>( glfwGetTime() ) * ah;
-  static float c;
-  static float s;
-  static constexpr float xs = 1;
-  sincosf( glfwGetTime() * ah, &c, &s );
+  const float a=(glfwGetTime() * ah);
   __builtin_prefetch( BuffersX::data, 1, 3 );
+  // const auto vfm =  viewproj2x;
+   const float c=sinx(a);
+  
+   float s = cos1(a);
+  // static constexpr float xs = 1;
+  // sincosf( , &c, &s );
   // const float ax = glfwGetTime() * ah;
 
   // rot = viewproj * glm::rotate( glm::identity<glm::mat4>(), ax, glm::vec3( 1, 0, 0 ) );
@@ -142,7 +234,7 @@ inline void renderer2::updateUniformBuffer()
 
   // const auto x = _mm256_fmaddsub_ps( viewproj2x, osxyzsZ, a );
 
-   const auto x=_mm256_fmaddsub_ps( viewproj2x, _mm256_set1_ps( s ), viewproj2x * _mm256_insertf128_ps( _mm256_set1_ps( c ), -_mm_set1_ps( c ) , 1 ) );
+   const auto x=_mm256_fmaddsub_ps( viewproj2x, _mm256_set1_ps( s ), viewproj2x * _mm256_insertf128_si256(_mm256_set1_ps(c),-_mm_set1_ps(c),1));
    *BuffersX::data=x;
   // _mm256_zeroupper();
 
@@ -446,7 +538,6 @@ void VkUtils2::cleanup()
  
 }
 
-#include "Pipeline.hpp"
 VkFormat PipelineX::findDepthFormat()
 {
   constexpr VkFormat formatCandidates[3] = { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT };
@@ -506,17 +597,22 @@ inline void PipelineX::createGraphicsPipelineLayout()
   // const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile();
   // const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile1();
 
+  VkSpecializationInfo Vks =
+  {
+
+  };
+
   const VkPipelineShaderStageCreateInfo vertexStage = {
     .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
     .stage  = VK_SHADER_STAGE_VERTEX_BIT,
-    .module = SPV.compileShaderFile(),
+    .module = Queues::clPPPI3A<VkShaderModule, PFN_vkCreateShaderModule>( &SPV.VsMCI, "vkCreateShaderModule" ),
     .pName  = "main",
 
   };
 
   const VkPipelineShaderStageCreateInfo fragStage = { .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                                                       .stage  = VK_SHADER_STAGE_FRAGMENT_BIT,
-                                                      .module = SPV.compileShaderFile1(),
+                                                      .module = Queues::clPPPI3A<VkShaderModule, PFN_vkCreateShaderModule>( &SPV.VsMCI2, "vkCreateShaderModule" ),
                                                       .pName  = "main" };
 
   const VkPipelineShaderStageCreateInfo shaderStages[2] = { fragStage, vertexStage };
@@ -899,7 +995,7 @@ inline constexpr void UniformBufferObject::createDescriptorSetLayout()
     }
   }
 
-  #include "Queues.hpp"
+
 inline void Queues::createCommandPool()
 {
   constexpr VkCommandPoolCreateInfo poolInfo = {
