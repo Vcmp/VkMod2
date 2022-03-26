@@ -1,10 +1,7 @@
-
+#pragma once
 
 //I will have to assume that this works without needing explicit includes due to forward declarations
 
-#include "glm/ext/matrix_float4x4.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/ext/vector_float3.hpp"
 
 
 #include <immintrin.h>

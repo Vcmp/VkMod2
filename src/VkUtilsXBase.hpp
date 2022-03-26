@@ -1,5 +1,5 @@
 
-
+#pragma once
 
 
 #define GLFW_EXPOSE_NATIVE_WIN32

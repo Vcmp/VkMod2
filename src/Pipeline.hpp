@@ -1,4 +1,4 @@
-
+#pragma once
 #include "Buffers.hpp"
 #include "test.inl"
 #include "mat4x.hpp"

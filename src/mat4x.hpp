@@ -1,8 +1,5 @@
+#pragma once
 
-
-#include <array>
-#include <cstdio>
-#include <immintrin.h>
 
 /*
  *too lazy to do an SSE version as AVX in many cases can allow for the ability to the same steps in half as many stages

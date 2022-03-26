@@ -1,4 +1,4 @@
-
+#pragma once
 #include "Pipeline.hpp"
 // #include "Queues.hpp"
 // #include "SwapChainSupportDetails.hpp"
