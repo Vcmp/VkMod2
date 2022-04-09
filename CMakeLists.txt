@@ -45,6 +45,8 @@ message(STATUS ${CMAKE_CXX_FLAGS})
 			"${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderSPIRVUtils.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/shaders/21_shader_ubo.frag"
 			"${CMAKE_CURRENT_SOURCE_DIR}/shaders/21_shader_ubo.vert"
+			"${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt.inl"
+			"${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt.inl"
 			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/TracyClient.cpp"
 			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/Tracy.hpp"
 	)  
@@ -150,7 +152,8 @@ function(CompileShaders SHADER SHADER2)
 	# file(READ ${current-output-path} content)
 	# Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt frag)
 	# Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt vert)
-
+	file(WRITE SHADER "")
+	file(WRITE SHADER2 "")
 	set_source_files_properties(${current-output-path} ${current-output-path2} PROPERTIES GENERATED TRUE)
     target_sources(VkMod2 PRIVATE ${current-output-path} ${current-output-path2})	
 	

@@ -20,7 +20,7 @@ static constexpr struct PipelineX
   static constinit inline VkPipelineLayout vkLayout;
   static constinit inline VkPipeline       graphicsPipeline;
   static constinit inline VkCommandBuffer  commandBuffers[Frames];
-} PX;
+} __attribute__((aligned(64))) PX;
 
 
 static constexpr struct UniformBufferObject

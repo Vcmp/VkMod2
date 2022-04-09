@@ -8,6 +8,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <emmintrin.h>
+#include <immintrin.h>
 #include <pthread.h>
 #include <unistd.h>
 
@@ -30,9 +32,9 @@ inline namespace
 	constexpr uint16_t SIN_COUNT = SIN_MASK + 1;
 		
 	constexpr	float radFull = (float) (PI * 2.0);
-	constexpr float	radToIndex = SIN_COUNT / radFull;
+	const __m128	radToIndex = _mm_set1_ps(SIN_COUNT / radFull);
 		
-	constexpr float	cosOffset = (float)(PI / 2);
+	const __m128	cosOffset = _mm_set1_ps((float)(PI / 2));
 
 __attribute__((pure, const)) auto const setupfloat()
     {
@@ -161,64 +163,85 @@ float cosfromsin(float sin, float angle) __attribute__((pure))
 
         return b >= 3.1415927F ? -cos : cos;
 }
-auto sin1(const float& __restrict__ rad) {
-		float index = rad * radToIndex;
-		float index2 = rad+cosOffset * radToIndex;
+// auto sin1(const float& __restrict__ rad) {
+// 		float index = rad * radToIndex;
+// 		float index2 = rad+cosOffset * radToIndex;
 
-    __m256 aidxi=_mm256_set_ps(index, index2, index, index2, index, index2, index, index2);
-		//float floor = (float)Math.floor(index); //Correct
-		__m256i floor12x = _mm256_floor_ps(aidxi);	              //Fast, only for positive angles
-		__m256i indexedFloor = (uint32_t)(index) - floor12x;
-		// float alpha = index - floor;
-		__m256i a=_mm256_castps_si256(floor12x);
-		__m256i b=_mm256_set1_epi32(SIN_MASK);
-		uint32_t i = _mm256_and_ps(a,b)[0];
+//     __m256 aidxi=_mm256_set_ps(index, index2, index, index2, index, index2, index, index2);
+// 		//float floor = (float)Math.floor(index); //Correct
+// 		__m256i floor12x = _mm256_floor_ps(aidxi);	              //Fast, only for positive angles
+// 		__m256i indexedFloor = (uint32_t)(index) - floor12x;
+// 		// float alpha = index - floor;
+// 		__m256i a=_mm256_castps_si256(floor12x);
+// 		__m256i b=_mm256_set1_epi32(SIN_MASK);
+// 		uint32_t i = _mm256_and_ps(a,b)[0];
 		
-    auto x = _mm256_set_ps(sint[i+0],sint[i+0],sint[i+0],sint[i+0],sint[i+1],sint[i+1],sint[i+1],sint[i+1]);
+//     auto x = _mm256_set_ps(sint[i+0],sint[i+0],sint[i+0],sint[i+0],sint[i+1],sint[i+1],sint[i+1],sint[i+1]);
 
-		__m128 sin1 = _mm_set1_ps(sint[i+0]);
-		__m128 sin2 = _mm_set1_ps(sint[i+1]);
-        // __m256 sin132x = _mm256_set_m128(sin1, sin2);
-  __m256 sin132x = _mm256_loadu2_m128(&sint[i+0],&sint[i+1]);
+// 		__m128 sin1 = _mm_set1_ps(sint[i+0]);
+// 		__m128 sin2 = _mm_set1_ps(sint[i+1]);
+//         // __m256 sin132x = _mm256_set_m128(sin1, sin2);
+//   __m256 sin132x = _mm256_loadu2_m128(&sint[i+0],&sint[i+1]);
 		
-		return _mm256_fmaddsub_ps(indexedFloor, (sin132x), x);
-		// return _mm256_fmaddsub_ps(x, aidxi, _mm256_sub_ps(a, b));
-		// return sin1 + (sin2 - sin1) * (indexedFloor[0]);
-    // return indexedFloor * sin1 + (1 - indexedFloor) * sin2;
-	}
+// 		return _mm256_fmaddsub_ps(indexedFloor, (sin132x), x);
+// 		// return _mm256_fmaddsub_ps(x, aidxi, _mm256_sub_ps(a, b));
+// 		// return sin1 + (sin2 - sin1) * (indexedFloor[0]);
+//     // return indexedFloor * sin1 + (1 - indexedFloor) * sin2;
+// 	}
 
 
-constexpr float sinx(const float& __restrict__ rad) 
+const auto sinx(const auto& __restrict__ rad) 
 {
-	const float index = rad * radToIndex;
+	const auto index = rad * radToIndex;
 		//float floor = (float)Math.floor(index); //Correct
-	const	int floor = (int)index & SIN_MASK;	              //Fast, only for positive angles
+    const auto Floorf=_mm_round_ps(index, _MM_FROUND_FLOOR);
+	const	size_t floor = static_cast<uint16_t>(Floorf[0])&SIN_MASK;	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
 		
-	const	float alpha = index - (int)index; //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
+	const	auto alpha = _mm_fmsub_ps(rad, radToIndex, Floorf); //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
 		
 		;
+			// const float* a=sint.data()+1;
+	const	auto sin1 = _mm_set1_ps(sint[floor]);
+	const	auto sin2 = _mm_set1_ps(sint[floor+1])-sin1;
 		
-	const	float sin1 = sint[floor+0];
-	const	float sin2 = sint[floor+1]-sin1;
+		return _mm256_set_m128(_mm_fmadd_ps(sin2, alpha, sin1), -_mm_fmadd_ps(sin2, alpha, sin1));
+	}
+
+//Attemting to avoid a vinsertf128 by "dupling" the sin vetcor prior beforhand, may or maynot be faster than justusing teh priro /previosu sin methodand 
+const auto cosx(const auto& __restrict__ rad) 
+{
+  const auto radToIndex2=_mm256_broadcast_ps(&radToIndex);
+	const auto index = rad * radToIndex2;
+		//float floor = (float)Math.floor(index); //Correct
+    const auto Floorf=_mm256_round_ps(index, _MM_FROUND_FLOOR);
+	const	auto floor = _mm256_and_ps(Floorf,_mm256_set1_ps(SIN_MASK));	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
 		
-		return fma(sin2, alpha, sin1);
+	const	auto alpha = _mm256_fmsub_ps(rad, radToIndex2, Floorf); //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
+		
+		;
+			const int a=floor[0];
+	const	auto sin1 = _mm256_set1_ps(sint[a]);
+	const	auto sin2 = _mm256_set1_ps(sint[a+1])-sin1;
+		
+		return _mm256_fmadd_ps(sin2, alpha, sin1);
 	}
 	
 	
-constexpr	float cos1(const float& __restrict__  rad) {
+/* const	__m128 cos1(const __m128& __restrict__  rad) {
 
 		
 		return sinx(rad+cosOffset);
-	}
+	} */
 inline void renderer2::updateUniformBuffer()
 {
   // const float time = static_cast<float>( glfwGetTime() ) * ah;
-  const float a=(glfwGetTime() * ah);
+  const __m128 a= _mm_set1_ps((glfwGetTime() * ah));
   __builtin_prefetch( BuffersX::data, 1, 3 );
+  // __builtin_prefetch( &viewproj, 1, 3 );
   // const auto vfm =  viewproj2x;
-   const float c=sinx(a);
+   const __m256 c=sinx(a)*viewproj2x;
   
-   float s = cos1(a);
+   const __m256 s = cosx(_mm256_set_m128(a+cosOffset,a+cosOffset));
   // static constexpr float xs = 1;
   // sincosf( , &c, &s );
   // const float ax = glfwGetTime() * ah;
@@ -242,7 +265,7 @@ inline void renderer2::updateUniformBuffer()
 
   // const auto x = _mm256_fmaddsub_ps( viewproj2x, osxyzsZ, a );
 
-   const auto x=_mm256_fmaddsub_ps( viewproj2x, _mm256_set1_ps( s ), viewproj2x * _mm256_insertf128_si256(_mm256_set1_ps(c),-_mm_set1_ps(c),1));
+   const auto x=_mm256_fmaddsub_ps( viewproj2x, s, c);
    *BuffersX::data=x;
   // _mm256_zeroupper();
 

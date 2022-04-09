@@ -88,7 +88,7 @@ struct BuffersX
 inline namespace
 {
 
-  glm::mat4 viewproj = glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
+  const glm::mat4 viewproj = glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
                        glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
   ;
   // glm::mat4 rot;

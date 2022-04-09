@@ -174,9 +174,10 @@ inline VkDevice VkDev::createLogicalDevice()
   createInfo.pQueueCreateInfos       = queueCreateInfos;
   createInfo.ppEnabledExtensionNames = ( &VkUtilsXBase::deviceExtensions );
   createInfo.enabledExtensionCount   = 1;
+  
   // createInfo.ppEnabledLayerNames=(validationLayers.data());
   createInfo.pEnabledFeatures = nullptr;
-VkDevice device;
+  VkDevice device;
   if ( !deviceVulkan12Features.imagelessFramebuffer )
   {
      std::runtime_error( "Failed Enumeration!" );

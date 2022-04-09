@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Pipeline.hpp"
 //I will have to assume that this works without needing explicit includes due to forward declarations
 
 

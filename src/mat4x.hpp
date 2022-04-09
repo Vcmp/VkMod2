@@ -5,6 +5,7 @@
  *too lazy to do an SSE version as AVX in many cases can allow for the ability to the same steps in half as many stages
  */
 
+#include <immintrin.h>
 static constexpr float ax[16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
 inline static struct mat4x
 {
@@ -35,7 +36,7 @@ public:
   inline void    doLook( float );
   inline void    rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
-} m4, m5;
+} __attribute__((aligned(64))) m4, m5;
 
 inline void mat4x::permute()
 {
