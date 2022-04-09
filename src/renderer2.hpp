@@ -4,7 +4,7 @@
 
 
 
-#include <immintrin.h>
+
 
 /*
  trick to use builtins+Attributes to treat a blob of memory as a vector type which compiles more cleanly into slightly better asm with vmovps (At least with Clang)
@@ -12,7 +12,7 @@
 */
 typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( m4 ) ), __aligned__( 64 ) ) );
 
-static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) renderer2 : Queues
+static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) renderer2// : Queues
 {
       static constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr };
   constexpr renderer2(): AvailableSemaphore(Queues::clPPPI3A<VkSemaphore, PFN_vkCreateSemaphore>( &vkCreateCSemaphore, "vkCreateSemaphore" ))

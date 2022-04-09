@@ -4,11 +4,11 @@
 
 //Was being quite silly anf fogt/did nt replaise that it is in aftc accpeble/even good rpatcie to iclude Heards Quelitlaly,icnlien.nSres,chais.Senu as long as impeltaions/translation units to not Overlap/Overide Eahc other and/or reudent;need/elss ?Excessive Linoing takes palces and taranltios,tcoep.moame sanoot be mitiagedenagtaited/handled/ienatces/Dlelaiatve/reonee\bd/impelmated 
 
-static constexpr struct Queues
+static struct Queues
 {
+  static inline VkPhysicalDevice            physicalDevice;
   static inline VkCommandPool               commandPool;
   static inline VkCommandPool               commandPool2;
-  static inline VkPhysicalDevice            physicalDevice;
   static inline VkDevice                    device;
   static inline bool                        a = false;
   static inline uint32_t                    graphicsFamily;
@@ -35,5 +35,5 @@ static constexpr struct Queues
     T( vkGetDeviceProcAddr( Queues::device, a ) )( Queues::device, pStrct, nullptr, &object );
     return object;
   }
-} inline const queues;
+};
 

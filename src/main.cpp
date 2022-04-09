@@ -2,27 +2,31 @@
 #include "glm/ext/scalar_constants.hpp"
 #include "glm/gtc/constants.hpp"
 #include "renderer2.hpp"
+#include "VkTemp.hpp"
+#include "VkDev.hpp"
 
-#include <cmath>
+
+#include <cstddef>
 #include <cstdint>
-#include <immintrin.h>
-#include <cmath>
 #include <pthread.h>
 #include <unistd.h>
-#include <xmmintrin.h>
+
 
 
 /*
   Unfortuately the Linking Structure in this project/Repo is absolutely terrible/Sucks/is Hot Garbage:
     and their was a signficant issue with undefined references with both variables and functions but priamirly the Latter; 
   ideally implemtaions would be compartmentalised and structured more cleanly, but as a result functiom implementations will ahve to be dumped ehere for now to avoid the linker having a fit
-*/
 
+
+Unlesss their is a reliable method of "cross-Linking" or tieing seperate/Disparate translation Units Together their does not seem to be an immedately apparent solution/Quick Fix available to help mitigate/Address the garbage CodeGen/Compile Times and the Abysmall Code Gen Layout
+*/
+//All Credit "theagentd" : //https://jvm-gaming.org/t/extremely-fast-sine-cosine/55153/80
 inline namespace
 {
   constexpr double PI = glm::pi<double>();
   constexpr uint8_t SIN_BITS = 9;
-	constexpr uint16_t SIN_MASK = ~(-1 << SIN_BITS);
+	constexpr uint16_t SIN_MASK = ~(-1U << SIN_BITS);
 	constexpr uint16_t SIN_COUNT = SIN_MASK + 1;
 		
 	constexpr	float radFull = (float) (PI * 2.0);
@@ -30,21 +34,22 @@ inline namespace
 		
 	constexpr float	cosOffset = (float)(PI / 2);
 
-
-	static constinit float sint[SIN_COUNT+1];
-		
-    void setupfloat()
+__attribute__((pure, const)) auto const setupfloat()
     {
+      std::array<float, SIN_COUNT+1> sint{};
 		for (int i = 0; i <= SIN_COUNT; i++) {
 			sint[i] = (float) sin(PI * 2 * i / SIN_COUNT);
 		}
-    }
+    return sint;
+    } 
+	static const std::array<float, SIN_COUNT+1> sint=setupfloat();
+		
+    
 	
   static constinit inline bool      a = true;
   static constinit inline uint16_t  aa;
   static constinit inline pthread_t sys;
   // static inline pthread_t rThrd;
-
 } 
 
 // Apparently Threads other than the  main thread have much smaller stack allocation sizes, whether this is true is completely unconfirmed however
@@ -74,12 +79,15 @@ int __cdecl main( int argc, char * argv[] )
     std::cout << argv[a] << "\n";
   }
   int r;
-
+  if constexpr(VK_EXT_graphics_pipeline_library)
+  {
+    printf("VK_EXT_graphics_pipeline_library Supported \n");
+  }
   r = pthread_create( &sys, nullptr, Sysm, nullptr );
   setupfloat();
   while ( !glfwWindowShouldClose( ( VkUtils2::window ) ) )
   {
-    glfwPollEvents();
+    // glfwPollEvents();
     renderer2::drawFrame();
     aa++;
   }
@@ -374,164 +382,179 @@ inline VkResult VkUtils2::createDebugUtilsMessengerEXT( const VkInstance instanc
 
 inline void VkUtils2::pickPhysicalDevice()
 {
-  std::cout << ( "Picking Physical Device" ) << "\n";
-  uint32_t deviceCount;
-  VkUtilsXBase::checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, nullptr ) );
-  if ( deviceCount == 0 )
-    std::runtime_error( "Failed to find GPUs with Vulkan support" );
-  VkPhysicalDevice ppPhysicalDevices[deviceCount];
+  auto const vkds=VkDev();
+   Queues::physicalDevice=vkds.pd;
+   Queues::device=vkds.pds;
+   BuffersX::memProperties=vkds.memProperties;
+  // std::cout << ( "Picking Physical Device" ) << "\n";
+  // uint32_t deviceCount;
+  // VkUtilsXBase::checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, nullptr ) );
+  // if ( deviceCount == 0 )
+  //   std::runtime_error( "Failed to find GPUs with Vulkan support" );
+  //  std::vector<VkPhysicalDevice> ppPhysicalDevicesdeviceCount(deviceCount);
 
-  std::cout << ( "Enumerate Physical Device" ) << "\n";
-  VkUtilsXBase::checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, ppPhysicalDevices ) );
-  for ( const VkPhysicalDevice & d : ppPhysicalDevices )
-  {
-    std::cout << ( "Check Device:" ) << d << "\n";
-    if ( isDeviceSuitable( d ) )
-    {
-      std::cout << ( "Device Suitable:" ) << d << "\n";
-      Queues::physicalDevice = d;
-      return;
-    }
-    std::cout << ( "Device Not Suitable:" ) << d << "\n";
-  }
-  if ( Queues::physicalDevice == VK_NULL_HANDLE )
-  {
-    std::runtime_error( "Failed to find a suitable GPU" );
-  }
+  // std::cout << ( "Enumerate Physical Device" ) << "\n";
+  // VkUtilsXBase::checkCall( vkEnumeratePhysicalDevices( vkInstance, &deviceCount, ppPhysicalDevicesdeviceCount.data() ) );
+  // for ( auto i=0U; i< ppPhysicalDevicesdeviceCount.size(); i++ )
+  // {
+  //   const auto d =ppPhysicalDevicesdeviceCount.at(i);
+  //   std::cout << ( "Check Device:" ) << d << "\n";
+  //   VkDev const ab= VkDev(d);
+  //   // auto const aaq= Queues(ab);
+  //   if ( VkDev(d).is )
+  //   {
+  //     std::cout << ( "Device Suitable:" ) << d << "\n";
+  //    Queues::physicalDevice=d;
+  //     return;
+  //   }
+  //   std::cout << ( "Device Not Suitable:" ) << d << "\n";
+  // }
+  // if ( Queues::physicalDevice == VK_NULL_HANDLE )
+  // {
+  //   std::runtime_error( "Failed to find a suitable GPU" );
+  // }
 }
-// Use VK Tutorial refernce as that sems to be far more reliable that the prior
-// java approach used
-inline bool VkUtils2::isDeviceSuitable( const VkPhysicalDevice device )
-{
-  VkPhysicalDeviceProperties deviceProperties;
-  VkPhysicalDeviceFeatures   deviceFeatures;
-  /*   VkUtilsXBase::getAddrFuncPtr<PFN_vkGetPhysicalDeviceProperties>( "vkGetPhysicalDeviceProperties" )(
-      device, &deviceProperties );
-    auto b = VkUtilsXBase::getAddrFuncPtr<PFN_vkGetPhysicalDeviceFeatures>( "vkGetPhysicalDeviceFeatures" );
-    b( device, &deviceFeatures );*/
-  vkGetPhysicalDeviceProperties( device, &deviceProperties );
-  vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
-  checkDeviceExtensionSupport( device );
+// // Use VK Tutorial refernce as that sems to be far more reliable that the prior
+// // java approach used
+// inline bool VkUtils2::isDeviceSuitable( const VkPhysicalDevice device )
+// {
+//   VkPhysicalDeviceProperties deviceProperties;
+//   // VkPhysicalDeviceFeatures   deviceFeatures;
+//   /*   VkUtilsXBase::getAddrFuncPtr<PFN_vkGetPhysicalDeviceProperties>( "vkGetPhysicalDeviceProperties" )(
+//       device, &deviceProperties );
+//     auto b = VkUtilsXBase::getAddrFuncPtr<PFN_vkGetPhysicalDeviceFeatures>( "vkGetPhysicalDeviceFeatures" );
+//     b( device, &deviceFeatures );*/
+//   vkGetPhysicalDeviceProperties( device, &deviceProperties );
+//   // vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
+//   checkDeviceExtensionSupport( device );
 
-  return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU; /*&&
-                               deviceFeatures.geometryShader;*/
-}
+//   return deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU; /*&&
+//                                deviceFeatures.geometryShader;*/
+// }
 
-inline void VkUtils2::checkDeviceExtensionSupport( VkPhysicalDevice device )
-{
-  std::cout << "Verifying checkDeviceExtensionSupport"
-            << "\n";
-  uint32_t extensionCount;
-  vkEnumerateDeviceExtensionProperties( device, VK_NULL_HANDLE, &extensionCount, VK_NULL_HANDLE );
-  VkExtensionProperties availableExtensions[extensionCount];  // todo: May MEMory Leak
-  vkEnumerateDeviceExtensionProperties( device, VK_NULL_HANDLE, &extensionCount, availableExtensions );
-  std::cout << extensionCount << "->Extensions"
-            << "\n";
-}
+// inline void VkUtils2::checkDeviceExtensionSupport( VkPhysicalDevice device )
+// {
+//   std::cout << "Verifying checkDeviceExtensionSupport"
+//             << "\n";
+//   uint32_t extensionCount;
+//   vkEnumerateDeviceExtensionProperties( device, VK_NULL_HANDLE, &extensionCount, VK_NULL_HANDLE );
+//   VkExtensionProperties availableExtensions[extensionCount];  // todo: May MEMory Leak
+//   vkEnumerateDeviceExtensionProperties( device, VK_NULL_HANDLE, &extensionCount, availableExtensions );
+//   std::cout << extensionCount << "->Extensions"
+//             << "\n";
+// }
 
-inline void VkUtils2::createLogicalDevice()
-{
-  std::cout << ( "Creating Logical Device" ) << "\n";
+// inline void VkUtils2::createLogicalDevice()
+// {
+//   std::cout << ( "Creating Logical Device" ) << "\n";
 
-  uint32_t pQueueFamilyPropertyCount;
-  vkGetPhysicalDeviceQueueFamilyProperties( Queues::physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE );
+//   uint32_t pQueueFamilyPropertyCount;
+//   vkGetPhysicalDeviceQueueFamilyProperties( Queues::physicalDevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE );
 
-  VkQueueFamilyProperties uniqueQueueFamilies[pQueueFamilyPropertyCount];
-  vkGetPhysicalDeviceQueueFamilyProperties( Queues::physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies );
+//   VkQueueFamilyProperties uniqueQueueFamilies[pQueueFamilyPropertyCount];
+//   vkGetPhysicalDeviceQueueFamilyProperties( Queues::physicalDevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies );
 
-  uint32_t i = 0;
-  // todo: Likley/Prop won't work with AMD properly and/or specific GPUs with differing Queue Family layouts
-  for ( VkQueueFamilyProperties & uniqueQueue : uniqueQueueFamilies )
-  {
-    std::cout << ( uniqueQueue.queueCount ) << "\n";
-    if ( ( uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT ) )
-    {
-      Queues::graphicsFamily = i;
-      continue;
-    }
-    // Check that Video Tranfer Queues are not Accidentally selected if the Vulkan beta Drivers from Nvidia are used
-    VkBool32 presentSupport = false;
-    vkGetPhysicalDeviceSurfaceSupportKHR( Queues::physicalDevice, i, Queues::surface, &presentSupport );
-    if ( uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !presentSupport )
-    {
-      Queues::transferFamily = i;
-      break;
-    }
+//   uint32_t i = 0;
+//   // todo: Likley/Prop won't work with AMD properly and/or specific GPUs with differing Queue Family layouts
+//   for ( VkQueueFamilyProperties & uniqueQueue : uniqueQueueFamilies )
+//   {
+//     std::cout << ( uniqueQueue.queueCount ) << "\n";
+//     if ( ( uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT ) )
+//     {
+//       Queues::graphicsFamily = i;
+//       continue;
+//     }
+//     // Check that Video Tranfer Queues are not Accidentally selected if the Vulkan beta Drivers from Nvidia are used
+//     VkBool32 presentSupport = false;
+//     vkGetPhysicalDeviceSurfaceSupportKHR( Queues::physicalDevice, i, Queues::surface, &presentSupport );
+//     if ( uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !presentSupport )
+//     {
+//       Queues::transferFamily = i;
+//       break;
+//     }
 
-    i++;
-  }
-  std::cout << "Using: " << Queues::graphicsFamily << "-->" << Queues::transferFamily << "\n";
+//     i++;
+//   }
+//   std::cout << "Using: " << Queues::graphicsFamily << "-->" << Queues::transferFamily << "\n";
 
-  constexpr float priority = 1.0f;
-  uint32_t        pIx      = 0;
+//   constexpr float priority = 1.0f;
+//   uint32_t        pIx      = 0;
 
-  VkDeviceQueueCreateInfo GQ{};
+//   VkDeviceQueueCreateInfo GQ{};
 
-  GQ.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-  GQ.queueFamilyIndex = Queues::graphicsFamily;
-  GQ.queueCount       = 1;
-  GQ.pQueuePriorities = &priority;
-  GQ.flags            = 0;
-  GQ.pNext            = VK_NULL_HANDLE;
+//   GQ.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+//   GQ.queueFamilyIndex = Queues::graphicsFamily;
+//   GQ.queueCount       = 1;
+//   GQ.pQueuePriorities = &priority;
+//   GQ.flags            = 0;
+//   GQ.pNext            = VK_NULL_HANDLE;
 
-  VkDeviceQueueCreateInfo PQ{};
+//   VkDeviceQueueCreateInfo PQ{};
 
-  PQ.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-  PQ.queueFamilyIndex = Queues::transferFamily;
-  PQ.queueCount       = 2;
-  PQ.pQueuePriorities = &priority;
-  PQ.flags            = 0;
-  PQ.pNext            = VK_NULL_HANDLE;
+//   PQ.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+//   PQ.queueFamilyIndex = Queues::transferFamily;
+//   PQ.queueCount       = 2;
+//   PQ.pQueuePriorities = &priority;
+//   PQ.flags            = 0;
+//   PQ.pNext            = VK_NULL_HANDLE;
 
-  VkDeviceQueueCreateInfo queueCreateInfos[2] = { GQ, PQ };
+//   VkDeviceQueueCreateInfo queueCreateInfos[2] = { GQ, PQ };
 
-  static VkPhysicalDeviceVulkan12Features deviceVulkan12Features = {
-    .sType                           = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
-    .pNext                           = VK_NULL_HANDLE,
-    .descriptorBindingPartiallyBound = true,
-    .imagelessFramebuffer            = true,
+//   static VkPhysicalDeviceVulkan13Features vk13F
+//   {
+//     .sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+//     .pNext=VK_NULL_HANDLE
+//   };
 
-  };
 
-  static constexpr VkPhysicalDeviceFeatures deviceFeatures = {};
+//   static VkPhysicalDeviceVulkan12Features deviceVulkan12Features = {
+//     .sType                           = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+//     .pNext                           = &vk13F,
+//     .descriptorBindingPartiallyBound = true,
+//     .imagelessFramebuffer            = true,
 
-  VkPhysicalDeviceFeatures2 deviceFeatures2 = { .sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
-                                                .pNext    = &deviceVulkan12Features,
-                                                .features = deviceFeatures };
+//   };
 
-  //.fillModeNonSolid(true) //dneeded to adres valditaion errors when using
-  // VK_POLIGYON_MODE_LINE or POINT .robustBufferAccess(true);
-  //                        .geometryShader(true);
-  //                        .pipelineStatisticsQuery(true)
-  //                        .alphaToOne(false);
-  vkGetPhysicalDeviceFeatures2( Queues::physicalDevice, &deviceFeatures2 );
+//   static constexpr VkPhysicalDeviceFeatures deviceFeatures = {};
 
-  // vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
-  VkDeviceCreateInfo createInfo      = {};
-  createInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-  createInfo.pNext                   = &deviceFeatures2;
-  createInfo.queueCreateInfoCount    = 2;
-  createInfo.pQueueCreateInfos       = queueCreateInfos;
-  createInfo.ppEnabledExtensionNames = ( &VkUtilsXBase::deviceExtensions );
-  createInfo.enabledExtensionCount   = 1;
-  // createInfo.ppEnabledLayerNames=(validationLayers.data());
-  createInfo.pEnabledFeatures = nullptr;
+//   VkPhysicalDeviceFeatures2 deviceFeatures2 = { .sType    = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+//                                                 .pNext    = &deviceVulkan12Features,
+//                                                 /* .features = deviceFeatures */ };
 
-  if ( !deviceVulkan12Features.imagelessFramebuffer )
-  {
-     std::runtime_error( "Failed Enumeration!" );
-  }
-  if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
-  {
-    createInfo.ppEnabledLayerNames = &VkUtilsXBase::validationLayers;
-  }
-  VkUtilsXBase::checkCall( vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &Queues::device ) );
-  volkLoadDevice( Queues::device );
 
-  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[0].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::GraphicsQueue );
-  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::TransferQueue[0] );
-  VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 1, &Queues::TransferQueue[1] );
-}
+//   //.fillModeNonSolid(true) //dneeded to adres valditaion errors when using
+//   // VK_POLIGYON_MODE_LINE or POINT .robustBufferAccess(true);
+//   //                        .geometryShader(true);
+//   //                        .pipelineStatisticsQuery(true)
+//   //                        .alphaToOne(false);
+//   vkGetPhysicalDeviceFeatures2( Queues::physicalDevice, &deviceFeatures2 );
+
+//   // vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
+//   VkDeviceCreateInfo createInfo      = {};
+//   createInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+//   createInfo.pNext                   = &deviceFeatures2;
+//   createInfo.queueCreateInfoCount    = 2;
+//   createInfo.pQueueCreateInfos       = queueCreateInfos;
+//   createInfo.ppEnabledExtensionNames = ( &VkUtilsXBase::deviceExtensions );
+//   createInfo.enabledExtensionCount   = 1;
+//   // createInfo.ppEnabledLayerNames=(validationLayers.data());
+//   createInfo.pEnabledFeatures = nullptr;
+
+//   if ( !deviceVulkan12Features.imagelessFramebuffer )
+//   {
+//      std::runtime_error( "Failed Enumeration!" );
+//   }
+//   if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
+//   {
+//     createInfo.ppEnabledLayerNames = &VkUtilsXBase::validationLayers;
+//   }
+//   VkUtilsXBase::checkCall( vkCreateDevice( Queues::physicalDevice, &createInfo, VK_NULL_HANDLE, &Queues::device ) );
+//   volkLoadDevice( Queues::device );
+
+//   VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[0].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::GraphicsQueue );
+//   VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 0, &Queues::TransferQueue[0] );
+//   VkUtilsXBase::clPPJI3<PFN_vkGetDeviceQueue>( createInfo.pQueueCreateInfos[1].queueFamilyIndex, "vkGetDeviceQueue", 1, &Queues::TransferQueue[1] );
+// }
 
 void VkUtils2::cleanup()
 {
@@ -837,7 +860,7 @@ inline void BuffersX::createSetBuffer(
     .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
     .pNext           = nullptr,
     .allocationSize  = memRequirements.size,
-    .memoryTypeIndex = findMemoryType( Queues::physicalDevice, memRequirements.memoryTypeBits, properties ),
+    .memoryTypeIndex = findMemoryType( memRequirements.memoryTypeBits, properties ),
   };
   //
   VkUtilsXBase::clPPPI3<PFN_vkAllocateMemory>( &allocateInfo1, "vkAllocateMemory", &vertexBufferMemory );
@@ -845,13 +868,13 @@ inline void BuffersX::createSetBuffer(
   VkUtilsXBase::checkCall( vkBindBufferMemory( Queues::device, currentBuffer, vertexBufferMemory, 0 ) );
 }
 
-inline uint32_t BuffersX::findMemoryType( VkPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlagBits properties )
+inline uint32_t BuffersX::findMemoryType( uint32_t typeFilter, VkMemoryPropertyFlagBits properties )
 {
-  VkPhysicalDeviceMemoryProperties memProperties = {};
-  vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
+  // VkPhysicalDeviceMemoryProperties memProperties = {};
+  // vkGetPhysicalDeviceMemoryProperties( physicalDevice, &memProperties );
   for ( uint32_t i = 0; i < memProperties.memoryTypeCount; i++ )
   {
-    if ( ( typeFilter & ( 1U << i ) ) != 0 && ( memProperties.memoryTypes[i].propertyFlags & properties ) == properties )
+    if ( /* ( typeFilter & ( 1U << i ) ) != 0 &&  */( memProperties.memoryTypes[i].propertyFlags & properties ) == properties )
     {
       return i;
     }
@@ -877,7 +900,7 @@ inline void BuffersX::copyBuffer( VkBuffer & dst, const size_t sized )
     .dstOffset = 0,
     .size      = sized,
   };
-  vkCmdCopyBuffer( queues.commandBuffer, Bufferstaging, dst, 1, &vkBufferCopy );
+  vkCmdCopyBuffer( Queues::commandBuffer, Bufferstaging, dst, 1, &vkBufferCopy );
   Queues::endSingleTimeCommands();
 }
 

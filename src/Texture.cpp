@@ -27,7 +27,7 @@ inline void Texture::createImage( VkExtent2D extent, VkFormat format, VkImageUsa
   allocInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocInfo.allocationSize       = memRequirements.memoryRequirements.size;
   allocInfo.memoryTypeIndex =
-    BuffersX::findMemoryType( Queues::physicalDevice, memRequirements.memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
+    BuffersX::findMemoryType( memRequirements.memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
   allocInfo.pNext = VK_NULL_HANDLE;
 
   if constexpr ( img2.prefersDedicatedAllocation | img2.requiresDedicatedAllocation )

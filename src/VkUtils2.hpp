@@ -41,7 +41,7 @@ static inline const struct VkUtils2
   VkUtils2::setupDebugMessenger();
   VkUtils2::createSurface();
   VkUtils2::pickPhysicalDevice();
-  VkUtils2::createLogicalDevice();
+  // VkUtils2::createLogicalDevice();
   SwapChainSupportDetails::setupImageFormats();
   SwapChainSupportDetails::createSwapChain();
   SwapChainSupportDetails::createImageViews();

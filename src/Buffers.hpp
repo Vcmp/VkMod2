@@ -18,6 +18,7 @@ struct BuffersX
 {
   static  inline __m256*  data = nullptr;  // Similar to the Hardcodes Address Field in the Memory Allocation
                                                   // System used in the Java Version
+  static inline  VkPhysicalDeviceMemoryProperties memProperties; //May Cause alignment problems
 
   static constinit inline VkBuffer       vertexBuffer;
   static constinit inline VkDeviceMemory vertexBufferMemory;
@@ -77,7 +78,7 @@ struct BuffersX
 
   // inline VkPipelineLayout vkLayout;
 
-  static uint32_t findMemoryType( VkPhysicalDevice, uint32_t, VkMemoryPropertyFlagBits );
+  static uint32_t findMemoryType( uint32_t, VkMemoryPropertyFlagBits );
   static void     createVkEvents();
   static void     setupBuffers();
   static void     createSetBuffer( VkMemoryPropertyFlagBits, VkBuffer &, VkBufferUsageFlagBits, size_t, VkDeviceMemory & );

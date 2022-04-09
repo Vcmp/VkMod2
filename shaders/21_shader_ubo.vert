@@ -1,4 +1,5 @@
 #version 460
+#pragma shader_stage(vertex)
 layout(binding = 0) uniform UBO { mat4 model; }
 ubo;
 
