@@ -31,10 +31,11 @@ inline namespace
 	constexpr uint16_t SIN_MASK = ~(-1U << SIN_BITS);
 	constexpr uint16_t SIN_COUNT = SIN_MASK + 1;
 		
-	constexpr	float radFull = (float) (PI * 2.0);
+	constexpr	float radFull = glm::two_pi<float>();
 	const __m128	radToIndex = _mm_set1_ps(SIN_COUNT / radFull);
+	const __m256	radToIndexA = _mm256_set1_ps(SIN_COUNT / radFull);
 		
-	const __m128	cosOffset = _mm_set1_ps((float)(PI / 2));
+	constexpr __m128	cosOffset = __extension__ (__m128){ glm::half_pi<double>(), glm::half_pi<double>(), glm::half_pi<double>(), glm::half_pi<double>() };
 
 __attribute__((pure, const)) auto const setupfloat()
     {
@@ -189,7 +190,55 @@ float cosfromsin(float sin, float angle) __attribute__((pure))
 //     // return indexedFloor * sin1 + (1 - indexedFloor) * sin2;
 // 	}
 
+const void sinxcosx(const __m128& a, __v8sf&  cos,  __v8sf&  sin)
+{
+  	// const __m128 index = a * radToIndex;
+const auto aaa=a+cosOffset;
+	// const auto index2 = aaa * radToIndex;
 
+  const __v8sf w= _mm256_set_m128(aaa, a)*radToIndexA;
+  // const __m256 xysc= _mm256_set_m128(index2, index);
+		//float floor = (float)Math.floor(index); //Correct
+    const auto Floorf=_mm256_floor_ps(w);
+    const auto Floorf1=__builtin_convertvector((__v8su)w, __v8sf);
+	const	size_t floor = static_cast<uint16_t>(Floorf[0])&SIN_MASK;	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
+	const	size_t floor2 = static_cast<uint16_t>(Floorf[4])&SIN_MASK;	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
+		
+	const	auto alpha = _mm_fmsub_ps(a, radToIndex,__builtin_shufflevector((__v8sf)Floorf, (__v8sf)Floorf, 0, 1, 2, 3)); //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
+		
+		;
+			// const float* a=sint.data()+1;
+	const	auto sin1 = _mm_set1_ps(sint[floor]);
+	const	auto sin2 = _mm_set1_ps(sint[floor+1]-sint[floor]);
+
+const	auto sin12 = _mm_set1_ps(sint[floor2]);
+	const	auto sin22 = _mm_set1_ps(sint[floor2+1]-sint[floor2]); //Adaptive Inetrpolation/Steps here......[Maybe]
+
+		const auto axzlvehaqiKXQ=_mm_fmadd_ps(sin22, alpha, sin12);
+		
+		cos= _mm256_set_m128(_mm_fmadd_ps(sin2, alpha, sin1), -_mm_fmadd_ps(sin2, alpha, sin1))*viewproj2x;
+
+		sin = _mm256_broadcast_ps(&axzlvehaqiKXQ);
+// const auto radToIndex2=_mm256_broadcast_ps(&radToIndex);
+		//float floor = (float)Math.floor(index); //Correct
+    // const auto Floorf2=_mm_round_ps(index2, _MM_FROUND_FLOOR);
+	// const	auto floor2 = static_cast<uint16_t>(Floorf2[0])&SIN_MASK;	 //_mm_and_ps(Floorf2,_mm_set1_ps(SIN_MASK))[0];	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
+		
+	// const	auto alpha2 = _mm_fmsub_ps(aaa, radToIndex, Floorf2); //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
+		
+		;
+			// const int a2=floor2[0];
+	
+  //   const __m128 aa=a+cosOffset;
+  // 	const __m256 index2 = _mm256_set_m128(aa * radToIndex, aa * radToIndex);
+  //   const auto Floorf2=_mm256_round_ps(index2, _MM_FROUND_FLOOR);
+	// const	size_t floor2 = static_cast<uint16_t>(Floorf2[0])&SIN_MASK;	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
+	// const	auto alph2a = _mm256_fmsub_ps(_mm256_broadcast_ps(&a), _mm256_broadcast_ps(&radToIndex), Floorf2); //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
+  // const	auto sin12 = _mm256_set1_ps(sint[floor2]);
+	// const	auto sin22 = _mm256_set1_ps(sint[floor2+1])-sin12;
+  //   sin=_mm256_fmadd_ps(sin22, alph2a, sin12);
+  
+}
 const auto sinx(const auto& __restrict__ rad) 
 {
 	const auto index = rad * radToIndex;
@@ -239,9 +288,13 @@ inline void renderer2::updateUniformBuffer()
   __builtin_prefetch( BuffersX::data, 1, 3 );
   // __builtin_prefetch( &viewproj, 1, 3 );
   // const auto vfm =  viewproj2x;
-   const __m256 c=sinx(a)*viewproj2x;
+   static constinit __v8sf c;
+   static constinit __v8sf s;
+  sinxcosx(a, c, s);
   
-   const __m256 s = cosx(_mm256_set_m128(a+cosOffset,a+cosOffset));
+
+//  c=sinx(a)*viewproj2x;
+//   s=cosx(_mm256_set_m128(a+cosOffset,a+cosOffset));
   // static constexpr float xs = 1;
   // sincosf( , &c, &s );
   // const float ax = glfwGetTime() * ah;
