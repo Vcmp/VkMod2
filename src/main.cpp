@@ -27,11 +27,11 @@ Unlesss their is a reliable method of "cross-Linking" or tieing seperate/Dispara
 inline namespace
 {
   constexpr double PI = glm::pi<double>();
-  constexpr uint8_t SIN_BITS = 9;
-	constexpr uint16_t SIN_MASK = ~(-1U << SIN_BITS);
-	constexpr uint16_t SIN_COUNT = SIN_MASK + 1;
+  constexpr auto SIN_BITS = 9;
+	constexpr auto SIN_MASK = ~(-1U << SIN_BITS);
+	constexpr auto SIN_COUNT = SIN_MASK + 1;
 		
-	constexpr	float radFull = glm::two_pi<float>();
+	constexpr	auto radFull = glm::two_pi<float>();
 	const __m128	radToIndex = _mm_set1_ps(SIN_COUNT / radFull);
 	const __m256	radToIndexA = _mm256_set1_ps(SIN_COUNT / radFull);
 		
@@ -50,7 +50,7 @@ __attribute__((pure, const)) auto const setupfloat()
     
 	
   static constinit inline bool      a = true;
-  static constinit inline uint16_t  aa;
+  static constinit inline uint32_t  aa;
   static constinit inline pthread_t sys;
   // static inline pthread_t rThrd;
 } 
@@ -190,7 +190,7 @@ float cosfromsin(float sin, float angle) __attribute__((pure))
 //     // return indexedFloor * sin1 + (1 - indexedFloor) * sin2;
 // 	}
 
-const void sinxcosx(const __m128& a, __v8sf&  cos,  __v8sf&  sin)
+/* const void sinxcosx(const __m128& __restrict__ a, __v8sf&  cos,  __v8sf&  sin)
 {
   	// const __m128 index = a * radToIndex;
 const auto aaa=a+cosOffset;
@@ -238,22 +238,23 @@ const	auto sin12 = _mm_set1_ps(sint[floor2]);
 	// const	auto sin22 = _mm256_set1_ps(sint[floor2+1])-sin12;
   //   sin=_mm256_fmadd_ps(sin22, alph2a, sin12);
   
-}
+} */
 const auto sinx(const auto& __restrict__ rad) 
 {
 	const auto index = rad * radToIndex;
 		//float floor = (float)Math.floor(index); //Correct
     const auto Floorf=_mm_round_ps(index, _MM_FROUND_FLOOR);
 	const	size_t floor = static_cast<uint16_t>(Floorf[0])&SIN_MASK;	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
+	const	size_t floor2 = static_cast<uint16_t>(Floorf[4])&SIN_MASK;	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
 		
 	const	auto alpha = _mm_fmsub_ps(rad, radToIndex, Floorf); //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
 		
 		;
 			// const float* a=sint.data()+1;
-	const	auto sin1 = _mm_set1_ps(sint[floor]);
-	const	auto sin2 = _mm_set1_ps(sint[floor+1])-sin1;
+	const	auto sin1 = _mm_broadcast_ss(&sint[floor]);
+	const	auto sin2 = _mm_broadcast_ss(&sint[floor+1])-sin1;
 		
-		return _mm256_set_m128(_mm_fmadd_ps(sin2, alpha, sin1), -_mm_fmadd_ps(sin2, alpha, sin1));
+		return _mm_fmadd_ps(sin2, alpha, sin1);
 	}
 
 //Attemting to avoid a vinsertf128 by "dupling" the sin vetcor prior beforhand, may or maynot be faster than justusing teh priro /previosu sin methodand 
@@ -263,14 +264,14 @@ const auto cosx(const auto& __restrict__ rad)
 	const auto index = rad * radToIndex2;
 		//float floor = (float)Math.floor(index); //Correct
     const auto Floorf=_mm256_round_ps(index, _MM_FROUND_FLOOR);
-	const	auto floor = _mm256_and_ps(Floorf,_mm256_set1_ps(SIN_MASK));	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
+	// const	__m256i floor = _mm256_and_ps(__builtin_convertvector(Floorf, __v8su),_mm256_set1_ps(SIN_MASK));	       //Edit* also settign sclar isnetad of vetcor also helps furtehr improve Compielr/Gen>Compield/ Outpuit/Asm/REdoeeved Ams       //For some Reason seting this variable.Adders to size_t instead of a distrete float/int or a SIMD/128-Biot Vetcor([__m128/__m128i] masively improves the genrased Assembily/ASM By?from/Via the Compiler (At least With Clang.........,..............))
 		
 	const	auto alpha = _mm256_fmsub_ps(rad, radToIndex2, Floorf); //Must floor here Otherwise as it dosne;t seem to interpolatw proeprly from teh Sin table
 		
 		;
-			const int a=floor[0];
-	const	auto sin1 = _mm256_set1_ps(sint[a]);
-	const	auto sin2 = _mm256_set1_ps(sint[a+1])-sin1;
+			const auto a=static_cast<uint16_t>(Floorf[0])&SIN_MASK;//floor[0];
+	const	auto sin1 = _mm256_broadcast_ss(&sint[a]);
+	const	auto sin2 = _mm256_broadcast_ss(&sint[a+1])-sin1;
 		
 		return _mm256_fmadd_ps(sin2, alpha, sin1);
 	}
@@ -284,19 +285,19 @@ const auto cosx(const auto& __restrict__ rad)
 inline void renderer2::updateUniformBuffer()
 {
   // const float time = static_cast<float>( glfwGetTime() ) * ah;
-  const __m128 a= _mm_set1_ps((glfwGetTime() * ah));
+  const __v4sf a= _mm_set1_ps((glfwGetTime()));
   __builtin_prefetch( BuffersX::data, 1, 3 );
   // __builtin_prefetch( &viewproj, 1, 3 );
   // const auto vfm =  viewproj2x;
-   static constinit __v8sf c;
-   static constinit __v8sf s;
-  sinxcosx(a, c, s);
+  auto c=sinx(a);//*viewproj2x;
+  auto s=sinx(a+cosOffset);
+  // sinxcosx(a, c, s);
   
 
 //  c=sinx(a)*viewproj2x;
 //   s=cosx(_mm256_set_m128(a+cosOffset,a+cosOffset));
   // static constexpr float xs = 1;
-  // sincosf( , &c, &s );
+  // sincosf(a, &c, &s );
   // const float ax = glfwGetTime() * ah;
 
   // rot = viewproj * glm::rotate( glm::identity<glm::mat4>(), ax, glm::vec3( 1, 0, 0 ) );
@@ -309,16 +310,16 @@ inline void renderer2::updateUniformBuffer()
   // const __m128 osx2    = _mm_set1_ps( c );
   // const __m256 osx     = _mm256_set1_ps( c );
   // const __m256 osxyzsZ = _mm256_set1_ps( s );
-  // const __m256 XORS    = _mm256_sub_ps( _mm256_xor_ps( osx, osx2 ), osx2 );
-  // const __m128 XORS = _mm_sub_ps( _mm_sub_ps( osx2, osx2 ), osx2 );
+  // // const __m256 XORS    = _mm256_sub_ps( _mm256_xor_ps( osx, osx2 ), osx2 );
+  // // const __m128 XORS = _mm_sub_ps( _mm_sub_ps( osx2, osx2 ), osx2 );
 
-  // const __m256 a = viewproj2x * _mm256_insertf128_ps( osx, XORS, 1 );
+  const __m256 aa = viewproj2x * _mm256_insertf128_ps( _mm256_broadcast_ps(&c), -c, 1 );
   // _mm256_xor_ps( osx, axvZXLI );
   // _mm256_storeu2_m128( &c, &c2, a );
 
-  // const auto x = _mm256_fmaddsub_ps( viewproj2x, osxyzsZ, a );
+  const auto x = _mm256_fmaddsub_ps( viewproj2x, _mm256_broadcast_ps(&s), aa );
 
-   const auto x=_mm256_fmaddsub_ps( viewproj2x, s, c);
+  //  const auto x=_mm256_fmaddsub_ps( viewproj2x, s, c);
    *BuffersX::data=x;
   // _mm256_zeroupper();
 
@@ -862,7 +863,7 @@ inline void PipelineX::createCommandBuffers()
     .clearValueCount = 2,
     .pClearValues    = clearValues2,
   };
-  static uint8_t i = 0;
+  static auto i = 0;
   vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
   static constexpr VkDeviceSize offsets[] = { 0 };
   m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->

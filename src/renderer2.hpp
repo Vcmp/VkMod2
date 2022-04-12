@@ -24,11 +24,11 @@ static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligne
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
   static void            drawFrame();
 
+  static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
 private:
   constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   ;
 
-  static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
 
   const VkSemaphore AvailableSemaphore;
 
