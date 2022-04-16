@@ -46,16 +46,16 @@ static inline const struct VkUtils2
   SwapChainSupportDetails::createSwapChain();
   SwapChainSupportDetails::createImageViews();
   PipelineX::createRenderPasses();
-  UniformBufferObject::createDescriptorSetLayout();
+  // UniformBufferObject::createDescriptorSetLayout();
   PipelineX::createGraphicsPipelineLayout();
   Queues::createCommandPool();
   BuffersX::setupBuffers();
   SwapChainSupportDetails::createFramebuffers();
 
-  UniformBufferObject::createUniformBuffers();
+  // UniformBufferObject::createUniformBuffers();
 
-  UniformBufferObject::createDescriptorPool();
-  UniformBufferObject::createDescriptorSets();
+  // UniformBufferObject::createDescriptorPool();
+  // UniformBufferObject::createDescriptorSets();
   PipelineX::createCommandBuffers();
   }
 

@@ -1,5 +1,7 @@
 #include "VkUtils2.hpp"
+#include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/scalar_constants.hpp"
+#include "glm/ext/vector_float3.hpp"
 #include "glm/gtc/constants.hpp"
 #include "renderer2.hpp"
 #include "VkTemp.hpp"
@@ -12,6 +14,7 @@
 #include <immintrin.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <vulkan/vulkan_core.h>
 
 
 
@@ -130,7 +133,7 @@ inline void renderer2::drawFrame()
   vkAcquireNextImageKHR( Queues::device, SwapChainSupportDetails::swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
   // __builtin_prefetch( BuffersX::data );
   // __builtin_prefetch( &viewproj2x );
-  updateUniformBuffer();
+  // updateUniformBuffer();
   R2.info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
 
   vkQueueSubmit( Queues::GraphicsQueue, 1, &R2.info, nullptr );
@@ -774,7 +777,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .sType                 = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
     .depthTestEnable       = VK_FALSE,
     .depthWriteEnable      = VK_FALSE,
-    .depthCompareOp        = VK_COMPARE_OP_LESS,
+    .depthCompareOp        = VK_COMPARE_OP_EQUAL,
     .depthBoundsTestEnable = VK_FALSE,
     .stencilTestEnable     = VK_FALSE,
   };
@@ -864,7 +867,7 @@ inline void PipelineX::createCommandBuffers()
     .pClearValues    = clearValues2,
   };
   static auto i = 0;
-  vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
+  // vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
   static constexpr VkDeviceSize offsets[] = { 0 };
   m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
   for ( const VkCommandBuffer & commandBuffer : commandBuffers )
@@ -878,10 +881,12 @@ inline void PipelineX::createCommandBuffers()
     vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline );
     vkCmdBindVertexBuffers( commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
     vkCmdBindIndexBuffer( commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
+    auto a = glm::translate(viewproj, glm::vec3(0,i,0));
+    vkCmdPushConstants(commandBuffer, vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &m4);
 
-    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
+    // vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
 
-    m4.toAddress(BuffersX::data);
+    // m4.toAddress(BuffersX::data);
 
     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 

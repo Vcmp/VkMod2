@@ -1,6 +1,6 @@
 #version 460
 #pragma shader_stage(vertex)
-layout(binding = 0) uniform UBO { mat4 model; }
+layout(push_constant) uniform UBO { mat4 model; }
 ubo;
 
 layout(location = 0) in vec3 inPosition;
