@@ -8,7 +8,7 @@ project ("VkMod2")
 # set(CMAKE_CXX_COMPILER_TARGET x86_64-w64-windows-gnu)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set (CMAKE_SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src")
+# set (CMAKE_SOURCE_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 #include_directories($ENV{VULKAN_SDK}/include)
@@ -45,8 +45,6 @@ message(STATUS ${CMAKE_CXX_FLAGS})
 			"${CMAKE_CURRENT_SOURCE_DIR}/src/ShaderSPIRVUtils.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/shaders/21_shader_ubo.frag"
 			"${CMAKE_CURRENT_SOURCE_DIR}/shaders/21_shader_ubo.vert"
-			"${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt.inl"
-			"${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt.inl"
 			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/TracyClient.cpp"
 			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/Tracy.hpp"
 	)  
@@ -62,7 +60,7 @@ set(GLM_TEST_ENABLE_FAST_MATH ON CACHE BOOL "" FORCE)
 set(GLM_TEST_ENABLE_SIMD_AVX ON CACHE BOOL "" FORCE)
 set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
 
-
+include_directories(shaders)
 add_subdirectory(glfw EXCLUDE_FROM_ALL)
 add_subdirectory(glm EXCLUDE_FROM_ALL)
 add_subdirectory(volk EXCLUDE_FROM_ALL)
@@ -96,7 +94,7 @@ target_link_libraries(VkMod2 PRIVATE volk glfw glm)
 
 
 
-
+message(STATUS ${CMAKE_COMMAND})
 
 ## TODO: make this recompile shader files if they are changed/do not match checksums instead of having to mnaully delete them each time
 # file(GLOB_RECURSE GLSL_SOURCE_FILES
@@ -123,48 +121,29 @@ endfunction(Dump2)
 	# 	an adiitonal isue that can ocur is that often the file is not egnerated in time before the compielr is called, causin a mising include compilation error to be incurred
 	#	the current methdo to fix this is to generate the Cmakecache then run the build generator (e.g. Ninja) and then run Cmake again to finsh/compleet teh Cache before running teh final Build again
 	find_program(GLSLC glslc)
-function(CompileShaders SHADER SHADER2)
-	set(current-shader-path ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER})
-	set(current-output-path ${CMAKE_CURRENT_SOURCE_DIR}/src/${SHADER}.txt)
-	set(current-shader-path2 ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER2})
-	set(current-output-path2 ${CMAKE_CURRENT_SOURCE_DIR}/src/${SHADER2}.txt)
-	set(final ${CMAKE_CURRENT_SOURCE_DIR}/src/${SHADER}.hpp)
-	# get_filename_component(current-output-dir ${current-output-path} DIRECTORY)
+function(CompileShaders SHADER name)
+set(current-shader-path "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER}")
+set(current-output-path "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER}.inl")
+	execute_process(
+		COMMAND ${GLSLC} ${current-shader-path} -mfmt=c -O -o -
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/shaders/"
+		OUTPUT_VARIABLE w
+	)
+	# file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER}.inl "${content}")
 	
-     add_custom_command(
-           OUTPUT ${current-output-path}
-           COMMAND ${GLSLC} -O -finvert-y -mfmt=c -o ${current-output-path} ${current-shader-path}
-           COMMAND ${GLSLC} -O -finvert-y -mfmt=c -o ${current-output-path2} ${current-shader-path2}
-           DEPENDS ${current-shader-path}
-		   IMPLICIT_DEPENDS CXX ${current-shader-path}
-           VERBATIM
-           )
-		   
-	# file(WRITE ${current-output-path})
-           # Dump2(${current-output-path} ${final})
-	# message(STATUS ${current-output-path})
-		   # add_custom_command(
-           # OUTPUT ${final}
-           # DEPENDS ${current-output-path}
-           # IMPLICIT_DEPENDS CXX ${current-output-path}
-           # VERBATIM)
-	# message(STATUS ${final})
 	# file(READ ${current-output-path} content)
-	# Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt frag)
-	# Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt vert)
-	file(WRITE SHADER "")
-	file(WRITE SHADER2 "")
-	set_source_files_properties(${current-output-path} ${current-output-path2} PROPERTIES GENERATED TRUE)
-    target_sources(VkMod2 PRIVATE ${current-output-path} ${current-output-path2})	
-	
+	set(content "unsigned int constexpr ${name}[] = ${w};")
+	file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/src/${SHADER}.inl "${content}")
+	target_sources(VkMod2 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/${SHADER}.inl")
 endfunction(CompileShaders)
 
-CompileShaders(21_shader_ubo.frag 21_shader_ubo.vert)
-Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt frag)
-Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt vert)
-# add_custom_target(
-    # Shaders 
-    # DEPENDS ${SPIRV_BINARY_FILES}
-    # )
+CompileShaders(21_shader_ubo.frag frag)
+CompileShaders(21_shader_ubo.vert vert)
+# Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt frag)
+# Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt vert)
+add_custom_target(
+    Shaders 
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag" "${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert"
+    )
 	
 # Dump2()

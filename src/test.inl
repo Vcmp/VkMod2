@@ -2,8 +2,8 @@
 #include <array>
 #include <cinttypes>
 // #include "VkUtilsXBase.hpp"
-#include "21_shader_ubo.frag.txt.inl"
-#include "21_shader_ubo.vert.txt.inl"
+#include "21_shader_ubo.frag.inl"
+#include "21_shader_ubo.vert.inl"
 
 
 

@@ -133,7 +133,7 @@ inline void renderer2::drawFrame()
   vkAcquireNextImageKHR( Queues::device, SwapChainSupportDetails::swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
   // __builtin_prefetch( BuffersX::data );
   // __builtin_prefetch( &viewproj2x );
-  // updateUniformBuffer();
+  updateUniformBuffer();
   R2.info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
 
   vkQueueSubmit( Queues::GraphicsQueue, 1, &R2.info, nullptr );
@@ -711,7 +711,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
     .module = Queues::clPPPI3A<VkShaderModule, PFN_vkCreateShaderModule>( &SPV.VsMCI, "vkCreateShaderModule" ),
     .pName  = "main",
 
-  };
+  }; 
 
   const VkPipelineShaderStageCreateInfo fragStage = { .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
                                                       .stage  = VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -725,6 +725,7 @@ inline void PipelineX::createGraphicsPipelineLayout()
   static constexpr VkVertexInputAttributeDescription attributeDescriptions[2]{
     { .location = 0, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = OFFSET_POS },
     { .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = OFFSETOF_COLOR },
+    // { .location = 2, .binding = 1, .format = VK_FORMAT_R32G32_SFLOAT, .offset = 0 },
 
   };
 
@@ -867,9 +868,10 @@ inline void PipelineX::createCommandBuffers()
     .pClearValues    = clearValues2,
   };
   static auto i = 0;
-  // vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
+  vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
   static constexpr VkDeviceSize offsets[] = { 0 };
   m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
+    // m4.toAddress(BuffersX::data);
   for ( const VkCommandBuffer & commandBuffer : commandBuffers )
   {
     VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>( commandBuffer, "vkBeginCommandBuffer", &beginInfo1 );
@@ -882,11 +884,10 @@ inline void PipelineX::createCommandBuffers()
     vkCmdBindVertexBuffers( commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
     vkCmdBindIndexBuffer( commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
     auto a = glm::translate(viewproj, glm::vec3(0,i,0));
-    vkCmdPushConstants(commandBuffer, vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &m4);
+    vkCmdPushConstants(commandBuffer, vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &viewproj);
 
-    // vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
+    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
 
-    // m4.toAddress(BuffersX::data);
 
     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 
