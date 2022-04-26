@@ -87,12 +87,17 @@ inline namespace SwapChainSupportDetails
     // return VK_PRESENT_MODE_FIFO_KHR;
 
     // swapChainExtent = SwapChainSupportDetails::chooseSwapExtent();
-    imageCount = ( SwapChainSupportDetails::capabilities.minImageCount + 1 );
+    imageCount = ( Frames );
 
     if ( SwapChainSupportDetails::capabilities.maxImageCount > 0 && imageCount > SwapChainSupportDetails::capabilities.maxImageCount )
     {
       imageCount = SwapChainSupportDetails::capabilities.maxImageCount;
     }
+
+    std::cout << SwapChainSupportDetails::capabilities.minImageCount << "\n";
+    std::cout << SwapChainSupportDetails::capabilities.maxImageCount << "\n";
+    std::cout << SwapChainSupportDetails::capabilities.currentExtent.height << "\n";
+    std::cout << SwapChainSupportDetails::capabilities.currentExtent.width << "\n";
 
     // SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
     // SwapChainSupportDetails::swapChainExtent      = extent;

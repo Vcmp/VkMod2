@@ -41,11 +41,12 @@ private:
                                                                     .pImageIndices  = &currentFrame,
                                                                     .pResults       = nullptr };
   static constexpr VkPipelineStageFlags          waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-     VkSubmitInfo           info{
+  const VkSubmitInfo           info{
               .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
               .waitSemaphoreCount = 1,
               .pWaitSemaphores    = &AvailableSemaphore,
               .pWaitDstStageMask  = &waitStages,
-              .commandBufferCount = 1,
+              .commandBufferCount = Frames,
+              .pCommandBuffers = PipelineX::commandBuffers
   };
 }R2;

@@ -46,16 +46,16 @@ static inline const struct VkUtils2
   SwapChainSupportDetails::createSwapChain();
   SwapChainSupportDetails::createImageViews();
   PipelineX::createRenderPasses();
-  UniformBufferObject::createDescriptorSetLayout();
+  // UniformBufferObject::createDescriptorSetLayout();
   PipelineX::createGraphicsPipelineLayout();
   Queues::createCommandPool();
   BuffersX::setupBuffers();
   SwapChainSupportDetails::createFramebuffers();
 
-  UniformBufferObject::createUniformBuffers();
+  // UniformBufferObject::createUniformBuffers();
 
-  UniformBufferObject::createDescriptorPool();
-  UniformBufferObject::createDescriptorSets();
+  // UniformBufferObject::createDescriptorPool();
+  // UniformBufferObject::createDescriptorSets();
   PipelineX::createCommandBuffers();
   }
 
@@ -66,7 +66,7 @@ static inline const struct VkUtils2
   static void createSurface();
   static bool checkValidationLayerSupport();
 
-  static constexpr void setupDebugMessenger();
+  static void setupDebugMessenger();
 
   static void pickPhysicalDevice();
   static void createLogicalDevice();

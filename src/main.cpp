@@ -1,3 +1,4 @@
+#include "GLFW/glfw3.h"
 #include "VkUtils2.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/scalar_constants.hpp"
@@ -93,7 +94,6 @@ int __cdecl main( int argc, char * argv[] )
   setupfloat();
   while ( !glfwWindowShouldClose( ( VkUtils2::window ) ) )
   {
-    // glfwPollEvents();
     renderer2::drawFrame();
     aa++;
   }
@@ -130,17 +130,24 @@ inline void VkUtils2::setupWindow()
 inline void renderer2::drawFrame()
 {
   // m4.loadAligned( &m5 );
+  
   vkAcquireNextImageKHR( Queues::device, SwapChainSupportDetails::swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
   // __builtin_prefetch( BuffersX::data );
   // __builtin_prefetch( &viewproj2x );
-  updateUniformBuffer();
-  R2.info.pCommandBuffers = &PipelineX::commandBuffers[currentFrame];
+ 
 
-  vkQueueSubmit( Queues::GraphicsQueue, 1, &R2.info, nullptr );
+  if(currentFrame==0)
+  { 
+    PipelineX::recCmdBuffers();
+    vkQueueSubmit( Queues::GraphicsQueue, 1, &R2.info, nullptr );
+  }
+  
+
 
   //  info.pWaitSemaphores = &AvailableSemaphore;
 
-  vkQueuePresentKHR( Queues::GraphicsQueue, &VkPresentInfoKHR1 );
+ vkQueuePresentKHR( Queues::GraphicsQueue, &VkPresentInfoKHR1 );
+  
 
   currentFrame = currentFrame + __builtin_parity( Frames );
 }
@@ -323,7 +330,8 @@ inline void renderer2::updateUniformBuffer()
   const auto x = _mm256_fmaddsub_ps( viewproj2x, _mm256_broadcast_ps(&s), aa );
 
   //  const auto x=_mm256_fmaddsub_ps( viewproj2x, s, c);
-   *BuffersX::data=x;
+  //  *BuffersX::data=x;
+   m4.__a=x;
   // _mm256_zeroupper();
 
   // memcpy( BuffersX::data, &x, sizeof( x ) );
@@ -428,7 +436,7 @@ VKAPI_ATTR inline VkBool32 VKAPI_CALL VkUtils2::debugCallback( VkDebugUtilsMessa
   return VK_FALSE;
 }
 
-inline constexpr void VkUtils2::setupDebugMessenger()
+inline void VkUtils2::setupDebugMessenger()
 {
   if constexpr ( !VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
   {
@@ -803,8 +811,8 @@ inline void PipelineX::createGraphicsPipelineLayout()
   };
 
   constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = { .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-                                                                      .setLayoutCount         = 1,
-                                                                      .pSetLayouts            = &UniformBufferObject::descriptorSetLayout,
+                                                                      // .setLayoutCount         = 1,
+                                                                      // .pSetLayouts            = &UniformBufferObject::descriptorSetLayout,
                                                                       .pushConstantRangeCount = 1,
                                                                       .pPushConstantRanges    = &vkPushConstantRange };
 
@@ -827,6 +835,55 @@ inline void PipelineX::createGraphicsPipelineLayout()
   VkUtilsXBase::clPPPJI<PFN_vkCreateGraphicsPipelines>( &pipelineInfo, 1, "vkCreateGraphicsPipelines", &graphicsPipeline );
 }
 
+void PipelineX::recCmdBuffers()
+{
+    constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+                                                    .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT) };
+
+    constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = SwapChainSupportDetails::swapChainExtent };
+
+  // constexpr VkClearColorValue aa[] = { { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } };
+  // // constexpr VkClearDepthStencilValue aaa[] = { { { 0.0F, 1.0F } } };
+  // constexpr VkClearValue clearValues = {
+  //   .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } }
+  //   // .depthStencil = { 0.0F, static_cast<uint32_t>( 1.0F ) },
+  // };
+  constexpr VkClearValue clearValues2[2] = { { .color = { { PipelineX::UNormFlt, PipelineX::UNormFlt, PipelineX::UNormFlt, 1.0F } } }, { .color = { { PipelineX::UNormFlt, PipelineX::UNormFlt, PipelineX::UNormFlt, 1.0F } } } };
+
+  static VkRenderPassBeginInfo renderPassInfo = {
+    .sType           = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO ),
+    .renderPass      = ( SwapChainSupportDetails::renderPass ),
+    .renderArea      = renderArea,
+    .clearValueCount = 2,
+    .pClearValues    = clearValues2,
+  };
+  static constexpr VkDeviceSize offsets[] = { 0 };
+  int i;
+  for ( const VkCommandBuffer & commandBuffer : commandBuffers )
+  {
+  VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>(commandBuffer, "vkBeginCommandBuffer", &beginInfo1 );
+
+    renderPassInfo.framebuffer = ( SwapChainSupportDetails::swapChainFramebuffers[i] );
+
+    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,graphicsPipeline );
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
+    vkCmdBindIndexBuffer(commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
+    renderer2::updateUniformBuffer();  
+    vkCmdPushConstants(commandBuffer,vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &m4);
+
+    // vkCmdBindDescriptorSets( PipelineX::commandBuffers[0], VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineX::vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
+
+
+    vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
+
+    vkCmdEndRenderPass( commandBuffer );
+    VkUtilsXBase::clP<PFN_vkEndCommandBuffer>( commandBuffer, "vkEndCommandBuffer" );
+    i++;
+  }
+}
+
 inline void PipelineX::createCommandBuffers()
 {
   const VkCommandBufferAllocateInfo allocateInfo{ .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
@@ -837,64 +894,28 @@ inline void PipelineX::createCommandBuffers()
             << "\n";
   VkUtilsXBase::clPPI3<PFN_vkAllocateCommandBuffers>( &allocateInfo, "vkAllocateCommandBuffers", commandBuffers );
 
-  constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-                                                    .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT ) };
 
   /*   VkRenderPassAttachmentBeginInfo attachmentsbeginInfo{ .sType =
      VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO, .attachmentCount = 1, .pAttachments =
                                                             &SwapChainSupportDetails::swapChainImageViews[0] };
 
    */
-  constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = SwapChainSupportDetails::swapChainExtent };
-
-  // constexpr VkClearColorValue aa[] = { { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } };
-  // // constexpr VkClearDepthStencilValue aaa[] = { { { 0.0F, 1.0F } } };
-  // constexpr VkClearValue clearValues = {
-  //   .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } }
-  //   // .depthStencil = { 0.0F, static_cast<uint32_t>( 1.0F ) },
-  // };
-  constexpr VkClearValue clearValues2[2] = { { .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } }, { .color = { { UNormFlt, UNormFlt, UNormFlt, 1.0F } } } };
 
   // {
   //   .color        = { UNormFlt, UNormFlt, UNormFlt, 1.0F },
   //   .depthStencil = { 0.0F, static_cast<uint32_t>( 1.0F ) },
   // },
 
-  static VkRenderPassBeginInfo renderPassInfo = {
-    .sType           = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO ),
-    .renderPass      = ( SwapChainSupportDetails::renderPass ),
-    .renderArea      = renderArea,
-    .clearValueCount = 2,
-    .pClearValues    = clearValues2,
-  };
+  
   static auto i = 0;
-  vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
-  static constexpr VkDeviceSize offsets[] = { 0 };
+  // vkMapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory, 0, UniformBufferObject::Sized, 0, (void**)&BuffersX::data );
+  
   m4.loadAligned( &viewproj );  // NoS ure on best order............................................................->
     // m4.toAddress(BuffersX::data);
-  for ( const VkCommandBuffer & commandBuffer : commandBuffers )
-  {
-    VkUtilsXBase::clPI<PFN_vkBeginCommandBuffer>( commandBuffer, "vkBeginCommandBuffer", &beginInfo1 );
-
-    renderPassInfo.framebuffer = ( SwapChainSupportDetails::swapChainFramebuffers[i] );
-
-    vkCmdBeginRenderPass( commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
-
-    vkCmdBindPipeline( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline );
-    vkCmdBindVertexBuffers( commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
-    vkCmdBindIndexBuffer( commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
-    auto a = glm::translate(viewproj, glm::vec3(0,i,0));
-    vkCmdPushConstants(commandBuffer, vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &viewproj);
-
-    vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
-
-
-    vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
-
-    vkCmdEndRenderPass( commandBuffer );
-    VkUtilsXBase::clP<PFN_vkEndCommandBuffer>( commandBuffer, "vkEndCommandBuffer" );
-    i++;
-  }
+ 
+    recCmdBuffers();
+   
+  
 }
 inline void BuffersX::setupBuffers()
 {
