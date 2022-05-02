@@ -36,4 +36,3 @@ static struct Queues
     return object;
   }
 };
-

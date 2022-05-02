@@ -139,6 +139,8 @@ endfunction(CompileShaders)
 
 CompileShaders(21_shader_ubo.frag frag)
 CompileShaders(21_shader_ubo.vert vert)
+CompileShaders(shader_tempTst.vert vert2)
+CompileShaders(shader_tempTst.frag frag2)
 # Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.frag.txt frag)
 # Dump2(${CMAKE_CURRENT_SOURCE_DIR}/src/21_shader_ubo.vert.txt vert)
 add_custom_target(

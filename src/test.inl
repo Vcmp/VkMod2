@@ -4,6 +4,8 @@
 // #include "VkUtilsXBase.hpp"
 #include "21_shader_ubo.frag.inl"
 #include "21_shader_ubo.vert.inl"
+#include "shader_tempTst.vert.inl"
+#include "shader_tempTst.frag.inl"
 
 
 
@@ -27,6 +29,22 @@ static constexpr struct ShaderSPIRVUtils
     .pNext    = VK_NULL_HANDLE,
     .codeSize = sizeof(frag),
     .pCode    = frag,
+  };  
+  
+  static constexpr VkShaderModuleCreateInfo VsMCI3temp = {
+
+    .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+    .pNext    = VK_NULL_HANDLE,
+    .codeSize = sizeof(vert2),
+    .pCode    = vert2,
+  };
+  
+  static constexpr VkShaderModuleCreateInfo VsMCI4temp = {
+
+    .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+    .pNext    = VK_NULL_HANDLE,
+    .codeSize = sizeof(frag2),
+    .pCode    = frag2,
   };
   VkShaderModule compileShaderFile(const VkShaderModuleCreateInfo& __restrict__);
 }  SPV;

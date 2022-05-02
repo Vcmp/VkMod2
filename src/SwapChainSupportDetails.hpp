@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Queues.hpp"
+#include <vulkan/vulkan_core.h>
 
 inline namespace SwapChainSupportDetails
 {
@@ -124,9 +125,9 @@ inline namespace SwapChainSupportDetails
       .imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 
       // if (graphicsFamily != presentFamily) {
-      .imageSharingMode      = VK_SHARING_MODE_CONCURRENT,
-      .queueFamilyIndexCount = 2,
-      .pQueueFamilyIndices   = aa,
+      .imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE,
+      .queueFamilyIndexCount = 1,
+      .pQueueFamilyIndices   = &aa[0],
       // } else {
       // .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       // .queueFamilyIndexCount = 0; // Optiona,
@@ -177,18 +178,43 @@ inline namespace SwapChainSupportDetails
 
   inline void createFramebuffers()
   {
+    
+    // framebufferCreateInfo.attachmentCount = 1;
+    
+    VkFramebufferAttachmentImageInfo FramebufferAttachmentImage
+    {
+      .sType=VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENT_IMAGE_INFO,
+      .pViewFormats=&swapChainImageFormat.format,
+      .viewFormatCount=1,
+      .layerCount=1,
+      .height= swapChainExtent.height,
+      .width= swapChainExtent.width,
+      .usage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT+1, //Possible Driver Bug Setting the Usage to 0x11 instead of 0x10 on the SwapChain Image Usage Flag...
+    };
+
+    // VkFramebufferAttachmentImageInfo atts[3]={FramebufferAttachmentImage, FramebufferAttachmentImage, FramebufferAttachmentImage};
+    VkFramebufferAttachmentsCreateInfo FramebufferAttachments
+    {
+      .sType=VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENTS_CREATE_INFO,
+      .attachmentImageInfoCount=1,
+      .pAttachmentImageInfos=&FramebufferAttachmentImage,
+    };
+    
     VkFramebufferCreateInfo framebufferCreateInfo = {};
-    framebufferCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+    framebufferCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+    framebufferCreateInfo.pNext                   = &FramebufferAttachments,
+    framebufferCreateInfo.flags                   = VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT;
     framebufferCreateInfo.renderPass              = renderPass;
     framebufferCreateInfo.width                   = swapChainExtent.width;
     framebufferCreateInfo.height                  = swapChainExtent.height;
     framebufferCreateInfo.layers                  = 1;
+    framebufferCreateInfo.attachmentCount         = 1;
+    framebufferCreateInfo.pAttachments            = nullptr;
 
-    framebufferCreateInfo.attachmentCount = 1;
 
     for ( size_t i = 0; i < Frames; i++ )
     {
-      framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
+      // framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 
       VkUtilsXBase::clPPPI3<PFN_vkCreateFramebuffer>( &framebufferCreateInfo, "vkCreateFramebuffer", &swapChainFramebuffers[i] );
     }

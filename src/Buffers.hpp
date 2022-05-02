@@ -21,7 +21,9 @@ struct BuffersX
   static inline  VkPhysicalDeviceMemoryProperties memProperties; //May Cause alignment problems
 
   static constinit inline VkBuffer       vertexBuffer;
+  // static constinit inline VkBuffer       vertexBufferTemp;
   static constinit inline VkDeviceMemory vertexBufferMemory;
+  // static constinit inline VkDeviceMemory vertexBufferMemorytemp;
 
   static constinit inline VkBuffer       Bufferstaging;
   static constinit inline VkDeviceMemory stagingBufferMemory;
@@ -102,3 +104,53 @@ inline namespace
 //   glm::mat4 model = viewproj;
 //   // mat4 Trans;
 // } ubo;
+struct textTemp
+{
+    // static constexpr VkDevice &aa= Queues::device;
+    VkPipelineShaderStageCreateInfo vkShaderStages[2];
+    VkPipeline x;
+    VkCommandPool p;
+    textTemp()
+    {
+      
+
+      constexpr VkCommandPoolCreateInfo VkPC{
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .queueFamilyIndex = 0
+
+      };
+      vkCreateCommandPool(Queues::device, &VkPC, nullptr, &p);
+
+      VkCommandBufferAllocateInfo a{
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext=nullptr,
+        .commandPool = p,
+        .level=VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount=1,
+      };
+      vkAllocateCommandBuffers(Queues::device, &a, &comBuffer);
+    }
+    
+   
+    void doBuffers();
+    void initPipelineCustom();
+    void voidrecComBufferSub(int i);
+
+    VkCommandBuffer comBuffer; void vkMappedCopy(VkDeviceMemory&, size_t, const float[], __m256*, VkBuffer&);
+
+    VkBuffer VertexTemp;
+    VkDeviceMemory VertexTempMem;
+    
+    VkBuffer stagingBuffer2;
+    VkDeviceMemory stagingBufferMemory2;
+
+    static constexpr float Vktemp[] = {
+       1.f, 1.f, 0.f, 1.f, 0.0f,
+	    -1.f, 1.f, 0.f, 1.f, 0.0f,
+	    0.f, -1.f, 0.f, 1.f, 0.0f,
+    };
+
+
+
+};

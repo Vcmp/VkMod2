@@ -35,9 +35,9 @@ private:
 public:
   // not sure if auto or exlicitit(ish) templateis better for the return argument
   template <typename T>
-  static constexpr auto getAddrFuncPtr( const char * a )
+  static constexpr auto getAddrFuncPtr( const VkDevice v, const char * a )
   {
-    return reinterpret_cast<T>( vkGetDeviceProcAddr( volkGetLoadedDevice(), a ) );
+    return reinterpret_cast<T>( vkGetDeviceProcAddr( v, a ) );
   }
 
   // Their may seem to be an anomalous memory leak when the main render Loop/Draw

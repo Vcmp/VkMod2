@@ -6,6 +6,7 @@
 
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
+#include <vulkan/vulkan_core.h>
 
 static inline const struct VkUtils2
 {
@@ -46,16 +47,16 @@ static inline const struct VkUtils2
   SwapChainSupportDetails::createSwapChain();
   SwapChainSupportDetails::createImageViews();
   PipelineX::createRenderPasses();
-  // UniformBufferObject::createDescriptorSetLayout();
+  UniformBufferObject::createDescriptorSetLayout();
   PipelineX::createGraphicsPipelineLayout();
   Queues::createCommandPool();
   BuffersX::setupBuffers();
   SwapChainSupportDetails::createFramebuffers();
 
-  // UniformBufferObject::createUniformBuffers();
+  UniformBufferObject::createUniformBuffers();
 
-  // UniformBufferObject::createDescriptorPool();
-  // UniformBufferObject::createDescriptorSets();
+  UniformBufferObject::createDescriptorPool();
+  UniformBufferObject::createDescriptorSets();
   PipelineX::createCommandBuffers();
   }
 
@@ -76,13 +77,17 @@ static inline const struct VkUtils2
      vkDeviceWaitIdle( Queues::device );
   vkUnmapMemory( Queues::device, UniformBufferObject::uniformBuffersMemory );
   vkDestroyCommandPool( Queues::device, (VkCommandPool)Queues::commandPool, nullptr );
+  vkDestroyCommandPool( Queues::device, (VkCommandPool)Queues::commandPool2, nullptr );
   for ( auto framebuffer : SwapChainSupportDetails::swapChainFramebuffers )
   {
     vkDestroyFramebuffer( Queues::device, framebuffer, nullptr );
   }
+  vkDestroySwapchainKHR(Queues::device, SwapChainSupportDetails::swapChain, nullptr);
 
   vkDestroyBuffer( Queues::device, BuffersX::vertexBuffer, nullptr );
   vkFreeMemory( Queues::device, BuffersX::vertexBufferMemory, nullptr );
+  vkDestroyBuffer( Queues::device, BuffersX::indexBuffer, nullptr );
+  vkFreeMemory( Queues::device, BuffersX::indexBufferMemory, nullptr );
   }
   // static void createSwapChain();
   // static void createImageViews();

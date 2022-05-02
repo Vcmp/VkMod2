@@ -8,6 +8,7 @@
 static constexpr struct PipelineX
 {
   static void recCmdBuffers();
+  static void recCmdBuffer(int);
   static void createGraphicsPipelineLayout();
   static void createCommandBuffers();
   static void createRenderPasses();
