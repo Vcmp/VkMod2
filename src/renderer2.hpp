@@ -46,6 +46,6 @@ private:
               .waitSemaphoreCount = 1,
               .pWaitSemaphores    = &AvailableSemaphore,
               .pWaitDstStageMask  = &waitStages,
-              .commandBufferCount = 1,
+              .commandBufferCount = 2,
   };
 }R2;

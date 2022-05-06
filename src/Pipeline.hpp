@@ -3,7 +3,6 @@
 #include "test.inl"
 #include "mat4x.hpp"
 
-#include <iostream>
 
 static constexpr struct PipelineX
 {

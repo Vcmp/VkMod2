@@ -58,3 +58,14 @@
 /brcxxc
 bbrcxxc.exe
 /tracy
+*.s
+*.ii
+*.bc
+*.ninja
+.ninja_log
+.ninja_deps
+*.cmake
+CMakeCache.txt
+CMakeCache.txt
+CMakeCache.txt
+CMakeCache.txt
