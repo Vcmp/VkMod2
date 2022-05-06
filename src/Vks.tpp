@@ -5,9 +5,9 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-constexpr int width = 854;
-constexpr int height = 480;
-constexpr int Frames = 3;
+constexpr uint8_t width = 854;
+constexpr uint8_t height = 480;
+constexpr uint8_t Frames = 3;
 
 struct VkInit
 {
