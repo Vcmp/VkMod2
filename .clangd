@@ -4,6 +4,6 @@
     
 Diagnostics:
   ClangTidy:
-    Add: [core*, google*, bugprone*, performance*]
-	  Remove: [-bugprone-easily-swappable-parameters]
+    Add: [core*, google*, bugprone*, performance*, hicpp*, modernize*, misc*, cppcoreguidelines*]
+	  # Remove: [-bugprone-easily-swappable-parameters]
     

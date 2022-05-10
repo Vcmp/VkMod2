@@ -1,47 +1,91 @@
+#define GLFW_EXPOSE_NATIVE_WIN32
+#define VK_USE_64_BIT_PTR_DEFINES 1
+#define VULKAN_HPP_SUPPORT_SPAN
 #pragma once
 #include <volk.h>
 
 #include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 
-constexpr uint8_t width = 854;
-constexpr uint8_t height = 480;
+
+constexpr uint16_t width = 854;
+constexpr uint16_t height = 480;
 constexpr uint8_t Frames = 3;
 
-struct VkInit
+static struct VkInit
 {
     GLFWwindow* window;
     const VkInstance instance;
-    VkDevice device;
-    VkPhysicalDevice physdevice;
     VkSurfaceKHR surface;
+    const VkPhysicalDevice physdevice;
+    const VkDevice device;
     uint32_t graphicsFamily;
     uint32_t transferFamily;
     VkQueue GraphicsQueue;
     VkQueue TransferQueue;
     // SwapChain SW;
-    VkInit() : window(init()), instance(createInstance()), surface(createSurface())
+    VkInit() : window(init()), instance(createInstance()), surface(createSurface()), physdevice(doPhysicalDevice()), device(doDevice())
     {
-        physdevice = doPhysicalDevice();
-        device = doDevice();
+        
+        
     };
 
-     GLFWwindow*  init();
-     VkInstance  createInstance();
-     VkPhysicalDevice  doPhysicalDevice();
-     VkSurfaceKHR createSurface();
-     VkDevice doDevice();
+     auto  init() -> GLFWwindow*;
+     auto  createInstance() -> VkInstance;
+     auto  doPhysicalDevice() -> VkPhysicalDevice;
+     auto createSurface() -> VkSurfaceKHR;
+     auto doDevice() -> VkDevice;
+     auto tst() -> int;
+     ~VkInit()
+     {
+        //  std::cout << "Destructing:..." << "\n";
+     }
 
-} VKI;
+} const VKI;
 
 inline namespace Vks
 {
     //   typedef VkResult ( *callPPPPI )( const void* device, const void * strct, const void *VkAllocationCallbacks, const void *hndle);
     template<typename type, typename handle>
-    constexpr type doPointerAlloc(VkDevice device, auto* strct, type* hndle, handle pHndl)
+    constexpr auto doPointerAlloc(VkDevice device, auto* strct, type* hndle, handle pHndl) -> type
     {
         (handle(pHndl))(device, strct ,nullptr, hndle);
         return *hndle;
     }
+    template<typename type>
+    constexpr type doPointerAlloc2(auto* strct, type* hndle, auto pHndl)
+    {
+        (pHndl)(VKI.device, strct ,nullptr, hndle);
+        return *hndle;
+    }
+    template<typename type>
+    constexpr type doPointerAlloc3(auto* strct, auto* hndle)
+    {
+        type pHndl = nullptr; 
+        (hndle)(VKI.device, strct ,nullptr, &pHndl);
+        return pHndl;
+    }
+    template<typename type, typename type2f>
+    constexpr type doPointerAlloc3Alt(auto* strct)
+    {
+        type pHndl = nullptr; 
+        (type2f)(VKI.device, strct, &pHndl);
+        return pHndl;
+    }
+    template<typename type>
+    constexpr type doPointerAllocSml(auto* strct, /* type* hndle,  */auto pHndl)
+    {
+        type hndle = nullptr;
+        (pHndl)(VKI.device, strct ,nullptr, &hndle);
+        return hndle;
+    }
+
+    template<typename type>
+    constexpr type doPointerAllocX(auto* strct, auto* hndle)
+    {
+        type pHndl = nullptr; 
+        vkCreateGraphicsPipelines(VKI.device, nullptr, 1, strct, nullptr, &pHndl);
+        return pHndl;
+    }
+    
     
 }

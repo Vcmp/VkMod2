@@ -1,65 +1,25 @@
-#pragma once
+#include "SwapChain.hpp"
+#include <iostream>
 
-#include "Queues.hpp"
-#include <vulkan/vulkan_core.h>
-
-inline namespace SwapChainSupportDetails
+void SwapChain::setupImageFormats()
 {
-  static constinit inline VkSurfaceCapabilitiesKHR capabilities{};
+    std::cout <<"SetupImageFormats"<<"\n";
+    uint32_t count=0;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VKI.physdevice, VKI.surface, &capabilities );
 
-  static constinit inline VkImageLayout  depthImageView;
-  static constinit inline VkSwapchainKHR swapChain;
-  static constinit inline uint32_t       count;
-  static constinit inline uint32_t       imageCount;
-
-  static inline VkSurfaceFormatKHR         swapChainImageFormat;
-  static constinit inline VkPresentModeKHR presentMode;
-  static constinit inline VkImageView      swapChainImageViews[Frames];
-  static constinit inline VkRenderPass     renderPass;
-
-  static inline constexpr const VkExtent2D swapChainExtent{ width, height };
-
-  static constinit inline VkImage       swapchainImages[Frames];
-  static constinit inline VkFramebuffer swapChainFramebuffers[Frames];
-
-  inline uint32_t clamp( uint32_t min, uint32_t max, uint32_t value )
-  {
-    const uint32_t a = ( max < value ? max : value );
-    return ( min > a ? min : a );
-  }
-
-  inline void setupImageFormats()
-  {
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR( Queues::physicalDevice, Queues::surface, &capabilities );
-
-    vkGetPhysicalDeviceSurfaceFormatsKHR( Queues::physicalDevice, Queues::surface, &count, nullptr );
+    vkGetPhysicalDeviceSurfaceFormatsKHR(VKI.physdevice, VKI.surface, &count, nullptr );
     VkSurfaceFormatKHR surfaceFormats[count];
-
-    // vkGetPhysicalDeviceSurfaceCapabilitiesKHR( Queues::physicalDevice, Queues::surface, &capabilities );
-
-    // vkGetPhysicalDeviceSurfaceFormatsKHR( Queues::physicalDevice, Queues::surface, &count, nullptr );
-    // VkSurfaceFormatKHR surfaceFormats[count];
-
-    // VkPresentModeKHR presentModes[count];
-    // vkGetPhysicalDeviceSurfacePresentModesKHR( Queues::physicalDevice, Queues::surface, &count, nullptr );
     
-    // if ( count != 0 )
-    // {
-    //   vkGetPhysicalDeviceSurfaceFormatsKHR( Queues::physicalDevice, Queues::surface, &count, surfaceFormats );
-    //   vkGetPhysicalDeviceSurfacePresentModesKHR( Queues::physicalDevice, Queues::surface, &count, presentModes );
-    // }
-
-
     if ( count != 0 )
     {
-      vkGetPhysicalDeviceSurfaceFormatsKHR( Queues::physicalDevice, Queues::surface, &count, surfaceFormats );
+      vkGetPhysicalDeviceSurfaceFormatsKHR(VKI.physdevice, VKI.surface, &count, surfaceFormats );
     }
 
-    vkGetPhysicalDeviceSurfacePresentModesKHR( Queues::physicalDevice, Queues::surface, &count, nullptr );
+    vkGetPhysicalDeviceSurfacePresentModesKHR(VKI.physdevice, VKI.surface, &count, nullptr );
     VkPresentModeKHR presentModes[count];
     if ( count != 0 )
     {
-      vkGetPhysicalDeviceSurfacePresentModesKHR( Queues::physicalDevice, Queues::surface, &count, presentModes );
+      vkGetPhysicalDeviceSurfacePresentModesKHR(VKI.physdevice, VKI.surface, &count, presentModes );
     }
 
     // VkSurfaceFormatKHR surfaceFormat;
@@ -90,31 +50,32 @@ inline namespace SwapChainSupportDetails
     // swapChainExtent = SwapChainSupportDetails::chooseSwapExtent();
     imageCount = ( Frames );
 
-    if ( SwapChainSupportDetails::capabilities.maxImageCount > 0 && imageCount > SwapChainSupportDetails::capabilities.maxImageCount )
+    if ( capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount )
     {
-      imageCount = SwapChainSupportDetails::capabilities.maxImageCount;
+      imageCount = capabilities.maxImageCount;
     }
 
-    std::cout << SwapChainSupportDetails::capabilities.minImageCount << "\n";
-    std::cout << SwapChainSupportDetails::capabilities.maxImageCount << "\n";
-    std::cout << SwapChainSupportDetails::capabilities.currentExtent.height << "\n";
-    std::cout << SwapChainSupportDetails::capabilities.currentExtent.width << "\n";
+    std::cout << capabilities.minImageCount << "\n";
+    std::cout << capabilities.maxImageCount << "\n";
+    std::cout << capabilities.currentExtent.height << "\n";
+    std::cout << capabilities.currentExtent.width << "\n";
 
     // SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
     // SwapChainSupportDetails::swapChainExtent      = extent;
-  }
-  inline void createSwapChain()
+}
+
+void SwapChain::createSwapChain()
   {
     std::cout << "ImageCount: " << imageCount << "\n";
 
-    const uint32_t aa[] = { Queues::graphicsFamily, Queues::transferFamily };
+    const uint32_t aa[] = { VKI.graphicsFamily, VKI.transferFamily };
     ;
 
     const VkSwapchainCreateInfoKHR createInfo{
 
       .sType   = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
       .pNext   = nullptr,
-      .surface = Queues::surface,
+      .surface = VKI.surface,
 
       // Image settings
       .minImageCount    = imageCount,
@@ -134,24 +95,28 @@ inline namespace SwapChainSupportDetails
       // .pQueueFamilyIndices = nullptr; // Optiona,
       // }
 
-      .preTransform   = SwapChainSupportDetails::capabilities.currentTransform,
+      .preTransform   = capabilities.currentTransform,
       .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
       .presentMode    = presentMode,
       .clipped        = true,
 
       .oldSwapchain = VK_NULL_HANDLE
     };
-    std::cout << Queues::device << "\n";
+    std::cout << VKI.device << "\n";
 
-    VkUtilsXBase::clPPPI3<PFN_vkCreateSwapchainKHR>( &createInfo, "vkCreateSwapchainKHR", &swapChain );
-    VkUtilsXBase::checkCall( vkGetSwapchainImagesKHR( Queues::device, swapChain, &imageCount, swapchainImages ) );
+    vkCreateSwapchainKHR(VKI.device, &createInfo, nullptr, &swapChain );
+    vkGetSwapchainImagesKHR( VKI.device, swapChain, &imageCount, image);
   }
 
-  inline void createImageViews()
+  
+
+
+
+  void SwapChain::createImageViews()
   {
     std::cout << ( "Creating Image Views" ) << "\n";
     int i = 0;
-    for ( const VkImage & swapchainImage : swapchainImages )
+    for ( const VkImage & swapchainImage : image )
     {
       VkImageViewCreateInfo createInfo = {};
       createInfo.sType                 = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -172,13 +137,14 @@ inline namespace SwapChainSupportDetails
 
       createInfo.image = swapchainImage;
 
-      VkUtilsXBase::clPPPI3<PFN_vkCreateImageView>( &createInfo, "vkCreateImageView", &SwapChainSupportDetails::swapChainImageViews[i++] );
+      Vks::doPointerAlloc<VkImageView, PFN_vkCreateImageView>(VKI.device, &createInfo, &imageViews[i++], vkCreateImageView);
     }
   }
 
-  inline void createFramebuffers()
+  VkFramebuffer SwapChain::createFramebuffers()
   {
-    
+        std::cout << ( "Creating FrameBuffers" ) << "\n";
+
     // framebufferCreateInfo.attachmentCount = 1;
     
     VkFramebufferAttachmentImageInfo FramebufferAttachmentImage
@@ -204,7 +170,7 @@ inline namespace SwapChainSupportDetails
     framebufferCreateInfo.sType                   = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
     framebufferCreateInfo.pNext                   = &FramebufferAttachments,
     framebufferCreateInfo.flags                   = VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT;
-    framebufferCreateInfo.renderPass              = renderPass;
+    framebufferCreateInfo.renderPass              = renderpass;
     framebufferCreateInfo.width                   = swapChainExtent.width;
     framebufferCreateInfo.height                  = swapChainExtent.height;
     framebufferCreateInfo.layers                  = 1;
@@ -212,12 +178,58 @@ inline namespace SwapChainSupportDetails
     framebufferCreateInfo.pAttachments            = nullptr;
 
 
-    for ( size_t i = 0; i < Frames; i++ )
+    // for ( size_t i = 0; i < Frames; i++ )
     {
       // framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 
-      VkUtilsXBase::clPPPI3<PFN_vkCreateFramebuffer>( &framebufferCreateInfo, "vkCreateFramebuffer", &swapChainFramebuffers[i] );
+      return Vks::doPointerAlloc3<VkFramebuffer>(&framebufferCreateInfo, vkCreateFramebuffer);
     }
-  }
+  
 
 }  // namespace SwapChainSupportDetails
+
+
+void SwapChain::createRenderPass()
+{
+    std::cout << ( "Creating RenderPass" ) << "\n";
+      static const VkAttachmentDescription colorAttachment{
+    .format         = VK_FORMAT_B8G8R8A8_SRGB,  // SwapChainSupportDetails::swapChainImageFormat,
+    .samples        = VK_SAMPLE_COUNT_1_BIT,
+    .loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    .storeOp        = VK_ATTACHMENT_STORE_OP_STORE,
+    .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+    .initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED,
+    .finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+  };
+  static constexpr VkAttachmentReference colorAttachmentRef{ .attachment = 0, .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+  static constexpr VkSubpassDescription  subpass{ .pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                                  .colorAttachmentCount = 1,
+                                                  .pColorAttachments    = &colorAttachmentRef };
+
+                                                  
+  static constexpr VkSubpassDependency  VkSubpassDependency
+  {
+    .srcSubpass=VK_SUBPASS_EXTERNAL,
+    .dstSubpass=0,
+    .srcStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    .dstStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+    .srcAccessMask=0,
+    .dstAccessMask=VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+
+  };
+
+  constexpr VkRenderPassCreateInfo vkRenderPassCreateInfo1 = {
+    .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+    //   .flags=VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT,
+    .attachmentCount = 1,
+    .pAttachments    = &colorAttachment,
+    .subpassCount    = 1,
+    .pSubpasses      = &subpass,
+    .dependencyCount=1,
+    .pDependencies=&VkSubpassDependency
+  };
+
+  Vks::doPointerAlloc(VKI.device, &vkRenderPassCreateInfo1, &renderpass, vkCreateRenderPass );
+
+}

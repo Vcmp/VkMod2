@@ -1,23 +1,15 @@
-
-
-
-#include <vulkan/vulkan_core.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define VK_USE_64_BIT_PTR_DEFINES 1
-#define VULKAN_HPP_SUPPORT_SPAN
-
-#pragma once
-#include <volk.h>
+#include "Vks.tpp"
 #include <vector>
 #include <iostream>
-
-#include "Vks.tpp"
-
-
+#include <GLFW/glfw3native.h>
+inline namespace {
 static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+}
 
-
-
+int VkInit::tst()
+{
+    return this->graphicsFamily;
+}
 
 GLFWwindow* VkInit::init()
 {
@@ -32,6 +24,13 @@ GLFWwindow* VkInit::init()
   std::cout << "OK!" << "\n";
   return window;
 };
+
+
+
+
+
+
+
 inline const std::vector<const char *> getRequiredExtensions()
 {
   uint32_t                  glfwExtensionCount = 0;
@@ -48,13 +47,13 @@ VkInstance VkInit::createInstance()
  
   constexpr VkApplicationInfo vkApplInfo 
   {
-    .sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-    .pNext              = VK_NULL_HANDLE,
-    .pApplicationName   = "VKMod2",
-    .applicationVersion = VK_MAKE_VERSION( 1, 2, 0 ),
-    .pEngineName        = "No Engine",
-    .engineVersion      = VK_MAKE_VERSION( 1, 2, 0 ),
-    .apiVersion = VK_API_VERSION_1_2
+    .sType{VK_STRUCTURE_TYPE_APPLICATION_INFO},
+    .pNext{VK_NULL_HANDLE},
+    .pApplicationName{"VKMod2"},
+    .applicationVersion{VK_MAKE_VERSION( 1, 2, 0 )},
+    .pEngineName{"No Engine"},
+    .engineVersion{VK_MAKE_VERSION( 1, 2, 0 )},
+    .apiVersion{VK_API_VERSION_1_2}
   };
   std::vector<const char *>  extensions                        = getRequiredExtensions();
   VkInstanceCreateInfo InstCreateInfo 
@@ -70,6 +69,7 @@ VkInstance VkInit::createInstance()
   volkLoadInstanceOnly( vki );
   return vki;
  }
+
 
 
  VkPhysicalDevice VkInit::doPhysicalDevice()
