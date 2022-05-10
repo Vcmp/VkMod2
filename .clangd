@@ -1,9 +1,9 @@
 ﻿CompileFlags:
-    Add: [-xc++, -std=c++2b, -Wextra, -Wpedantic]   
+    Add: [-xc++, -std=c++2b, -Weffc++]   
     Remove: -W* 
     
 Diagnostics:
   ClangTidy:
-    Add: [core*, google*, bugprone*, performance*, hicpp*, modernize*, misc*, cppcoreguidelines*]
+    # Add: [core*, google*, bugprone*, performance*, modernize*, misc*]
 	  # Remove: [-bugprone-easily-swappable-parameters]
     

@@ -3,6 +3,7 @@
 #define VULKAN_HPP_SUPPORT_SPAN
 #pragma once
 #include <volk.h>
+#include <iostream>
 
 #include <GLFW/glfw3.h>
 
@@ -11,38 +12,41 @@ constexpr uint16_t width = 854;
 constexpr uint16_t height = 480;
 constexpr uint8_t Frames = 3;
 
-static struct VkInit
+inline const struct VkInit
 {
     GLFWwindow* window;
-    const VkInstance instance;
+     VkInstance instance;
     VkSurfaceKHR surface;
-    const VkPhysicalDevice physdevice;
-    const VkDevice device;
+     VkPhysicalDevice physdevice;
+     VkDevice device;
     uint32_t graphicsFamily;
     uint32_t transferFamily;
     VkQueue GraphicsQueue;
     VkQueue TransferQueue;
     // SwapChain SW;
-    VkInit() : window(init()), instance(createInstance()), surface(createSurface()), physdevice(doPhysicalDevice()), device(doDevice())
+    constexpr VkInit() : window(init()), instance(createInstance()), surface(createSurface()), physdevice(doPhysicalDevice()), device(doDevice())
     {
         
         
     };
+
+      VkInit(const VkInit&);                 // Prevent copy-construction
+  VkInit& operator=(const VkInit&); 
 
      auto  init() -> GLFWwindow*;
      auto  createInstance() -> VkInstance;
      auto  doPhysicalDevice() -> VkPhysicalDevice;
      auto createSurface() -> VkSurfaceKHR;
      auto doDevice() -> VkDevice;
-     auto tst() -> int;
+     auto tst() -> VkDevice;
      ~VkInit()
      {
         //  std::cout << "Destructing:..." << "\n";
      }
 
-} const VKI;
+} VKI;
 
-inline namespace Vks
+inline namespace Vks 
 {
     //   typedef VkResult ( *callPPPPI )( const void* device, const void * strct, const void *VkAllocationCallbacks, const void *hndle);
     template<typename type, typename handle>

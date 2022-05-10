@@ -1,15 +1,16 @@
 
-
-#include "GLFW/glfw3.h"
 #include "renderer2.hpp"
 #include <pthread.h>
 #include <type_traits>
 #include <unistd.h>
 #include <iostream>
 
-static constinit inline pthread_t sys;
-bool a = true;
+namespace
+{
+  pthread_t sys;
+  bool a = true;
 static uint32_t aa = 0;
+}
 
 inline void * Sysm( void * pv_unused )
 {
@@ -47,14 +48,15 @@ int main()
     // std::cout <<(SW.imageCount)<< "\n";
     std::cout <<(dp.i)<< "\n";
     // std::cout <<(VKI.tst())<< "\n";
-
+    // VkInit give_me_a_name{VkInit::init(), VkInit::createInstance(), VkInit::createSurface(), VkInit::doPhysicalDevice(), VkInit::doDevice()};
     int r =  pthread_create( &sys, nullptr, Sysm, nullptr );
     //PX2.genPipeline(SW.renderpass, VK_CULL_MODE_NONE);
    
-    PX2.genCommBuffers();
-    std::cout << "VkInit" <<std::is_pod<base_pod>::value << "\n";
-  
-    while(!glfwWindowShouldClose(VKI.window))
+    // PX2.genCommBuffers();
+    std::cout << "VkInit" <<std::is_standard_layout<VkInit>::value << "\n";
+    std::cout << "VkInit" <<std::is_trivially_copyable<VkInit>::value << "\n";
+    std::cout << "VkInit" <<std::is_trivially_constructible<VkInit>::value << "\n";
+    while(true)
     {
         // printf("%i \n", aa++);
         glfwPollEvents();
@@ -65,3 +67,4 @@ int main()
  
 
 }
+

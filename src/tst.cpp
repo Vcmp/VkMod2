@@ -1,4 +1,5 @@
 #include "Vks.tpp"
+#include <cstdint>
 #include <vector>
 #include <iostream>
 #include <GLFW/glfw3native.h>
@@ -6,13 +7,14 @@ inline namespace {
 static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 }
 
-int VkInit::tst()
+VkDevice VkInit::tst()
 {
-    return this->graphicsFamily;
+    return this->device;
 }
 
 GLFWwindow* VkInit::init()
 {
+    GLFWwindow* window;
   volkInitialize();
   glfwInit();
   glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
@@ -91,6 +93,7 @@ VkInstance VkInit::createInstance()
 
 VkSurfaceKHR VkInit::createSurface()
 {
+    VkSurfaceKHR surface;
   std::cout << ( "Creating Surface" ) << "\n";
   VkWin32SurfaceCreateInfoKHR createSurfaceInfo = {};
   createSurfaceInfo.sType                       = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
@@ -105,7 +108,8 @@ VkSurfaceKHR VkInit::createSurface()
 VkDevice VkInit::doDevice()
 {
    std::cout << ( "Creating Logical Device" ) << "\n";
-
+uint32_t graphicsFamily;
+uint32_t transferFamily;
   uint32_t pQueueFamilyPropertyCount;
   vkGetPhysicalDeviceQueueFamilyProperties( physdevice, &pQueueFamilyPropertyCount, VK_NULL_HANDLE );
 

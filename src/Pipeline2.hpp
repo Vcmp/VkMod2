@@ -2,7 +2,7 @@
 #include <array>
 #include "SwapChain.hpp"
 #include "Vks.tpp"
-#include <iostream>
+
 constexpr VkViewport vkViewport{ .x = 0.0F, .y = 0.0F, .width = width, .height = height, .minDepth = 0.0F, .maxDepth = 1.0F };
 
 constexpr VkRect2D scissor{ .offset = { 0, 0 }, .extent{ width, height } };
@@ -155,7 +155,7 @@ VkPipeline Pipeline2::genPipeline(VkRenderPass renderPass, VkCullModeFlagBits cu
 
 std::array<VkCommandBuffer, Frames> Pipeline2::doCommBuffers()
 {
-  std::array<VkCommandBuffer, Frames> PreTestBuffer;
+  std::array<VkCommandBuffer, Frames> PreTestBuffer{};
    const VkCommandBufferAllocateInfo allocateInfo{ .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
                                                   .commandPool        = ( commandPool ),
                                                   .level              = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
