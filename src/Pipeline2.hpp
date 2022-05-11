@@ -1,5 +1,7 @@
 #include "test.inl"
 #include <array>
+#include <cstdint>
+#include <vulkan/vulkan_core.h>
 #include "SwapChain.hpp"
 #include "Vks.tpp"
 
@@ -7,6 +9,7 @@ constexpr VkViewport vkViewport{ .x = 0.0F, .y = 0.0F, .width = width, .height =
 
 constexpr VkRect2D scissor{ .offset = { 0, 0 }, .extent{ width, height } };
 
+constexpr std::array<VkShaderModuleCreateInfo, 2> shaderStages2{SPV.VsMCI, SPV.VsMCI2};
 
 static struct Pipeline2
 {
@@ -14,51 +17,37 @@ static struct Pipeline2
     const VkPipelineLayout vkLayout;
     const VkCommandPool commandPool;
     const std::array<VkCommandBuffer, Frames>commandBuffer;
-    Pipeline2(): commandPool(genCommPool()), vkLayout(genLayout()), pipeline(genPipeline(SW.renderpass, VK_CULL_MODE_NONE)), commandBuffer(doCommBuffers()){genCommBuffers();};
-    auto genPipeline(VkRenderPass, VkCullModeFlagBits) -> VkPipeline;
+    Pipeline2(): commandPool(genCommPool()), vkLayout(genLayout()), pipeline(genPipeline(shaderStages2, SW.createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED), VK_CULL_MODE_NONE, -1)), commandBuffer(doCommBuffers()){genCommBuffers();};
+    auto genPipeline(const std::array<VkShaderModuleCreateInfo, 2>, VkRenderPass, VkCullModeFlagBits, int32_t) -> VkPipeline;
     void genCommBuffers();
     auto genCommPool() -> VkCommandPool;
     auto doCommBuffers() -> std::array<VkCommandBuffer, Frames>;
-    constexpr auto genLayout() -> VkPipelineLayout;
+    auto genLayout() -> VkPipelineLayout;
+     VkPipelineShaderStageCreateInfo genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits);
 }PX2;
 
-  template <typename X, typename T>
+     VkPipelineShaderStageCreateInfo Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag)
+    {
+        const VkPipelineShaderStageCreateInfo shaderMiscStage
+        {
+          .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+          .stage  = stageFlag,
+          .module = Vks::doPointerAlloc3<VkShaderModule>( &a, vkCreateShaderModule),
+          .pName  = "main",
 
-static constexpr auto clPPPI3A( const auto * __restrict__ pStrct, const char * __restrict__ a )
-  {
-    // const VkDevice aa = volkGetLoadedDevice();
-    X object;
-    T( vkGetDeviceProcAddr( VKI.device, a ) )( VKI.device, pStrct, nullptr, &object );
-    return object;
-  }
+        };
+        return shaderMiscStage;
+    }
 
-VkPipeline Pipeline2::genPipeline(VkRenderPass renderPass, VkCullModeFlagBits cullMode)
+VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2> shaderStages2, VkRenderPass renderPass, VkCullModeFlagBits cullMode, int32_t baseIndex)
 {
     // Thankfully Dont; need to worry about compiling the Shader Files AnyMore due
   // to teh ability to premptively use the SPRI-V Compielr (e.g.GLSLC) prior to compile time...
   std::cout << ( "Setting up PipeLine" ) << "\n";
 
-  // const VkShaderModule vertShaderModule = ShaderSPIRVUtils::compileShaderFile();
-  // const VkShaderModule fragShaderModule = ShaderSPIRVUtils::compileShaderFile1();
-
-  VkSpecializationInfo Vks =
-  {
-
-  };
-
-  const VkPipelineShaderStageCreateInfo vertexStage = {
-    .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-    .stage  = VK_SHADER_STAGE_VERTEX_BIT,
-    .module = Vks::doPointerAlloc3<VkShaderModule>( &SPV.VsMCI, vkCreateShaderModule),
-    .pName  = "main",
-
-  }; 
+  auto vertexStage = genShaderPiplineStage(shaderStages2[0], VK_SHADER_STAGE_VERTEX_BIT);
+  auto fragStage = genShaderPiplineStage(shaderStages2[1], VK_SHADER_STAGE_FRAGMENT_BIT);
   
-  const VkPipelineShaderStageCreateInfo fragStage = { .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-                                                      .stage  = VK_SHADER_STAGE_FRAGMENT_BIT,
-                                                      .module = Vks::doPointerAlloc3<VkShaderModule>( &SPV.VsMCI2, vkCreateShaderModule),
-                                                      .pName  = "main" };
-
   const VkPipelineShaderStageCreateInfo shaderStages[] = { fragStage, vertexStage};
 
   static constexpr VkVertexInputBindingDescription VxL{ 0, ( 24 ), VK_VERTEX_INPUT_RATE_VERTEX };
@@ -148,9 +137,9 @@ VkPipeline Pipeline2::genPipeline(VkRenderPass renderPass, VkCullModeFlagBits cu
                                                    .pColorBlendState    = &colorBlending,
                                                    .layout              = vkLayout,
                                                    .renderPass          = renderPass,
-                                                   .basePipelineIndex=-1};
-  vkCreateGraphicsPipelines(VKI.device, nullptr, 1, &pipelineInfo, nullptr, &pipeline );
-  return pipeline;
+                                                   .basePipelineIndex=baseIndex};
+
+  return Vks::doPointerAllocX<VkPipeline>(&pipelineInfo, vkCreateGraphicsPipelines);
 }
 
 std::array<VkCommandBuffer, Frames> Pipeline2::doCommBuffers()
@@ -222,7 +211,7 @@ void Pipeline2::genCommBuffers()
 
 VkCommandPool Pipeline2::genCommPool()
 {
- VkCommandPoolCreateInfo  poolInfo = {
+ constexpr VkCommandPoolCreateInfo  poolInfo = {
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext            = nullptr,
     .queueFamilyIndex = 0,
@@ -232,7 +221,7 @@ VkCommandPool Pipeline2::genCommPool()
 }
 
 
-constexpr VkPipelineLayout Pipeline2::genLayout()
+VkPipelineLayout Pipeline2::genLayout()
 {
   
   constexpr VkPushConstantRange vkPushConstantRange{
@@ -248,5 +237,5 @@ constexpr VkPipelineLayout Pipeline2::genLayout()
                                                                       .pPushConstantRanges    = &vkPushConstantRange  */};
 
   // std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
-  return Vks::doPointerAlloc3Alt<VkPipelineLayout, PFN_vkCreatePipelineLayout>( &vkPipelineLayoutCreateInfo);
+  return Vks::doPointerAlloc3<VkPipelineLayout>( &vkPipelineLayoutCreateInfo, vkCreatePipelineLayout);
 }

@@ -1,5 +1,6 @@
 
 #include "Vks.tpp"
+#include <vulkan/vulkan_core.h>
 
 #pragma once
 static struct SwapChain
@@ -20,14 +21,14 @@ static struct SwapChain
         createSwapChain();
         createImageViews();
         // createFramebuffers();
-        createRenderPass();
+        renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED);
       
     };
     void setupImageFormats();
     void createSwapChain();
     void createImageViews();
     VkFramebuffer createFramebuffers();
-    void createRenderPass();
+    VkRenderPass createRenderPass(VkImageLayout);
 
 } SW;
 
@@ -221,7 +222,7 @@ void SwapChain::createSwapChain()
 }  // namespace SwapChainSupportDetails
 
 
-void SwapChain::createRenderPass()
+VkRenderPass SwapChain::createRenderPass(VkImageLayout initial)
 {
     std::cout << ( "Creating RenderPass" ) << "\n";
       static const VkAttachmentDescription colorAttachment{
@@ -231,7 +232,7 @@ void SwapChain::createRenderPass()
     .storeOp        = VK_ATTACHMENT_STORE_OP_STORE,
     .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
     .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-    .initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED,
+    .initialLayout  = initial,
     .finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
   };
   static constexpr VkAttachmentReference colorAttachmentRef{ .attachment = 0, .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
@@ -262,6 +263,6 @@ void SwapChain::createRenderPass()
     .pDependencies=&VkSubpassDependency
   };
 
-  Vks::doPointerAlloc(VKI.device, &vkRenderPassCreateInfo1, &renderpass, vkCreateRenderPass );
+  return Vks::doPointerAlloc3<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
 
 }

@@ -1,9 +1,11 @@
 
 #include "renderer2.hpp"
+#include <array>
 #include <pthread.h>
 #include <type_traits>
 #include <unistd.h>
 #include <iostream>
+#include <vulkan/vulkan_core.h>
 
 namespace
 {
@@ -50,8 +52,11 @@ int main()
     // std::cout <<(VKI.tst())<< "\n";
     // VkInit give_me_a_name{VkInit::init(), VkInit::createInstance(), VkInit::createSurface(), VkInit::doPhysicalDevice(), VkInit::doDevice()};
     int r =  pthread_create( &sys, nullptr, Sysm, nullptr );
-    //PX2.genPipeline(SW.renderpass, VK_CULL_MODE_NONE);
+
+    // std::array<VkShaderModuleCreateInfo, 2> si{SPV.VsMCI3temp, SPV.VsMCI4temp};
+    auto pi2 = PX2.genPipeline({SPV.VsMCI3temp, SPV.VsMCI4temp}, SW.renderpass, VK_CULL_MODE_NONE, 1);
    
+    std::cout << pi2 << "\n";
     // PX2.genCommBuffers();
     std::cout << "VkInit" <<std::is_standard_layout<VkInit>::value << "\n";
     std::cout << "VkInit" <<std::is_trivially_copyable<VkInit>::value << "\n";
