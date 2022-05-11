@@ -1,9 +1,6 @@
 #include "test.inl"
 #include <array>
-#include <cstdint>
-#include <vulkan/vulkan_core.h>
 #include "SwapChain.hpp"
-#include "Vks.tpp"
 
 constexpr VkViewport vkViewport{ .x = 0.0F, .y = 0.0F, .width = width, .height = height, .minDepth = 0.0F, .maxDepth = 1.0F };
 

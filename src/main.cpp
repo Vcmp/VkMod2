@@ -5,13 +5,13 @@
 #include <type_traits>
 #include <unistd.h>
 #include <iostream>
-#include <vulkan/vulkan_core.h>
 
 namespace
 {
   pthread_t sys;
   bool a = true;
-static uint32_t aa = 0;
+  static uint32_t aa = 0;
+  static mat4x m4;
 }
 
 inline void * Sysm( void * pv_unused )
@@ -22,7 +22,7 @@ inline void * Sysm( void * pv_unused )
     std::cout << aa /* <<"--->"<< duration  */ << "\n";
     // std::cout << cc /* <<"--->"<< duration  */ << "\n";
     // m4.loadAligned( BuffersX::data );
-    // m4.show();
+    m4.show();
     aa = 0;
     sleep( 1 );
   }

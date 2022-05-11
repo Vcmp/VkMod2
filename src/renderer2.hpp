@@ -1,5 +1,7 @@
 #pragma once
 #include "Pipeline2.hpp"
+#include "mat4x.hpp"
+
 //I will have to assume that this works without needing explicit includes due to forward declarations
 
 
@@ -10,7 +12,7 @@
  trick to use builtins+Attributes to treat a blob of memory as a vector type which compiles more cleanly into slightly better asm with vmovps (At least with Clang)
  static __int256 *__restrict__ ax = reinterpret_cast<__int256 *>(&ubo);
 */
-// typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( m4 ) ), __aligned__( 64 ) ) );
+typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( mat4x ) ), __aligned__( 64 ) ) );
 
 static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) renderer2// : Queues
 {
@@ -26,8 +28,8 @@ static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligne
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
 private:
-  // constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
-  ;
+  constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
+  
 
 
   const VkSemaphore AvailableSemaphore;
