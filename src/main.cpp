@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <unistd.h>
 #include <iostream>
+#include <vulkan/vulkan_core.h>
 
 namespace
 {
@@ -42,6 +43,8 @@ struct der_pod : public base_pod
     const int k;
 };
 
+
+
 constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
 int main()
 {
@@ -54,18 +57,37 @@ int main()
     int r =  pthread_create( &sys, nullptr, Sysm, nullptr );
 
     // std::array<VkShaderModuleCreateInfo, 2> si{SPV.VsMCI3temp, SPV.VsMCI4temp};
-    auto pi2 = PX2.genPipeline({SPV.VsMCI3temp, SPV.VsMCI4temp}, SW.renderpass, VK_CULL_MODE_NONE, 1);
+    auto pi2 = PX2.genPipeline({SPV.VsMCI3temp, SPV.VsMCI4temp}, SW.createRenderPass(VK_IMAGE_LAYOUT_PREINITIALIZED), VK_CULL_MODE_NONE, 1);
    
-    std::cout << pi2 << "\n";
+    // std::cout << pi2 << "\n";
+
+    fakeFBO fFBO
+    {
+      pi2, 
+      PX2.genCommPool(), 
+      SW.createRenderPass(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR), 
+      SW.frameBuffer, 
+      {SW.imageViews[0], SW.imageViews[1], SW.imageViews[2]},
+      PX2.genLayout(),
+      {PX2.commandBuffer[0], PX2.commandBuffer[1], PX2.commandBuffer[2]}
+      };
+
+
+    // fFBO.doCommBuffers();
+    fFBO.doCommndRec();
     // PX2.genCommBuffers();
     std::cout << "VkInit" <<std::is_standard_layout<VkInit>::value << "\n";
     std::cout << "VkInit" <<std::is_trivially_copyable<VkInit>::value << "\n";
     std::cout << "VkInit" <<std::is_trivially_constructible<VkInit>::value << "\n";
+
+    std::cout << "fakeFBO" <<std::is_standard_layout<fakeFBO>::value << "\n";
+    std::cout << "fakeFBO" <<std::is_trivially_copyable<fakeFBO>::value << "\n";
+    std::cout << "fakeFBO" <<std::is_trivially_constructible<fakeFBO>::value << "\n";
     while(true)
     {
         // printf("%i \n", aa++);
         glfwPollEvents();
-        R2.drawFrame();
+        R2.drawFrame(fFBO.commandBuffers[R2.currentFrame]);
         aa++;
     }
     a= false;

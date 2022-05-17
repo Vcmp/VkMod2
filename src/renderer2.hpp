@@ -1,6 +1,8 @@
 #pragma once
 #include "Pipeline2.hpp"
 #include "mat4x.hpp"
+#include "fakeFBO.hpp"
+#include <vulkan/vulkan_core.h>
 
 //I will have to assume that this works without needing explicit includes due to forward declarations
 
@@ -24,9 +26,10 @@ static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligne
   }
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  void            drawFrame();
+  void            drawFrame(VkCommandBuffer);
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
+  static constinit inline uint32_t               currentFrame;
 private:
   constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   
@@ -34,7 +37,6 @@ private:
 
   const VkSemaphore AvailableSemaphore;
 
-  static constinit inline uint32_t               currentFrame;
   static constexpr const uint32_t                TmUt = 1000000000;
   static constexpr VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
                                                                     // .pWaitSemaphores=&FinishedSemaphore,
@@ -53,10 +55,10 @@ private:
 }R2;
 
 
-void renderer2::drawFrame()
+
+void renderer2::drawFrame(VkCommandBuffer commandBuffer)
 {
   // m4.loadAligned( &m5 );
-  
   vkAcquireNextImageKHR( VKI.device, SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
   // __builtin_prefetch( BuffersX::data );
   // __builtin_prefetch( &viewproj2x );
@@ -68,7 +70,7 @@ void renderer2::drawFrame()
 
     // PipelineX::recCmdBuffer(currentFrame);
 
-      R2.info.pCommandBuffers =&PX2.commandBuffer[currentFrame];
+      R2.info.pCommandBuffers =&commandBuffer;
     vkQueueSubmit( VKI.GraphicsQueue, 1, &R2.info, nullptr );
   // }
   

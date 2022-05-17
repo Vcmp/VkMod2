@@ -1,3 +1,4 @@
+#include "GLFW/glfw3.h"
 #include "Vks.tpp"
 #include <cstdint>
 #include <vector>
@@ -19,6 +20,9 @@ GLFWwindow* VkInit::init()
   glfwInit();
   glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
   glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
+  glfwWindowHint( GLFW_API_UNAVAILABLE, GLFW_TRUE );
+  glfwWindowHint( GLFW_CONTEXT_RELEASE_BEHAVIOR, GLFW_RELEASE_BEHAVIOR_NONE );
+  glfwWindowHint( GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API );
   window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
 
 

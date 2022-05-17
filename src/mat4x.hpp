@@ -15,7 +15,7 @@ public:
   __m256 __b;
 
   constexpr mat4x() : __a( lud( ax ) ), __b( lud( ax + 8 ) ) {}
-  // constexpr explicit mat4x( auto * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
+  // constexpr explic1it mat4x( auto * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
   //  float a[2][8];
 
    constexpr __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
