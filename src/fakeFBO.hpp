@@ -2,7 +2,8 @@
 #pragma once
 
 
-#include <volk.h>
+#include <array>
+#include "Vks.tpp"
 
 //ideally will need to fix this abomination of a Constructor/InitialserList/Layout later
 struct fakeFBO
@@ -11,10 +12,11 @@ struct fakeFBO
     const VkCommandPool commandPool;
     const VkRenderPass renderPass;
     const VkFramebuffer frameBuffer;
-    const VkImageView imageViews[3];
+    const std::array<VkImageView, 3> imageViews;
     const VkPipelineLayout layout;
-    const VkCommandBuffer commandBuffers[3];
+    const std::array<VkCommandBuffer, 3> commandBuffers =  doGenCommnd();
     static VkCommandBuffer doCommBuffers(VkCommandPool, uint32_t);
+    std::array<VkCommandBuffer, 3> doGenCommnd();
     void doCommndRec();
 
     

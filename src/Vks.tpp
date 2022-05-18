@@ -1,3 +1,4 @@
+#include <windows.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #define VK_USE_64_BIT_PTR_DEFINES 1
 #define VULKAN_HPP_SUPPORT_SPAN
@@ -7,31 +8,45 @@
 
 #include <GLFW/glfw3.h>
 
-
 constexpr uint16_t width = 854;
 constexpr uint16_t height = 480;
 constexpr uint8_t Frames = 3;
 
+
+const WNDCLASSA  AHack{
+  .style=0,
+  .lpfnWndProc=nullptr,
+  .cbClsExtra=NULL,
+  .cbWndExtra=NULL,
+  .hInstance=nullptr,
+  .hIcon=nullptr,
+  .hCursor=nullptr,
+  .hbrBackground=nullptr,
+  .lpszMenuName=nullptr,
+  .lpszClassName=nullptr,
+};
+
+
+
 inline const struct VkInit
 {
-    GLFWwindow* window;
-     VkInstance instance;
-    VkSurfaceKHR surface;
-     VkPhysicalDevice physdevice;
-     VkDevice device;
+    GLFWwindow* window=init();
+     const VkInstance instance=createInstance();
+    const VkSurfaceKHR surface = createSurface();
+     const VkPhysicalDevice physdevice = doPhysicalDevice();
+     const VkDevice device = doDevice();
     uint32_t graphicsFamily;
     uint32_t transferFamily;
     VkQueue GraphicsQueue;
     VkQueue TransferQueue;
     // SwapChain SW;
-    constexpr VkInit() : window(init()), instance(createInstance()), surface(createSurface()), physdevice(doPhysicalDevice()), device(doDevice())
+    constexpr VkInit()
     {
         
         
     };
-
-      VkInit(const VkInit&);                 // Prevent copy-construction
-  VkInit& operator=(const VkInit&); 
+    VkInit(VkInit const &) = delete;
+  VkInit& operator=(const VkInit&) = delete; 
 
      auto  init() -> GLFWwindow*;
      auto  createInstance() -> VkInstance;
@@ -39,10 +54,7 @@ inline const struct VkInit
      auto createSurface() -> VkSurfaceKHR;
      auto doDevice() -> VkDevice;
      auto tst() -> VkDevice;
-     ~VkInit()
-     {
-        //  std::cout << "Destructing:..." << "\n";
-     }
+     ~VkInit() = default;
 
 } VKI;
 

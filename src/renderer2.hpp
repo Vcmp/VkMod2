@@ -19,14 +19,10 @@ typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( mat4x ) ), __a
 static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) renderer2// : Queues
 {
       static constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr };
-  renderer2(): AvailableSemaphore(Vks::doPointerAllocSml<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore))
-  {
-
-
-  }
+      
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  void            drawFrame(VkCommandBuffer);
+  void            drawFrame(std::array<VkCommandBuffer, 2>) const;
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   static constinit inline uint32_t               currentFrame;
@@ -35,7 +31,7 @@ private:
   
 
 
-  const VkSemaphore AvailableSemaphore;
+  const VkSemaphore AvailableSemaphore = Vks::doPointerAllocSml<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore);
 
   static constexpr const uint32_t                TmUt = 1000000000;
   static constexpr VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
@@ -50,13 +46,13 @@ private:
               .waitSemaphoreCount = 1,
               .pWaitSemaphores    = &AvailableSemaphore,
               .pWaitDstStageMask  = &waitStages,
-              .commandBufferCount = 1,
+              .commandBufferCount = 2,
   };
 }R2;
 
 
 
-void renderer2::drawFrame(VkCommandBuffer commandBuffer)
+void renderer2::drawFrame(std::array<VkCommandBuffer, 2> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
   vkAcquireNextImageKHR( VKI.device, SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
@@ -70,7 +66,7 @@ void renderer2::drawFrame(VkCommandBuffer commandBuffer)
 
     // PipelineX::recCmdBuffer(currentFrame);
 
-      R2.info.pCommandBuffers =&commandBuffer;
+      R2.info.pCommandBuffers =commandBuffer.data();
     vkQueueSubmit( VKI.GraphicsQueue, 1, &R2.info, nullptr );
   // }
   

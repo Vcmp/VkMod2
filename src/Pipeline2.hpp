@@ -6,7 +6,7 @@ constexpr VkViewport vkViewport{ .x = 0.0F, .y = 0.0F, .width = width, .height =
 
 constexpr VkRect2D scissor{ .offset = { 0, 0 }, .extent{ width, height } };
 
-constexpr std::array<VkShaderModuleCreateInfo, 2> shaderStages2{SPV.VsMCI, SPV.VsMCI2};
+constexpr std::array<VkShaderModuleCreateInfo, 2> shaderStages2{ShaderSPIRVUtils::VsMCI, ShaderSPIRVUtils::VsMCI2};
 
 static struct Pipeline2
 {
@@ -14,16 +14,16 @@ static struct Pipeline2
     const VkPipelineLayout vkLayout;
     const VkCommandPool commandPool;
     const std::array<VkCommandBuffer, Frames>commandBuffer;
-    Pipeline2(): commandPool(genCommPool()), vkLayout(genLayout()), pipeline(genPipeline(shaderStages2, SW.createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED), VK_CULL_MODE_NONE, -1)), commandBuffer(doCommBuffers()){genCommBuffers();};
-    auto genPipeline(const std::array<VkShaderModuleCreateInfo, 2>, VkRenderPass, VkCullModeFlagBits, int32_t) -> VkPipeline;
+    Pipeline2(): pipeline(genPipeline(shaderStages2, SW.createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED), VK_CULL_MODE_NONE, -1)), vkLayout(genLayout()), commandPool(genCommPool()), commandBuffer(doCommBuffers()){genCommBuffers();};
+    auto genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&, VkRenderPass, VkCullModeFlagBits, int32_t) -> VkPipeline;
     void genCommBuffers();
     auto genCommPool() -> VkCommandPool;
     auto doCommBuffers() -> std::array<VkCommandBuffer, Frames>;
     auto genLayout() -> VkPipelineLayout;
-     VkPipelineShaderStageCreateInfo genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits);
-}PX2;
+     VkPipelineShaderStageCreateInfo genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const;
+} PX2;
 
-     VkPipelineShaderStageCreateInfo Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag)
+     VkPipelineShaderStageCreateInfo Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag) const
     {
         const VkPipelineShaderStageCreateInfo shaderMiscStage
         {
@@ -36,7 +36,7 @@ static struct Pipeline2
         return shaderMiscStage;
     }
 
-VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2> shaderStages2, VkRenderPass renderPass, VkCullModeFlagBits cullMode, int32_t baseIndex)
+VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>& shaderStages2, VkRenderPass renderPass, VkCullModeFlagBits cullMode, int32_t baseIndex)
 {
     // Thankfully Dont; need to worry about compiling the Shader Files AnyMore due
   // to teh ability to premptively use the SPRI-V Compielr (e.g.GLSLC) prior to compile time...

@@ -1,5 +1,7 @@
 
 #include "Vks.tpp"
+#include <array>
+#include <vector>
 #include <vulkan/vulkan_core.h>
 
 #pragma once
@@ -9,25 +11,25 @@ static struct SwapChain
     uint32_t       imageCount;
     VkSwapchainKHR swapChain;
     VkImage image[3];
-    VkImageView imageViews[3];
-    VkRenderPass renderpass;
+    std::array<VkImageView, 3> imageViews;
+    const VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED);
     VkSurfaceFormatKHR         swapChainImageFormat;
     VkPresentModeKHR presentMode;
     VkExtent2D swapChainExtent{854, 480};
     const VkFramebuffer frameBuffer;
-    SwapChain(/* VkPhysicalDevice physdevice, VkSurfaceKHR surface */) : frameBuffer(createFramebuffers())
+    SwapChain(/* VkPhysicalDevice physdevice, VkSurfaceKHR surface */) : frameBuffer(createFramebuffers(renderpass))
     {
         setupImageFormats();
         createSwapChain();
-        createImageViews();
+        imageViews=createImageViews();
         // createFramebuffers();
-        renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED);
+        
       
     };
     void setupImageFormats();
     void createSwapChain();
-    void createImageViews();
-    VkFramebuffer createFramebuffers();
+    std::array<VkImageView, 3> createImageViews();
+    VkFramebuffer createFramebuffers(VkRenderPass);
     VkRenderPass createRenderPass(VkImageLayout);
 
 } SW;
@@ -145,10 +147,11 @@ void SwapChain::createSwapChain()
 
 
 
-  void SwapChain::createImageViews()
+  std::array<VkImageView, 3> SwapChain::createImageViews()
   {
     std::cout << ( "Creating Image Views" ) << "\n";
     int i = 0;
+    std::array<VkImageView, 3> imageViews;
     for ( const VkImage & swapchainImage : image )
     {
       VkImageViewCreateInfo createInfo = {};
@@ -172,9 +175,10 @@ void SwapChain::createSwapChain()
 
       Vks::doPointerAlloc<VkImageView, PFN_vkCreateImageView>(VKI.device, &createInfo, &imageViews[i++], vkCreateImageView);
     }
+    return imageViews;
   }
 
-  VkFramebuffer SwapChain::createFramebuffers()
+  VkFramebuffer SwapChain::createFramebuffers(VkRenderPass renderpass)
   {
         std::cout << ( "Creating FrameBuffers" ) << "\n";
 

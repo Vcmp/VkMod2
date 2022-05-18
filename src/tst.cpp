@@ -1,9 +1,9 @@
-#include "GLFW/glfw3.h"
 #include "Vks.tpp"
 #include <cstdint>
 #include <vector>
 #include <iostream>
 #include <GLFW/glfw3native.h>
+
 inline namespace {
 static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 }
@@ -15,7 +15,10 @@ VkDevice VkInit::tst()
 
 GLFWwindow* VkInit::init()
 {
-    GLFWwindow* window;
+
+  RegisterClassA(&AHack);
+
+  GLFWwindow* window;
   volkInitialize();
   glfwInit();
   glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
@@ -26,7 +29,7 @@ GLFWwindow* VkInit::init()
   window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
 
 
-  glfwSetWindowShouldClose( ( window ), false );
+  glfwSetWindowShouldClose(  window , false );
   std::cout << "OK!" << "\n";
   return window;
 };
@@ -49,7 +52,7 @@ inline const std::vector<const char *> getRequiredExtensions()
 VkInstance VkInit::createInstance()
 {
   VkInstance vki;
-  std::cout << ( "Creating Instance" ) << "\n";
+  std::cout <<  "Creating Instance"  << "\n";
  
   constexpr VkApplicationInfo vkApplInfo 
   {
@@ -88,7 +91,7 @@ VkInstance VkInit::createInstance()
   //   std::runtime_error( "Failed to find GPUs with Vulkan support" );
    std::vector<VkPhysicalDevice> ppPhysicalDevicesdeviceCount(deviceCount);
 
-  std::cout << ( "Enumerate Physical Device" ) << "\n";
+  std::cout <<  "Enumerate Physical Device"  << "\n";
   vkEnumeratePhysicalDevices( instance, &deviceCount, ppPhysicalDevicesdeviceCount.data() );
   return ppPhysicalDevicesdeviceCount.at(0);
    //BuffersX::memProperties=vkds.memProperties;
@@ -101,7 +104,7 @@ VkSurfaceKHR VkInit::createSurface()
   std::cout << ( "Creating Surface" ) << "\n";
   VkWin32SurfaceCreateInfoKHR createSurfaceInfo = {};
   createSurfaceInfo.sType                       = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-  createSurfaceInfo.hwnd                        = glfwGetWin32Window( const_cast<GLFWwindow *>( window ) );
+  createSurfaceInfo.hwnd                        = glfwGetWin32Window( window  );
   createSurfaceInfo.hinstance                   = GetModuleHandle( nullptr );
   createSurfaceInfo.pNext                       = VK_NULL_HANDLE;
 
@@ -111,7 +114,7 @@ VkSurfaceKHR VkInit::createSurface()
 
 VkDevice VkInit::doDevice()
 {
-   std::cout << ( "Creating Logical Device" ) << "\n";
+   std::cout << "Creating Logical Device"  << "\n";
 uint32_t graphicsFamily;
 uint32_t transferFamily;
   uint32_t pQueueFamilyPropertyCount;
@@ -122,7 +125,7 @@ uint32_t transferFamily;
 
   uint32_t i = 0;
   // todo: Likley/Prop won't work with AMD properly and/or specific GPUs with differing Queue Family layouts
-  for ( VkQueueFamilyProperties & uniqueQueue : uniqueQueueFamilies )
+  for ( VkQueueFamilyProperties const & uniqueQueue : uniqueQueueFamilies )
   {
     std::cout << ( uniqueQueue.queueCount ) << "\n";
     if ( ( uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT ) )
@@ -188,14 +191,9 @@ uint32_t transferFamily;
                                                 /* .features = deviceFeatures */ };
 
 
-  //.fillModeNonSolid(true) //dneeded to adres valditaion errors when using
-  // VK_POLIGYON_MODE_LINE or POINT .robustBufferAccess(true);
-  //                        .geometryShader(true);
-  //                        .pipelineStatisticsQuery(true)
-  //                        .alphaToOne(false);
   vkGetPhysicalDeviceFeatures2( physdevice, &deviceFeatures2 );
 
-  // vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
+
   VkDeviceCreateInfo createInfo      = {};
   createInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   createInfo.pNext                   = &deviceFeatures2;
@@ -204,7 +202,6 @@ uint32_t transferFamily;
   createInfo.ppEnabledExtensionNames = ( &deviceExtensions );
   createInfo.enabledExtensionCount   = 1;
   
-  // createInfo.ppEnabledLayerNames=(validationLayers.data());
   createInfo.pEnabledFeatures = nullptr;
   VkDevice device;
   if ( !deviceVulkan12Features.imagelessFramebuffer )

@@ -9,8 +9,8 @@ layout(location = 2) in vec3 inColor;
 layout(location = 0) out vec3 fragColor;
 
 const vec2 tri[3] = vec2[3](
-  vec2(1.f,1.f),
-		vec2(-1.f,1.f),
+  vec2(0.5f,1.f),
+		vec2(-1.f,0.5f),
 		vec2(0.f,-1.f)
 );
 

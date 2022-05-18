@@ -22,30 +22,30 @@ constexpr auto VK_PIPELINE_CREATE_LINK_TIME_OPTIMIZATION_BIT_EXT            =(st
     VkBool32                              graphicsPipelineLibrary;
 } __attribute__((aligned(16))) __attribute__((packed)) VkPhysicalDeviceGraphicsPipelineLibraryFeaturesEXT{};
 
-typedef struct VkPhysicalDeviceGraphicsPipelineLibraryPropertiesEXT {
+using VkPhysicalDeviceGraphicsPipelineLibraryPropertiesEXT = struct VkPhysicalDeviceGraphicsPipelineLibraryPropertiesEXT {
     VkStructureType                       sType;
     const void*                           pNext;
     VkBool32                              graphicsPipelineLibraryFastLinking;
     VkBool32                              graphicsPipelineLibraryIndependentInterpolationDecoration;
-} VkPhysicalDeviceGraphicsPipelineLibraryPropertiesEXT;
+};
 
-typedef VkFlags VkGraphicsPipelineLibraryFlagsEXT;
+using VkGraphicsPipelineLibraryFlagsEXT = VkFlags;
 
-typedef struct VkGraphicsPipelineLibraryCreateInfoEXT {
+using VkGraphicsPipelineLibraryCreateInfoEXT = struct VkGraphicsPipelineLibraryCreateInfoEXT {
     VkStructureType                       sType;
     const void*                           pNext;
     VkGraphicsPipelineLibraryFlagsEXT     flags;
-} __attribute__((aligned(16))) __attribute__((packed)) VkGraphicsPipelineLibraryCreateInfoEXT;
+};
 
-typedef enum VkGraphicsPipelineLibraryFlagBitsEXT {
+using VkGraphicsPipelineLibraryFlagBitsEXT = enum class VkGraphicsPipelineLibraryFlagBitsEXT {
     VK_GRAPHICS_PIPELINE_LIBRARY_VERTEX_INPUT_INTERFACE_BIT_EXT = 0x00000001,
     VK_GRAPHICS_PIPELINE_LIBRARY_PRE_RASTERIZATION_SHADERS_BIT_EXT = 0x00000002,
     VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_SHADER_BIT_EXT = 0x00000004,
     VK_GRAPHICS_PIPELINE_LIBRARY_FRAGMENT_OUTPUT_INTERFACE_BIT_EXT = 0x00000008,
     VK_GRAPHICS_PIPELINE_LIBRARY_FLAG_BITS_MAX_ENUM_EXT = 0x7FFFFFFF
-} VkGraphicsPipelineLibraryFlagBitsEXT;
+};
 
-typedef enum VkPipelineLayoutCreateFlagBits {
+using VkPipelineLayoutCreateFlagBits = enum class VkPipelineLayoutCreateFlagBits {
     VK_PIPELINE_LAYOUT_CREATE_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
-} VkPipelineLayoutCreateFlagBits;
+};
 #endif  /* !defined(VK_EXT_graphics_pipeline_library) */
