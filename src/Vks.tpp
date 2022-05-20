@@ -90,6 +90,14 @@ inline namespace Vks
         (type2f)(VKI.device, strct, &pHndl);
         return pHndl;
     }
+    
+    template<typename type>
+    [[nodiscard]] constexpr auto doPointerAlloc5(auto* __restrict__ strct, auto* hndle) noexcept -> type
+    {
+        type pHndl = nullptr; 
+        (hndle)(VKI.device, strct, nullptr, &pHndl);
+        return pHndl;
+    }
     template<typename type>
     constexpr type doPointerAllocSml(auto* strct, /* type* hndle,  */auto pHndl)
     {

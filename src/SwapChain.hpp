@@ -220,7 +220,7 @@ void SwapChain::createSwapChain()
     {
       // framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 
-      return Vks::doPointerAlloc3<VkFramebuffer>(&framebufferCreateInfo, vkCreateFramebuffer);
+      return Vks::doPointerAlloc5<VkFramebuffer>(&framebufferCreateInfo, vkCreateFramebuffer);
     }
   
 

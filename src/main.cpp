@@ -54,12 +54,12 @@ int main()
     int r =  pthread_create( &sys, nullptr, Sysm, nullptr );
 
     // std::array<VkShaderModuleCreateInfo, 2> si{SPV.VsMCI3temp, SPV.VsMCI4temp};
-    const auto rs = SW.createRenderPass(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+/*     const auto rs = SW.createRenderPass(VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     const auto fs = SW.createFramebuffers(rs);
     const auto pi2 = PX2.genPipeline({ShaderSPIRVUtils::VsMCI3temp, ShaderSPIRVUtils::VsMCI4temp}, rs, VK_CULL_MODE_NONE, 1);
-    // std::cout << pi2 << "\n";
+ */    // std::cout << pi2 << "\n";
 
-    fakeFBO fFBO
+/*     fakeFBO fFBO
     {
       pi2, 
       PX2.genCommPool(), 
@@ -68,10 +68,10 @@ int main()
       SW.createImageViews(),
       PX2.genLayout()
     };
-
+ */
 
     // fFBO.doCommBuffers();
-    fFBO.doCommndRec();
+    // fFBO.doCommndRec();
     // PX2.genCommBuffers();
     std::cout << "VkInit" <<std::is_standard_layout_v<VkInit> << "\n";
     std::cout << "VkInit" <<std::is_trivially_copyable_v<VkInit> << "\n";
@@ -84,7 +84,7 @@ int main()
     {
         // printf("%i \n", aa++);
         // glfwPollEvents();
-        R2.drawFrame({PX2.commandBuffer[renderer2::currentFrame], fFBO.commandBuffers[renderer2::currentFrame]});
+        R2.drawFrame(PX2.commandBuffer[renderer2::currentFrame]);
         aa++;
     }
     a= false;

@@ -22,7 +22,7 @@ static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligne
       
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  void            drawFrame(std::array<VkCommandBuffer, 2>) const;
+  void            drawFrame(VkCommandBuffer) const;
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   static constinit inline uint32_t               currentFrame;
@@ -46,13 +46,13 @@ private:
               .waitSemaphoreCount = 1,
               .pWaitSemaphores    = &AvailableSemaphore,
               .pWaitDstStageMask  = &waitStages,
-              .commandBufferCount = 2,
+              .commandBufferCount = 1,
   };
 }R2;
 
 
 
-void renderer2::drawFrame(std::array<VkCommandBuffer, 2> commandBuffer) const
+void renderer2::drawFrame(VkCommandBuffer commandBuffer) const
 {
   // m4.loadAligned( &m5 );
   vkAcquireNextImageKHR( VKI.device, SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
@@ -66,7 +66,7 @@ void renderer2::drawFrame(std::array<VkCommandBuffer, 2> commandBuffer) const
 
     // PipelineX::recCmdBuffer(currentFrame);
 
-      R2.info.pCommandBuffers =commandBuffer.data();
+      R2.info.pCommandBuffers =&commandBuffer;
     vkQueueSubmit( VKI.GraphicsQueue, 1, &R2.info, nullptr );
   // }
   
