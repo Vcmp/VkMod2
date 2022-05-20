@@ -22,7 +22,7 @@ void fakeFBO::doCommndRec()
       constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
                                                     .flags =  VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT };
 
-    constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = {84, 480} };
+    constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = {854, 480} };
 
 
   

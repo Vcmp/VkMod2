@@ -37,14 +37,15 @@ GLFWwindow* VkInit::init()
 
 
 
-
-
-
 inline const std::vector<const char *> getRequiredExtensions()
 {
   uint32_t                  glfwExtensionCount = 0;
   const char **             glfwExtensions     = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
   std::vector<const char *> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
+  if constexpr ( ENABLE_VALIDATION_LAYERS )
+  {
+    extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
+  }
   return extensions;
 }
 
@@ -53,6 +54,15 @@ VkInstance VkInit::createInstance()
 {
   VkInstance vki;
   std::cout <<  "Creating Instance"  << "\n";
+
+  static constexpr auto valdFeatures       = { VK_VALIDATION_FEATURE_ENABLE_GPU_ASSISTED_EXT,
+                                                                   VK_VALIDATION_FEATURE_ENABLE_BEST_PRACTICES_EXT,
+                                                                   VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT };
+  constexpr VkValidationFeaturesEXT             extValidationFeatures = {
+                .sType                         = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT,
+                .enabledValidationFeatureCount = valdFeatures.size(),
+                .pEnabledValidationFeatures    = valdFeatures.begin(),
+  };
  
   constexpr VkApplicationInfo vkApplInfo 
   {
@@ -64,16 +74,27 @@ VkInstance VkInit::createInstance()
     .engineVersion{VK_MAKE_VERSION( 1, 2, 0 )},
     .apiVersion{VK_API_VERSION_1_2}
   };
-  std::vector<const char *>  extensions                        = getRequiredExtensions();
+  auto  extensions                        = getRequiredExtensions();
   VkInstanceCreateInfo InstCreateInfo 
   {
     .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
     .pApplicationInfo        = &vkApplInfo,
      
+    .enabledExtensionCount = static_cast<uint32_t>(( extensions.size() )),
     .ppEnabledExtensionNames = extensions.data(),
 
-    .enabledExtensionCount = static_cast<uint32_t>( extensions.size() ),
   };
+
+  
+  if constexpr ( ENABLE_VALIDATION_LAYERS )
+  {
+    InstCreateInfo.ppEnabledLayerNames = ( &validationLayers );
+    InstCreateInfo.enabledLayerCount   = 1;
+    InstCreateInfo.pNext               = &extValidationFeatures;
+  }
+  else
+    InstCreateInfo.enabledLayerCount = 0;
+
   vkCreateInstance(&InstCreateInfo, nullptr, &vki);
   volkLoadInstanceOnly( vki );
   return vki;
@@ -86,6 +107,11 @@ VkInstance VkInit::createInstance()
     std::cout << ( "Picking Physical Device" ) << "\n";
   uint32_t deviceCount;
   vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr ) ;
+
+  // if constexpr(ENABLE_VALIDATION_LAYERS)
+  // {
+  //   setupDebugMessenger();
+  // }
  
   // if ( deviceCount == 0 )
   //   std::runtime_error( "Failed to find GPUs with Vulkan support" );
@@ -167,7 +193,7 @@ uint32_t transferFamily;
   PQ.flags            = 0;
   PQ.pNext            = VK_NULL_HANDLE;
 
-  VkDeviceQueueCreateInfo queueCreateInfos[2] = { GQ, PQ };
+  const auto queueCreateInfos = { GQ, PQ };
 
   static VkPhysicalDeviceVulkan13Features vk13F
   {
@@ -194,25 +220,24 @@ uint32_t transferFamily;
   vkGetPhysicalDeviceFeatures2( physdevice, &deviceFeatures2 );
 
 
-  VkDeviceCreateInfo createInfo      = {};
-  createInfo.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-  createInfo.pNext                   = &deviceFeatures2;
-  createInfo.queueCreateInfoCount    = 2;
-  createInfo.pQueueCreateInfos       = queueCreateInfos;
-  createInfo.ppEnabledExtensionNames = ( &deviceExtensions );
-  createInfo.enabledExtensionCount   = 1;
-  
-  createInfo.pEnabledFeatures = nullptr;
+  const VkDeviceCreateInfo createInfo      = {
+  .sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+  .pNext                   = &deviceFeatures2,
+  .queueCreateInfoCount    = 2,
+  .pQueueCreateInfos       = queueCreateInfos.begin(),
+  .ppEnabledLayerNames =   ENABLE_VALIDATION_LAYERS  ? &validationLayers : nullptr,
+  .enabledExtensionCount   = 1,
+  .ppEnabledExtensionNames = ( &deviceExtensions ),
+  .pEnabledFeatures = nullptr,
+  };
   VkDevice device;
   if ( !deviceVulkan12Features.imagelessFramebuffer )
   {
      std::runtime_error( "Failed Enumeration!" );
   }
-  // if constexpr ( VkUtilsXBase::ENABLE_VALIDATION_LAYERS )
-  // {
-  //   createInfo.ppEnabledLayerNames = &VkUtilsXBase::validationLayers;
-  // }
-  ( vkCreateDevice( physdevice, &createInfo, VK_NULL_HANDLE, &device ) );
+  
+  
+  vkCreateDevice( physdevice, &createInfo, VK_NULL_HANDLE, &device ) ;
   volkLoadDevice( device );
 
   vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0, &GraphicsQueue );

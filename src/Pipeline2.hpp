@@ -10,11 +10,11 @@ constexpr std::array<VkShaderModuleCreateInfo, 2> shaderStages2{ShaderSPIRVUtils
 
 static struct Pipeline2
 {
+    const VkPipelineLayout vkLayout=genLayout();
     VkPipeline pipeline;
-    const VkPipelineLayout vkLayout;
     const VkCommandPool commandPool;
     const std::array<VkCommandBuffer, Frames>commandBuffer;
-    Pipeline2(): pipeline(genPipeline(shaderStages2, SW.createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED), VK_CULL_MODE_NONE, -1)), vkLayout(genLayout()), commandPool(genCommPool()), commandBuffer(doCommBuffers()){genCommBuffers();};
+    Pipeline2(): pipeline(genPipeline(shaderStages2, SW.createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED), VK_CULL_MODE_NONE, -1)), commandPool(genCommPool()), commandBuffer(doCommBuffers()){genCommBuffers();};
     auto genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&, VkRenderPass, VkCullModeFlagBits, int32_t) -> VkPipeline;
     void genCommBuffers();
     auto genCommPool() -> VkCommandPool;

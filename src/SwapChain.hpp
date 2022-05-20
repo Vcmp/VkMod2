@@ -1,6 +1,7 @@
 
 #include "Vks.tpp"
 #include <array>
+#include <initializer_list>
 #include <vector>
 #include <vulkan/vulkan_core.h>
 
@@ -10,7 +11,7 @@ static struct SwapChain
     VkSurfaceCapabilitiesKHR capabilities{};
     uint32_t       imageCount;
     VkSwapchainKHR swapChain;
-    VkImage image[3];
+    std::array<VkImage, 3> image;
     std::array<VkImageView, 3> imageViews;
     const VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED);
     VkSurfaceFormatKHR         swapChainImageFormat;
@@ -103,8 +104,8 @@ void SwapChain::createSwapChain()
   {
     std::cout << "ImageCount: " << imageCount << "\n";
 
-    const uint32_t aa[] = { VKI.graphicsFamily, VKI.transferFamily };
-    ;
+    const auto aa = { VKI.graphicsFamily, VKI.transferFamily };
+    
 
     const VkSwapchainCreateInfoKHR createInfo{
 
@@ -123,7 +124,7 @@ void SwapChain::createSwapChain()
       // if (graphicsFamily != presentFamily) {
       .imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE,
       .queueFamilyIndexCount = 1,
-      .pQueueFamilyIndices   = &aa[0],
+      .pQueueFamilyIndices   = &VKI.graphicsFamily,
       // } else {
       // .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       // .queueFamilyIndexCount = 0; // Optiona,
@@ -140,7 +141,7 @@ void SwapChain::createSwapChain()
     std::cout << VKI.device << "\n";
 
     vkCreateSwapchainKHR(VKI.device, &createInfo, nullptr, &swapChain );
-    vkGetSwapchainImagesKHR( VKI.device, swapChain, &imageCount, image);
+    vkGetSwapchainImagesKHR( VKI.device, swapChain, &imageCount, image.data());
   }
 
   

@@ -72,9 +72,8 @@
 
  void mat4x::show()
 {
-  __m256 zx[2] = { __a, __b };
 
-  for ( __m256 v : zx )
+  for (auto zx = { __a, __b };  __m256 v : zx )
   {
     printf( "%f | %f | %f | %f \n", v[0], v[0 + 1], v[0 + 2], v[0 + 3] );
     printf( "%f | %f | %f | %f \n", v[4], v[4 + 1], v[4 + 2], v[4 + 3] );
