@@ -74,27 +74,21 @@ VkInstance VkInit::createInstance()
     .engineVersion{VK_MAKE_VERSION( 1, 2, 0 )},
     .apiVersion{VK_API_VERSION_1_2}
   };
-  auto  extensions                        = getRequiredExtensions();
-  VkInstanceCreateInfo InstCreateInfo 
+  const auto  extensions                        = getRequiredExtensions();
+  const VkInstanceCreateInfo InstCreateInfo 
   {
     .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+    .pNext               =  ENABLE_VALIDATION_LAYERS ? &extValidationFeatures : nullptr,
     .pApplicationInfo        = &vkApplInfo,
-     
+   .enabledLayerCount   =  ENABLE_VALIDATION_LAYERS ? 1 : 0,
+      .ppEnabledLayerNames = ENABLE_VALIDATION_LAYERS ? &validationLayers : nullptr,
     .enabledExtensionCount = static_cast<uint32_t>(( extensions.size() )),
     .ppEnabledExtensionNames = extensions.data(),
 
   };
 
   
-  if constexpr ( ENABLE_VALIDATION_LAYERS )
-  {
-    InstCreateInfo.ppEnabledLayerNames = ( &validationLayers );
-    InstCreateInfo.enabledLayerCount   = 1;
-    InstCreateInfo.pNext               = &extValidationFeatures;
-  }
-  else
-    InstCreateInfo.enabledLayerCount = 0;
-
+ 
   vkCreateInstance(&InstCreateInfo, nullptr, &vki);
   volkLoadInstanceOnly( vki );
   return vki;
@@ -160,9 +154,9 @@ uint32_t transferFamily;
       continue;
     }
     // Check that Video Tranfer Queues are not Accidentally selected if the Vulkan beta Drivers from Nvidia are used
-    VkBool32 presentSupport = false;
-    vkGetPhysicalDeviceSurfaceSupportKHR( physdevice, i, surface, &presentSupport );
-    if ( uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !presentSupport )
+    // VkBool32 presentSupport = vkGetPhysicalDeviceWin32PresentationSupportKHR(physdevice, i);
+    
+    if ( uniqueQueue.queueFlags & VK_QUEUE_TRANSFER_BIT && !vkGetPhysicalDeviceWin32PresentationSupportKHR(physdevice, i) )
     {
       transferFamily = i;
       break;
@@ -192,8 +186,17 @@ uint32_t transferFamily;
   PQ.pQueuePriorities = &priority;
   PQ.flags            = 0;
   PQ.pNext            = VK_NULL_HANDLE;
+  
+  VkDeviceQueueCreateInfo PRQ{};
 
-  const auto queueCreateInfos = { GQ, PQ };
+  PQ.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+  PQ.queueFamilyIndex = 0;
+  PQ.queueCount       = 1;
+  PQ.pQueuePriorities = &priority;
+  PQ.flags            = 0;
+  PQ.pNext            = VK_NULL_HANDLE;
+
+  const auto queueCreateInfos = { GQ, PQ, PRQ };
 
   static VkPhysicalDeviceVulkan13Features vk13F
   {
@@ -223,7 +226,7 @@ uint32_t transferFamily;
   const VkDeviceCreateInfo createInfo      = {
   .sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
   .pNext                   = &deviceFeatures2,
-  .queueCreateInfoCount    = 2,
+  .queueCreateInfoCount    = 3,
   .pQueueCreateInfos       = queueCreateInfos.begin(),
   .ppEnabledLayerNames =   ENABLE_VALIDATION_LAYERS  ? &validationLayers : nullptr,
   .enabledExtensionCount   = 1,
@@ -240,8 +243,9 @@ uint32_t transferFamily;
   vkCreateDevice( physdevice, &createInfo, VK_NULL_HANDLE, &device ) ;
   volkLoadDevice( device );
 
-  vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[0].queueFamilyIndex, 0, &GraphicsQueue );
-  vkGetDeviceQueue(device, createInfo.pQueueCreateInfos[1].queueFamilyIndex, 0, &TransferQueue );
+  vkGetDeviceQueue(device, 0, 0, &GraphicsQueue );
+  vkGetDeviceQueue(device, 0, 0, &PresentQueue );
+  vkGetDeviceQueue(device, 1, 0, &TransferQueue );
   // Queues::device=device;
   return device;
 }

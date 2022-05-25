@@ -14,7 +14,7 @@ static struct Pipeline2
     VkPipeline pipeline;
     const VkCommandPool commandPool;
     const std::array<VkCommandBuffer, Frames>commandBuffer;
-    Pipeline2(): pipeline(genPipeline(shaderStages2, SW.createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED), VK_CULL_MODE_NONE, -1)), commandPool(genCommPool()), commandBuffer(doCommBuffers()){genCommBuffers();};
+    Pipeline2(): pipeline(genPipeline(shaderStages2, SW.renderpass, VK_CULL_MODE_NONE, -1)), commandPool(genCommPool()), commandBuffer(doCommBuffers()){genCommBuffers();};
     auto genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&, VkRenderPass, VkCullModeFlagBits, int32_t) -> VkPipeline;
     void genCommBuffers();
     auto genCommPool() -> VkCommandPool;
@@ -29,7 +29,7 @@ static struct Pipeline2
         {
           .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
           .stage  = stageFlag,
-          .module = Vks::doPointerAlloc3<VkShaderModule>( &a, vkCreateShaderModule),
+          .module = Vks::doPointerAlloc5<VkShaderModule>( &a, vkCreateShaderModule),
           .pName  = "main",
 
         };
@@ -213,7 +213,7 @@ VkCommandPool Pipeline2::genCommPool()
     .pNext            = nullptr,
     .queueFamilyIndex = 0,
   };
-  return Vks::doPointerAlloc3<VkCommandPool>( &poolInfo, vkCreateCommandPool );
+  return Vks::doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool );
  
 }
 
@@ -234,5 +234,5 @@ VkPipelineLayout Pipeline2::genLayout()
                                                                       .pPushConstantRanges    = &vkPushConstantRange  */};
 
   // std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
-  return Vks::doPointerAlloc3<VkPipelineLayout>( &vkPipelineLayoutCreateInfo, vkCreatePipelineLayout);
+  return Vks::doPointerAlloc5<VkPipelineLayout>( &vkPipelineLayoutCreateInfo, vkCreatePipelineLayout);
 }

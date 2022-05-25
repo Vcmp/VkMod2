@@ -268,6 +268,6 @@ VkRenderPass SwapChain::createRenderPass(VkImageLayout initial)
     .pDependencies=&VkSubpassDependency
   };
 
-  return Vks::doPointerAlloc3<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
+  return Vks::doPointerAlloc5<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
 
 }

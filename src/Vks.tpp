@@ -41,6 +41,7 @@ inline const struct VkInit
     uint32_t graphicsFamily;
     uint32_t transferFamily;
     VkQueue GraphicsQueue;
+    VkQueue PresentQueue;
     VkQueue TransferQueue;
     // SwapChain SW;
     constexpr VkInit()
@@ -94,7 +95,7 @@ inline namespace Vks
     template<typename type>
     [[nodiscard]] constexpr auto doPointerAlloc5(auto* __restrict__ strct, auto* hndle) noexcept -> type
     {
-        type pHndl = nullptr; 
+        type pHndl; 
         (hndle)(VKI.device, strct, nullptr, &pHndl);
         return pHndl;
     }

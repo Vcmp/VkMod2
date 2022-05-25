@@ -2,13 +2,44 @@
 #include "Pipeline2.hpp"
 #include "mat4x.hpp"
 #include "fakeFBO.hpp"
+#include <array>
 #include <vulkan/vulkan_core.h>
 
 //I will have to assume that this works without needing explicit includes due to forward declarations
 
 
 
+auto genSubmits(const VkSemaphore &AvailableSemaphore)
+{
+    static constexpr VkPipelineStageFlags          waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
+  const  VkSubmitInfo           info{
+              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+              .waitSemaphoreCount = 1,
+              .pWaitSemaphores    = &AvailableSemaphore,
+              .pWaitDstStageMask  = &waitStages,
+              .commandBufferCount = 1,
+              .pCommandBuffers= &PX2.commandBuffer[0]
+  };
+  const VkSubmitInfo           info1{
+              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+              .waitSemaphoreCount = 1,
+              .pWaitSemaphores    = &AvailableSemaphore,
+              .pWaitDstStageMask  = &waitStages,
+              .commandBufferCount = 1,
+              .pCommandBuffers= &PX2.commandBuffer[1]
+  };
+  const VkSubmitInfo           info2{
+              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+              .waitSemaphoreCount = 1,
+              .pWaitSemaphores    = &AvailableSemaphore,
+              .pWaitDstStageMask  = &waitStages,
+              .commandBufferCount = 1,
+              .pCommandBuffers= &PX2.commandBuffer[2]
+  };
+  const std::array<VkSubmitInfo, 3> aa = { info, info1, info2};
+  return aa;
+}
 
 /*
  trick to use builtins+Attributes to treat a blob of memory as a vector type which compiles more cleanly into slightly better asm with vmovps (At least with Clang)
@@ -22,7 +53,7 @@ static struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligne
       
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  void            drawFrame(VkCommandBuffer) const;
+  void            drawFrame(std::array<VkCommandBuffer, 2>) const;
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   static constinit inline uint32_t               currentFrame;
@@ -31,31 +62,24 @@ private:
   
 
 
-  const VkSemaphore AvailableSemaphore = Vks::doPointerAllocSml<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore);
+  const VkSemaphore AvailableSemaphore = Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore);
 
   static constexpr const uint32_t                TmUt = 1000000000;
-  static constexpr VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-                                                                    // .pWaitSemaphores=&FinishedSemaphore,
-                                                                    .swapchainCount = 1,
-                                                                    .pSwapchains    = &SW.swapChain,
-                                                                    .pImageIndices  = &currentFrame,
-                                                                    .pResults       = nullptr };
-  static constexpr VkPipelineStageFlags          waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-  VkSubmitInfo           info{
-              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-              .waitSemaphoreCount = 1,
-              .pWaitSemaphores    = &AvailableSemaphore,
-              .pWaitDstStageMask  = &waitStages,
-              .commandBufferCount = 1,
-  };
+
+ 
+  const std::array<VkSubmitInfo, 3> aa = genSubmits(AvailableSemaphore);
 }R2;
 
 
 
-void renderer2::drawFrame(VkCommandBuffer commandBuffer) const
+void renderer2::drawFrame(std::array<VkCommandBuffer, 2> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
   vkAcquireNextImageKHR( VKI.device, SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
+
+ 
+
+  
   // __builtin_prefetch( BuffersX::data );
   // __builtin_prefetch( &viewproj2x );
 //  textTemp2.voidrecComBufferSub(currentFrame);
@@ -66,15 +90,20 @@ void renderer2::drawFrame(VkCommandBuffer commandBuffer) const
 
     // PipelineX::recCmdBuffer(currentFrame);
 
-      R2.info.pCommandBuffers =&commandBuffer;
-    vkQueueSubmit( VKI.GraphicsQueue, 1, &R2.info, nullptr );
+      // R2.info.pCommandBuffers =commandBuffer.data();
+    vkQueueSubmit( VKI.GraphicsQueue, 1, &R2.aa[currentFrame], nullptr );
   // }
-  
+    static constexpr VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+                                                                    // .pWaitSemaphores=&FinishedSemaphore,
+                                                                    .swapchainCount = 1,
+                                                                    .pSwapchains    = &SW.swapChain,
+                                                                    .pImageIndices  = &currentFrame,
+                                                                    .pResults       = nullptr };
 
 
   //  info.pWaitSemaphores = &AvailableSemaphore;
 
- vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 );
+ vkQueuePresentKHR( VKI.PresentQueue, &VkPresentInfoKHR1 );
 
   currentFrame = currentFrame + __builtin_parity( Frames );
 }
