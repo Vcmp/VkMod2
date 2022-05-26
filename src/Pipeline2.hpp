@@ -1,6 +1,15 @@
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_float4x4.hpp"
 #include "test.inl"
 #include <array>
+#include <initializer_list>
 #include "SwapChain.hpp"
+#include "mat4x.hpp"
+#include "Buffers.hpp"
+#include "Queues.hpp"
+
+ static constexpr uint8_t OFFSETOF_COLOR = 3 * sizeof( float );
+  static constexpr uint8_t OFFSET_POS     = 0;
 
 constexpr VkViewport vkViewport{ .x = 0.0F, .y = 0.0F, .width = width, .height = height, .minDepth = 0.0F, .maxDepth = 1.0F };
 
@@ -50,8 +59,8 @@ VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&
   static constexpr VkVertexInputBindingDescription VxL{ 0, ( 24 ), VK_VERTEX_INPUT_RATE_VERTEX };
 
   static constexpr VkVertexInputAttributeDescription attributeDescriptions[2]{
-    { .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = 0 },
-    { .location = 2, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = 12 },
+      { .location = 1, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = OFFSET_POS },
+    { .location = 2, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = OFFSETOF_COLOR },
     // { .location = 3, .binding = 0, .format = VK_FORMAT_R32G32_SFLOAT, .offset = 0 },
     // { .location = 4, .binding = 0, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = sizeof(float) * 2}
   };
@@ -60,7 +69,7 @@ VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&
     .sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
     .vertexBindingDescriptionCount   = 1,
     .pVertexBindingDescriptions      = &VxL,
-    .vertexAttributeDescriptionCount = sizeof( attributeDescriptions ) / sizeof( VkVertexInputAttributeDescription ),
+    .vertexAttributeDescriptionCount = 2,
     .pVertexAttributeDescriptions    = attributeDescriptions
   };
 
@@ -122,7 +131,7 @@ VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&
 
 
   const VkGraphicsPipelineCreateInfo pipelineInfo{ .sType      = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-                                                   .stageCount = sizeof(shaderStages)/sizeof(VkPipelineShaderStageCreateInfo),
+                                                   .stageCount = 2,
                                                    .pStages    = shaderStages,
                                                    // .pNext=VK_NULL_HANDLE,
                                                    .pVertexInputState   = &vkPipelineVertexInputStateCreateInfo,
@@ -141,6 +150,8 @@ VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&
 
 std::array<VkCommandBuffer, Frames> Pipeline2::doCommBuffers()
 {
+  Queues::createCommandPool();
+  BuffersX::setupBuffers();
   std::array<VkCommandBuffer, Frames> PreTestBuffer{};
    const VkCommandBufferAllocateInfo allocateInfo{ .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
                                                   .commandPool        = ( commandPool ),
@@ -152,7 +163,7 @@ std::array<VkCommandBuffer, Frames> Pipeline2::doCommBuffers()
   return PreTestBuffer;
 }
 
-void Pipeline2::genCommBuffers()
+inline void Pipeline2::genCommBuffers()
 {
 
   
@@ -165,6 +176,10 @@ void Pipeline2::genCommBuffers()
   
   static constexpr VkDeviceSize offsets[] = { 0 };
   uint32_t i = 0; 
+
+  
+   mat4x m4(&viewproj);
+
   for ( const VkCommandBuffer & commandBuffer : commandBuffer )
   {VkRenderPassAttachmentBeginInfo RenderPassAttachments
   {
@@ -182,21 +197,22 @@ void Pipeline2::genCommBuffers()
     // .clearValueCount = 1,
     // .pClearValues    = &clearValues2,
   };
+  
   vkBeginCommandBuffer(commandBuffer, &beginInfo1 );
 
 
     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,pipeline );
-    // vkCmdBindVertexBuffers(commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
-    // vkCmdBindIndexBuffer(commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
+    vkCmdBindIndexBuffer(commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
      
-    // vkCmdPushConstants(commandBuffer,vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &m4);
+    vkCmdPushConstants(commandBuffer,vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &m4);
 
     // vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineX::vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
 
 
-    vkCmdDraw( commandBuffer, ( 3), 1, 0, 0 );
+    vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 
     vkCmdEndRenderPass( commandBuffer );
     vkEndCommandBuffer( commandBuffer);
@@ -221,17 +237,17 @@ VkCommandPool Pipeline2::genCommPool()
 VkPipelineLayout Pipeline2::genLayout()
 {
   
-  constexpr VkPushConstantRange vkPushConstantRange{
+  static constexpr VkPushConstantRange vkPushConstantRange{
     .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
     .offset     = 0,
     .size       = 64,
   };
 
   constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = { .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-                                                                      /*. setLayoutCount         = 1,
-                                                                      .pSetLayouts            = &UniformBufferObject::descriptorSetLayout,
+                                                                     /*  . setLayoutCount         = 1,
+                                                                      .pSetLayouts            = &UniformBufferObject::descriptorSetLayout, */
                                                                       .pushConstantRangeCount = 1,
-                                                                      .pPushConstantRanges    = &vkPushConstantRange  */};
+                                                                      .pPushConstantRanges    = &vkPushConstantRange };
 
   // std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
   return Vks::doPointerAlloc5<VkPipelineLayout>( &vkPipelineLayoutCreateInfo, vkCreatePipelineLayout);

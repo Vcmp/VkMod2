@@ -24,13 +24,13 @@ set(VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_
 # set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
 # add_subdirectory(brcxxc ENABLE_EXPORTS)
 add_executable(VkMod2)
-# target_link_options(VkMod2 PRIVATE -fsanitize=address,undefined -glldb)
+target_link_options(VkMod2 PRIVATE -fsanitize=address,undefined -glldb)
 message(STATUS "${CMAKE_CXX_COMPILE_FEATURES}")
 message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
 target_compile_features(VkMod2 PRIVATE cxx_std_20)
 target_compile_features(VkMod2 PRIVATE c_std_23)
 # target_compile_definitions(VkMod2 PUBLIC VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_NONE TRACY_IMPORTS TRACY_ENABLE )
-target_compile_options(VkMod2 PRIVATE -march=native -mtune=native -save-temps -masm=intel -Ofast -Wuninitialized -Weffc++)
+target_compile_options(VkMod2 PRIVATE -march=native -mtune=native -save-temps -masm=intel -glldb -fsanitize=address,undefined -Ofast -Wuninitialized -Weffc++)
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -fno-plt -fmerge-all-constants -fno-exceptions -save-temps -masm=intel -fpic -fvisibility=hidden -pthread -lpthread")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} -std=c2x ${CMAKE_CXX_FLAGS}")
@@ -59,6 +59,7 @@ message(STATUS ${CMAKE_CXX_FLAGS})
 			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/TracyClient.cpp"
 			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/Tracy.hpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/src/fakeFBO.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/src/main2.cpp"
 	)  
 
 

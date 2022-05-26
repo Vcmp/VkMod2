@@ -1,6 +1,7 @@
 
 #include "Vks.tpp"
 #include <array>
+#include <cstdint>
 #include <initializer_list>
 #include <vector>
 #include <vulkan/vulkan_core.h>
@@ -10,34 +11,27 @@ static struct SwapChain
 {
     VkSurfaceCapabilitiesKHR capabilities{};
     uint32_t       imageCount;
-    VkSwapchainKHR swapChain;
-    std::array<VkImage, 3> image;
-    std::array<VkImageView, 3> imageViews;
-    const VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED);
-    VkSurfaceFormatKHR         swapChainImageFormat;
+    const VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED, false);
+    const VkSurfaceFormatKHR         swapChainImageFormat=setupImageFormats();
     VkPresentModeKHR presentMode;
     VkExtent2D swapChainExtent{854, 480};
-    const VkFramebuffer frameBuffer;
-    SwapChain(/* VkPhysicalDevice physdevice, VkSurfaceKHR surface */) : frameBuffer(createFramebuffers(renderpass))
-    {
-        setupImageFormats();
-        createSwapChain();
-        imageViews=createImageViews();
-        // createFramebuffers();
-        
-      
-    };
-    void setupImageFormats();
-    void createSwapChain();
-    std::array<VkImageView, 3> createImageViews();
+    const VkFramebuffer frameBuffer=createFramebuffers(renderpass);
+    const VkSwapchainKHR swapChain=createSwapChain(swapChainImageFormat);;
+    const std::array<VkImage, 3> image = getSwapChainImages(3U);
+     std::array<VkImageView, 3> imageViews = createImageViews(image);
+    SwapChain(/* VkPhysicalDevice physdevice, VkSurfaceKHR surface */) = default;;
+    VkSurfaceFormatKHR setupImageFormats();
+    std::array<VkImage, 3> getSwapChainImages(uint32_t);
+    VkSwapchainKHR createSwapChain(VkSurfaceFormatKHR);
+    std::array<VkImageView, 3> createImageViews(std::array<VkImage, 3> image);
     VkFramebuffer createFramebuffers(VkRenderPass);
-    VkRenderPass createRenderPass(VkImageLayout);
+    VkRenderPass createRenderPass(VkImageLayout, bool);
 
 } SW;
 
 
 
-void SwapChain::setupImageFormats()
+VkSurfaceFormatKHR SwapChain::setupImageFormats()
 {
     std::cout <<"SetupImageFormats"<<"\n";
     uint32_t count=0;
@@ -58,10 +52,12 @@ void SwapChain::setupImageFormats()
       vkGetPhysicalDeviceSurfacePresentModesKHR(VKI.physdevice, VKI.surface, &count, presentModes );
     }
 
+    VkSurfaceFormatKHR         swapChainImageFormat;
+
     // VkSurfaceFormatKHR surfaceFormat;
     for ( const VkSurfaceFormatKHR & surfaceFormat1 : surfaceFormats )
     {
-      if ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR )
+      if ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
       {
         swapChainImageFormat = surfaceFormat1;
         break;
@@ -70,15 +66,9 @@ void SwapChain::setupImageFormats()
 
     for ( const VkPresentModeKHR & presentMode1 : presentModes )
     {
-      if ( presentMode1 == VK_PRESENT_MODE_IMMEDIATE_KHR )
-      {
-        presentMode = presentMode1;
-        break;
-      }
-      else
-      {
-        presentMode = VK_PRESENT_MODE_FIFO_KHR;
-      }
+      
+        presentMode = (presentMode1  == VK_PRESENT_MODE_IMMEDIATE_KHR)? VK_PRESENT_MODE_IMMEDIATE_KHR : VK_PRESENT_MODE_FIFO_KHR;
+       
     }
 
     // return VK_PRESENT_MODE_FIFO_KHR;
@@ -98,9 +88,19 @@ void SwapChain::setupImageFormats()
 
     // SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
     // SwapChainSupportDetails::swapChainExtent      = extent;
+
+    return swapChainImageFormat;
 }
 
-void SwapChain::createSwapChain()
+
+std::array<VkImage, 3> SwapChain::getSwapChainImages(uint32_t size)
+{
+  std::array<VkImage, 3> image;
+  vkGetSwapchainImagesKHR( VKI.device, swapChain, &size, image.data());
+  return image;
+}
+
+VkSwapchainKHR SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat)
   {
     std::cout << "ImageCount: " << imageCount << "\n";
 
@@ -139,21 +139,22 @@ void SwapChain::createSwapChain()
       .oldSwapchain = VK_NULL_HANDLE
     };
     std::cout << VKI.device << "\n";
-
+    VkSwapchainKHR swapChain;
     vkCreateSwapchainKHR(VKI.device, &createInfo, nullptr, &swapChain );
-    vkGetSwapchainImagesKHR( VKI.device, swapChain, &imageCount, image.data());
+    return swapChain;
+    
   }
 
   
 
 
-
-  std::array<VkImageView, 3> SwapChain::createImageViews()
+//Posibel BUg fix: Don't use self-reference to the parent Struct vkImage Array and instead just use a passed VkImage paramter so it isn't accidentally Overridden!
+  std::array<VkImageView, 3> SwapChain::createImageViews(std::array<VkImage, 3> images)
   {
     std::cout << ( "Creating Image Views" ) << "\n";
     int i = 0;
     std::array<VkImageView, 3> imageViews;
-    for ( const VkImage & swapchainImage : image )
+    for ( const VkImage & swapchainImage : images )
     {
       VkImageViewCreateInfo createInfo = {};
       createInfo.sType                 = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -174,7 +175,8 @@ void SwapChain::createSwapChain()
 
       createInfo.image = swapchainImage;
 
-      Vks::doPointerAlloc<VkImageView, PFN_vkCreateImageView>(VKI.device, &createInfo, &imageViews[i++], vkCreateImageView);
+      imageViews[i]=Vks::doPointerAlloc5<VkImageView>(&createInfo, vkCreateImageView);
+      i++;
     }
     return imageViews;
   }
@@ -227,13 +229,13 @@ void SwapChain::createSwapChain()
 }  // namespace SwapChainSupportDetails
 
 
-VkRenderPass SwapChain::createRenderPass(VkImageLayout initial)
+VkRenderPass SwapChain::createRenderPass(VkImageLayout initial, bool load)
 {
     std::cout << ( "Creating RenderPass" ) << "\n";
       static const VkAttachmentDescription colorAttachment{
     .format         = VK_FORMAT_B8G8R8A8_SRGB,  // SwapChainSupportDetails::swapChainImageFormat,
     .samples        = VK_SAMPLE_COUNT_1_BIT,
-    .loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    .loadOp         = (!load)? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD,
     .storeOp        = VK_ATTACHMENT_STORE_OP_STORE,
     .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
     .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
@@ -248,8 +250,8 @@ VkRenderPass SwapChain::createRenderPass(VkImageLayout initial)
                                                   
   static constexpr VkSubpassDependency  VkSubpassDependency
   {
-    .srcSubpass=VK_SUBPASS_EXTERNAL,
-    .dstSubpass=0,
+    .srcSubpass=VK_SUBPASS_CONTENTS_INLINE,
+    .dstSubpass=VK_SUBPASS_CONTENTS_INLINE,
     .srcStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
     .dstStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
     .srcAccessMask=0,
@@ -264,8 +266,8 @@ VkRenderPass SwapChain::createRenderPass(VkImageLayout initial)
     .pAttachments    = &colorAttachment,
     .subpassCount    = 1,
     .pSubpasses      = &subpass,
-    .dependencyCount=1,
-    .pDependencies=&VkSubpassDependency
+    // .dependencyCount=1,
+    // .pDependencies=&VkSubpassDependency
   };
 
   return Vks::doPointerAlloc5<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );

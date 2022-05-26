@@ -41,7 +41,7 @@ inline const struct VkInit
     uint32_t graphicsFamily;
     uint32_t transferFamily;
     VkQueue GraphicsQueue;
-    VkQueue PresentQueue;
+    // VkQueue PresentQueue;
     VkQueue TransferQueue;
     // SwapChain SW;
     constexpr VkInit()

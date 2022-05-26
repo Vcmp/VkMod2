@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <GLFW/glfw3native.h>
+#include <vulkan/vulkan_core.h>
 
 inline namespace {
 static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
@@ -187,16 +188,16 @@ uint32_t transferFamily;
   PQ.flags            = 0;
   PQ.pNext            = VK_NULL_HANDLE;
   
-  VkDeviceQueueCreateInfo PRQ{};
+  // VkDeviceQueueCreateInfo PRQ{};
 
-  PQ.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-  PQ.queueFamilyIndex = 0;
-  PQ.queueCount       = 1;
-  PQ.pQueuePriorities = &priority;
-  PQ.flags            = 0;
-  PQ.pNext            = VK_NULL_HANDLE;
+  // PQ.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+  // PQ.queueFamilyIndex = 0;
+  // PQ.queueCount       = 1;
+  // PQ.pQueuePriorities = &priority;
+  // PQ.flags            = 0;
+  // PQ.pNext            = VK_NULL_HANDLE;
 
-  const auto queueCreateInfos = { GQ, PQ, PRQ };
+  const auto queueCreateInfos = { GQ, PQ };
 
   static VkPhysicalDeviceVulkan13Features vk13F
   {
@@ -226,7 +227,7 @@ uint32_t transferFamily;
   const VkDeviceCreateInfo createInfo      = {
   .sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
   .pNext                   = &deviceFeatures2,
-  .queueCreateInfoCount    = 3,
+  .queueCreateInfoCount    = 2,
   .pQueueCreateInfos       = queueCreateInfos.begin(),
   .ppEnabledLayerNames =   ENABLE_VALIDATION_LAYERS  ? &validationLayers : nullptr,
   .enabledExtensionCount   = 1,
@@ -244,7 +245,7 @@ uint32_t transferFamily;
   volkLoadDevice( device );
 
   vkGetDeviceQueue(device, 0, 0, &GraphicsQueue );
-  vkGetDeviceQueue(device, 0, 0, &PresentQueue );
+  // vkGetDeviceQueue(device, 0, 0, &PresentQueue );
   vkGetDeviceQueue(device, 1, 0, &TransferQueue );
   // Queues::device=device;
   return device;
