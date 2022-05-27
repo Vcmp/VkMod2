@@ -18,7 +18,7 @@ static constexpr struct ShaderSPIRVUtils
     .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     .pNext    = VK_NULL_HANDLE,
     .codeSize = sizeof(vert),
-    .pCode    = vert,
+    .pCode    = vert.data(),
   };
 
   static constexpr VkShaderModuleCreateInfo VsMCI2 = {
@@ -26,7 +26,7 @@ static constexpr struct ShaderSPIRVUtils
     .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     .pNext    = VK_NULL_HANDLE,
     .codeSize = sizeof(frag),
-    .pCode    = frag,
+    .pCode    = frag.data(),
   };  
   
   static constexpr VkShaderModuleCreateInfo VsMCI3temp = {
@@ -34,7 +34,7 @@ static constexpr struct ShaderSPIRVUtils
     .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     .pNext    = VK_NULL_HANDLE,
     .codeSize = sizeof(vert2),
-    .pCode    = vert2,
+    .pCode    = vert2.data(),
   };
   
   static constexpr VkShaderModuleCreateInfo VsMCI4temp = {
@@ -42,7 +42,7 @@ static constexpr struct ShaderSPIRVUtils
     .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
     .pNext    = VK_NULL_HANDLE,
     .codeSize = sizeof(frag2),
-    .pCode    = frag2,
+    .pCode    = frag2.data(),
   };
   VkShaderModule compileShaderFile(const VkShaderModuleCreateInfo& __restrict__);
 }  SPV;

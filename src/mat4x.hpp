@@ -7,13 +7,13 @@
 
 #include <immintrin.h>
 #include <initializer_list>
-static constexpr float ax[] = { 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F };
+static constexpr auto ax= { 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F };
 
 struct mat4x
 {
 public:
-  __m256 __a = lud( ax );
-  __m256 __b = lud( ax + 8);
+  __m256 __a = lud( ax.begin() );
+  __m256 __b = lud( ax.begin() + 8);
 
   /* constexpr mat4x() : __a(  ), __b(  ) ) {} */
   explicit constexpr  mat4x( auto * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}

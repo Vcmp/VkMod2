@@ -29,10 +29,10 @@ static struct Pipeline2
     auto genCommPool() -> VkCommandPool;
     auto doCommBuffers() -> std::array<VkCommandBuffer, Frames>;
     auto genLayout() -> VkPipelineLayout;
-     VkPipelineShaderStageCreateInfo genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const;
-} PX2;
+     [[nodiscard]] auto genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const -> VkPipelineShaderStageCreateInfo;
+} __attribute__((aligned(64))) PX2;
 
-     VkPipelineShaderStageCreateInfo Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag) const
+     auto Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag) const -> VkPipelineShaderStageCreateInfo
     {
         const VkPipelineShaderStageCreateInfo shaderMiscStage
         {
@@ -148,7 +148,7 @@ VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&
   return Vks::doPointerAllocX<VkPipeline>(&pipelineInfo, vkCreateGraphicsPipelines);
 }
 
-std::array<VkCommandBuffer, Frames> Pipeline2::doCommBuffers()
+auto Pipeline2::doCommBuffers() -> std::array<VkCommandBuffer, Frames>
 {
   Queues::createCommandPool();
   BuffersX::setupBuffers();

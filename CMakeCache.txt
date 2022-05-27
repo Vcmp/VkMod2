@@ -345,6 +345,10 @@ VOLK_INSTALL:BOOL=OFF
 //Vulkan as a transitive dependency
 VOLK_PULL_IN_VULKAN:BOOL=ON
 
+//Additional defines for building the volk static library, e.g.
+// Vulkan platform defines
+VOLK_STATIC_DEFINES:BOOL=OFF
+
 //Value Computed by CMake
 VkMod2_BINARY_DIR:STATIC=C:/Users/CB/GitHub/VkMod2
 

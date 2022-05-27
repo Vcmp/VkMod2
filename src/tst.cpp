@@ -67,13 +67,13 @@ VkInstance VkInit::createInstance()
  
   constexpr VkApplicationInfo vkApplInfo 
   {
-    .sType{VK_STRUCTURE_TYPE_APPLICATION_INFO},
-    .pNext{VK_NULL_HANDLE},
-    .pApplicationName{"VKMod2"},
-    .applicationVersion{VK_MAKE_VERSION( 1, 2, 0 )},
-    .pEngineName{"No Engine"},
-    .engineVersion{VK_MAKE_VERSION( 1, 2, 0 )},
-    .apiVersion{VK_API_VERSION_1_2}
+    VK_STRUCTURE_TYPE_APPLICATION_INFO,
+     VK_NULL_HANDLE,
+    "VKMod2",
+    VK_MAKE_VERSION( 1, 3, 0 ),
+    "No Engine",
+    VK_MAKE_VERSION( 1, 3, 0 ),
+    VK_API_VERSION_1_3
   };
   const auto  extensions                        = getRequiredExtensions();
   const VkInstanceCreateInfo InstCreateInfo 
@@ -144,9 +144,9 @@ uint32_t transferFamily;
   VkQueueFamilyProperties uniqueQueueFamilies[pQueueFamilyPropertyCount];
   vkGetPhysicalDeviceQueueFamilyProperties( physdevice, &pQueueFamilyPropertyCount, uniqueQueueFamilies );
 
-  uint32_t i = 0;
+  
   // todo: Likley/Prop won't work with AMD properly and/or specific GPUs with differing Queue Family layouts
-  for ( VkQueueFamilyProperties const & uniqueQueue : uniqueQueueFamilies )
+  for ( uint32_t i = 0; VkQueueFamilyProperties const & uniqueQueue : uniqueQueueFamilies )
   {
     std::cout << ( uniqueQueue.queueCount ) << "\n";
     if ( ( uniqueQueue.queueFlags & VK_QUEUE_GRAPHICS_BIT ) )
@@ -202,7 +202,8 @@ uint32_t transferFamily;
   static VkPhysicalDeviceVulkan13Features vk13F
   {
     .sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
-    .pNext=VK_NULL_HANDLE
+    .pNext=nullptr,
+    .synchronization2=true,
   };
 
 

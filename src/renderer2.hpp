@@ -4,6 +4,7 @@
 #include "mat4x.hpp"
 #include "fakeFBO.hpp"
 #include <array>
+#include <initializer_list>
 #include <vulkan/vulkan_core.h>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_projection.hpp>
@@ -58,7 +59,7 @@ static const struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __
       
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  void            drawFrame(std::array<VkCommandBuffer, 2>) const;
+  void            drawFrame(std::initializer_list<VkCommandBuffer>) const;
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   static constinit inline uint32_t               currentFrame;
@@ -78,7 +79,7 @@ private:
 
 
 
-void renderer2::drawFrame(std::array<VkCommandBuffer, 2> commandBuffer) const
+void renderer2::drawFrame(std::initializer_list<VkCommandBuffer> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
   vkAcquireNextImageKHR( VKI.device, SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
@@ -102,7 +103,7 @@ static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_B
               .pWaitSemaphores    = &AvailableSemaphore,
               .pWaitDstStageMask  = &t,
               .commandBufferCount = 1,
-              .pCommandBuffers= &commandBuffer[0]
+              .pCommandBuffers= commandBuffer.begin()
   };
     vkQueueSubmit( VKI.GraphicsQueue, 1, &info, nullptr );
   // }

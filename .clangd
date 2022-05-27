@@ -4,6 +4,5 @@
     
 Diagnostics:
   ClangTidy:
-    Add: [ modernize* ]
-	  Remove: [-bugprone-easily-swappable-parameters]
-    
+    Add: [ modernize*, altera* ]
+	  #Remove: [-bugprone-easily-swappable-parameters]
