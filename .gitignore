@@ -70,3 +70,5 @@ CMakeCache.txt
 CMakeCache.txt
 CMakeCache.txt
 CMakeCache.txt
+shaderc/
+include/glslang/build_info.h

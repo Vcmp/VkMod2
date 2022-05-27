@@ -31,7 +31,7 @@ const WNDCLASSA  AHack{
 
 
 
-inline const struct VkInit
+inline struct VkInit
 {
     GLFWwindow* window=init();
      const VkInstance instance=createInstance();
@@ -44,18 +44,14 @@ inline const struct VkInit
     // VkQueue PresentQueue;
     VkQueue TransferQueue;
     // SwapChain SW;
-    constexpr VkInit()
-    {
-        
-        
-    };
+    constexpr VkInit() = default;;
     VkInit(VkInit const &) = delete;
   VkInit& operator=(const VkInit&) = delete; 
 
-     auto  init() -> GLFWwindow*;
-     auto  createInstance() -> VkInstance;
-     auto  doPhysicalDevice() -> VkPhysicalDevice;
-     auto createSurface() -> VkSurfaceKHR;
+     [[nodiscard]] auto  init() const-> GLFWwindow*;
+     [[nodiscard]] auto  createInstance() const -> VkInstance;
+     [[nodiscard]] auto  doPhysicalDevice() const -> VkPhysicalDevice;
+     [[nodiscard]] auto createSurface() const -> VkSurfaceKHR;
      auto doDevice() -> VkDevice;
      auto tst() -> VkDevice;
      ~VkInit() = default;

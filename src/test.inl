@@ -7,8 +7,6 @@
 
 
 
-static constexpr struct ShaderSPIRVUtils
-{
 
 
 //ShaderSPIRVUtils(): FragMod(Queues::clPPPI3A<VkShaderModule, PFN_vkCreateShaderModule>( &VsMCI2, "vkCreateShaderModule" )), VertMod(Queues::clPPPI3A<VkShaderModule, PFN_vkCreateShaderModule>( &VsMCI, "vkCreateShaderModule" )) {};
@@ -44,5 +42,3 @@ static constexpr struct ShaderSPIRVUtils
     .codeSize = sizeof(frag2),
     .pCode    = frag2.data(),
   };
-  VkShaderModule compileShaderFile(const VkShaderModuleCreateInfo& __restrict__);
-}  SPV;

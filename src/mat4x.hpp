@@ -5,47 +5,39 @@
  *too lazy to do an SSE version as AVX in many cases can allow for the ability to the same steps in half as many stages
  */
 
+// #include <array>
+#include "glm/ext/matrix_float4x4.hpp"
 #include <immintrin.h>
-#include <initializer_list>
-static constexpr auto ax= { 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F };
+// constexpr float ax[]= {  };
 
 struct mat4x
 {
 public:
-  __m256 __a = lud( ax.begin() );
-  __m256 __b = lud( ax.begin() + 8);
+  __m256 __a = _mm256_set_ps(1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F);
+  __m256 __b = _mm256_set_ps(0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F );
 
   /* constexpr mat4x() : __a(  ), __b(  ) ) {} */
-  explicit constexpr  mat4x( auto * a ) : __a( lud( (float *)a ) ), __b( lud( (float *)a + 8 ) ) {}
+  // constexpr mat4x( const float * a ) : __a( __builtin_shufflevector()  ), __b( _mm256_load_ps(a + 8)  ) {}
   //  float a[2][8];
 
-   constexpr __m256 lud( const float[] ) __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
-   void             domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
-   void             domatFMA( mat4x & /*b*/ );
+   __m256 lud( const float[] ) const __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
+  //  void             domatFMA( mat4x * /*b*/, __m256 /*__Trans*/ );
+  //  void             domatFMA( mat4x & /*b*/ );
 
    constexpr void    toAddress(const __m256* a );
-   void    loadTmp( const float[] );
-   void    loadAligned( const void * a ) __attribute__( ( preserve_most ) );
-   mat4x   loadAlignedA( const void * a ) __attribute__( ( preserve_most ) );
+  //  void    loadTmp( const float[] );
+   void    loadAligned( const glm::mat4x4 &a ) __attribute__( ( preserve_most ) );
+  //  mat4x   loadAlignedA( const void * a ) __attribute__( ( preserve_most ) );
    void    loadAligned( const mat4x * a ) __attribute__( ( preserve_most ) );
-   mat4x * identity();
-   void    neg();
-   void    setPerspective( float, float, float, float, bool );
-   mat4x   copyOf() __attribute__( ( pure ) );
-   void    show();
-   void    permute();
+  //  mat4x * identity();
+  //  void    neg();
+  //  void    setPerspective( float, float, float, float, bool );
+  //  mat4x   copyOf() __attribute__( ( pure ) );
+  //  void    show();
+  //  void    permute();
    void    doPerspective( float, float, float, float );
-   void    doLook( float );
-   void    rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
+  //  void    doLook( float );
+  //  void    rotateL( float const & /* , glm::vec3 const &  */ ) __attribute__( ( __aligned__( 32 ), hot, flatten ) );
   ;
 } __attribute__((aligned(64)));
 
-
-/*
- * Note* casting issues usually mostly only occur with the AVX2 instrincis function delcarations  available
- * and while teh AVX counterparts for floats also do not supprot void* they instead supprot *float insetad which is till a great/considerable improvement
- */
- constexpr __m256 mat4x::lud( const float * a )
-{
-  return *(const __m256 *)( ( ( a ) ) );
-}

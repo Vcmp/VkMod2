@@ -15,21 +15,21 @@ constexpr VkViewport vkViewport{ .x = 0.0F, .y = 0.0F, .width = width, .height =
 
 constexpr VkRect2D scissor{ .offset = { 0, 0 }, .extent{ width, height } };
 
-constexpr std::array<VkShaderModuleCreateInfo, 2> shaderStages2{ShaderSPIRVUtils::VsMCI, ShaderSPIRVUtils::VsMCI2};
+constexpr std::array<VkShaderModuleCreateInfo, 2> shaderStages2{VsMCI, VsMCI2};
 
-static struct Pipeline2
+const static struct Pipeline2
 {
     const VkPipelineLayout vkLayout=genLayout();
-    VkPipeline pipeline;
+    const VkPipeline pipeline;
     const VkCommandPool commandPool;
     const std::array<VkCommandBuffer, Frames>commandBuffer;
-    Pipeline2(): pipeline(genPipeline(shaderStages2, SW.renderpass, VK_CULL_MODE_NONE, -1)), commandPool(genCommPool()), commandBuffer(doCommBuffers()){genCommBuffers();};
-    auto genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&, VkRenderPass, VkCullModeFlagBits, int32_t) -> VkPipeline;
+    constexpr Pipeline2(): pipeline(genPipeline(shaderStages2, SW.renderpass, VK_CULL_MODE_NONE, -1)), commandPool(genCommPool()), commandBuffer(doCommBuffers()){genCommBuffers();};
+    auto genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&, VkRenderPass, VkCullModeFlagBits, int32_t) const -> VkPipeline;
     void genCommBuffers();
-    auto genCommPool() -> VkCommandPool;
-    auto doCommBuffers() -> std::array<VkCommandBuffer, Frames>;
-    auto genLayout() -> VkPipelineLayout;
-     [[nodiscard]] auto genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const -> VkPipelineShaderStageCreateInfo;
+   [[nodiscard]] auto genCommPool() const -> VkCommandPool;
+   [[nodiscard]] auto doCommBuffers() const -> std::array<VkCommandBuffer, Frames>;
+   [[nodiscard]] auto genLayout() const -> VkPipelineLayout;
+   [[nodiscard]] auto genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const -> VkPipelineShaderStageCreateInfo;
 } __attribute__((aligned(64))) PX2;
 
      auto Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag) const -> VkPipelineShaderStageCreateInfo
@@ -45,7 +45,7 @@ static struct Pipeline2
         return shaderMiscStage;
     }
 
-VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>& shaderStages2, VkRenderPass renderPass, VkCullModeFlagBits cullMode, int32_t baseIndex)
+VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>& shaderStages2, VkRenderPass renderPass, VkCullModeFlagBits cullMode, int32_t baseIndex) const
 {
     // Thankfully Dont; need to worry about compiling the Shader Files AnyMore due
   // to teh ability to premptively use the SPRI-V Compielr (e.g.GLSLC) prior to compile time...
@@ -148,7 +148,7 @@ VkPipeline Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&
   return Vks::doPointerAllocX<VkPipeline>(&pipelineInfo, vkCreateGraphicsPipelines);
 }
 
-auto Pipeline2::doCommBuffers() -> std::array<VkCommandBuffer, Frames>
+auto  Pipeline2::doCommBuffers() const -> std::array<VkCommandBuffer, Frames>
 {
   Queues::createCommandPool();
   BuffersX::setupBuffers();
@@ -163,7 +163,7 @@ auto Pipeline2::doCommBuffers() -> std::array<VkCommandBuffer, Frames>
   return PreTestBuffer;
 }
 
-inline void Pipeline2::genCommBuffers()
+void Pipeline2::genCommBuffers()
 {
 
   
@@ -176,9 +176,8 @@ inline void Pipeline2::genCommBuffers()
   
   static constexpr VkDeviceSize offsets[] = { 0 };
   uint32_t i = 0; 
-
-  
-   mat4x m4(&viewproj);
+mat4x m4;
+m4.loadAligned(viewproj);
 
   for ( const VkCommandBuffer & commandBuffer : commandBuffer )
   {VkRenderPassAttachmentBeginInfo RenderPassAttachments
@@ -222,7 +221,7 @@ inline void Pipeline2::genCommBuffers()
 
 }
 
-VkCommandPool Pipeline2::genCommPool()
+auto Pipeline2::genCommPool() const -> VkCommandPool
 {
  constexpr VkCommandPoolCreateInfo  poolInfo = {
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
@@ -234,7 +233,7 @@ VkCommandPool Pipeline2::genCommPool()
 }
 
 
-VkPipelineLayout Pipeline2::genLayout()
+auto Pipeline2::genLayout() const -> VkPipelineLayout
 {
   
   static constexpr VkPushConstantRange vkPushConstantRange{

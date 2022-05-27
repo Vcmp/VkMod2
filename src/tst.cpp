@@ -14,7 +14,7 @@ VkDevice VkInit::tst()
     return this->device;
 }
 
-GLFWwindow* VkInit::init()
+auto VkInit::init() const -> GLFWwindow*
 {
 
   RegisterClassA(&AHack);
@@ -51,7 +51,7 @@ inline const std::vector<const char *> getRequiredExtensions()
 }
 
 
-VkInstance VkInit::createInstance()
+auto VkInit::createInstance() const -> VkInstance
 {
   VkInstance vki;
   std::cout <<  "Creating Instance"  << "\n";
@@ -97,7 +97,7 @@ VkInstance VkInit::createInstance()
 
 
 
- VkPhysicalDevice VkInit::doPhysicalDevice()
+ auto VkInit::doPhysicalDevice() const -> VkPhysicalDevice
  {
     std::cout << ( "Picking Physical Device" ) << "\n";
   uint32_t deviceCount;
@@ -119,7 +119,7 @@ VkInstance VkInit::createInstance()
   //  return physdeviceevice;
  }
 
-VkSurfaceKHR VkInit::createSurface()
+auto VkInit::createSurface() const -> VkSurfaceKHR
 {
     VkSurfaceKHR surface;
   std::cout << ( "Creating Surface" ) << "\n";

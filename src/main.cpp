@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vulkan/vulkan_core.h>
 
-namespace
+inline namespace
 {
   pthread_t sys;
   bool a = true;
@@ -45,7 +45,7 @@ struct der_pod : public base_pod
 
 
 constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
-int main()
+auto main() -> int
 {
     printf("-->");
     std::cout <<(dp.i)<< "\n";
@@ -56,7 +56,7 @@ int main()
     // std::array<VkShaderModuleCreateInfo, 2> si{SPV.VsMCI3temp, SPV.VsMCI4temp};
     const auto rs = SW.createRenderPass(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL, true);
     const auto fs = SW.frameBuffer;
-    const auto pi2 = PX2.genPipeline({ShaderSPIRVUtils::VsMCI3temp, ShaderSPIRVUtils::VsMCI4temp}, rs, VK_CULL_MODE_NONE, 1);
+    const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, rs, VK_CULL_MODE_NONE, 1);
     // std::cout << pi2 << "\n";
 
     // fakeFBO fFBO

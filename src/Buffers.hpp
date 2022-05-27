@@ -2,7 +2,7 @@
 
 #include "Vks.tpp"
 
-#include <immintrin.h>
+#include "mat4x.hpp"
 #include <vulkan/vulkan_core.h>
 
 #define GLM_FORCE_LEFT_HANDED
@@ -88,17 +88,19 @@ struct BuffersX
 
 };  // namespace BuffersX
 
-inline namespace
-{
 
   const glm::mat4 viewproj = glm::perspectiveLH_ZO( glm::radians( 45.0F ) * -1, width / static_cast<float>( height ), 1.7F, 90.0F ) *
                        glm::lookAtLH( glm::vec3( 2.0F, 2.0F, 2.0F ), glm::vec3( 0.0F, 0.0F, 0.0F ), glm::vec3( 0.0F, 0.0F, 1.0F ) );
   ;
   // glm::mat4 rot;
-  static const __m256     viewproj2x = *(const __m256 *)(&viewproj);
+   const __m256     viewproj2x = *(const __m256 *)(&viewproj);
+   const __m256     viewproj2x2 = *(const __m256 *)(&viewproj+8);
+   
+  
+ 
   static constexpr __m128 axvZXLI    = __extension__( __m128 ){ /*  -1, -1, -1, -1,  */ 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
 
-};  // namespace
+
 
 // static inline struct alignas( ( 64 ) ) UBO
 // {
