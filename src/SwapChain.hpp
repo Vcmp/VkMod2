@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <initializer_list>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 
 #pragma once
@@ -232,15 +233,15 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) c
 
 }  // namespace SwapChainSupportDetails
 
-
+//COuld Turn this into an Dedicated Object or even amore complex "Scene" Aggregate"
 auto SwapChain::createRenderPass(VkImageLayout initial, bool load) const -> VkRenderPass
 {
     std::cout << ( "Creating RenderPass" ) << "\n";
       static const VkAttachmentDescription colorAttachment{
     .format         = VK_FORMAT_B8G8R8A8_SRGB,  // SwapChainSupportDetails::swapChainImageFormat,
     .samples        = VK_SAMPLE_COUNT_1_BIT,
-    .loadOp         = (!load)? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD,
-    .storeOp        = VK_ATTACHMENT_STORE_OP_STORE,
+    .loadOp         = VK_ATTACHMENT_LOAD_OP_NONE_EXT,
+    .storeOp        = VK_ATTACHMENT_STORE_OP_NONE, //Interestign Bugs: VK_ATTACHMENT_STORE_OP_STORE_DONT_CARE
     .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
     .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
     .initialLayout  = initial,

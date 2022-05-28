@@ -55,10 +55,10 @@ auto main() -> int
 
     // std::array<VkShaderModuleCreateInfo, 2> si{SPV.VsMCI3temp, SPV.VsMCI4temp};
 
-    static const VkAttachmentDescription colorAttachment{
+    static constexpr VkAttachmentDescription colorAttachment{
     .format         = VK_FORMAT_B8G8R8A8_SRGB,  // SwapChainSupportDetails::swapChainImageFormat,
     .samples        = VK_SAMPLE_COUNT_1_BIT,
-    .loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    .loadOp         = VK_ATTACHMENT_LOAD_OP_NONE_EXT,
     .storeOp        = VK_ATTACHMENT_STORE_OP_NONE, //Must be NONE, Not Don't Care to retain previous renderpass/Subpass/RenerPass/Subpass/Src Attachment e.g.
     .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
     .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
