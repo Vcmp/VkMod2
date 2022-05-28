@@ -1,9 +1,10 @@
-#include "Vks.tpp"
+#include "VKI.hpp"
 #include <cstdint>
 #include <vector>
 #include <iostream>
+#include "GLFW/glfw3.h"
 #include <GLFW/glfw3native.h>
-#include <vulkan/vulkan_core.h>
+
 
 inline namespace {
 static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
@@ -14,12 +15,11 @@ VkDevice VkInit::tst()
     return this->device;
 }
 
-auto VkInit::init() const -> GLFWwindow*
+auto VkInit::init() const -> HWND
 {
 
-  RegisterClassA(&AHack);
+ 
 
-  GLFWwindow* window;
   volkInitialize();
   glfwInit();
   glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
@@ -27,12 +27,11 @@ auto VkInit::init() const -> GLFWwindow*
   glfwWindowHint( GLFW_API_UNAVAILABLE, GLFW_TRUE );
   glfwWindowHint( GLFW_CONTEXT_RELEASE_BEHAVIOR, GLFW_RELEASE_BEHAVIOR_NONE );
   glfwWindowHint( GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API );
-  window = glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr );
+ auto w = glfwGetWin32Window(glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr ));
 
-
-  glfwSetWindowShouldClose(  window , false );
+ 
   std::cout << "OK!" << "\n";
-  return window;
+  return  w;
 };
 
 
@@ -75,7 +74,20 @@ auto VkInit::createInstance() const -> VkInstance
     VK_MAKE_VERSION( 1, 3, 0 ),
     VK_API_VERSION_1_3
   };
-  const auto  extensions                        = getRequiredExtensions();
+  uint32_t                  glfwExtensionCount = 0;
+  const char **             glfwExtensions     = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
+  std::vector<const char *> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
+  
+  for(uint32_t i=0; i< glfwExtensionCount; i++)
+  {
+    std::cout << extensions[i] << "\n";
+  }
+  
+  if constexpr ( ENABLE_VALIDATION_LAYERS )
+  {
+    extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
+    extensions.push_back( "VK_EXT_debug_report" );
+  }
   const VkInstanceCreateInfo InstCreateInfo 
   {
     .sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -125,7 +137,7 @@ auto VkInit::createSurface() const -> VkSurfaceKHR
   std::cout << ( "Creating Surface" ) << "\n";
   VkWin32SurfaceCreateInfoKHR createSurfaceInfo = {};
   createSurfaceInfo.sType                       = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-  createSurfaceInfo.hwnd                        = glfwGetWin32Window( window  );
+  createSurfaceInfo.hwnd                        = window;
   createSurfaceInfo.hinstance                   = GetModuleHandle( nullptr );
   createSurfaceInfo.pNext                       = VK_NULL_HANDLE;
 

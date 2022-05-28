@@ -1,65 +1,11 @@
-#include <windows.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define VK_USE_64_BIT_PTR_DEFINES 1
-#define VULKAN_HPP_SUPPORT_SPAN
-#pragma once
-#include <volk.h>
-#include <iostream>
 
-#include <GLFW/glfw3.h>
+#include "VKI.hpp"
+// const VkDevice device = VKI.device;
 
-constexpr uint16_t width = 854;
-constexpr uint16_t height = 480;
-constexpr uint8_t Frames = 3;
-
-constexpr bool ENABLE_VALIDATION_LAYERS = true;
-
-constexpr char* validationLayers = "VK_LAYER_KHRONOS_validation";
-
-const WNDCLASSA  AHack{
-  .style=0,
-  .lpfnWndProc=nullptr,
-  .cbClsExtra=NULL,
-  .cbWndExtra=NULL,
-  .hInstance=nullptr,
-  .hIcon=nullptr,
-  .hCursor=nullptr,
-  .hbrBackground=nullptr,
-  .lpszMenuName=nullptr,
-  .lpszClassName=nullptr,
-};
-
-
-
-inline struct VkInit
-{
-    GLFWwindow* window=init();
-     const VkInstance instance=createInstance();
-    const VkSurfaceKHR surface = createSurface();
-     const VkPhysicalDevice physdevice = doPhysicalDevice();
-     const VkDevice device = doDevice();
-    uint32_t graphicsFamily;
-    uint32_t transferFamily;
-    VkQueue GraphicsQueue;
-    // VkQueue PresentQueue;
-    VkQueue TransferQueue;
-    // SwapChain SW;
-    constexpr VkInit() = default;;
-    VkInit(VkInit const &) = delete;
-  VkInit& operator=(const VkInit&) = delete; 
-
-     [[nodiscard]] auto  init() const-> GLFWwindow*;
-     [[nodiscard]] auto  createInstance() const -> VkInstance;
-     [[nodiscard]] auto  doPhysicalDevice() const -> VkPhysicalDevice;
-     [[nodiscard]] auto createSurface() const -> VkSurfaceKHR;
-     auto doDevice() -> VkDevice;
-     auto tst() -> VkDevice;
-     ~VkInit() = default;
-
-} VKI;
 
 inline namespace Vks 
 {
+    
     //   typedef VkResult ( *callPPPPI )( const void* device, const void * strct, const void *VkAllocationCallbacks, const void *hndle);
     template<typename type, typename handle>
     constexpr auto doPointerAlloc(VkDevice device, auto* strct, type* hndle, handle pHndl) -> type

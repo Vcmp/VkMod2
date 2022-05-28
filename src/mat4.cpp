@@ -1,8 +1,8 @@
 #include "glm/ext/matrix_float4x4.hpp"
 #include "mat4x.hpp"
 #include <cwchar>
-#include <immintrin.h>
-#include <initializer_list>
+
+
 
 
 
@@ -39,7 +39,8 @@
 {
   // auto aa = { a[0][1], a[0][2], a[0][3], a[2][0], a[2][1], a[2][2], a[2][3]};
   // auto bb = {a[1][0], a[1][1], a[1][2], a[1][3], a[3][0], a[3][1], a[3][2], a[3][3]};
-    wmemmove(this, &a, sizeof(a));
+    memcpy(this, &a, sizeof(a));
+    
  
   // mat4x::__a = ( *(const __m256 *)aa.begin());
   // mat4x::__b = ( *(const __m256 *)bb.begin());

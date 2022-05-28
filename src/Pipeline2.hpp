@@ -1,12 +1,12 @@
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_float4x4.hpp"
+
 #include "test.inl"
 #include <array>
 #include <initializer_list>
 #include "SwapChain.hpp"
-#include "mat4x.hpp"
+
 #include "Buffers.hpp"
 #include "Queues.hpp"
+
 
  static constexpr uint8_t OFFSETOF_COLOR = 3 * sizeof( float );
   static constexpr uint8_t OFFSET_POS     = 0;
@@ -193,8 +193,8 @@ m4.loadAligned(viewproj);
     .renderPass      = ( SW.renderpass ),
     .framebuffer = ( SW.frameBuffer ),
     .renderArea      = renderArea,
-    // .clearValueCount = 1,
-    // .pClearValues    = &clearValues2,
+    .clearValueCount = 0,
+    .pClearValues    = nullptr,
   };
   
   vkBeginCommandBuffer(commandBuffer, &beginInfo1 );

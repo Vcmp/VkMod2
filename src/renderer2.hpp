@@ -2,7 +2,7 @@
 #include "Pipeline2.hpp"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "mat4x.hpp"
-#include "fakeFBO.hpp"
+
 #include <array>
 #include <initializer_list>
 #include <vulkan/vulkan_core.h>
@@ -77,47 +77,3 @@ private:
   const std::array<VkSubmitInfo, 3> aa = genSubmits(AvailableSemaphore);
 }R2;
 
-
-
-void renderer2::drawFrame(std::initializer_list<VkCommandBuffer> commandBuffer) const
-{
-  // m4.loadAligned( &m5 );
-  vkAcquireNextImageKHR( VKI.device, SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
-
-  
-  // __builtin_prefetch( BuffersX::data );
-  // __builtin_prefetch( &viewproj2x );
-//  textTemp2.voidrecComBufferSub(currentFrame);
-  // renderer2::updateUniformBuffer(); 
-
-    // vkResetCommandPool(Queues::device, Queues::commandPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
-
-
-    // PipelineX::recCmdBuffer(currentFrame);
-
-      // R2.info.pCommandBuffers =commandBuffer.data();
-static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
-      const  VkSubmitInfo           info{
-              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-              .waitSemaphoreCount = 1,
-              .pWaitSemaphores    = &AvailableSemaphore,
-              .pWaitDstStageMask  = &t,
-              .commandBufferCount = 1,
-              .pCommandBuffers= commandBuffer.begin()
-  };
-    vkQueueSubmit( VKI.GraphicsQueue, 1, &info, nullptr );
-  // }
-    static constexpr VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-                                                                    .pWaitSemaphores=&R2.FinishedSemaphore,
-                                                                    .swapchainCount = 1,
-                                                                    .pSwapchains    = &SW.swapChain,
-                                                                    .pImageIndices  = &currentFrame,
-                                                                    .pResults       = nullptr };
-
-
-  //  info.pWaitSemaphores = &AvailableSemaphore;
-
- vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 );
-
-  currentFrame = currentFrame + __builtin_parity( Frames );
-}

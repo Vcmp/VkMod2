@@ -1,12 +1,12 @@
 #include "fakeFBO.hpp"
-
+#include "Vks.tpp"
 
 std::array<VkCommandBuffer, 3> fakeFBO::doGenCommnd()
 {
   std::array<VkCommandBuffer, 3> PreTestBuffer{};
-   const VkCommandBufferAllocateInfo allocateInfo{ .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
-                                                  .commandPool        = ( commandPool ),
-                                                  .level              = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
+   const VkCommandBufferAllocateInfo allocateInfo{ .sType              =  VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ,
+                                                  .commandPool        =  commandPool ,
+                                                  .level              =  VK_COMMAND_BUFFER_LEVEL_PRIMARY ,
                                                   .commandBufferCount = 3};
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";

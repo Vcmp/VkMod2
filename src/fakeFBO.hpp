@@ -3,7 +3,9 @@
 
 
 #include <array>
-#include "Vks.tpp"
+#include <vulkan/vulkan_core.h>
+
+
 
 //ideally will need to fix this abomination of a Constructor/InitialserList/Layout later
 struct fakeFBO

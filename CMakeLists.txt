@@ -24,7 +24,7 @@ set(VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_
 # set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
 # add_subdirectory(brcxxc ENABLE_EXPORTS)
 add_executable(VkMod2)
-# target_link_options(VkMod2 PRIVATE -fsanitize=address,undefined -glldb)
+# target_link_options(VkMod2 PRIVATE -fsanitize=address -glldb)
 message(STATUS "${CMAKE_CXX_COMPILE_FEATURES}")
 message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
 target_compile_features(VkMod2 PRIVATE cxx_std_20)
@@ -60,6 +60,7 @@ message(STATUS ${CMAKE_CXX_FLAGS})
 			# "${CMAKE_CURRENT_SOURCE_DIR}/tracy/Tracy.hpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/src/fakeFBO.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/src/main2.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/src/px.cpp"
 	)  
 
 

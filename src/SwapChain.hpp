@@ -1,13 +1,17 @@
 
+
 #include "Vks.tpp"
 #include <array>
 #include <cstdint>
 #include <initializer_list>
 #include <vector>
-#include <vulkan/vulkan_core.h>
+
 
 #pragma once
+inline namespace {
+
     VkSurfaceCapabilitiesKHR capabilities{};
+}
 static struct SwapChain
 {
     uint32_t       imageCount;
@@ -195,7 +199,7 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) c
       .layerCount=1,
       .height= swapChainExtent.height,
       .width= swapChainExtent.width,
-      .usage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT+1, //Possible Driver Bug Setting the Usage to 0x11 instead of 0x10 on the SwapChain Image Usage Flag...
+      .usage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, //Possible Driver Bug Setting the Usage to 0x11 instead of 0x10 on the SwapChain Image Usage Flag...
     };
 
     // VkFramebufferAttachmentImageInfo atts[3]={FramebufferAttachmentImage, FramebufferAttachmentImage, FramebufferAttachmentImage};
