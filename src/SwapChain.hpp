@@ -17,20 +17,20 @@ static struct SwapChain
 {
     uint32_t       imageCount;
     VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED, false);
-    const VkSurfaceFormatKHR         swapChainImageFormat=setupImageFormats();
+    VkSurfaceFormatKHR         swapChainImageFormat=setupImageFormats();
     VkPresentModeKHR presentMode;
     VkExtent2D swapChainExtent{width, height};
     VkFramebuffer frameBuffer=createFramebuffers(renderpass);
-    const VkSwapchainKHR swapChain=createSwapChain(swapChainImageFormat);;
-    const std::array<VkImage, 3> image = getSwapChainImages(3U);
-     std::array<VkImageView, 3> imageViews = createImageViews(image);
+    VkSwapchainKHR swapChain=createSwapChain(swapChainImageFormat);;
+    std::array<VkImage, Frames> image = getSwapChainImages(Frames);
+     std::array<VkImageView, Frames> imageViews = createImageViews(image);
     SwapChain(/* VkPhysicalDevice physdevice, VkSurfaceKHR surface */) = default;;
     auto setupImageFormats() -> VkSurfaceFormatKHR;
-    [[nodiscard]] auto getSwapChainImages(uint32_t) const -> std::array<VkImage, 3>;
-    [[nodiscard]] auto createSwapChain(VkSurfaceFormatKHR) const -> VkSwapchainKHR;
-    [[nodiscard]] auto createImageViews(std::array<VkImage, 3> image) const -> std::array<VkImageView, 3>;
-    auto createFramebuffers(VkRenderPass) const -> VkFramebuffer;
-    [[nodiscard]] auto createRenderPass(VkImageLayout, bool) const -> VkRenderPass;
+    [[nodiscard]] auto getSwapChainImages(uint32_t) -> std::array<VkImage, Frames>;
+    [[nodiscard]] auto createSwapChain(VkSurfaceFormatKHR) -> VkSwapchainKHR;
+    [[nodiscard]] auto createImageViews(std::array<VkImage, Frames> image) -> std::array<VkImageView, Frames>;
+    auto createFramebuffers(VkRenderPass) -> VkFramebuffer;
+    [[nodiscard]] auto createRenderPass(VkImageLayout, bool) -> VkRenderPass;
 
 } __attribute__((aligned(128))) SW;
 
@@ -98,14 +98,14 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
 }
 
 
-auto SwapChain::getSwapChainImages(uint32_t size) const -> std::array<VkImage, 3>
+auto SwapChain::getSwapChainImages(uint32_t size) -> std::array<VkImage, Frames>
 {
-  std::array<VkImage, 3> image;
+  std::array<VkImage, Frames> image;
   vkGetSwapchainImagesKHR( VKI.tst(), swapChain, &size, image.data());
   return image;
 }
 
-auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) const -> VkSwapchainKHR
+auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -> VkSwapchainKHR
   {
     std::cout << "ImageCount: " << imageCount << "\n";
 
@@ -154,11 +154,11 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) c
 
 
 //Posibel BUg fix: Don't use self-reference to the parent Struct vkImage Array and instead just use a passed VkImage paramter so it isn't accidentally Overridden!
-  auto SwapChain::createImageViews(std::array<VkImage, 3> images) const -> std::array<VkImageView, 3>
+  auto SwapChain::createImageViews(std::array<VkImage, Frames> images) -> std::array<VkImageView, Frames>
   {
     std::cout << ( "Creating Image Views" ) << "\n";
     int i = 0;
-    std::array<VkImageView, 3> imageViews;
+    std::array<VkImageView, Frames> imageViews;
     for ( const VkImage & swapchainImage : images )
     {
       VkImageViewCreateInfo createInfo = {};
@@ -186,7 +186,7 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) c
     return imageViews;
   }
 
-  auto SwapChain::createFramebuffers(VkRenderPass renderpass) const -> VkFramebuffer
+  auto SwapChain::createFramebuffers(VkRenderPass renderpass) -> VkFramebuffer
   {
         std::cout << ( "Creating FrameBuffers" ) << "\n";
 
@@ -224,24 +224,24 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) c
 
 
     // for ( size_t i = 0; i < Frames; i++ )
-    {
+    
       // framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 
       return Vks::doPointerAlloc5<VkFramebuffer>(&framebufferCreateInfo, vkCreateFramebuffer);
-    }
+    
   
 
 }  // namespace SwapChainSupportDetails
 
 //COuld Turn this into an Dedicated Object or even amore complex "Scene" Aggregate"
-auto SwapChain::createRenderPass(VkImageLayout initial, bool load) const -> VkRenderPass
+auto SwapChain::createRenderPass(VkImageLayout initial, bool load) -> VkRenderPass
 {
     std::cout << ( "Creating RenderPass" ) << "\n";
       static const VkAttachmentDescription colorAttachment{
     .format         = VK_FORMAT_B8G8R8A8_UNORM,  // SwapChainSupportDetails::swapChainImageFormat,
     .samples        = VK_SAMPLE_COUNT_1_BIT,
-    .loadOp         = VK_ATTACHMENT_LOAD_OP_NONE_EXT,
-    .storeOp        = VK_ATTACHMENT_STORE_OP_NONE, //Interestign Bugs: VK_ATTACHMENT_STORE_OP_STORE_DONT_CARE
+    .loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+    .storeOp        = VK_ATTACHMENT_STORE_OP_STORE, //Interestign Bugs: VK_ATTACHMENT_STORE_OP_STORE_DONT_CARE
     .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
     .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
     .initialLayout  = initial,

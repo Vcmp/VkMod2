@@ -15,37 +15,37 @@
 
 
 
-auto genSubmits(const VkSemaphore &AvailableSemaphore)
-{
-    static constexpr VkPipelineStageFlags          waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+// auto genSubmits(const VkSemaphore &AvailableSemaphore)
+// {
+//     static constexpr VkPipelineStageFlags          waitStages = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
-  const  VkSubmitInfo           info{
-              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-              .waitSemaphoreCount = 1,
-              .pWaitSemaphores    = &AvailableSemaphore,
-              .pWaitDstStageMask  = &waitStages,
-              .commandBufferCount = 1,
-              .pCommandBuffers= &PX2.commandBuffer[0]
-  };
-  const VkSubmitInfo           info1{
-              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-              .waitSemaphoreCount = 1,
-              .pWaitSemaphores    = &AvailableSemaphore,
-              .pWaitDstStageMask  = &waitStages,
-              .commandBufferCount = 1,
-              .pCommandBuffers= &PX2.commandBuffer[1]
-  };
-  const VkSubmitInfo           info2{
-              .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-              .waitSemaphoreCount = 1,
-              .pWaitSemaphores    = &AvailableSemaphore,
-              .pWaitDstStageMask  = &waitStages,
-              .commandBufferCount = 1,
-              .pCommandBuffers= &PX2.commandBuffer[2]
-  };
-  const std::array<VkSubmitInfo, 3> aa = { info, info1, info2};
-  return aa;
-}
+//   const  VkSubmitInfo           info{
+//               .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+//               .waitSemaphoreCount = 1,
+//               .pWaitSemaphores    = &AvailableSemaphore,
+//               .pWaitDstStageMask  = &waitStages,
+//               .commandBufferCount = 1,
+//               .pCommandBuffers= &PX2.commandBuffer[0]
+//   };
+//   const VkSubmitInfo           info1{
+//               .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+//               .waitSemaphoreCount = 1,
+//               .pWaitSemaphores    = &AvailableSemaphore,
+//               .pWaitDstStageMask  = &waitStages,
+//               .commandBufferCount = 1,
+//               .pCommandBuffers= &PX2.commandBuffer[1]
+//   };
+//   const VkSubmitInfo           info2{
+//               .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+//               .waitSemaphoreCount = 1,
+//               .pWaitSemaphores    = &AvailableSemaphore,
+//               .pWaitDstStageMask  = &waitStages,
+//               .commandBufferCount = 1,
+//               .pCommandBuffers= &PX2.commandBuffer[2]
+//   };
+//   const std::array<VkSubmitInfo, 3> aa = { info, info1, info2};
+//   return aa;
+// }
 
 /*
  trick to use builtins+Attributes to treat a blob of memory as a vector type which compiles more cleanly into slightly better asm with vmovps (At least with Clang)
@@ -74,6 +74,6 @@ private:
   static constexpr const uint32_t                TmUt = 1000000000;
 
  
-  const std::array<VkSubmitInfo, 3> aa = genSubmits(AvailableSemaphore);
+  // const std::array<VkSubmitInfo, 3> aa = genSubmits(AvailableSemaphore);
 }R2;
 

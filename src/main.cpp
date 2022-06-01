@@ -1,4 +1,5 @@
 
+#include "GLFW/glfw3.h"
 #include "renderer2.hpp"
 #include "fakeFBO.hpp"
 
@@ -123,8 +124,9 @@ auto main() -> int
     while(true)
     {
         // printf("%i \n", aa++);
-        // glfwPollEvents();
+        
         // vkQueueWaitIdle(VKI.GraphicsQueue);
+        glfwPollEvents();
         vkQueueWaitIdle(VKI.GraphicsQueue);
         vkResetCommandPool(VKI.device, fFBO.commandPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
         fFBO.doCommndRec();
@@ -142,9 +144,11 @@ auto main() -> int
 void renderer2::drawFrame(std::initializer_list<VkCommandBuffer> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
-  // vkQueueWaitIdle(VKI.GraphicsQueue);
-  vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
-
+ auto v = vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 1000, R2.AvailableSemaphore, nullptr, &currentFrame );
+  if (v!=VK_SUCCESS)
+  {
+    exit(1);
+  }
   
   // __builtin_prefetch( BuffersX::data );
   // __builtin_prefetch( &viewproj2x );
@@ -180,7 +184,12 @@ static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_B
 
  vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 );
 
-  currentFrame = currentFrame + __builtin_parity( Frames );
+  // currentFrame++;
+  currentFrame = ++currentFrame % Frames;
+  // if(currentFrame==Frames)
+  // {
+  //   currentFrame=0;
+  // }
 }
 
 

@@ -156,7 +156,7 @@ auto  Pipeline2::doCommBuffers() const -> std::array<VkCommandBuffer, Frames>
    const VkCommandBufferAllocateInfo allocateInfo{ .sType              = ( VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ),
                                                   .commandPool        = ( commandPool ),
                                                   .level              = ( VK_COMMAND_BUFFER_LEVEL_PRIMARY ),
-                                                  .commandBufferCount = 3};
+                                                  .commandBufferCount = Frames};
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
   vkAllocateCommandBuffers(VKI.tst(), &allocateInfo, PreTestBuffer.data() );

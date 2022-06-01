@@ -22,7 +22,7 @@ auto VkInit::init() const -> HWND
   glfwWindowHint( GLFW_API_UNAVAILABLE, GLFW_TRUE );
   glfwWindowHint( GLFW_CONTEXT_RELEASE_BEHAVIOR, GLFW_RELEASE_BEHAVIOR_NONE );
   glfwWindowHint( GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API );
- auto w = glfwGetWin32Window(glfwCreateWindow( width, height, "VKMod2", nullptr, nullptr ));
+ auto w = glfwGetWin32Window(glfwCreateWindow( width, height, "VKMod2", glfwGetPrimaryMonitor(), nullptr ));
 
  
   std::cout << "OK!" << "\n";

@@ -4,13 +4,13 @@
 #include "glm/ext/vector_float2.hpp"
 #include <vulkan/vulkan_core.h>
 
-std::array<VkCommandBuffer, 3> fakeFBO::doGenCommnd()
+std::array<VkCommandBuffer, Frames> fakeFBO::doGenCommnd()
 {
-  std::array<VkCommandBuffer, 3> PreTestBuffer{};
+  std::array<VkCommandBuffer, Frames> PreTestBuffer{};
    const VkCommandBufferAllocateInfo allocateInfo{ .sType              =  VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ,
                                                   .commandPool        =  commandPool ,
                                                   .level              =  VK_COMMAND_BUFFER_LEVEL_PRIMARY ,
-                                                  .commandBufferCount = 3};
+                                                  .commandBufferCount = Frames};
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
   vkAllocateCommandBuffers(VKI.device, &allocateInfo, PreTestBuffer.data() );
