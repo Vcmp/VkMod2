@@ -96,7 +96,7 @@ auto main() -> int
   auto rs =  Vks::doPointerAlloc5<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
     // const auto rs = SW.createRenderPass(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL, true);
     // const auto fs = SW.frameBuffer;
-    const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, rs, VK_CULL_MODE_NONE, 1);
+    auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, rs, VK_CULL_MODE_BACK_BIT, 1);
     // std::cout << pi2 << "\n";
 
     fakeFBO fFBO
@@ -111,7 +111,7 @@ auto main() -> int
 
 
     // fFBO.doCommBuffers();
-    fFBO.doCommndRec();
+    
     // PX2.genCommBuffers();
     std::cout << "VkInit" <<std::is_standard_layout_v<VkInit> << "\n";
     std::cout << "VkInit" <<std::is_trivially_copyable_v<VkInit> << "\n";
@@ -124,7 +124,11 @@ auto main() -> int
     {
         // printf("%i \n", aa++);
         // glfwPollEvents();
-        R2.drawFrame({PX2.commandBuffer[renderer2::currentFrame], fFBO.commandBuffers[renderer2::currentFrame]});
+        // vkQueueWaitIdle(VKI.GraphicsQueue);
+        vkQueueWaitIdle(VKI.GraphicsQueue);
+        vkResetCommandPool(VKI.device, fFBO.commandPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
+        fFBO.doCommndRec();
+        R2.drawFrame({fFBO.commandBuffers[renderer2::currentFrame]});
         aa++;
     }
     a= false;
@@ -138,7 +142,8 @@ auto main() -> int
 void renderer2::drawFrame(std::initializer_list<VkCommandBuffer> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
-  vkAcquireNextImageKHR( VKI.device, SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
+  // vkQueueWaitIdle(VKI.GraphicsQueue);
+  vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, -1, R2.AvailableSemaphore, nullptr, &currentFrame );
 
   
   // __builtin_prefetch( BuffersX::data );
@@ -158,7 +163,7 @@ static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_B
               .waitSemaphoreCount = 1,
               .pWaitSemaphores    = &AvailableSemaphore,
               .pWaitDstStageMask  = &t,
-              .commandBufferCount = 2,
+              .commandBufferCount = 1,
               .pCommandBuffers= commandBuffer.begin()
   };
     vkQueueSubmit( VKI.GraphicsQueue, 1, &info, nullptr );

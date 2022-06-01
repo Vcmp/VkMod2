@@ -20,7 +20,7 @@ static struct SwapChain
     const VkSurfaceFormatKHR         swapChainImageFormat=setupImageFormats();
     VkPresentModeKHR presentMode;
     VkExtent2D swapChainExtent{854, 480};
-    const VkFramebuffer frameBuffer=createFramebuffers(renderpass);
+    VkFramebuffer frameBuffer=createFramebuffers(renderpass);
     const VkSwapchainKHR swapChain=createSwapChain(swapChainImageFormat);;
     const std::array<VkImage, 3> image = getSwapChainImages(3U);
      std::array<VkImageView, 3> imageViews = createImageViews(image);
@@ -101,7 +101,7 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
 auto SwapChain::getSwapChainImages(uint32_t size) const -> std::array<VkImage, 3>
 {
   std::array<VkImage, 3> image;
-  vkGetSwapchainImagesKHR( VKI.device, swapChain, &size, image.data());
+  vkGetSwapchainImagesKHR( VKI.tst(), swapChain, &size, image.data());
   return image;
 }
 
@@ -143,9 +143,9 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) c
 
       .oldSwapchain = VK_NULL_HANDLE
     };
-    std::cout << VKI.device << "\n";
+    std::cout << VKI.tst() << "\n";
     VkSwapchainKHR swapChain;
-    vkCreateSwapchainKHR(VKI.device, &createInfo, nullptr, &swapChain );
+    vkCreateSwapchainKHR(VKI.tst(), &createInfo, nullptr, &swapChain );
     return swapChain;
     
   }

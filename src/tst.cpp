@@ -10,11 +10,6 @@ inline namespace {
 static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 }
 
-VkDevice VkInit::tst()
-{
-    return this->device;
-}
-
 auto VkInit::init() const -> HWND
 {
 
@@ -33,21 +28,6 @@ auto VkInit::init() const -> HWND
   std::cout << "OK!" << "\n";
   return  w;
 };
-
-
-
-
-inline const std::vector<const char *> getRequiredExtensions()
-{
-  uint32_t                  glfwExtensionCount = 0;
-  const char **             glfwExtensions     = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
-  std::vector<const char *> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
-  if constexpr ( ENABLE_VALIDATION_LAYERS )
-  {
-    extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
-  }
-  return extensions;
-}
 
 
 auto VkInit::createInstance() const -> VkInstance
@@ -86,7 +66,6 @@ auto VkInit::createInstance() const -> VkInstance
   if constexpr ( ENABLE_VALIDATION_LAYERS )
   {
     extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
-    extensions.push_back( "VK_EXT_debug_report" );
   }
   const VkInstanceCreateInfo InstCreateInfo 
   {
@@ -106,14 +85,11 @@ auto VkInit::createInstance() const -> VkInstance
   volkLoadInstanceOnly( vki );
   return vki;
  }
-
-
-
- auto VkInit::doPhysicalDevice() const -> VkPhysicalDevice
- {
-    std::cout << ( "Picking Physical Device" ) << "\n";
+template <typename name>
+auto  VkInit::vkEnumSet(auto aa) const
+{
   uint32_t deviceCount;
-  vkEnumeratePhysicalDevices( instance, &deviceCount, nullptr ) ;
+  aa( instance, &deviceCount, nullptr ) ;
 
   // if constexpr(ENABLE_VALIDATION_LAYERS)
   // {
@@ -122,13 +98,19 @@ auto VkInit::createInstance() const -> VkInstance
  
   // if ( deviceCount == 0 )
   //   std::runtime_error( "Failed to find GPUs with Vulkan support" );
-   std::vector<VkPhysicalDevice> ppPhysicalDevicesdeviceCount(deviceCount);
+   std::vector<name> ppPhysicalDevicesdeviceCount(deviceCount);
 
   std::cout <<  "Enumerate Physical Device"  << "\n";
-  vkEnumeratePhysicalDevices( instance, &deviceCount, ppPhysicalDevicesdeviceCount.data() );
-  return ppPhysicalDevicesdeviceCount.at(0);
-   //BuffersX::memProperties=vkds.memProperties;
-  //  return physdeviceevice;
+  aa( instance, &deviceCount, ppPhysicalDevicesdeviceCount.data() );
+  return ppPhysicalDevicesdeviceCount;
+}
+
+
+
+ auto VkInit::doPhysicalDevice() const -> VkPhysicalDevice
+ {
+    std::cout << ( "Picking Physical Device" ) << "\n";
+  return vkEnumSet<VkPhysicalDevice>(vkEnumeratePhysicalDevices)[0];
  }
 
 auto VkInit::createSurface() const -> VkSurfaceKHR

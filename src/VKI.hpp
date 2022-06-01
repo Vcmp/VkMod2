@@ -14,7 +14,7 @@ constexpr uint16_t width = 854;
 constexpr uint16_t height = 480;
 constexpr uint8_t Frames = 3;
 
-constexpr bool ENABLE_VALIDATION_LAYERS = true;
+constexpr bool ENABLE_VALIDATION_LAYERS = false;
 
 constexpr char* validationLayers = "VK_LAYER_KHRONOS_validation";
 
@@ -34,13 +34,14 @@ inline struct VkInit
     constexpr VkInit() = default;;
     VkInit(VkInit const &) = delete;
   VkInit& operator=(const VkInit&) = delete; 
-
      [[nodiscard]] auto init() const -> HWND;
      [[nodiscard]] auto  createInstance() const -> VkInstance;
      [[nodiscard]] auto  doPhysicalDevice() const -> VkPhysicalDevice;
      [[nodiscard]] auto createSurface() const -> VkSurfaceKHR;
      auto doDevice() -> VkDevice;
-     auto tst() -> VkDevice;
-     ~VkInit() = default;
+     template <typename name> auto vkEnumSet(auto a) const;
+     template <typename name>  auto  vkEnumSet2(auto a) const -> std::vector<name>;
+     [[nodiscard, gnu::pure, gnu::const, clang::vectorcall]] constexpr auto tst() const noexcept -> VkDevice{ return this->device; };
 
 } VKI;
+// VkInit VkInit::VKI;

@@ -24,13 +24,13 @@ void BuffersX::setupBuffers()
 
   auto x3 = static_cast<VkBufferUsageFlagBits>( VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
   createSetBuffer( VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, x3, sizedsfIdx, indexBufferMemory );
-  vkMapMemory( VKI.device, stagingBufferMemory, 0, 1024, 0, (void**)&data );
+  vkMapMemory( VKI.tst(), stagingBufferMemory, 0, 1024, 0, (void**)&data );
   {
 
   vkMappedCopy(stagingBufferMemory, sizedsf, vectBuf, data, vertexBuffer);
   vkMappedCopy(stagingBufferMemory, sizedsfIdx, idxBuf, data, indexBuffer);
   }  
-  vkUnmapMemory( VKI.device, stagingBufferMemory );
+  vkUnmapMemory( VKI.tst(), stagingBufferMemory );
 
   // BuffersX::copyBuffer( vertexBufferTemp, sizeof(Temp) );
 
@@ -48,10 +48,10 @@ inline void BuffersX::createSetBuffer(
     .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
   };
 
- vkCreateBuffer(VKI.device, &allocateInfo, nullptr, &currentBuffer );
+ vkCreateBuffer(VKI.tst(), &allocateInfo, nullptr, &currentBuffer );
 
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements( VKI.device, currentBuffer, &memRequirements );
+  vkGetBufferMemoryRequirements( VKI.tst(), currentBuffer, &memRequirements );
 
   VkMemoryAllocateInfo allocateInfo1 = {
     .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -60,9 +60,9 @@ inline void BuffersX::createSetBuffer(
     .memoryTypeIndex = findMemoryType( memRequirements.memoryTypeBits, properties ),
   };
   //
-  vkAllocateMemory(VKI.device, &allocateInfo1, nullptr, &vertexBufferMemory );
+  vkAllocateMemory(VKI.tst(), &allocateInfo1, nullptr, &vertexBufferMemory );
 
-  vkBindBufferMemory( VKI.device, currentBuffer, vertexBufferMemory, 0 ) ;
+  vkBindBufferMemory( VKI.tst(), currentBuffer, vertexBufferMemory, 0 ) ;
 }
 
 inline uint32_t BuffersX::findMemoryType( uint32_t typeFilter, VkMemoryPropertyFlagBits properties )
@@ -120,7 +120,7 @@ void Queues::createCommandPool()
       .commandBufferCount = ( 1 ),
     };
 
-    vkAllocateCommandBuffers(VKI.device,  &allocateInfo,  &commandBuffer );
+    vkAllocateCommandBuffers(VKI.tst(),  &allocateInfo,  &commandBuffer );
   }
 }
 
@@ -135,5 +135,5 @@ inline void Queues::endSingleTimeCommands()
 
   vkQueueSubmit( VKI.TransferQueue, 1, &submitInfo1, VK_NULL_HANDLE );
   vkQueueWaitIdle( VKI.TransferQueue );
-  vkResetCommandPool( VKI.device, ( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
+  vkResetCommandPool( VKI.tst(), ( commandPool2 ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
 }

@@ -11,7 +11,7 @@ VkCommandBuffer Buffer::genCommandBuffer()
       .commandBufferCount = ( 1 ),
     };
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(VKI.device, &allocateInfo, &commandBuffer);
+    vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffer);
     return commandBuffer;
 
 
@@ -58,7 +58,7 @@ void Buffer::endSingleTimeCommands()
  
   vkQueueSubmit( VKI.TransferQueue, 1, &submitInfo1, VK_NULL_HANDLE );
   vkQueueWaitIdle( VKI.TransferQueue );
-  vkResetCommandPool( VKI.device, ( commandPool ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
+  vkResetCommandPool( device, ( commandPool ), VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT );
 }
 
 void Buffer::copyBuffer( VkBuffer & dst, const size_t sized )
@@ -91,12 +91,12 @@ void Buffer::setupBuffers()
   constexpr auto        p  = static_cast<VkMemoryPropertyFlagBits>( VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
   createSetBuffer( p, Bufferstaging, x2, sizedsf, stagingBufferMemory );
 
-  vkMapMemory( VKI.device, stagingBufferMemory, 0, sizedsf, 0, (void**)&data );
+  vkMapMemory( device, stagingBufferMemory, 0, sizedsf, 0, (void**)&data );
   {
 
   vkMappedCopy(stagingBufferMemory, sizedsf, buffAbs, data, buffer);
   }  
-  vkUnmapMemory( VKI.device, stagingBufferMemory );
+  vkUnmapMemory( device, stagingBufferMemory );
 
   // BuffersX::copyBuffer( vertexBufferTemp, sizeof(Temp) );
 
@@ -132,7 +132,7 @@ void Buffer::createSetBuffer(
   currentBuffer = Vks::doPointerAlloc5<VkBuffer>( &allocateInfo, vkCreateBuffer );
 
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements( VKI.device, currentBuffer, &memRequirements );
+  vkGetBufferMemoryRequirements( device, currentBuffer, &memRequirements );
 
   VkMemoryAllocateInfo allocateInfo1 = {
     .sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
@@ -143,5 +143,5 @@ void Buffer::createSetBuffer(
   //
   BufMemory= Vks::doPointerAlloc5<VkDeviceMemory>( &allocateInfo1, vkAllocateMemory);
 
-  vkBindBufferMemory( VKI.device, currentBuffer, vertexBufferMemory, 0 );
+  vkBindBufferMemory( device, currentBuffer, vertexBufferMemory, 0 );
 }

@@ -1,5 +1,7 @@
 #include "fakeFBO.hpp"
+#include "GLFW/glfw3.h"
 #include "Vks.tpp"
+#include <vulkan/vulkan_core.h>
 
 std::array<VkCommandBuffer, 3> fakeFBO::doGenCommnd()
 {
@@ -20,7 +22,7 @@ void fakeFBO::doCommndRec()
 
   
       constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-                                                    .flags =  VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT };
+                                                    .flags =  VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT };
 
     constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = {854, 480} };
 
@@ -28,6 +30,9 @@ void fakeFBO::doCommndRec()
   
   static constexpr VkDeviceSize offsets[] = { 0 };
   uint32_t i = 0; 
+
+  const auto iTime = {static_cast<float>(glfwGetTime()), static_cast<float>(renderArea.extent.width), static_cast<float>(renderArea.extent.height)};
+
   for(const VkCommandBuffer &commandBuffer : commandBuffers)
   {VkRenderPassAttachmentBeginInfo RenderPassAttachments
   {
@@ -52,10 +57,10 @@ void fakeFBO::doCommndRec()
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeLine );
      
-    // vkCmdPushConstants(commandBuffer,vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &m4);
+    vkCmdPushConstants(commandBuffer,layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, 12, iTime.begin());
 
 
-    vkCmdDraw( commandBuffer, ( 3), 1, 0, 0 );
+    vkCmdDraw( commandBuffer, ( 6), 1, 0, 0 );
 
     vkCmdEndRenderPass( commandBuffer );
     vkEndCommandBuffer( commandBuffer);
