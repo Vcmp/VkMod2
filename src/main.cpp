@@ -93,17 +93,17 @@ auto main() -> int
     // .pDependencies=&VkSubpassDependency
   };
 
-  auto rs =  Vks::doPointerAlloc5<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
+  // auto rs =  Vks::doPointerAlloc5<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
     // const auto rs = SW.createRenderPass(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL, true);
     // const auto fs = SW.frameBuffer;
-    auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, rs, VK_CULL_MODE_BACK_BIT, 1);
+    auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
     // std::cout << pi2 << "\n";
 
     fakeFBO fFBO
     {
       pi2, 
       PX2.genCommPool(), 
-      rs, 
+      SW.renderpass, 
       SW.frameBuffer, 
       SW.imageViews,
       PX2.genLayout()

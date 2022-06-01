@@ -239,7 +239,7 @@ auto Pipeline2::genLayout() const -> VkPipelineLayout
   static constexpr VkPushConstantRange vkPushConstantRange{
     .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
     .offset     = 0,
-    .size       = 12,
+    .size       = 16,
   };
 
   constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = { .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,

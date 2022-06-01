@@ -1,6 +1,7 @@
 #include "fakeFBO.hpp"
 #include "GLFW/glfw3.h"
 #include "Vks.tpp"
+#include "glm/ext/vector_float2.hpp"
 #include <vulkan/vulkan_core.h>
 
 std::array<VkCommandBuffer, 3> fakeFBO::doGenCommnd()
@@ -16,6 +17,13 @@ std::array<VkCommandBuffer, 3> fakeFBO::doGenCommnd()
   return PreTestBuffer;
 }
 
+struct ITime
+{
+  glm::vec2 xy;
+  float time;
+  float stime;
+} __attribute__((aligned(16))) ;
+
 
 void fakeFBO::doCommndRec()
 {
@@ -24,14 +32,14 @@ void fakeFBO::doCommndRec()
       constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
                                                     .flags =  VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT };
 
-    constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = {854, 480} };
+    constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = {width, height} };
 
 
   
   static constexpr VkDeviceSize offsets[] = { 0 };
   uint32_t i = 0; 
-
-  const auto iTime = {static_cast<float>(glfwGetTime()), static_cast<float>(renderArea.extent.width), static_cast<float>(renderArea.extent.height)};
+  const auto at = static_cast<float>(glfwGetTime());
+  const ITime iTime = {{(renderArea.extent.width), (renderArea.extent.height)}, at, sinf(at)};
 
   for(const VkCommandBuffer &commandBuffer : commandBuffers)
   {VkRenderPassAttachmentBeginInfo RenderPassAttachments
@@ -57,7 +65,7 @@ void fakeFBO::doCommndRec()
 
     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeLine );
      
-    vkCmdPushConstants(commandBuffer,layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, 12, iTime.begin());
+    vkCmdPushConstants(commandBuffer,layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, 16, &iTime);
 
 
     vkCmdDraw( commandBuffer, ( 6), 1, 0, 0 );

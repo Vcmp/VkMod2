@@ -16,10 +16,10 @@ inline namespace {
 static struct SwapChain
 {
     uint32_t       imageCount;
-    const VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED, false);
+    VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED, false);
     const VkSurfaceFormatKHR         swapChainImageFormat=setupImageFormats();
     VkPresentModeKHR presentMode;
-    VkExtent2D swapChainExtent{854, 480};
+    VkExtent2D swapChainExtent{width, height};
     VkFramebuffer frameBuffer=createFramebuffers(renderpass);
     const VkSwapchainKHR swapChain=createSwapChain(swapChainImageFormat);;
     const std::array<VkImage, 3> image = getSwapChainImages(3U);
@@ -43,18 +43,18 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VKI.physdevice, VKI.surface, &capabilities );
 
     vkGetPhysicalDeviceSurfaceFormatsKHR(VKI.physdevice, VKI.surface, &count, nullptr );
-    VkSurfaceFormatKHR surfaceFormats[count];
+    std::vector<VkSurfaceFormatKHR> surfaceFormats(count);
     
     if ( count != 0 )
     {
-      vkGetPhysicalDeviceSurfaceFormatsKHR(VKI.physdevice, VKI.surface, &count, surfaceFormats );
+      vkGetPhysicalDeviceSurfaceFormatsKHR(VKI.physdevice, VKI.surface, &count, surfaceFormats.data() );
     }
-
     vkGetPhysicalDeviceSurfacePresentModesKHR(VKI.physdevice, VKI.surface, &count, nullptr );
-    VkPresentModeKHR presentModes[count];
+    std::vector<VkPresentModeKHR> presentModes(count);
+
     if ( count != 0 )
     {
-      vkGetPhysicalDeviceSurfacePresentModesKHR(VKI.physdevice, VKI.surface, &count, presentModes );
+      vkGetPhysicalDeviceSurfacePresentModesKHR(VKI.physdevice, VKI.surface, &count, presentModes.data() );
     }
 
     VkSurfaceFormatKHR         swapChainImageFormat;
@@ -62,7 +62,7 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
     // VkSurfaceFormatKHR surfaceFormat;
     for ( const VkSurfaceFormatKHR & surfaceFormat1 : surfaceFormats )
     {
-      if ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+      if ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_UNORM && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
       {
         swapChainImageFormat = surfaceFormat1;
         break;
@@ -238,7 +238,7 @@ auto SwapChain::createRenderPass(VkImageLayout initial, bool load) const -> VkRe
 {
     std::cout << ( "Creating RenderPass" ) << "\n";
       static const VkAttachmentDescription colorAttachment{
-    .format         = VK_FORMAT_B8G8R8A8_SRGB,  // SwapChainSupportDetails::swapChainImageFormat,
+    .format         = VK_FORMAT_B8G8R8A8_UNORM,  // SwapChainSupportDetails::swapChainImageFormat,
     .samples        = VK_SAMPLE_COUNT_1_BIT,
     .loadOp         = VK_ATTACHMENT_LOAD_OP_NONE_EXT,
     .storeOp        = VK_ATTACHMENT_STORE_OP_NONE, //Interestign Bugs: VK_ATTACHMENT_STORE_OP_STORE_DONT_CARE
