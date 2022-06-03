@@ -8,13 +8,10 @@ ubo;
 
 layout(location = 0) out vec3 fragColor;
 
-const vec2 tri[6] = vec2[6](
-  vec2(1.f,1.f),
-		vec2(1.f,-1.f),
-		vec2(-1.f,1.f),
-    vec2(-1.f,-1.f),
-		vec2(-1.f,1.f),
-		vec2(1.f,-1.f)
+const vec2 tri[3] = vec2[3](
+    vec2(1.f,1.f),
+    vec2(1.f,-3.f),
+    vec2(-3.f,1.f)
 );
 
 void main() {

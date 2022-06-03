@@ -2,6 +2,8 @@
 #include "GLFW/glfw3.h"
 #include "Vks.tpp"
 #include "glm/ext/vector_float2.hpp"
+#include "glm/ext/vector_uint2.hpp"
+#include <cstdint>
 #include <vulkan/vulkan_core.h>
 
 std::array<VkCommandBuffer, Frames> fakeFBO::doGenCommnd()
@@ -19,13 +21,13 @@ std::array<VkCommandBuffer, Frames> fakeFBO::doGenCommnd()
 
 struct ITime
 {
-  glm::vec2 xy;
+  glm::uvec2 xy;
   float time;
   float stime;
 } __attribute__((aligned(16))) ;
 
 
-void fakeFBO::doCommndRec()
+void fakeFBO::doCommndRec(uint32_t a)
 {
 
   
@@ -37,16 +39,16 @@ void fakeFBO::doCommndRec()
 
   
   static constexpr VkDeviceSize offsets[] = { 0 };
-  uint32_t i = 0; 
+  // uint32_t i = 0; 
   const auto at = static_cast<float>(glfwGetTime());
-  const ITime iTime = {{(renderArea.extent.width), (renderArea.extent.height)}, at, sinf(at)};
+  const ITime iTime = {{(width), (height)}, at, sinf(at)};
 
-  for(const VkCommandBuffer &commandBuffer : commandBuffers)
-  {VkRenderPassAttachmentBeginInfo RenderPassAttachments
+  /* for(const VkCommandBuffer &commandBuffer : commandBuffers)
+  {*/VkRenderPassAttachmentBeginInfo RenderPassAttachments
   {
     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO,
     .attachmentCount = 1,
-    .pAttachments = &imageViews[i]
+    .pAttachments = &imageViews[a]
   };
 
   const VkRenderPassBeginInfo renderPassInfo = {
@@ -58,22 +60,22 @@ void fakeFBO::doCommndRec()
     // .clearValueCount = 1,
     // .pClearValues    = &clearValues2,
   };
-  vkBeginCommandBuffer(commandBuffer, &beginInfo1 );
+  vkBeginCommandBuffer(commandBuffers[a], &beginInfo1 );
 
 
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+    vkCmdBeginRenderPass(commandBuffers[a], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeLine );
+    vkCmdBindPipeline(commandBuffers[a], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeLine );
      
-    vkCmdPushConstants(commandBuffer,layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, 16, &iTime);
+    vkCmdPushConstants(commandBuffers[a],layout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, 16, &iTime);
 
 
-    vkCmdDraw( commandBuffer, ( 6), 1, 0, 0 );
+    vkCmdDraw( commandBuffers[a], ( 3), 1, 0, 0 );
 
-    vkCmdEndRenderPass( commandBuffer );
-    vkEndCommandBuffer( commandBuffer);
-    i++;
-  }
+    vkCmdEndRenderPass( commandBuffers[a] );
+    vkEndCommandBuffer( commandBuffers[a]);
+    // i++;
+  // }
   // return commandBuffer;
 
 }

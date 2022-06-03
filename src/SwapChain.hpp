@@ -11,15 +11,14 @@
 #pragma once
 inline namespace {
 
-    VkSurfaceCapabilitiesKHR capabilities{};
 }
 static struct SwapChain
 {
-    uint32_t       imageCount;
+    VkExtent2D swapChainExtent=getCurrentSwapChainSurfaceCapabilities();
     VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED, false);
     VkSurfaceFormatKHR         swapChainImageFormat=setupImageFormats();
     VkPresentModeKHR presentMode;
-    VkExtent2D swapChainExtent{width, height};
+    // VkExtent2D swapChainExtent=capabilities.currentExtent;
     VkFramebuffer frameBuffer=createFramebuffers(renderpass);
     VkSwapchainKHR swapChain=createSwapChain(swapChainImageFormat);;
     std::array<VkImage, Frames> image = getSwapChainImages(Frames);
@@ -31,16 +30,23 @@ static struct SwapChain
     [[nodiscard]] auto createImageViews(std::array<VkImage, Frames> image) -> std::array<VkImageView, Frames>;
     auto createFramebuffers(VkRenderPass) -> VkFramebuffer;
     [[nodiscard]] auto createRenderPass(VkImageLayout, bool) -> VkRenderPass;
+    [[nodiscard]] auto getCurrentSwapChainSurfaceCapabilities() const -> VkExtent2D;
 
-} __attribute__((aligned(128))) SW;
+} SW;
 
 
+auto SwapChain::getCurrentSwapChainSurfaceCapabilities() const -> VkExtent2D
+{
+   VkSurfaceCapabilitiesKHR capabilities;
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VKI.physdevice, VKI.surface, &capabilities );
+  return capabilities.currentExtent;
+}
 
 auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
 {
     std::cout <<"SetupImageFormats"<<"\n";
     uint32_t count=0;
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VKI.physdevice, VKI.surface, &capabilities );
+    
 
     vkGetPhysicalDeviceSurfaceFormatsKHR(VKI.physdevice, VKI.surface, &count, nullptr );
     std::vector<VkSurfaceFormatKHR> surfaceFormats(count);
@@ -79,17 +85,17 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
     // return VK_PRESENT_MODE_FIFO_KHR;
 
     // swapChainExtent = SwapChainSupportDetails::chooseSwapExtent();
-    imageCount = ( Frames );
+    // imageCount = ( Frames );
 
-    if ( capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount )
-    {
-      imageCount = capabilities.maxImageCount;
-    }
+    // if ( capabilities.maxImageCount > 0 && Frames > capabilities.maxImageCount )
+    // {
+    //   // imageCount = capabilities.maxImageCount;
+    // }
 
-    std::cout << capabilities.minImageCount << "\n";
-    std::cout << capabilities.maxImageCount << "\n";
-    std::cout << capabilities.currentExtent.height << "\n";
-    std::cout << capabilities.currentExtent.width << "\n";
+    // std::cout << capabilities.minImageCount << "\n";
+    // std::cout << capabilities.maxImageCount << "\n";
+    // std::cout << capabilities.currentExtent.height << "\n";
+    // std::cout << capabilities.currentExtent.width << "\n";
 
     // SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
     // SwapChainSupportDetails::swapChainExtent      = extent;
@@ -107,7 +113,7 @@ auto SwapChain::getSwapChainImages(uint32_t size) -> std::array<VkImage, Frames>
 
 auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -> VkSwapchainKHR
   {
-    std::cout << "ImageCount: " << imageCount << "\n";
+    std::cout << "ImageCount: " << Frames << "\n";
 
     const auto aa = { VKI.graphicsFamily, VKI.transferFamily };
     
@@ -119,7 +125,7 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
       .surface = VKI.surface,
 
       // Image settings
-      .minImageCount    = imageCount,
+      .minImageCount    = Frames,
       .imageFormat      = swapChainImageFormat.format,
       .imageColorSpace  = swapChainImageFormat.colorSpace,
       .imageExtent      = swapChainExtent,
@@ -128,7 +134,7 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
 
       // if (graphicsFamily != presentFamily) {
       .imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE,
-      .queueFamilyIndexCount = 1,
+      .queueFamilyIndexCount = 0,
       .pQueueFamilyIndices   = &VKI.graphicsFamily,
       // } else {
       // .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
@@ -136,7 +142,7 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
       // .pQueueFamilyIndices = nullptr; // Optiona,
       // }
 
-      .preTransform   = capabilities.currentTransform,
+      .preTransform   = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
       .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
       .presentMode    = presentMode,
       .clipped        = true,
@@ -240,8 +246,8 @@ auto SwapChain::createRenderPass(VkImageLayout initial, bool load) -> VkRenderPa
       static const VkAttachmentDescription colorAttachment{
     .format         = VK_FORMAT_B8G8R8A8_UNORM,  // SwapChainSupportDetails::swapChainImageFormat,
     .samples        = VK_SAMPLE_COUNT_1_BIT,
-    .loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-    .storeOp        = VK_ATTACHMENT_STORE_OP_STORE, //Interestign Bugs: VK_ATTACHMENT_STORE_OP_STORE_DONT_CARE
+    .loadOp         = VK_ATTACHMENT_LOAD_OP_NONE_EXT,
+    .storeOp        = VK_ATTACHMENT_STORE_OP_NONE, //Interestign Bugs: VK_ATTACHMENT_STORE_OP_STORE_DONT_CARE
     .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
     .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
     .initialLayout  = initial,

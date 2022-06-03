@@ -3,6 +3,7 @@
 
 
 #include <array>
+#include <cstdint>
 #include "VKI.hpp"
 
 
@@ -19,7 +20,7 @@ struct fakeFBO
     std::array<VkCommandBuffer, Frames> commandBuffers =  doGenCommnd();
     static VkCommandBuffer doCommBuffers(VkCommandPool, uint32_t);
     std::array<VkCommandBuffer, Frames> doGenCommnd();
-    void doCommndRec();
+    void doCommndRec(uint32_t);
 
     
 };

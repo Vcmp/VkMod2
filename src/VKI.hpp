@@ -14,7 +14,7 @@ constexpr uint16_t width = 1920;
 constexpr uint16_t height = 1080;
 constexpr uint8_t Frames = 3;
 
-constexpr bool ENABLE_VALIDATION_LAYERS = false;
+constexpr bool ENABLE_VALIDATION_LAYERS = true;
 
 constexpr char* validationLayers = "VK_LAYER_KHRONOS_validation";
 
@@ -22,7 +22,7 @@ inline struct VkInit
 {
     const HWND window=init();
      const VkInstance instance=createInstance();
-    const VkSurfaceKHR surface = createSurface();
+    VkSurfaceKHR surface = createSurface();
      const VkPhysicalDevice physdevice = doPhysicalDevice();
      const VkDevice device = doDevice();
     uint32_t graphicsFamily;

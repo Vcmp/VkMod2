@@ -3,344 +3,200 @@
 
 //layout(location = 0) in vec3 fragColor;
 
-layout(push_constant) uniform i_Time { vec2 iResolution; float iTime; float sTime; };
+layout(push_constant) uniform i_Time { ivec2 iResolution; float iTime; float sTime; };
 layout(location = 0) out vec4 fragColor;
 mat4 a={vec4(1,0,1,0),vec4(1,1,0,0),vec4(0,0,1,0),vec4(0,0,0,1)};
-
+ivec2 fragCoord = ivec2(gl_FragCoord.x,(iResolution.y-gl_FragCoord.y));
+const vec4 iMouse = vec4(0.,0.,0.,0.);
 //NOT My SHADER!
+// Gaussian Weights and Fake AO. Created by Reinder Nijhoff 2019
+// Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+// @reindernijhoff
+//
+// https://www.shadertoy.com/view/Wtj3Wc
+//
+// Sometimes you need to calculate the weights of a Gaussian blur kernel 
+// yourself. For example if you want to calculate weights for a kernel where
+// the center of the Gaussian curve is not exactly in the "center of the
+// kernel" but has a sub-pixel offset. These "shifted" Gaussian kernels can be
+// used if you want to blur-and-upscale an image in a single pass, e.g. if you
+// are adding a low-res raytraced reflection buffer to your high-res
+// rasterized scene. It is also needed for the fake ambient occlusion (AO)
+// term as used in this shader.
+//
+// The Gaussian weights for a blur kernel can be calculated, either by
+// numerical integration, or by directly calculating the value of the Gauss
+// error funtion, as shown below.
+//
+// In this shader I calculate a fake ambient occlusion (AO) term for each
+// sample point. The AO-term is based on the weighted average of fake AO-terms
+// for all cells in a 7x7 grid around the sample point, corresponding with a
+// 7x7 Gaussian kernel with the sample point as its center. The AO-term for
+// a single cell in this weighted average is simply given by the difference in
+// height of the cell and that of the sample point.
+//
 
-/////////////////////////////////////////////////////////////////
-// 
-// "2nd stage BOSS" by 0x4015 & YET11 - Shadertoy port
-//   http://www.pouet.net/prod.php?which=66962
-//   Big thanks to i-saint for initial GLSL Sandbox port!
-//     http://glslsandbox.com/e#31067
-// 
-////////////////////////////////////////////////////////////////
+#define AA 1
+#define MAX_DIST 10000
 
-float u,y,z;
-vec3 v,w,x;
+//
+// Approximation of the Gauss error function (https://en.wikipedia.org/wiki/Error_function)
+// http://people.math.sfu.ca/~cbm/aands/page_299.htm
+//
+float erf(float x) {
+    const float p  =  .47047;
+    const float a1 =  .3480242;
+    const float a2 = -.0958798;  
+    const float a3 =  .7478556;
 
-float B(vec3 a)
-{
-    return max(max(a.x,a.y),a.z);
+    float t = 1. / (1. + p * x);
+    return 1. - t * (a1 + t * (a2 + t * a3)) * exp(-x*x);
+}
+    
+float gaussianWeight(int cell, float center, const float sigma) {
+    float x0 = float(cell) - center;
+    float x1 = abs(x0+1.);
+    x0 = abs(x0);
+    
+    float erfx0 = erf(x0 / sigma);
+    float erfx1 = erf(x1 / sigma);
+    
+    return x0 < 1. && x1 < 1. ? abs(erfx0 + erfx1) : abs(erfx0 - erfx1);
 }
 
-float C(float a)
-{
-    return a/(abs(a)+1.0);
+float gaussianWeight(ivec2 cell, vec2 center, const float sigma) {
+	float ix = gaussianWeight(cell.x, center.x, sigma);
+	float iy = gaussianWeight(cell.y, center.y, sigma);
+    
+    return ix * iy;
 }
 
-float D(float a)
-{
-    float b = max(0.0, a);
-    return exp(1.0 - b) * b;
+// Hash by Dave_Hoskins: https://www.shadertoy.com/view/4djSRW
+float hash12(vec2 p) {
+	vec3 p3  = fract(vec3(p.xyx) * .1031);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.x + p3.y) * p3.z);
 }
 
-float E(float a,float b,float c)
-{
-    float d = clamp((b-a)/c*.5+.5, 0.0, 1.0);
-    return mix(b,a,d) - c * d * (1.0-d);
+float curveXOffset(vec2 pos) {
+    return 15.*cos(pos.y*.1);;
 }
 
-float F(vec3 a, vec3 b, vec3 c, vec3 d, int i)
-{
-    vec3 e = a-b;
-    float f = dot(c,c);
-    float g = dot(d,d);
-    float h = dot(d,e);
-    float j = dot(c,e);
-    float k = dot(c,d);
-    float l = clamp((k*h-j*g)/(f*g-k*k), 0.0, 1.0);
-    float m = k*l+h;
-    float n = 0.0;
-    if( m < 0.0) {
-        l = clamp(-j/f, 0.0, 1.0);
-    }
-    else if(m > g) {
-        n = 1.0;
-        l = clamp((k-j)/f, 0.0, 1.0);
-    }
-    else {
-        n = m/g;
-    }
-    e += c*l-d*n;
-    return(sin(l*50.0 - u*500.0) + 1.1)/(fract(u*9.0 + float(i)*.11)*dot(e,e)+.0001);
+// camera path
+vec3 curve(float time) {
+	vec3 p = vec3(0., 3.5+.8*cos(.95*time), 8.5*sin(.1+.37*time)+12.*time);
+    p.x = curveXOffset(p.xz);
+    return p;
 }
 
-float G(vec3 a,int b,float c,float d,float e)
-{
-    float f = 0.0;
-    for(int i=0; i<8; ++i){
-        if(i>=b) break;
-        vec3 g = (a+e)*c;
-        g += sin(g.zxy*1.13)*1.63;
-        f += (length(cos(g)+sin(g.yzx))-1.5)*d;
-        a = a.yzx;
-        c *= 1.93;
-        d *= .419;
-    }
-    return f;
+float map(vec2 pos) {
+    float x = pos.x - curveXOffset(pos);
+    return (2.*hash12(pos) + 5.) * (.3+min(3.,.002*(x*x)));
 }
 
-float H(vec3 a)
-{
-    return (abs(a.z)*.5 + a.y - 2333.0) * .89;
-}
-
-float I(vec3 a)
-{
-    return length(sin(a*.01)) * 125.0 - 137.0;
-}
-
-float J(vec3 a)
-{
-    return max(B(abs(a)),B(vec3(length(a.xy),length(a.yz),length(a.zx)))-.2)-1.0;
-}
-
-float K(vec3 a)
-{
-    a = abs(a);
-    return max(a.x*.87+a.y*.5, a.y) - 1.0;
-}
-
-float L(vec3 a)
-{
-    a.z -= 5.0;
-    return max(max(abs(length(a)-5.0) - .05, K(a)), a.z);
-}
-
-vec2 M(vec3 a, int b)
-{
-    vec3 c = (a-x)*.5;
-    vec3 d = a-v;
-    vec3 e = d*.1;
-    float f = .5;
-    float g = length(c)-5.0;
-    if(int(g) < 1){
-        float b=(floor(atan(c.x,c.y)/3.14159265*1.5)+.5)/3.0*3.14159265*2.0;
-        float d=sin(b);
-        float e=cos(b);
-        vec3 f=vec3(c.x*d+c.y*e,abs(c.x*e-c.y*d),c.z),h=vec3(abs(c.x),c.zy);
-        g = min(min(max(L(h*vec3(.6, .3, -.3) + vec3(.3, -.1, 0.0))/.6,.2-abs(h.x)),L(h*vec3(1.0, .5, -.5)+vec3(.3, 0.0, .3))),min(min(max(K(f*1.25-vec3(.2,1.1,-2.5))/1.25,abs(h.y+2.0)-1.75),L(vec3(0.0, -.5, 1.5)-f.yzx*.5)*2.0),max(J(f*.7+vec3(-1.75, .35, 1.4))/.7, -J(f*.8+vec3(-2.0, .4, 2.8))/.8)))*2.0;
-    }
-    for(int i=0; i<8; ++i) {
-        vec3 a = floor(e) + vec3(mod(float(i), 2.0), mod(floor(float(i)/2.0), 2.0), mod(floor(float(i)/4.0), 2.0));
-        if(max(I(a*10.0),H(a*10.0)) < 0.0 && fract(a.x*.1+a.y*.17+a.z*.31)>.5) f = min(f,B(abs(a-e))-.49);
-    }
-    float h = I(d);
-    float j = H(d);
-    float k = max(max(max(h-2.0, j-5.0), f*10.0), B(abs(.5-fract(d*.01))*100.0)-41.0)+G(d, b, .5,.1, 0.0)+.1;
-    float l = length(a-w)-110.0;
-    float m = min(E(E(h+a.y*.15-15.0+max(0.0, j)-G(d, b, .05, 2.0, 0.0), a.y + 40.0 - E(-G(a, b, .01, 15.0, 0.0),-G(a+40.0, b, .011, 15.0, 0.0), .3)+(b>1 ? sin(G(a, b, .02, 1.0, 0.0) * 30.0 + a.x + a.z)*.05 : 0.0), 50.0)*.95, k, 10.0), min(l,g));
-    return vec2(m, float(m==k) + float(m==l) * 2.0 + float(m==g) * 3.0);
-}
-
-vec2 N5(vec3 a, vec3 c)
-{
-    vec2 d;
-    float e = 0.0;
-    for(int i=0; i<5; ++i) {
-        d = M(a+c*e, 1);
-        if(abs(d.x)<(e*5.0 + 1.0)*.0001 || e>=3000.0) break;
-        e = min(e+d.x*y, 3000.0);
-    }
-    return vec2(e, d.y);
-}
-vec2 N80(vec3 a, vec3 c)
-{
-    vec2 d;
-    float e = 0.0;
-    for(int i=0; i<80; ++i) {
-        d = M(a+c*e, 1);
-        if(abs(d.x)<(e*5.0 + 1.0)*.0001 || e>=3000.0) break;
-        e = min(e+d.x*y, 3000.0);
-    }
-    return vec2(e, d.y);
-}
-
-float O(vec3 a,float b)
-{
-    return exp(min(H(a-v), 0.0)*b);
-}
-
-float P(vec3 a,vec3 b)
-{
-    float c = N5(a+b*2.0, b).x;
-    return C(c*c*.005);
-}
-
-float Q(vec3 a,int b,float c,float d)
-{
-    float e = C(c*10.0)+c*.3;
-    float f = G(a, b, d, .3, C(c*2.0) + c * .2);
-    return E(
-        min(min(length(a.zx),length(a.xy)),length(a.yz))+(length(a)-C(c*50.0)*5.0+c)*.3-f*e,
-        E(  E(length(a+e*1.2)-e*2.0-f, length(a+e*1.2*vec3(-1.0, -1.0, 1.0))-e*2.2-f,.4),
-            E(length(a+e*1.2*vec3(1.0,-1.0,-1.0))-e*2.4-f,length(a+e*1.2*vec3(-1.0, 1.0, -1.0))-e*2.6-f,.4),
-            .4), .2);
-}
-
-vec4 R(vec3 a,vec3 b,vec3 c,float d,float e,float f)
-{
-    float g = 0.0;
-    float h = 1.0;
-    vec3 j = vec3(0);
-    if(d > 0.0) {
-        d += .1;
-        for(int i=0; i<32; ++i) {
-            if(g>=f) break;
-            vec3 k=b+c*g-a,l=k/e;
-            float m = Q(l, 3, d, 1.2);
-            float n = Q(l, 5, d-.1,1.2);
-            float p = exp(smoothstep(d, -d, n*.2) * 40.0 - 20.0);
-            float q = max(min(m,n),.1) * e * y / (h*.8+.4);
-            j += h*((exp(smoothstep(d,-d,m*.5)*20.0-10.0)*exp(-d*9.0)*vec3(1.0, .2, .1)+C(p*.005)*(C(Q(l+vec3(.73,.64,.23)*.3, 5, d-.1,1.2)*e*5.0)*.5+.5)*vec3(40.0, 32.0, 28.0) * O(k+a,.004)+vec3(2.0, 1.0, 5.0)*.0001)*vec3(6.0, 5.0, 3.0)*.01) * q;
-            h *= exp(-.1*p*q);
-            g+=q;
+float fakeAO(vec3 p) {
+    const int gridOffset = 3;
+    float sum =0., accum = 0.;
+    
+    for (int x = -gridOffset; x <= gridOffset; x++) {
+        for (int y = -gridOffset; y <= gridOffset; y++) {
+            ivec2 s = ivec2(x,y) + ivec2(p.xz);
+            float weight = gaussianWeight(s, p.xz, 1.5);
+            
+            sum += max(map(s)-p.y, 0.) * weight;
+            accum += weight;
         }
     }
-    return vec4(j,h);
+    return sum / accum;
 }
 
-vec3 S(vec3 a,vec3 b,vec3 c,float d)
-{
-    float e = dot(c,vec3(.73,.64,.23))*.1+.9;
-    float f = G(c*vec3(1.0, 3.0, 1.0), 8, 3.0, .3, 0.0);
-    float g = O(b+c*d,.004);
-    return mix(vec3(5.0, 3.4, 2.9)*(pow(e,4.0)*.2+pow(e,99.0)*.7+.1)*g, mix(a,mix(vec3(.42, .6, 12.0)*smoothstep(1.0, 0.0, f), vec3(40.0, 32.0, 28.0),smoothstep(0.0,1.0,f-G(vec3(.73,.64,.23)*.02+c*vec3(1.0, 3.0, 1.0), 8, 3.0, .3, 0.0)))*g,smoothstep(1800.0,3000.0,d)), exp(-d*.0025*(smoothstep(.5, -1.0, c.y)*.95+.05)));
+// trace cubes in grid
+vec3 trace( in vec3 ro, in vec3 rd, const int steps, inout vec3 normal ) {
+	ivec2 pos = ivec2(floor(ro.xz));
+    vec3 rdi = 1./rd;
+    vec3 rda = abs(rdi);
+	ivec3 rds = ivec3(sign(rd));
+	vec2 dis = (pos - ro.xz + .5 + rds.xz*.5) * rdi.xz;
+	vec3 roi = rdi*(ro-vec3(.5,0,.5));
+    
+	// ivec2 mm = ivec2(0);
+	for( int i=0; i<steps; i++ ) {        
+        vec3 n = roi - rdi * vec3(pos.x, 0, pos.y);
+        vec3 k = rda*vec3(.5, map(pos), .5);
+
+        vec3 t1 = -n - k;
+        vec3 t2 = -n + k;
+
+        float tN = max( max( t1.x, t1.y ), t1.z );
+        float tF = min( min( t2.x, t2.y ), t2.z );
+
+        if (tN < tF && tN >= 0.) {
+            normal = -rds*step(t1.yzx,t1.xyz)*step(t1.zxy,t1.xyz);
+            return vec3(tN, pos);
+        }
+        
+		ivec2 mm = ivec2(step( dis.xy, dis.yx )); 
+		dis += mm*rda.xz;
+        pos += (mm*rds.xz);
+	}
+
+	return vec3(MAX_DIST);
 }
 
-vec3 T(vec3 a,vec3 b,vec3 c,vec3 d,vec3 e)
-{
-    vec3 f = normalize(b+e);
-    float g = d.z * d.z;
-    float h = max(0.0, dot(a,e));
-    float j = max(0.0, dot(a,f));
-    float k = j * j * (g*g-1.0)+1.0;
-    float l = g * .5;
-    return(c*(1.0-d.y)+d.x*g*g/(3.14159265*k*k)*(d.y+(1.0-d.y)*pow(1.0-max(0.0,dot(e,f)),5.0))/((h*(1.0-l)+l)*(max(0.0,dot(a,b))*(1.0-l)+l)))*h;
+vec3 render( in vec3 ro, in vec3 rd, bool full ) {
+    vec3 normal, col = vec3(0);
+	float ref = 1.;
+    
+    for (int i=1; i>=0; i--) {
+        vec3 d = trace(ro, rd, i*64+64, normal);
+        if (d.x < MAX_DIST) { // cube hit
+            ro += d.x * rd;
+            
+            float fresnel = full ? pow(1.-max(0.,-dot(normal,rd)),5.) : 0.;
+            float mat = full ? hash12(d.zy) : 1.;
+            mat *= exp(-1.5*fakeAO(ro)) * ref * (1.-fresnel) 
+                * (.8 + .2 * dot(normal, vec3(-.25916,.8639,-.4319)));
+	       	col += mat;
+            
+            ref *= fresnel;
+            rd = reflect(rd, normal);
+        } else { // background 
+            col +=vec3(.5,.8,1) * (ref*(5.-2.5*rd.y));
+            return col;
+        }
+        if (ref <= .001) return col;
+    }    
+    return col;
 }
 
-void main()
-{
-    vec2 fc = (gl_FragCoord.xy / iResolution.xy) * vec2(1280.0, 720.0);
-    vec2 sc = gl_FragCoord.xy / (iResolution.x / 1280.0);
-    u = iTime;
-    y = fract(sin(float(fc.x)*.67 + float(fc.y)*.97 + u*7.0)*85081.0)*.05 + .95;
-    z = u + y*.2 - .2;
-    v = vec3(0.0, smoothstep(52.0, 66.0, z)*2000.0, 0.0);
-    w = v;
-    x = vec3(sin(z*.5)*2.0, 0.0, z*21.0 - 2015.0)*10.0;
+mat3 setLookAt( in vec3 ro, in vec3 ta, float cr ) {
+	vec3  cw = normalize(ta-ro);
+	vec3  cp = vec3(sin(cr), cos(cr), 0.);
+	vec3  cu = normalize(cross(cw,cp));
+	vec3  cv = normalize(cross(cu,cw));
+    return mat3(cu, cv, cw);
+}
 
-    vec3 a = vec3(0.0, smoothstep(19.5, 0.0, z)*80.0 - 2.0, z*40.0 - 4000.0)*5.0;
-    vec3 b;
-    vec3 c = vec3(0.0, z - 25.0, z + 9.0);
-    vec3 h = vec3(0.0);
-    vec3 d = h;
-    float e = .002;
-    float f = 0.0;
-    float g = 40.0;
-    if (30.0 < u) {
-        if (u < 46.0) {
-            a = x + sin(vec3(3.0, 5.0, 7.0)*(z - 17.0)*.05)*30.0;
-            c = x + sin(vec3(3.0, 5.0, 7.0)*(z - 17.0)*.07)*7.0 - a;
-            e = .005;
-        }
-        else if (u < 91.0) {
-            float b = z - 60.0;
-            a = vec3(180.0, 174.0, b*200.0 - 7670.0);
-            c = vec3(sin(b*.2)*3.0 + 2.0, smoothstep(0.0, 4.0, b)*smoothstep(50.0, 10.0, b)*15.0 - 5.0, 5.0);
-            e += D(b - 1.0)*.02;
-            w = vec3(33.0, 57.0, b*45.0 - 1650.0)*5.0;
-            x = w + vec3(cos(b*.5), -1.0, 6.0)*50.0;
-            if (b < 3.0) x = a - vec3(sin(b*.4 - 2.0)*3.0, -b - 2.0, b + 2.0) * 15.0;
-        }
-        else {
-            e *= 2.0;
-            float b = z - 100.0;
-            float h = b + sin(b*.4*3.14159265 - 1.7);
-            w = vec3(32.0, 54.0, b*70.0 - 220.0)*5.0;
-            x = w + vec3(sin(h)*3.0, sin(h*1.7) - 1.0, 14.0)*20.0;
-            a = w + mix(mix(vec3(7.0, 22.0, b*3.0 + 20.0), -vec3(13.0, 16.0, b - 60.0), smoothstep(0.0, 15.0, b)), vec3(-sin(b*.34)*35.0, 5.0, cos(b*.68)*33.0 + 30.0), smoothstep(4.0, 7.0, b)*smoothstep(22.0, 18.0, b))*5.0;
-            c = mix(x, w, (smoothstep(3.0, -9.0, b) + smoothstep(21.0, 23.0, b)*smoothstep(37.0, 32.0, b))*.8 + .1) - a;
-            d = vec3(3.0, 7.0, 32.0) * 50.0;
-            f = b / 3.0 - 1.8;
-            if (b > 15.0) {
-                d = vec3(3, 4, 96)*50.0;
-                f -= 3.3;
-            }
-            if (b > 22.8) {
-                b -= 22.8;
-                d = vec3(3.0, b + 5.0, b*3.0 + 137.0) * 50.0;
-                f = b / 8.0;
-                g = 150.0;
-                e += D(b*2.0)*.05;
-                x = w + vec3(sin(b*.7 + 2.0)*10.0 - 4.0, sin(b*.5 + 4.0)*2.0 - 12.0, 50.0 + b*b*.5 - b*8.0)*5.0;
-                w *= float(b < .5);
-            }
-        }
-    }
+void main() {
+    float time = .2*iTime + 20.*iMouse.x/iResolution.x;    
+    vec2 p = (-iResolution.xy+2.*(fragCoord)) / iResolution.y;
+	bool full = fract(.5*time + .015*(p.x + p.y)) < .5;
+    
+    vec3 ro = curve(time);
+    vec3 ta = curve(time+.1);
+    ta.y -= .3 + .1*sin(time);
+    float roll = .2*sin(.1*ro.z-1.6);
 
-    {
-        vec3 a = normalize(c);
-        vec3 d = normalize(cross(vec3(0.0, 1.0, 0.0), a));
-        vec3 f = normalize(vec3(G(vec3(z), 5, 1.3, e, 0.0), G(vec3(z), 5, 1.7, e, 0.0), .5));
-        vec3 g = normalize(cross(vec3(G(vec3(z), 5, 1.5, e, 0.0) + sin(z*.15), 2.0, 0.0), f));
-        b = normalize(
-//          mat3(d, cross(a, d), a) * mat3(-g, cross(f, g), f) * vec3(sc / 108.0 - vec2(8.9, 5.0), 6.0));
-			mat3(d, cross(-a, d), a) * mat3(-g, cross(f, g), f) * vec3(sc / 72.0 - vec2(8.9, 5.0), 6.0));
-    }
-
-    vec2 j = N80(a, b);
-    float k = j.x;
-    vec3 l = a + b*k;
-    vec3 t = fract((v - l) / 3.14159265*.01 + vec3(.5, 0.0, .5)) - .5;
-    vec3 m = vec3(1.0, -1.0, -1.0) * .01;
-    vec3 n = normalize(M(l + m, 5).x*m + M(l + m.yyx, 5).x*m.yyx + M(l + m.yxy, 5).x*m.yxy + M(l + m.xxx, 5).x*m.xxx);
-    vec3 o = vec3(5.0, 1.0, 1.0)*.01;
-    vec3 p = vec3(.2, .15, .8);
-    float q = O(l, .004);
-    float r = P(l, n);
-    if (int(j.y) == 1) {
-        o = vec3(5.0, 4.0, 3.0)*.01;
-        p = vec3(.1, .1, .5);
-    }
-    else if (int(j.y) == 2) {
-        vec3 c = fract(n*.1);
-        vec3 d = abs(.5 - c) - .5;
-        float b = 1.0;
-        float e = B(d);
-        for (int i = 0; i < 7; ++i) {
-            d = .5 - abs(.5 - fract(c*b))*3.0;
-            b *= 3.0;
-            e = max(min(max(d.x, d.z), min(max(d.x, d.y), max(d.y, d.z))) / b, e);
-        }
-        b = smoothstep(-(k*.001 + .05), k*.001 + .05, abs(.5 - fract(e*900.0)) - .4);
-        o = vec3(1.0, 2.0, 5.0)*.01;
-        p = vec3(.3, .1, mix(.5, .1, b));
-        h = (b + .01) * .002 * vec3(5.0, 1.0, 5.0) / (1.0001 - sin(u*3.14159265*.4 + 1.3));
-    }
-    else if (int(j.y) == 3) {
-        o = vec3(2.0, 3.0, 3.0) * .01;
-        p = vec3(.3, .1, .1);
-        h = smoothstep(1.0, 0.0, abs(l - x + 4.0).z)*.1*vec3(1.0, 5.0, 1.0) / (1.0001 - sin(u*13.0772 + .07));
-    }
-    vec4 s = R(d, a, b, f, g, k);
-    h = mix(S(s.xyz, a, b, length(a - d)), S(h + (T(n, -b, o, p, vec3(.73, .64, .23))*P(l, vec3(.73, .64, .23)) + T(n, -b, o, mix(p, vec3(p.xy, 1.0), .5), -vec3(.73, .64, .23))*P(l, -vec3(.73, .64, .23))*vec3(.1, .088, .085))*vec3(40.0, 32.0, 28.0)*q + T(n, -b, o, mix(p, vec3(p.xy, 1.0), .5), n)*(mix(vec3(.64, .47, 1.4), vec3(6.4, 5.4, 16.0), n.y*.5 + .5)*q + g*9.0*vec3(1.0, .2, .1)*D(f*20.0)*(dot(normalize(d - l), n)*.5 + .5) / exp(length(d - l)*.01) + .02*vec3(5.0, 1.0, 5.0) / (1.0001 - sin(u*3.14159265*.4 + 1.3))*(dot(normalize(w - l), n)*.5 + .5) / exp(length(w - l)*.01) + .5*vec3(2.0, 1.0, 5.0)*(dot(normalize(t), n)*.5 + .5) / exp(length(t)*7.0)*(1.0 / (1.0001 - B(sin(u + (v - l)*.1)) + float(j.y != 1.0)*.5) + 1.0)*smoothstep(3000.0, 2000.0, abs(l.z - 4000.0))*smoothstep(108.0, 113.0, u))*r, a, b, k), s.a);
-    if (99.0 < u && u < 123.0 && fract(u*.2) < .2) {
-        for (int i = 0; i < 3; ++i) {
-            float c = floor(u*5.0)*3.14159265*.5;
-            h += F(w + vec3(sin(c), cos(c), 0.0)*110.0, a, vec3(sin(z*(float(i) + 2.0)*.7), sin(z*(float(i) + 2.0)*.5), 7.0)*300.0, l - a, i)*vec3(5.0, 1.0, 1.0)*.2;
-        }
-    }
-    if (118.0 < u && u < 123.0) {
-        for (int i = 0; i < 4; ++i) {
-            float c = z*2.0 + float(i)*3.14159265*.5;
-            float b = smoothstep(120.0, 120.5, z)*3.14159265*.5;
-            h += F(x, a, vec3(sin(c)*cos(b), cos(c)*cos(b), -sin(b))*5000.0, l - a, i) * vec3(1.0, 5.0, 1.0);
-        }
-    }
-    h *= O(a, -.0015);
-    fragColor = vec4(pow(h / (abs(h) + 1.0), vec3(.45)), 1.0);
+    mat3 ca = setLookAt( ro, ta, roll );
+    
+   
+   
+            const vec3 rd = normalize(ca * vec3(p + (2/(iResolution.y)), 2));
+            const vec3 col = render(ro, rd, full);
+           
+        
+	
+    
+    
+    fragColor = vec4(pow(col, vec3(.4545)), 1);
 }

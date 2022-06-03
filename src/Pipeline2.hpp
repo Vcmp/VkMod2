@@ -226,6 +226,7 @@ auto Pipeline2::genCommPool() const -> VkCommandPool
  constexpr VkCommandPoolCreateInfo  poolInfo = {
     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     .pNext            = nullptr,
+    .flags=VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
     .queueFamilyIndex = 0,
   };
   return Vks::doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool );

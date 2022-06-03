@@ -56,6 +56,8 @@ typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( mat4x ) ), __a
 static const struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __aligned__( 32 ) ) ) renderer2// : Queues
 {
       static constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr };
+
+      static constexpr VkFenceCreateInfo vkFenceCreateInfo{.sType=VK_STRUCTURE_TYPE_FENCE_CREATE_INFO, .pNext=nullptr};
       
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
@@ -63,13 +65,14 @@ static const struct __attribute__( ( internal_linkage, __vector_size__( 32 ), __
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   static constinit inline uint32_t               currentFrame;
-private:
+
   constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   
 
 
-  const VkSemaphore AvailableSemaphore = Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore);
-  const VkSemaphore FinishedSemaphore = Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore);
+  const std::array<VkSemaphore, Frames> AvailableSemaphore = {Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore), Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore), Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore)};
+  const std::array<VkSemaphore, Frames> FinishedSemaphore = {Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore), Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore), Vks::doPointerAlloc5<VkSemaphore>( &vkCreateCSemaphore, vkCreateSemaphore)};
+  const std::array<VkFence, Frames> fence = {Vks::doPointerAlloc5<VkFence>( &vkFenceCreateInfo, vkCreateFence), Vks::doPointerAlloc5<VkFence>( &vkFenceCreateInfo, vkCreateFence), Vks::doPointerAlloc5<VkFence>( &vkFenceCreateInfo, vkCreateFence)};
 
   static constexpr const uint32_t                TmUt = 1000000000;
 
