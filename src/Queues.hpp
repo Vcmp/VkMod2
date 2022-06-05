@@ -28,12 +28,5 @@ static struct Queues
   static void createCommandPool();
   static void beginSingleTimeCommands();
   static void endSingleTimeCommands();
-  template <typename X, typename T>
-  static constexpr auto clPPPI3A( const auto * __restrict__ pStrct, const char * __restrict__ a )
-  {
-    // const VkDevice aa = volkGetLoadedDevice();
-    X object;
-    T( vkGetDeviceProcAddr( VKI.tst(), a ) )( VKI.tst(), pStrct, nullptr, &object );
-    return object;
-  }
+
 };

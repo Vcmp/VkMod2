@@ -30,7 +30,7 @@ static struct Pipeline2
    [[nodiscard]] auto doCommBuffers() const -> std::array<VkCommandBuffer, Frames>;
    [[nodiscard]] auto genLayout() const -> VkPipelineLayout;
    [[nodiscard]] constexpr auto genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const -> VkPipelineShaderStageCreateInfo;
-} __attribute__((aligned(64))) PX2;
+} __attribute__((aligned(64)));
 
     constexpr auto Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag) const -> VkPipelineShaderStageCreateInfo
     {
@@ -163,63 +163,63 @@ auto  Pipeline2::doCommBuffers() const -> std::array<VkCommandBuffer, Frames>
   return PreTestBuffer;
 }
 
-void Pipeline2::genCommBuffers()
-{
+// void Pipeline2::genCommBuffers()
+// {
 
   
-      constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-                                                    .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT) };
+//       constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+//                                                     .flags = ( VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT) };
 
-    constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = {width, height} };
+//     constexpr VkRect2D renderArea = { .offset = { 0, 0 }, .extent = {width, height} };
 
 
   
-  static constexpr VkDeviceSize offsets[] = { 0 };
-  uint32_t i = 0; 
-mat4x m4;
-m4.loadAligned(viewproj);
+//   static constexpr VkDeviceSize offsets[] = { 0 };
+//   uint32_t i = 0; 
+// mat4x m4;
+// m4.loadAligned(viewproj);
 
-  for ( const VkCommandBuffer & commandBuffer : commandBuffer )
-  {VkRenderPassAttachmentBeginInfo RenderPassAttachments
-  {
-    .sType = VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO,
-    .attachmentCount = 1,
-    .pAttachments = &SW.imageViews[i]
-  };
+//   for ( const VkCommandBuffer & commandBuffer : commandBuffer )
+//   {VkRenderPassAttachmentBeginInfo RenderPassAttachments
+//   {
+//     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_ATTACHMENT_BEGIN_INFO,
+//     .attachmentCount = 1,
+//     .pAttachments = &SW.imageViews[i]
+//   };
 
-  const VkRenderPassBeginInfo renderPassInfo = {
-    .sType           = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO ),
-    .pNext = &RenderPassAttachments,
-    .renderPass      = ( SW.renderpass ),
-    .framebuffer = ( SW.frameBuffer ),
-    .renderArea      = renderArea,
-    .clearValueCount = 0,
-    .pClearValues    = nullptr,
-  };
+//   const VkRenderPassBeginInfo renderPassInfo = {
+//     .sType           = ( VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO ),
+//     .pNext = &RenderPassAttachments,
+//     .renderPass      = ( SW.renderpass ),
+//     .framebuffer = ( SW.frameBuffer ),
+//     .renderArea      = renderArea,
+//     .clearValueCount = 0,
+//     .pClearValues    = nullptr,
+//   };
   
-  vkBeginCommandBuffer(commandBuffer, &beginInfo1 );
+//   vkBeginCommandBuffer(commandBuffer, &beginInfo1 );
 
 
-    vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
+//     vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE );
 
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,pipeline );
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
-    vkCmdBindIndexBuffer(commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
+//     vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,pipeline );
+//     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &BuffersX::vertexBuffer, offsets );
+//     vkCmdBindIndexBuffer(commandBuffer, BuffersX::indexBuffer, 0, VK_INDEX_TYPE_UINT16 );
      
-    vkCmdPushConstants(commandBuffer,vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &m4);
+//     vkCmdPushConstants(commandBuffer,vkLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, 64, &m4);
 
-    // vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineX::vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
+//     // vkCmdBindDescriptorSets( commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, PipelineX::vkLayout, 0, 1, &UniformBufferObject::descriptorSets, 0, nullptr );
 
 
-    vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
+//     vkCmdDrawIndexed( commandBuffer, ( ( BuffersX::sizedsfIdx ) / 2 ), 1, 0, 0, 0 );
 
-    vkCmdEndRenderPass( commandBuffer );
-    vkEndCommandBuffer( commandBuffer);
-    i++;
-  }
-  // return commandBuffer;
+//     vkCmdEndRenderPass( commandBuffer );
+//     vkEndCommandBuffer( commandBuffer);
+//     i++;
+//   }
+//   // return commandBuffer;
 
-}
+// }
 
 auto Pipeline2::genCommPool() const -> VkCommandPool
 {

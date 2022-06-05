@@ -1,10 +1,7 @@
 #include "fakeFBO.hpp"
 #include "GLFW/glfw3.h"
-#include "Vks.tpp"
-#include "glm/ext/vector_float2.hpp"
 #include "glm/ext/vector_uint2.hpp"
-#include <cstdint>
-#include <vulkan/vulkan_core.h>
+
 
 std::array<VkCommandBuffer, Frames> fakeFBO::doGenCommnd()
 {

@@ -7,13 +7,16 @@
 #include <cstdio>
 #include <pthread.h>
 #include <unistd.h>
-#include <vulkan/vulkan_core.h>
+
 inline namespace
 {
   pthread_t sys;
   bool a = true;
   static uint32_t aa = 0;
   // static mat4x m4;
+  const renderer2 R2;
+  Pipeline2 PX2;
+  SwapChain SW;
 }
 
 inline void * Sysm( void * pv_unused )
