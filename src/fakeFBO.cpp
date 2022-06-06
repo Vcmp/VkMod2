@@ -3,18 +3,7 @@
 #include "glm/ext/vector_uint2.hpp"
 
 
-std::array<VkCommandBuffer, Frames> fakeFBO::doGenCommnd()
-{
-  std::array<VkCommandBuffer, Frames> PreTestBuffer{};
-   const VkCommandBufferAllocateInfo allocateInfo{ .sType              =  VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ,
-                                                  .commandPool        =  commandPool ,
-                                                  .level              =  VK_COMMAND_BUFFER_LEVEL_PRIMARY ,
-                                                  .commandBufferCount = Frames};
-  std::cout << allocateInfo.commandBufferCount << "Command Buffers"
-            << "\n";
-  vkAllocateCommandBuffers(VKI.device, &allocateInfo, PreTestBuffer.data() );
-  return PreTestBuffer;
-}
+
 
 struct ITime
 {

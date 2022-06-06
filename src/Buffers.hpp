@@ -32,9 +32,9 @@ struct BuffersX
   static constinit inline VkBuffer       indexBuffer;
   static constinit inline VkDeviceMemory indexBufferMemory;
 
-  static inline constexpr float x         = 0;
-  static inline constexpr float y         = 1;
-  static inline constexpr float vectBuf[] = {
+  static constexpr float x         = 0;
+  static constexpr float y         = 1;
+  static constexpr float vectBuf[] = {
     /*0  -->*/ x,  x, x, 1, 0, 0,
     /*1  -->*/ y,  y, x, x, y, x,
     /*2  -->*/ y,  y, x, x, x, y,

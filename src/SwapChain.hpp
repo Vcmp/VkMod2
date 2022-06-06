@@ -1,18 +1,16 @@
 
 
-#include "VKI.hpp"
+#include "Vks.tpp"
+
+
 #include <array>
-#include <cstdint>
-#include <initializer_list>
+
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 
 #pragma once
-inline namespace {
 
-}
-static struct SwapChain
+struct SwapChain
 {
     VkExtent2D swapChainExtent=getCurrentSwapChainSurfaceCapabilities();
     VkRenderPass renderpass=createRenderPass(VK_IMAGE_LAYOUT_UNDEFINED, false);
