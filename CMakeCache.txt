@@ -357,9 +357,6 @@ Vulkan_GLSLANG_VALIDATOR_EXECUTABLE:FILEPATH=C:/VulkanSDK/1.3.204.1/Bin/glslangV
 //Path to a program.
 Vulkan_GLSLC_EXECUTABLE:FILEPATH=C:/VulkanSDK/1.3.204.1/Bin/glslc.exe
 
-//Path to a file.
-Vulkan_INCLUDE_DIR:PATH=C:/VulkanSDK/1.3.204.1/Include
-
 //Path to a library.
 Vulkan_LIBRARY:FILEPATH=C:/VulkanSDK/1.3.204.1/Lib/vulkan-1.lib
 
@@ -599,8 +596,6 @@ USE_MSVC_RUNTIME_LIBRARY_DLL:INTERNAL=OFF
 Vulkan_GLSLANG_VALIDATOR_EXECUTABLE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Vulkan_GLSLC_EXECUTABLE
 Vulkan_GLSLC_EXECUTABLE-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: Vulkan_INCLUDE_DIR
-Vulkan_INCLUDE_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Vulkan_LIBRARY
 Vulkan_LIBRARY-ADVANCED:INTERNAL=1
 //Have include xinput.h
