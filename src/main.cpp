@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <ctime>
 #include <minwindef.h>
 #include <pthread.h>
 #include <type_traits>
@@ -185,15 +186,30 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
     std::cout << "fakeFBO" <<std::is_trivially_copyable_v<fakeFBO> << "\n";
     std::cout << "fakeFBO" <<std::is_trivially_constructible_v<fakeFBO> << "\n";
 
-    while(true)
+      LPMSG msg;
+      DWORD prevTime;
+    while(!IsHungAppWindow(VKI.window))
     {
+      PeekMessageA(msg, VKI.window, NULL, NULL, PM_REMOVE);
+      // {
+      //   // std::cout << "MSG AVAILABLE!" << "\n";
+      //   std::cout << msg->message << "\n";
+      //   std::cout << msg->time << "\n";
+      //   std::cout << 16 << "\n";
+        
+      // }
         // printf("%i \n", aa++);
         
         // vkQueueWaitIdle(VKI.GraphicsQueue);
         // glfwPollEvents();
         // vkQueueWaitIdle(VKI.GraphicsQueue);
         // vkResetCommandBuffer(fFBO.commandBuffers[renderer2::currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
-        fFBO.doCommndRec(renderer2::currentFrame);
+        // if(msg->time==prevTime)
+        // {
+        //   printf("SAME");
+        // }
+        fFBO.doCommndRec(renderer2::currentFrame, clock());
+        prevTime=msg->time;
         chkTst(vkResetFences(VKI.device, 1, &R2.fence[renderer2::currentFrame]));
         R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
         aa++;
@@ -210,8 +226,11 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
 void renderer2::drawFrame(VkInit &VKI, SwapChain &__restrict__ SW, std::initializer_list<VkCommandBuffer> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
-  
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 1000, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
+  if(IsHungAppWindow(VKI.window))
+  {
+    std::cout << "HUNG!" << "\n";
+  }
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, -1, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
   
   
   // __builtin_prefetch( BuffersX::data );

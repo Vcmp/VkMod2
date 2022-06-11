@@ -1,5 +1,7 @@
 #include "fakeFBO.hpp"
 #include "glm/ext/vector_uint2.hpp"
+#include <ctime>
+#include <minwindef.h>
 
 
 
@@ -12,7 +14,7 @@ struct ITime
 } __attribute__((aligned(16))) ;
 
 
-void fakeFBO::doCommndRec(uint32_t a)
+void fakeFBO::doCommndRec(uint32_t a, clock_t time)
 {
 
   
@@ -25,7 +27,7 @@ void fakeFBO::doCommndRec(uint32_t a)
   
   static constexpr VkDeviceSize offsets[] = { 0 };
   // uint32_t i = 0; 
-  const auto at = static_cast<float>(1);
+  const auto at = static_cast<float>(time)/1000;
   const ITime iTime = {{(width), (height)}, at, sinf(at)};
 
   /* for(const VkCommandBuffer &commandBuffer : commandBuffers)

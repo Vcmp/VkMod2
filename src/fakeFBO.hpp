@@ -20,7 +20,7 @@ struct fakeFBO
     std::array<VkCommandBuffer, Frames> commandBuffers;
     // static VkCommandBuffer doCommBuffers(VkCommandPool, uint32_t);
     // std::array<VkCommandBuffer, Frames> doGenCommnd();
-    void doCommndRec(uint32_t);
+    void doCommndRec(uint32_t, clock_t);
 
     
 } __attribute__((aligned(64)));

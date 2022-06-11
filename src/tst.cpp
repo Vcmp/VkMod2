@@ -1,8 +1,11 @@
 #include "VKI.hpp"
+#include <cstddef>
 #include <cstdint>
 
 #include <vector>
 #include <iostream>
+#include <windef.h>
+#include <wingdi.h>
 #include "vulkan/vulkan_core.h"
 #include "vulkan/vulkan_win32.h"
 
@@ -14,25 +17,18 @@ static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME
 
 static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  std::cout << "OK!" << "\n";
+      std::cout <<std::hex <<"0x"<< uMsg << "OK!" << "\n";
+      std::cout <<std::hex <<"wParam"<<"0x"<< wParam << "OK!" << "\n";
+      std::cout <<std::hex <<"lParam"<<"0x"<< lParam << "OK!" << "\n";
+
   switch (uMsg)
     {
     case WM_DESTROY:
         PostQuitMessage(0);
         return 0;
 
-    // case WM_PAINT:
-    //     {
-    //         PAINTSTRUCT ps;
-    //         HDC hdc = BeginPaint(hwnd, &ps);
-
-    //         // All painting occurs here, between BeginPaint and EndPaint.
-
-    //         FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
-
-    //         EndPaint(hwnd, &ps);
-    //     }
-    //     return 0;
+    case WM_PAINT:
+        return 0;
     case WM_NCCREATE:
     
           std::cout << "NCCreate Window!" << "\n";
@@ -48,16 +44,69 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
     case WM_NCACTIVATE:
        std::cout << "CreateActivat Window" << "\n";
       return(!wParam)?false: -1;
-    
-    default:
-    
-        std::cout << "-->" << uMsg << "\n";
-        if(!wParam)
-        {
-          return false;
-        }
-
+      return 1;
+    case WM_SETCURSOR:
+      return false;
+    case WM_GETMINMAXINFO:
       return 0;
+    case WM_NCCALCSIZE:
+      if(wParam)
+      {
+        return DefWindowProc(hwnd, uMsg, wParam, lParam);
+      }
+      else return true;
+    // case WM_SHOWWINDOW:
+    //   return 0;
+    // case WM_WINDOWPOSCHANGING:
+    //   return 0;
+    // case WM_ACTIVATEAPP:
+    //   return true;
+    // case WM_ACTIVATE:
+    //   if(wParam==1)
+    //     {
+    //       return 0;
+    //     }
+    //   std::cout << "Activating Window!" << "\n";
+    //   return 0;
+    // case WM_IME_SETCONTEXT:
+    //   std::cout << "Activating Window!" << "\n";
+    //   return true;
+    // case WM_SETFOCUS:
+    //   SetFocus(hwnd);
+    //   return 0;
+    // case WM_NCPAINT:
+    // {
+    //     HDC hdc;
+    //     hdc = GetDCEx(hwnd, (HRGN)wParam, DCX_WINDOW|DCX_INTERSECTRGN);
+    //     // Paint into this DC 
+    //     ReleaseDC(hwnd, hdc);
+    //     return 0;
+    // }
+    // case WM_ERASEBKGND:
+    // {
+    //   return 1;
+    // }
+    // case WM_WINDOWPOSCHANGED:
+    //   return true;
+    // case WM_SIZE:
+    //   RECT rcClient; 
+    //         GetClientRect(hwnd, &rcClient); 
+    //         EnumChildWindows(hwnd, nullptr, (LPARAM) &rcClient); 
+    //         return 0; 
+    //   return true;
+    case WM_MOVE:
+      std::cout << "MOVE!" << "\n";
+      return true;
+    
+    // default:
+    
+    //     std::cout << "-->" << uMsg << "\n";
+    //     if(!wParam)
+    //     {
+    //       return false;
+    //     }
+
+    //   return 0;
     
 
     }
@@ -71,12 +120,16 @@ auto VkInit::init(HINSTANCE instance) const -> HWND
 
   volkInitialize();
  WNDCLASS wc = { };
-
+    wc.style=CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   = WindowProc;
     wc.hInstance     = instance;
+    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = nullptr;//(HBRUSH)GetStockObject(BLACK_BRUSH);
+    wc.lpszMenuName = NULL;
     wc.lpszClassName = "main";
     RegisterClass(&wc);
-    auto w =CreateWindowEx(0,
+    auto w =CreateWindowEx(wc.style,
                                            "main",
                                            nullptr,
                                            WS_EX_OVERLAPPEDWINDOW,
