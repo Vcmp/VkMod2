@@ -1,6 +1,5 @@
 #include "fakeFBO.hpp"
-#include "glm/ext/vector_uint2.hpp"
-#include <ctime>
+#include "glm/ext/vector_float2.hpp"
 #include <minwindef.h>
 
 
@@ -8,7 +7,7 @@
 
 struct ITime
 {
-  glm::uvec2 xy;
+  glm::vec2 xy;
   float time;
   float stime;
 } __attribute__((aligned(16))) ;

@@ -15,7 +15,7 @@ constexpr std::array<type, Frames> doSet( auto &s, auto f)
 
    for(type & i: aa)
    {
-     i=Vks::doPointerAlloc5<type>( &s, f);
+     i=doPointerAlloc5<type>( &s, f);
    }
   return aa;
 }

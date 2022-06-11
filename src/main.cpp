@@ -51,7 +51,7 @@ struct der_pod : public base_pod
     const int k;
 };
 
-constexpr void chkTst(VkResult buh)
+constexpr void chkTst(VkResult buh) noexcept
 {
   if constexpr(checks)
   {
@@ -188,9 +188,8 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
 
       LPMSG msg;
       DWORD prevTime;
-    while(!IsHungAppWindow(VKI.window))
+    while(IsWindow(VKI.window))
     {
-      PeekMessageA(msg, VKI.window, NULL, NULL, PM_REMOVE);
       // {
       //   // std::cout << "MSG AVAILABLE!" << "\n";
       //   std::cout << msg->message << "\n";
@@ -208,11 +207,19 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
         // {
         //   printf("SAME");
         // }
-        fFBO.doCommndRec(renderer2::currentFrame, clock());
-        prevTime=msg->time;
+        auto x = clock();
+        fFBO.doCommndRec(renderer2::currentFrame, x);
         chkTst(vkResetFences(VKI.device, 1, &R2.fence[renderer2::currentFrame]));
         R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
         aa++;
+        
+        if(prevTime+CLOCKS_PER_SEC<clock())
+        {
+          PeekMessageA(msg, VKI.window, NULL, NULL, PM_REMOVE);
+        prevTime=x;
+          std::cout << aa << "\n";
+          aa=0;
+        }
     }
     a= false;
  
@@ -223,14 +230,14 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
 
 
 
-void renderer2::drawFrame(VkInit &VKI, SwapChain &__restrict__ SW, std::initializer_list<VkCommandBuffer> commandBuffer) const
+void renderer2::drawFrame(VkInit &__restrict__ VKI, SwapChain &__restrict__ SW, std::initializer_list<VkCommandBuffer> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
   if(IsHungAppWindow(VKI.window))
   {
     std::cout << "HUNG!" << "\n";
   }
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, -1, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 1000, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
   
   
   // __builtin_prefetch( BuffersX::data );
@@ -267,14 +274,10 @@ static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_B
   //  info.pWaitSemaphores = &AvailableSemaphore;
 
  chkTst(vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 ));
-          chkTst(vkWaitForFences(VKI.device, 1, &fence[renderer2::currentFrame], false, 1000));
 
+          chkTst(vkWaitForFences(VKI.device, 1, &fence[renderer2::currentFrame], false, -1));
   currentFrame++;
-  // currentFrame = ++currentFrame % Frames;
-  if(currentFrame==Frames)
-  {
-    currentFrame=0;
-  }
+  currentFrame&=0x7;
 }
 
 

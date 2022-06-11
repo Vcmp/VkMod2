@@ -104,13 +104,13 @@
 //     .pNext            = nullptr,
 //     .queueFamilyIndex = 0,
 //   };
-//   commandPool = Vks::doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool );
+//   commandPool = doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool );
 //   constexpr VkCommandPoolCreateInfo poolInfo2{
 //     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 //     .pNext            = nullptr,
 //     .queueFamilyIndex = 1,
 //   };
-//   commandPool2 = Vks::doPointerAlloc5<VkCommandPool>( &poolInfo2, vkCreateCommandPool );
+//   commandPool2 = doPointerAlloc5<VkCommandPool>( &poolInfo2, vkCreateCommandPool );
 //   if ( commandBuffer == nullptr )
 //   {
 //     const VkCommandBufferAllocateInfo allocateInfo{

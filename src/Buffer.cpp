@@ -24,7 +24,7 @@ VkCommandPool Buffer::createCommandPool()
     .pNext            = nullptr,
     .queueFamilyIndex = 1,
   };
-  return Vks::doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool);
+  return doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool);
 //   constexpr VkCommandPoolCreateInfo poolInfo2{
 //     .sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
 //     .pNext            = nullptr,
@@ -129,7 +129,7 @@ void Buffer::createSetBuffer(
     .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
   };
 
-  currentBuffer = Vks::doPointerAlloc5<VkBuffer>( &allocateInfo, vkCreateBuffer );
+  currentBuffer = doPointerAlloc5<VkBuffer>( &allocateInfo, vkCreateBuffer );
 
   VkMemoryRequirements memRequirements;
   vkGetBufferMemoryRequirements( device, currentBuffer, &memRequirements );
@@ -141,7 +141,7 @@ void Buffer::createSetBuffer(
     .memoryTypeIndex = findMemoryType( memRequirements.memoryTypeBits, properties ),
   };
   //
-  BufMemory= Vks::doPointerAlloc5<VkDeviceMemory>( &allocateInfo1, vkAllocateMemory);
+  BufMemory= doPointerAlloc5<VkDeviceMemory>( &allocateInfo1, vkAllocateMemory);
 
   vkBindBufferMemory( device, currentBuffer, vertexBufferMemory, 0 );
 }

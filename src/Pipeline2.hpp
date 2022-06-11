@@ -27,7 +27,7 @@ struct Pipeline2
    [[nodiscard]] auto doGenCommnd()  -> std::array<VkCommandBuffer, Frames>;
    [[nodiscard]] auto genLayout() const -> VkPipelineLayout;
    [[nodiscard]] constexpr auto genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const -> VkPipelineShaderStageCreateInfo;
-} __attribute__((aligned(64)));
+};
 
     constexpr auto Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag) const -> VkPipelineShaderStageCreateInfo
     {
@@ -36,7 +36,7 @@ struct Pipeline2
         return {
           .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
           .stage  = stageFlag,
-          .module = Vks::doPointerAllocX2<VkShaderModule>( &a),
+          .module = doPointerAllocX2<VkShaderModule>( &a),
           .pName  = "main",
 
         };
@@ -142,5 +142,5 @@ constexpr auto Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo,
                                                    .renderPass          = renderPass,
                                                    .basePipelineIndex=baseIndex};
 
-  return Vks::doPointerAllocX<VkPipeline>(&pipelineInfo);
+  return doPointerAllocX<VkPipeline>(&pipelineInfo);
 }

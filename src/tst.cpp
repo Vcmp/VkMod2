@@ -18,8 +18,8 @@ static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME
 static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
       std::cout <<std::hex <<"0x"<< uMsg << "OK!" << "\n";
-      std::cout <<std::hex <<"wParam"<<"0x"<< wParam << "OK!" << "\n";
-      std::cout <<std::hex <<"lParam"<<"0x"<< lParam << "OK!" << "\n";
+      std::cout <<std::dec <<"wParam"<<"0x"<< wParam << "OK!" << "\n";
+      std::cout <<std::dec <<"lParam"<<"0x"<< lParam << "OK!" << "\n";
 
   switch (uMsg)
     {
@@ -123,16 +123,16 @@ auto VkInit::init(HINSTANCE instance) const -> HWND
     wc.style=CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   = WindowProc;
     wc.hInstance     = instance;
-    wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = nullptr;//(HBRUSH)GetStockObject(BLACK_BRUSH);
+    // wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    // wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+    // wc.hbrBackground = nullptr;//(HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszMenuName = NULL;
     wc.lpszClassName = "main";
     RegisterClass(&wc);
     auto w =CreateWindowEx(wc.style,
                                            "main",
                                            nullptr,
-                                           WS_EX_OVERLAPPEDWINDOW,
+                                           NULL,
                                            0, 0,
                                            width, height,
                                            nullptr, // No parent window
@@ -140,9 +140,9 @@ auto VkInit::init(HINSTANCE instance) const -> HWND
                                            instance,
                                            (LPVOID) nullptr);
 
-    if (w == NULL)
+    if (w == nullptr)
     {
-        return 0;
+        return nullptr;
     }
 
     ShowWindow(w, 10);
