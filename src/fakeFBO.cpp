@@ -1,5 +1,4 @@
 #include "fakeFBO.hpp"
-#include "GLFW/glfw3.h"
 #include "glm/ext/vector_uint2.hpp"
 
 
@@ -26,7 +25,7 @@ void fakeFBO::doCommndRec(uint32_t a)
   
   static constexpr VkDeviceSize offsets[] = { 0 };
   // uint32_t i = 0; 
-  const auto at = static_cast<float>(glfwGetTime());
+  const auto at = static_cast<float>(1);
   const ITime iTime = {{(width), (height)}, at, sinf(at)};
 
   /* for(const VkCommandBuffer &commandBuffer : commandBuffers)

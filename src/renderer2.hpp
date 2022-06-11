@@ -1,5 +1,5 @@
 #pragma once
-#include "Vks.tpp"
+#include "SwapChain.hpp"
 
 #include "mat4x.hpp"
 
@@ -34,7 +34,7 @@ struct renderer2// : Queues
       
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  void            drawFrame(std::initializer_list<VkCommandBuffer>) const;
+  void            drawFrame(VkInit&, SwapChain&, std::initializer_list<VkCommandBuffer>) const;
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   static constinit inline uint32_t               currentFrame;

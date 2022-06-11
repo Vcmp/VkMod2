@@ -25,21 +25,21 @@ inline namespace Vks
     template<typename type>
     constexpr type doPointerAlloc2(auto* strct, type* hndle, auto pHndl)
     {
-        (pHndl)(VKI.tst(), strct ,nullptr, hndle);
+        (pHndl)(volkGetLoadedDevice(), strct ,nullptr, hndle);
         return *hndle;
     }
     template<typename type>
     constexpr type doPointerAlloc3(auto* strct, auto* hndle)
     {
         type pHndl = nullptr; 
-        (hndle)(VKI.tst(), strct ,nullptr, &pHndl);
+        (hndle)(volkGetLoadedDevice(), strct ,nullptr, &pHndl);
         return pHndl;
     }
     template<typename type, typename type2f>
     constexpr type doPointerAlloc3Alt(auto* strct)
     {
         type pHndl = nullptr; 
-        (type2f)(VKI.tst(), strct, &pHndl);
+        (type2f)(volkGetLoadedDevice(), strct, &pHndl);
         return pHndl;
     }
     
@@ -47,14 +47,14 @@ inline namespace Vks
     [[nodiscard]] constexpr auto doPointerAlloc5(auto* __restrict__ strct, auto* hndle) noexcept -> type
     {
         type pHndl; 
-        hndle(VKI.tst(), strct, nullptr, &pHndl);
+        hndle(volkGetLoadedDevice(), strct, nullptr, &pHndl);
         return pHndl;
     }
     template<typename type>
     constexpr type doPointerAllocSml(auto* strct, /* type* hndle,  */auto pHndl)
     {
         type hndle = nullptr;
-        (pHndl)(VKI.tst(), strct ,nullptr, &hndle);
+        (pHndl)(volkGetLoadedDevice(), strct ,nullptr, &hndle);
         return hndle;
     }
 
@@ -62,14 +62,14 @@ inline namespace Vks
     constexpr type doPointerAllocX(auto* strct)
     {
         type pHndl = nullptr; 
-        vkCreateGraphicsPipelines(VKI.tst(), nullptr, 1, strct, nullptr, &pHndl);
+        vkCreateGraphicsPipelines(volkGetLoadedDevice(), nullptr, 1, strct, nullptr, &pHndl);
         return pHndl;
     }
     template<typename type>
     constexpr type doPointerAllocX2(auto* strct)
     {
         type pHndl = nullptr; 
-        vkCreateShaderModule(VKI.tst(), strct, nullptr, &pHndl);
+        vkCreateShaderModule(volkGetLoadedDevice(), strct, nullptr, &pHndl);
         return pHndl;
     }
     

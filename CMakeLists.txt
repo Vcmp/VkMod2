@@ -30,7 +30,7 @@ message(STATUS "${CMAKE_C_COMPILE_FEATURES}")
 target_compile_features(VkMod2 PRIVATE cxx_std_20)
 target_compile_features(VkMod2 PRIVATE c_std_23)
 # target_compile_definitions(VkMod2 PUBLIC VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR VK_NO_PROTOTYPES GLFW_INCLUDE_NONE TRACY_IMPORTS TRACY_ENABLE )
-target_compile_options(VkMod2 PRIVATE -march=native -mtune=native -save-temps -masm=intel -fsanitize=address,undefined -glldb -O0 -Wuninitialized -Weffc++)
+target_compile_options(VkMod2 PRIVATE -march=native -mtune=native -save-temps -masm=intel -glldb -fsanitize=address,undefined -O0 -Wuninitialized -Weffc++)
 # set(CMAKE_CXX_FLAGS "-std=c++20 -v -march=native -mtune=native -O0 -fuse-ld=lld -g -fverbose-asm -save-temps -masm=intel -Wall -Wextra -pthread -lpthread ")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_INIT} -march=native -mtune=native -Ofast -fno-plt -fmerge-all-constants -fno-exceptions -save-temps -masm=intel -fpic -fvisibility=hidden -pthread -lpthread")
 # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS_INIT} -std=c2x ${CMAKE_CXX_FLAGS}")
@@ -79,13 +79,13 @@ set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
 include_directories(shaders)
 include_directories(Vulkan-Headers/include)
 target_include_directories(VkMod2 PUBLIC shaders Vulkan-Headers/include)
-add_subdirectory(glfw EXCLUDE_FROM_ALL)
+# add_subdirectory(glfw EXCLUDE_FROM_ALL)
 add_subdirectory(glm EXCLUDE_FROM_ALL)
 add_subdirectory(volk EXCLUDE_FROM_ALL)
 # add_subdirectory(Tracy)
 # add_subdirectory(sleef)
 # add_subdirectory(brcxxc EXCLUDE_FROM_ALL)
-target_link_libraries(VkMod2 PRIVATE volk glfw glm)
+target_link_libraries(VkMod2 PRIVATE volk glm)
 
 # add_dependencies(VkMod2 Shaders)
 
@@ -138,14 +138,14 @@ endfunction(Dump2)
 	# 	    this causes the build prcoes to fail unless a dummy .temp file is included beforehand and tehfore is not fit for purpose unelss this is fixed completely
 	# 	an adiitonal isue that can ocur is that often the file is not egnerated in time before the compielr is called, causin a mising include compilation error to be incurred
 	#	the current methdo to fix this is to generate the Cmakecache then run the build generator (e.g. Ninja) and then run Cmake again to finsh/compleet teh Cache before running teh final Build again
-	# find_program(GLSLC glslc PATH "${CMAKE_SOURCE_DIR}/shaderc/bin/glslc/")
-	set(TST "${CMAKE_SOURCE_DIR}/shaderc/bin/glslc/glslc.exe")
+	find_program(GLSLC glslc PATH "${CMAKE_SOURCE_DIR}/shaderc/bin/glslc/")
+	# set(TST "${CMAKE_SOURCE_DIR}/shaderc/bin/glslc/glslc.exe")
 function(CompileShaders SHADER name)
 set(current-shader-path "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER}")
 set(current-output-path "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${SHADER}.inl")
 message(STATUS "${current-shader-path}")
 	execute_process(
-		COMMAND ${TST} ${current-shader-path} -c -mfmt=c -finvert-y --target-env=vulkan1.3 -O -o -
+		COMMAND ${GLSLC} ${current-shader-path} -c -mfmt=c -finvert-y --target-env=vulkan1.3 -O -o -
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/shaders/"
 		OUTPUT_VARIABLE w
 		RESULT_VARIABLE w1

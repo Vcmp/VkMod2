@@ -11,7 +11,7 @@ auto Pipeline2::doGenCommnd() -> std::array<VkCommandBuffer, Frames>
                                                   .commandBufferCount = Frames};
   std::cout << allocateInfo.commandBufferCount << "Command Buffers"
             << "\n";
-  vkAllocateCommandBuffers(VKI.device, &allocateInfo, PreTestBuffer.data() );
+  vkAllocateCommandBuffers(volkGetLoadedDevice(), &allocateInfo, PreTestBuffer.data() );
   return PreTestBuffer;
 }
 

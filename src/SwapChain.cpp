@@ -5,7 +5,7 @@
 auto SwapChain::getCurrentSwapChainSurfaceCapabilities() const -> VkExtent2D
 {
    VkSurfaceCapabilitiesKHR capabilities;
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(VKI.physdevice, VKI.surface, &capabilities );
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physdevice, surface, &capabilities );
   return capabilities.currentExtent;
 }
 
@@ -15,19 +15,19 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
     uint32_t count=0;
     
 
-    vkGetPhysicalDeviceSurfaceFormatsKHR(VKI.physdevice, VKI.surface, &count, nullptr );
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physdevice, surface, &count, nullptr );
     std::vector<VkSurfaceFormatKHR> surfaceFormats(count);
     
     // if ( count != 0 )
     {
-      vkGetPhysicalDeviceSurfaceFormatsKHR(VKI.physdevice, VKI.surface, &count, surfaceFormats.data() );
+      vkGetPhysicalDeviceSurfaceFormatsKHR(physdevice, surface, &count, surfaceFormats.data() );
     }
-    vkGetPhysicalDeviceSurfacePresentModesKHR(VKI.physdevice, VKI.surface, &count, nullptr );
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physdevice, surface, &count, nullptr );
     std::vector<VkPresentModeKHR> presentModes(count);
 
     // if ( count != 0 )
     {
-      vkGetPhysicalDeviceSurfacePresentModesKHR(VKI.physdevice, VKI.surface, &count, presentModes.data() );
+      vkGetPhysicalDeviceSurfacePresentModesKHR(physdevice, surface, &count, presentModes.data() );
     }
 
     VkSurfaceFormatKHR         swapChainImageFormat;
@@ -74,7 +74,7 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
 auto SwapChain::getSwapChainImages(uint32_t size) -> std::array<VkImage, Frames>
 {
   std::array<VkImage, Frames> image;
-  vkGetSwapchainImagesKHR( VKI.tst(), swapChain, &size, image.data());
+  vkGetSwapchainImagesKHR( volkGetLoadedDevice(), swapChain, &size, image.data());
   return image;
 }
 
@@ -82,14 +82,14 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
   {
     std::cout << "ImageCount: " << Frames << "\n";
 
-    const auto aa = { VKI.graphicsFamily, VKI.transferFamily };
+    // const auto aa = { graphicsFamily, transferFamily };
     
 
     const VkSwapchainCreateInfoKHR createInfo{
 
       .sType   = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
       .pNext   = nullptr,
-      .surface = VKI.surface,
+      .surface = surface,
 
       // Image settings
       .minImageCount    = Frames,
@@ -102,7 +102,7 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
       // if (graphicsFamily != presentFamily) {
       .imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE,
       .queueFamilyIndexCount = 0,
-      .pQueueFamilyIndices   = &VKI.graphicsFamily,
+      .pQueueFamilyIndices   = 0,
       // } else {
       // .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
       // .queueFamilyIndexCount = 0; // Optiona,
@@ -116,9 +116,9 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
 
       .oldSwapchain = VK_NULL_HANDLE
     };
-    std::cout << VKI.tst() << "\n";
+    std::cout << volkGetLoadedDevice() << "\n";
     VkSwapchainKHR swapChain;
-    vkCreateSwapchainKHR(VKI.tst(), &createInfo, nullptr, &swapChain );
+    vkCreateSwapchainKHR(volkGetLoadedDevice(), &createInfo, nullptr, &swapChain );
     return swapChain;
     
   }

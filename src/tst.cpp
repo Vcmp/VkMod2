@@ -1,28 +1,98 @@
 #include "VKI.hpp"
 #include <cstdint>
+
 #include <vector>
 #include <iostream>
-#include "GLFW/glfw3.h"
-#include <GLFW/glfw3native.h>
+#include "vulkan/vulkan_core.h"
+#include "vulkan/vulkan_win32.h"
+
 
 
 inline namespace {
 static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 }
 
-auto VkInit::init() const -> HWND
+static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+  std::cout << "OK!" << "\n";
+  switch (uMsg)
+    {
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        return 0;
+
+    // case WM_PAINT:
+    //     {
+    //         PAINTSTRUCT ps;
+    //         HDC hdc = BeginPaint(hwnd, &ps);
+
+    //         // All painting occurs here, between BeginPaint and EndPaint.
+
+    //         FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
+
+    //         EndPaint(hwnd, &ps);
+    //     }
+    //     return 0;
+    case WM_NCCREATE:
+    
+          std::cout << "NCCreate Window!" << "\n";
+          return true;
+    
+    case WM_NCDESTROY:
+    
+      std::cout << "NCDestroy Window!" << "\n";
+      return 0;
+    case WM_CREATE:
+       std::cout << "Create Window" << "\n";
+       return true;
+    case WM_NCACTIVATE:
+       std::cout << "CreateActivat Window" << "\n";
+      return(!wParam)?false: -1;
+    
+    default:
+    
+        std::cout << "-->" << uMsg << "\n";
+        if(!wParam)
+        {
+          return false;
+        }
+
+      return 0;
+    
+
+    }
+    return DefWindowProc(hwnd, uMsg, wParam, lParam);
+};
+
+auto VkInit::init(HINSTANCE instance) const -> HWND
 {
 
  
 
   volkInitialize();
-  glfwInit();
-  glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
-  glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
-  glfwWindowHint( GLFW_API_UNAVAILABLE, GLFW_TRUE );
-  glfwWindowHint( GLFW_CONTEXT_RELEASE_BEHAVIOR, GLFW_RELEASE_BEHAVIOR_NONE );
-  glfwWindowHint( GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API );
- auto w = glfwGetWin32Window(glfwCreateWindow( width, height, "VKMod2", glfwGetPrimaryMonitor(), nullptr ));
+ WNDCLASS wc = { };
+
+    wc.lpfnWndProc   = WindowProc;
+    wc.hInstance     = instance;
+    wc.lpszClassName = "main";
+    RegisterClass(&wc);
+    auto w =CreateWindowEx(0,
+                                           "main",
+                                           nullptr,
+                                           WS_EX_OVERLAPPEDWINDOW,
+                                           0, 0,
+                                           width, height,
+                                           nullptr, // No parent window
+                                           NULL, // No window menu
+                                           instance,
+                                           (LPVOID) nullptr);
+
+    if (w == NULL)
+    {
+        return 0;
+    }
+
+    ShowWindow(w, 10);
 
  
   std::cout << "OK!" << "\n";
@@ -54,11 +124,11 @@ auto VkInit::createInstance() const -> VkInstance
     VK_MAKE_VERSION( 1, 3, 0 ),
     VK_API_VERSION_1_3
   };
-  uint32_t                  glfwExtensionCount = 0;
-  const char **             glfwExtensions     = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
-  std::vector<const char *> extensions( glfwExtensions, glfwExtensions + glfwExtensionCount );
+  // uint32_t                  glfwExtensionCount = 0;
+  //const char **             glfwExtensions     = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
+  std::vector<const char *> extensions{ VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME};
   
-  for(uint32_t i=0; i< glfwExtensionCount; i++)
+  for(uint32_t i=0; i< extensions.size(); i++)
   {
     std::cout << extensions[i] << "\n";
   }
@@ -120,7 +190,7 @@ auto VkInit::createSurface() const -> VkSurfaceKHR
   VkWin32SurfaceCreateInfoKHR createSurfaceInfo = {};
   createSurfaceInfo.sType                       = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
   createSurfaceInfo.hwnd                        = window;
-  createSurfaceInfo.hinstance                   = GetModuleHandle( nullptr );
+  createSurfaceInfo.hinstance                   = inst;
   createSurfaceInfo.pNext                       = VK_NULL_HANDLE;
 
   vkCreateWin32SurfaceKHR( instance, &createSurfaceInfo, nullptr, &surface);

@@ -1,5 +1,4 @@
 
-#include "GLFW/glfw3.h"
 #include "renderer2.hpp"
 #include "fakeFBO.hpp"
 #include "SwapChain.hpp"
@@ -7,9 +6,12 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <minwindef.h>
 #include <pthread.h>
 #include <type_traits>
 #include <unistd.h>
+#include <windows.h>
+#include <winuser.h>
 
 
 inline namespace
@@ -18,9 +20,7 @@ inline namespace
   bool a = true;
   static uint32_t aa = 0;
   // static mat4x m4;
-  SwapChain SW;
-  Pipeline2 PX2;
-  renderer2 R2;
+ 
 }
 
 inline void * Sysm( void * pv_unused )
@@ -104,14 +104,18 @@ constexpr void chkTst(VkResult buh)
 }
 
 constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
-auto main() -> int
+int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
 {
     printf("-->");
     std::cout <<(dp.i)<< "\n";
     std::cout <<(base_pod::tA(2))<< "\n";
     // VkInit give_me_a_name{VkInit::init(), VkInit::createInstance(), VkInit::createSurface(), VkInit::doPhysicalDevice(), VkInit::doDevice()};
-    int r =  pthread_create( &sys, nullptr, Sysm, nullptr );
+    // int r =  pthread_create( &sys, nullptr, Sysm, nullptr );
 
+    VkInit VKI(instance);
+    SwapChain SW(VKI.physdevice, VKI.surface);
+    Pipeline2 PX2;
+    renderer2 R2;                                   
   //   // std::array<VkShaderModuleCreateInfo, 2> si{SPV.VsMCI3temp, SPV.VsMCI4temp};
 
   //   static constexpr VkAttachmentDescription colorAttachment{
@@ -186,12 +190,12 @@ auto main() -> int
         // printf("%i \n", aa++);
         
         // vkQueueWaitIdle(VKI.GraphicsQueue);
-        glfwPollEvents();
+        // glfwPollEvents();
         // vkQueueWaitIdle(VKI.GraphicsQueue);
         // vkResetCommandBuffer(fFBO.commandBuffers[renderer2::currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
         fFBO.doCommndRec(renderer2::currentFrame);
         chkTst(vkResetFences(VKI.device, 1, &R2.fence[renderer2::currentFrame]));
-        R2.drawFrame({fFBO.commandBuffers[renderer2::currentFrame]});
+        R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
         aa++;
     }
     a= false;
@@ -203,11 +207,11 @@ auto main() -> int
 
 
 
-void renderer2::drawFrame(std::initializer_list<VkCommandBuffer> commandBuffer) const
+void renderer2::drawFrame(VkInit &VKI, SwapChain &__restrict__ SW, std::initializer_list<VkCommandBuffer> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
   
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 1000, R2.AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 1000, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
   
   
   // __builtin_prefetch( BuffersX::data );
@@ -244,7 +248,7 @@ static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_B
   //  info.pWaitSemaphores = &AvailableSemaphore;
 
  chkTst(vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 ));
-          chkTst(vkWaitForFences(VKI.device, 1, &R2.fence[renderer2::currentFrame], false, 1000));
+          chkTst(vkWaitForFences(VKI.device, 1, &fence[renderer2::currentFrame], false, 1000));
 
   currentFrame++;
   // currentFrame = ++currentFrame % Frames;
