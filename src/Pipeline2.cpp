@@ -2,7 +2,7 @@
 
 
 
-auto Pipeline2::doGenCommnd() -> std::array<VkCommandBuffer, Frames>
+auto Pipeline2::doGenCommnd(VkCommandPool commandPool) const -> std::array<VkCommandBuffer, Frames>
 {
   std::array<VkCommandBuffer, Frames> PreTestBuffer{};
    const VkCommandBufferAllocateInfo allocateInfo{ .sType              =  VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO ,
@@ -81,7 +81,7 @@ auto Pipeline2::genCommPool() const -> VkCommandPool
     .flags=VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
     .queueFamilyIndex = 0,
   };
-  return Vks::doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool );
+  return Vks.doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool );
  
 }
 
@@ -92,7 +92,7 @@ auto Pipeline2::genLayout() const -> VkPipelineLayout
   static constexpr VkPushConstantRange vkPushConstantRange{
     .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
     .offset     = 0,
-    .size       = 16,
+    .size       = 20,
   };
 
   constexpr VkPipelineLayoutCreateInfo vkPipelineLayoutCreateInfo = { .sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -102,5 +102,5 @@ auto Pipeline2::genLayout() const -> VkPipelineLayout
                                                                       .pPushConstantRanges    = &vkPushConstantRange };
 
   // std::cout << ( "using pipeLine with Length: " ) << sizeof( SwapChainSupportDetails::swapChainImageViews );
-  return Vks::doPointerAlloc5<VkPipelineLayout>( &vkPipelineLayoutCreateInfo, vkCreatePipelineLayout);
+  return Vks.doPointerAlloc5<VkPipelineLayout>( &vkPipelineLayoutCreateInfo, vkCreatePipelineLayout);
 }

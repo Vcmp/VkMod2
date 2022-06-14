@@ -1,7 +1,6 @@
 #include "SwapChain.hpp"
 
 
-
 auto SwapChain::getCurrentSwapChainSurfaceCapabilities() const -> VkExtent2D
 {
    VkSurfaceCapabilitiesKHR capabilities;
@@ -200,7 +199,7 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
     
       // framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 
-      return Vks::doPointerAlloc5<VkFramebuffer>(&framebufferCreateInfo, vkCreateFramebuffer);
+      return Vks.doPointerAlloc5<VkFramebuffer>(&framebufferCreateInfo, vkCreateFramebuffer);
     
   
 

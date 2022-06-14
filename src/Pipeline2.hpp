@@ -1,8 +1,7 @@
 
-#include "test.inl"
-#include <array>
-#include <initializer_list>
 #include "Vks.tpp"
+#include "test.inl"
+
 
 
  static constexpr uint8_t OFFSETOF_COLOR = 3 * sizeof( float );
@@ -17,14 +16,14 @@ constexpr std::array<VkShaderModuleCreateInfo, 2> shaderStages2{VsMCI, VsMCI2};
 struct Pipeline2
 {
      VkPipelineLayout vkLayout=genLayout();
-     VkPipeline pipeline;
+    //  VkPipeline pipeline;
      VkCommandPool commandPool=genCommPool();
-     std::array<VkCommandBuffer, Frames>commandBuffer=doGenCommnd();
+     std::array<VkCommandBuffer, Frames>commandBuffer=doGenCommnd(commandPool);
     //constexpr Pipeline2(): pipeline(genPipeline(shaderStages2, SW.renderpass, VK_CULL_MODE_NONE, -1)), commandPool(genCommPool()), commandBuffer(doCommBuffers()){genCommBuffers();};
     constexpr auto genPipeline(const std::array<VkShaderModuleCreateInfo, 2>&, VkRenderPass, VkCullModeFlagBits, int32_t) const -> VkPipeline;
     void genCommBuffers();
    [[nodiscard]] auto genCommPool() const -> VkCommandPool;
-   [[nodiscard]] auto doGenCommnd()  -> std::array<VkCommandBuffer, Frames>;
+   [[nodiscard]] auto doGenCommnd(VkCommandPool) const -> std::array<VkCommandBuffer, Frames>;
    [[nodiscard]] auto genLayout() const -> VkPipelineLayout;
    [[nodiscard]] constexpr auto genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const -> VkPipelineShaderStageCreateInfo;
 };
@@ -36,7 +35,7 @@ struct Pipeline2
         return {
           .sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
           .stage  = stageFlag,
-          .module = doPointerAllocX2<VkShaderModule>( &a),
+          .module = Vks.doPointerAllocX2<VkShaderModule>( &a),
           .pName  = "main",
 
         };
@@ -142,5 +141,5 @@ constexpr auto Pipeline2::genPipeline(const std::array<VkShaderModuleCreateInfo,
                                                    .renderPass          = renderPass,
                                                    .basePipelineIndex=baseIndex};
 
-  return doPointerAllocX<VkPipeline>(&pipelineInfo);
+  return Vks.doPointerAllocX<VkPipeline>(&pipelineInfo);
 }

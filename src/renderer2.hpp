@@ -1,11 +1,11 @@
 #pragma once
 #include "SwapChain.hpp"
+#include "VKI.hpp"
 
 #include "mat4x.hpp"
 
 #include <array>
-
-
+#include <vulkan/vulkan_core.h>
 
 template <typename type>
 constexpr std::array<type, Frames> doSet( auto &s, auto f)
@@ -15,7 +15,7 @@ constexpr std::array<type, Frames> doSet( auto &s, auto f)
 
    for(type & i: aa)
    {
-     i=doPointerAlloc5<type>( &s, f);
+     i=Vks::doPointerAlloc5<type>( &s, f);
    }
   return aa;
 }
@@ -34,7 +34,7 @@ struct renderer2// : Queues
       
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  void            drawFrame(VkInit&, SwapChain&, std::initializer_list<VkCommandBuffer>) const;
+  constexpr void            drawFrame(const VkInit&, const SwapChain&, std::initializer_list<VkCommandBuffer>) const;
 
   // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   static constinit inline uint32_t               currentFrame;
@@ -44,6 +44,7 @@ struct renderer2// : Queues
 
 
   std::array<VkSemaphore, Frames> AvailableSemaphore = doSet<VkSemaphore>(vkCreateCSemaphore, vkCreateSemaphore);
+  std::array<VkSemaphore, Frames> PresentSemaphore = doSet<VkSemaphore>(vkCreateCSemaphore, vkCreateSemaphore);
   std::array<VkSemaphore, Frames> FinishedSemaphore = doSet<VkSemaphore>(vkCreateCSemaphore, vkCreateSemaphore);
   std::array<VkFence, Frames> fence = doSet<VkFence>(vkFenceCreateInfo, vkCreateFence);
 

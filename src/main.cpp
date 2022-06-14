@@ -4,19 +4,17 @@
 #include "SwapChain.hpp"
 #include "Pipeline2.hpp"
 
-#include <cstdint>
-#include <cstdio>
-#include <ctime>
-#include <minwindef.h>
+
 #include <pthread.h>
-#include <type_traits>
+
 #include <unistd.h>
-#include <windows.h>
+#include <windef.h>
 #include <winuser.h>
 
 
 inline namespace
 {
+ 
   pthread_t sys;
   bool a = true;
   static uint32_t aa = 0;
@@ -113,10 +111,11 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
     // VkInit give_me_a_name{VkInit::init(), VkInit::createInstance(), VkInit::createSurface(), VkInit::doPhysicalDevice(), VkInit::doDevice()};
     // int r =  pthread_create( &sys, nullptr, Sysm, nullptr );
 
-    VkInit VKI(instance);
-    SwapChain SW(VKI.physdevice, VKI.surface);
-    Pipeline2 PX2;
-    renderer2 R2;                                   
+   static const VkInit VKI(instance);
+   Vks::Device=VKI.tst();
+  static const SwapChain SW(VKI.physdevice, VKI.surface);
+  static const Pipeline2 PX2;
+  static const renderer2 R2;                                   
   //   // std::array<VkShaderModuleCreateInfo, 2> si{SPV.VsMCI3temp, SPV.VsMCI4temp};
 
   //   static constexpr VkAttachmentDescription colorAttachment{
@@ -160,10 +159,10 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
   // auto rs =  Vks::doPointerAlloc5<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
     // const auto rs = SW.createRenderPass(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL, true);
     // const auto fs = SW.frameBuffer;
-    auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
+    const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI2}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
     // std::cout << pi2 << "\n";
 
-    fakeFBO fFBO
+    static const fakeFBO fFBO
     {
       pi2, 
       PX2.commandPool, 
@@ -186,10 +185,11 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
     std::cout << "fakeFBO" <<std::is_trivially_copyable_v<fakeFBO> << "\n";
     std::cout << "fakeFBO" <<std::is_trivially_constructible_v<fakeFBO> << "\n";
 
-      LPMSG msg;
-      DWORD prevTime;
+      
     while(IsWindow(VKI.window))
     {
+      static LPMSG msg;
+      static DWORD prevTime;
       // {
       //   // std::cout << "MSG AVAILABLE!" << "\n";
       //   std::cout << msg->message << "\n";
@@ -207,15 +207,15 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
         // {
         //   printf("SAME");
         // }
-        auto x = clock();
+        const auto x = clock();
         fFBO.doCommndRec(renderer2::currentFrame, x);
         chkTst(vkResetFences(VKI.device, 1, &R2.fence[renderer2::currentFrame]));
         R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
         aa++;
         
+          PeekMessageA(msg, VKI.window, WM_KEYLAST, WM_MOUSELAST, PM_NOREMOVE);
         if(prevTime+CLOCKS_PER_SEC<clock())
         {
-          PeekMessageA(msg, VKI.window, NULL, NULL, PM_REMOVE);
         prevTime=x;
           std::cout << aa << "\n";
           aa=0;
@@ -230,7 +230,7 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
 
 
 
-void renderer2::drawFrame(VkInit &__restrict__ VKI, SwapChain &__restrict__ SW, std::initializer_list<VkCommandBuffer> commandBuffer) const
+constexpr void renderer2::drawFrame(VkInit const &__restrict__ VKI, SwapChain const &__restrict__ SW, std::initializer_list<VkCommandBuffer> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
   if(IsHungAppWindow(VKI.window))
@@ -251,7 +251,7 @@ void renderer2::drawFrame(VkInit &__restrict__ VKI, SwapChain &__restrict__ SW, 
     // PipelineX::recCmdBuffer(currentFrame);
 
       // R2.info.pCommandBuffers =commandBuffer.data();
-static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
       const  VkSubmitInfo           info{
               .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
               .waitSemaphoreCount = 1,
@@ -263,7 +263,7 @@ static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_B
     chkTst(vkQueueSubmit( VKI.GraphicsQueue, 1, &info, fence[currentFrame] ));
   // }
   
-    static const VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+    const VkPresentInfoKHR VkPresentInfoKHR1{ .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
                                                                     .pWaitSemaphores=&FinishedSemaphore[currentFrame],
                                                                     .swapchainCount = 1,
                                                                     .pSwapchains    = &SW.swapChain,
@@ -275,7 +275,7 @@ static constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_B
 
  chkTst(vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 ));
 
-          chkTst(vkWaitForFences(VKI.device, 1, &fence[renderer2::currentFrame], false, -1));
+          chkTst(vkWaitForFences(VKI.device, 1, &fence[currentFrame], false, -1));
   currentFrame++;
   currentFrame&=0x7;
 }
