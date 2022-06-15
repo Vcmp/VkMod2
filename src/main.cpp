@@ -175,16 +175,16 @@ int WinMain(HINSTANCE instance, int v)
       PX2.vkLayout,
       PX2.commandBuffer
     };
-    auto x = PX2.genCommPool();
+    // auto x = PX2.genCommPool();
 static const fakeFBO fFBO1
     {
       pi1, 
-      x, 
+      PX2.commandPool, 
       SW.renderpass, 
       SW.frameBuffer, 
       SW.imageViews,
-      PX2.genLayout(),
-      PX2.doGenCommnd(x)
+      PX2.vkLayout,
+      PX2.commandBuffer
     };
 
 
@@ -262,7 +262,7 @@ constexpr void renderer2::drawFrame(VkInit const &__restrict__ VKI, SwapChain co
   {
     std::cout << "HUNG!" << "\n";
   }
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 2000, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 1000, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
   
   
   // __builtin_prefetch( BuffersX::data );
@@ -300,7 +300,7 @@ constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
  chkTst(vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 ));
 
-          chkTst(vkWaitForFences(VKI.device, 8, fence.data(), false, 1000)); //This is Unstable and 1000 TiemOut+ all efnce wait only work/wfunctions/behaves rleibly of the Swapchian dpeth is at the Maixmum supprtted at 8 FrameChain?SwapChian?faremBuffer Dpeth/ Octule/OctupleBuffered
+          chkTst(vkWaitForFences(VKI.device, 1, &fence[currentFrame], false, -1)); //This is Unstable and 1000 TiemOut+ all efnce wait only work/wfunctions/behaves rleibly of the Swapchian dpeth is at the Maixmum supprtted at 8 FrameChain?SwapChian?faremBuffer Dpeth/ Octule/OctupleBuffered
   currentFrame++;
   currentFrame&=0x7;
 }
