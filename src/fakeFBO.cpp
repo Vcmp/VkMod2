@@ -1,6 +1,5 @@
 #include "fakeFBO.hpp"
 #include "glm/ext/vector_float2.hpp"
-#include "glm/ext/vector_uint2.hpp"
 
 
 
@@ -8,9 +7,9 @@
 struct ITime
 {
   glm::vec2 xy;
-  glm::uvec2 mouPos;
   float time;
-} __attribute__((aligned(32)));
+  float stime;
+} __attribute__((aligned(16))) ;
 
 
 void fakeFBO::doCommndRec(uint32_t a, clock_t time) const
@@ -27,7 +26,7 @@ void fakeFBO::doCommndRec(uint32_t a, clock_t time) const
   static constexpr VkDeviceSize offsets[] = { 0 };
   // uint32_t i = 0; 
   const auto at = static_cast<float>(time)/1000;
-  const ITime iTime = {{(width), (height)}, {VkInit::X, VkInit::Y}, at };
+  const ITime iTime = {{(width), (height)}, at, sinf(at)};
 
   /* for(const VkCommandBuffer &commandBuffer : commandBuffers)
   {*/VkRenderPassAttachmentBeginInfo RenderPassAttachments

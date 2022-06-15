@@ -9,6 +9,7 @@
 
 #include <unistd.h>
 #include <windef.h>
+#include <winnt.h>
 #include <winuser.h>
 
 
@@ -17,7 +18,8 @@ inline namespace
  
   pthread_t sys;
   bool a = true;
-  static uint32_t aa = 0;
+   uint32_t aa = 0;
+   uint32_t tmSecs = 0;
   // static mat4x m4;
  
 }
@@ -103,7 +105,7 @@ constexpr void chkTst(VkResult buh) noexcept
 }
 
 constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
-int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
+int WinMain(HINSTANCE instance, int v)
 {
     printf("-->");
     std::cout <<(dp.i)<< "\n";
@@ -159,7 +161,8 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
   // auto rs =  Vks::doPointerAlloc5<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
     // const auto rs = SW.createRenderPass(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL, true);
     // const auto fs = SW.frameBuffer;
-    const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI2}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
+    const auto pi1 = PX2.genPipeline({VsMCI3temp, VsMCI2}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
+    const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
     // std::cout << pi2 << "\n";
 
     static const fakeFBO fFBO
@@ -171,6 +174,17 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
       SW.imageViews,
       PX2.vkLayout,
       PX2.commandBuffer
+    };
+    auto x = PX2.genCommPool();
+static const fakeFBO fFBO1
+    {
+      pi1, 
+      x, 
+      SW.renderpass, 
+      SW.frameBuffer, 
+      SW.imageViews,
+      PX2.genLayout(),
+      PX2.doGenCommnd(x)
     };
 
 
@@ -208,14 +222,25 @@ int WinMain(HINSTANCE instance, HINSTANCE prev, LPSTR pCmdLine, int v)
         //   printf("SAME");
         // }
         const auto x = clock();
+        if(tmSecs%10==0)
+        {
         fFBO.doCommndRec(renderer2::currentFrame, x);
         chkTst(vkResetFences(VKI.device, 1, &R2.fence[renderer2::currentFrame]));
-        R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
+          R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
+        }
+        else 
+        {
+        fFBO1.doCommndRec(renderer2::currentFrame, x);
+        chkTst(vkResetFences(VKI.device, 1, &R2.fence[renderer2::currentFrame]));
+          R2.drawFrame(VKI, SW, {fFBO1.commandBuffers[renderer2::currentFrame]});
+        }
         aa++;
         
-          PeekMessageA(msg, VKI.window, WM_KEYLAST, WM_MOUSELAST, PM_NOREMOVE);
+          PeekMessageA(msg, VKI.window, WM_KEYFIRST, WM_MOVING, PM_REMOVE);
+          
         if(prevTime+CLOCKS_PER_SEC<clock())
         {
+          tmSecs++;
         prevTime=x;
           std::cout << aa << "\n";
           aa=0;
@@ -237,7 +262,7 @@ constexpr void renderer2::drawFrame(VkInit const &__restrict__ VKI, SwapChain co
   {
     std::cout << "HUNG!" << "\n";
   }
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 1000, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 2000, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
   
   
   // __builtin_prefetch( BuffersX::data );
@@ -275,7 +300,7 @@ constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
  chkTst(vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 ));
 
-          chkTst(vkWaitForFences(VKI.device, 1, &fence[currentFrame], false, -1));
+          chkTst(vkWaitForFences(VKI.device, 8, fence.data(), false, 1000)); //This is Unstable and 1000 TiemOut+ all efnce wait only work/wfunctions/behaves rleibly of the Swapchian dpeth is at the Maixmum supprtted at 8 FrameChain?SwapChian?faremBuffer Dpeth/ Octule/OctupleBuffered
   currentFrame++;
   currentFrame&=0x7;
 }

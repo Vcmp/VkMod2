@@ -23,7 +23,7 @@ constexpr char* validationLayers = "VK_LAYER_KHRONOS_validation";
 struct VkInit
 {
     // HINSTANCE inst;
-    HWND window;
+    const HWND window;
     VkInstance instance=createInstance();
     VkSurfaceKHR surface;
     VkPhysicalDevice physdevice = doPhysicalDevice();

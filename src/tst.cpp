@@ -19,11 +19,11 @@ static constexpr char const * deviceExtensions = VK_KHR_SWAPCHAIN_EXTENSION_NAME
 
 static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-      // std::cout <<std::hex <<"0x"<< uMsg << "OK!" << "\n";
-      // std::cout <<std::dec <<"wParam"<<"0x"<< wParam << "OK!" << "\n";
-      // std::cout <<std::left <<"lParam"<<"0x"<< lParam << "OK!" << "\n";
-      // std::cout <<std::dec <<"W"<< (GET_X_LPARAM(lParam)) << "OK!" << "\n";
-      // std::cout <<std::dec <<"H"<< (GET_Y_LPARAM(lParam)) << "OK!" << "\n";
+      std::cout <<std::hex <<"0x"<< uMsg << "OK!" << "\n";
+      std::cout <<std::dec <<"wParam"<<"0x"<< wParam << "OK!" << "\n";
+      std::cout <<std::left <<"lParam"<<"0x"<< lParam << "OK!" << "\n";
+      std::cout <<std::dec <<"W"<< (GET_X_LPARAM(lParam)) << "OK!" << "\n";
+      std::cout <<std::dec <<"H"<< (GET_Y_LPARAM(lParam)) << "OK!" << "\n";
       VkInit::X=(GET_X_LPARAM(lParam));
       VkInit::Y=(GET_Y_LPARAM(lParam));
 
@@ -44,6 +44,13 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
     
       std::cout << "NCDestroy Window!" << "\n";
       return 0;
+    case WM_INPUT:
+    {
+      std::cout << "INPUT!" << "\n";
+      auto a =GET_RAWINPUT_CODE_WPARAM(wParam);
+      std::cout << a << "\n";
+      return 0;
+    }
     case WM_CREATE:
        std::cout << "Create Window" << "\n";
        return true;
