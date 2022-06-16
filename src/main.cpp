@@ -118,52 +118,9 @@ int WinMain(HINSTANCE instance, int v)
   static const SwapChain SW(VKI.physdevice, VKI.surface);
   static const Pipeline2 PX2;
   static const renderer2 R2;                                   
-  //   // std::array<VkShaderModuleCreateInfo, 2> si{SPV.VsMCI3temp, SPV.VsMCI4temp};
-
-  //   static constexpr VkAttachmentDescription colorAttachment{
-  //   .format         = VK_FORMAT_B8G8R8A8_SRGB,  // SwapChainSupportDetails::swapChainImageFormat,
-  //   .samples        = VK_SAMPLE_COUNT_1_BIT,
-  //   .loadOp         = VK_ATTACHMENT_LOAD_OP_NONE_EXT,
-  //   .storeOp        = VK_ATTACHMENT_STORE_OP_NONE, //Must be NONE, Not Don't Care to retain previous renderpass/Subpass/RenerPass/Subpass/Src Attachment e.g.
-  //   .stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-  //   .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-  //   .initialLayout  = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-  //   .finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-  // };
-  // static constexpr VkAttachmentReference colorAttachmentRef{ .attachment = 0, .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
-  // static constexpr VkSubpassDescription  subpass{ .pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS,
-  //                                                 .colorAttachmentCount = 1,
-  //                                                 .pColorAttachments    = &colorAttachmentRef };
-
-                                                  
-  // static constexpr VkSubpassDependency  VkSubpassDependency
-  // {
-  //   .srcSubpass=VK_SUBPASS_CONTENTS_INLINE,
-  //   .dstSubpass=VK_SUBPASS_CONTENTS_INLINE,
-  //   .srcStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-  //   .dstStageMask=VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-  //   .srcAccessMask=VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
-  //   .dstAccessMask=VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
-
-  // };
-
-  // constexpr VkRenderPassCreateInfo vkRenderPassCreateInfo1 = {
-  //   .sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-  //   //   .flags=VK_FRAMEBUFFER_CREATE_IMAGELESS_BIT,
-  //   .attachmentCount = 1,
-  //   .pAttachments    = &colorAttachment,
-  //   .subpassCount    = 1,
-  //   .pSubpasses      = &subpass,
-  //   // .dependencyCount=1,
-  //   // .pDependencies=&VkSubpassDependency
-  // };
-
-  // auto rs =  Vks::doPointerAlloc5<VkRenderPass>(&vkRenderPassCreateInfo1, vkCreateRenderPass );
-    // const auto rs = SW.createRenderPass(VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL, true);
-    // const auto fs = SW.frameBuffer;
+  
     const auto pi1 = PX2.genPipeline({VsMCI3temp, VsMCI2}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
     const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
-    // std::cout << pi2 << "\n";
 
     static const fakeFBO fFBO
     {
@@ -204,23 +161,7 @@ static const fakeFBO fFBO1
     {
       static LPMSG msg;
       static DWORD prevTime;
-      // {
-      //   // std::cout << "MSG AVAILABLE!" << "\n";
-      //   std::cout << msg->message << "\n";
-      //   std::cout << msg->time << "\n";
-      //   std::cout << 16 << "\n";
-        
-      // }
-        // printf("%i \n", aa++);
-        
-        // vkQueueWaitIdle(VKI.GraphicsQueue);
-        // glfwPollEvents();
-        // vkQueueWaitIdle(VKI.GraphicsQueue);
-        // vkResetCommandBuffer(fFBO.commandBuffers[renderer2::currentFrame], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
-        // if(msg->time==prevTime)
-        // {
-        //   printf("SAME");
-        // }
+     
         const auto x = clock();
         if(tmSecs%10==0)
         {

@@ -17,14 +17,12 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
     vkGetPhysicalDeviceSurfaceFormatsKHR(physdevice, surface, &count, nullptr );
     std::vector<VkSurfaceFormatKHR> surfaceFormats(count);
     
-    // if ( count != 0 )
     {
       vkGetPhysicalDeviceSurfaceFormatsKHR(physdevice, surface, &count, surfaceFormats.data() );
     }
     vkGetPhysicalDeviceSurfacePresentModesKHR(physdevice, surface, &count, nullptr );
     std::vector<VkPresentModeKHR> presentModes(count);
 
-    // if ( count != 0 )
     {
       vkGetPhysicalDeviceSurfacePresentModesKHR(physdevice, surface, &count, presentModes.data() );
     }
@@ -48,23 +46,7 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
        
     }
 
-    // return VK_PRESENT_MODE_FIFO_KHR;
-
-    // swapChainExtent = SwapChainSupportDetails::chooseSwapExtent();
-    // imageCount = ( Frames );
-
-    // if ( capabilities.maxImageCount > 0 && Frames > capabilities.maxImageCount )
-    // {
-    //   // imageCount = capabilities.maxImageCount;
-    // }
-
-    // std::cout << capabilities.minImageCount << "\n";
-    // std::cout << capabilities.maxImageCount << "\n";
-    // std::cout << capabilities.currentExtent.height << "\n";
-    // std::cout << capabilities.currentExtent.width << "\n";
-
-    // SwapChainSupportDetails::swapChainImageFormat = surfaceFormat;
-    // SwapChainSupportDetails::swapChainExtent      = extent;
+    
 
     return swapChainImageFormat;
 }
@@ -80,8 +62,6 @@ auto SwapChain::getSwapChainImages(uint32_t size) -> std::array<VkImage, Frames>
 auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -> VkSwapchainKHR
   {
     std::cout << "ImageCount: " << Frames << "\n";
-
-    // const auto aa = { graphicsFamily, transferFamily };
     
 
     const VkSwapchainCreateInfoKHR createInfo{
@@ -98,15 +78,10 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
       .imageArrayLayers = 1,
       .imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
 
-      // if (graphicsFamily != presentFamily) {
-      .imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE,
+      .imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE, //Is concurrent even needed in many cases...
       .queueFamilyIndexCount = 0,
       .pQueueFamilyIndices   = 0,
-      // } else {
-      // .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
-      // .queueFamilyIndexCount = 0; // Optiona,
-      // .pQueueFamilyIndices = nullptr; // Optiona,
-      // }
+      
 
       .preTransform   = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
       .compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
@@ -172,10 +147,10 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
       .layerCount=1,
       .height= swapChainExtent.height,
       .width= swapChainExtent.width,
-      .usage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, //Possible Driver Bug Setting the Usage to 0x11 instead of 0x10 on the SwapChain Image Usage Flag...
+      .usage=VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, //Nvidia Driver bug with Usages/Varients is now fixed in an eailer 473.** Driver Branch and does/no longer needs an offset tp be corrected manually
     };
 
-    // VkFramebufferAttachmentImageInfo atts[3]={FramebufferAttachmentImage, FramebufferAttachmentImage, FramebufferAttachmentImage};
+
     VkFramebufferAttachmentsCreateInfo FramebufferAttachments
     {
       .sType=VK_STRUCTURE_TYPE_FRAMEBUFFER_ATTACHMENTS_CREATE_INFO,
@@ -195,15 +170,12 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
     framebufferCreateInfo.pAttachments            = nullptr;
 
 
-    // for ( size_t i = 0; i < Frames; i++ )
-    
-      // framebufferCreateInfo.pAttachments = &swapChainImageViews[i];
 
       return Vks.doPointerAlloc5<VkFramebuffer>(&framebufferCreateInfo, vkCreateFramebuffer);
     
   
 
-}  // namespace SwapChainSupportDetails
+}
 
 //COuld Turn this into an Dedicated Object or even amore complex "Scene" Aggregate"
 auto SwapChain::createRenderPass(VkImageLayout initial, bool load) -> VkRenderPass

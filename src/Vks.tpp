@@ -8,9 +8,7 @@ constexpr uint16_t width = 1280;
 constexpr uint16_t height = 720;
 constexpr uint8_t Frames = 8;
 
-// constexpr  auto ta =LoadLibraryA("vulkan-1.dll");
 
-// constexpr auto tst = (PFN_vkGetInstanceProcAddr)(void(*)())vkGetInstanceProcAddr(VkInit::VKI.instance, "vkCreateShaderModule");
 
 static union Vks 
 {

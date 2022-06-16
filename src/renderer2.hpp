@@ -36,7 +36,6 @@ struct renderer2// : Queues
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
   constexpr void            drawFrame(const VkInit&, const SwapChain&, std::initializer_list<VkCommandBuffer>) const;
 
-  // static void updateUniformBuffer() __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   static constinit inline uint32_t               currentFrame;
 
   constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
@@ -51,6 +50,5 @@ struct renderer2// : Queues
   static constexpr const uint32_t                TmUt = 1000000000;
 
  
-  // const std::array<VkSubmitInfo, 3> aa = genSubmits(AvailableSemaphore);
 };
 

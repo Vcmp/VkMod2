@@ -68,59 +68,12 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
       }
       else return true;
-    // case WM_SHOWWINDOW:
-    //   return 0;
-    // case WM_WINDOWPOSCHANGING:
-    //   return 0;
-    // case WM_ACTIVATEAPP:
-    //   return true;
-    // case WM_ACTIVATE:
-    //   if(wParam==1)
-    //     {
-    //       return 0;
-    //     }
-    //   std::cout << "Activating Window!" << "\n";
-    //   return 0;
-    // case WM_IME_SETCONTEXT:
-    //   std::cout << "Activating Window!" << "\n";
-    //   return true;
-    // case WM_SETFOCUS:
-    //   SetFocus(hwnd);
-    //   return 0;
-    // case WM_NCPAINT:
-    // {
-    //     HDC hdc;
-    //     hdc = GetDCEx(hwnd, (HRGN)wParam, DCX_WINDOW|DCX_INTERSECTRGN);
-    //     // Paint into this DC 
-    //     ReleaseDC(hwnd, hdc);
-    //     return 0;
-    // }
-    // case WM_ERASEBKGND:
-    // {
-    //   return 1;
-    // }
-    // case WM_WINDOWPOSCHANGED:
-    //   return true;
-    // case WM_SIZE:
-    //   RECT rcClient; 
-    //         GetClientRect(hwnd, &rcClient); 
-    //         EnumChildWindows(hwnd, nullptr, (LPARAM) &rcClient); 
-    //         return 0; 
-    //   return true;
+    
     case WM_MOVE:
       std::cout << "MOVE!" << "\n";
       return true;
     
-    // default:
-    
-    //     std::cout << "-->" << uMsg << "\n";
-    //     if(!wParam)
-    //     {
-    //       return false;
-    //     }
-
-    //   return 0;
-    
+   
 
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -190,8 +143,6 @@ auto VkInit::createInstance() const -> VkInstance
     VK_MAKE_VERSION( 1, 3, 0 ),
     VK_API_VERSION_1_3
   };
-  // uint32_t                  glfwExtensionCount = 0;
-  //const char **             glfwExtensions     = glfwGetRequiredInstanceExtensions( &glfwExtensionCount );
   std::vector<const char *> extensions{ VK_KHR_SURFACE_EXTENSION_NAME, VK_KHR_WIN32_SURFACE_EXTENSION_NAME};
   
   for(uint32_t i=0; i< extensions.size(); i++)
@@ -227,13 +178,7 @@ auto  VkInit::vkEnumSet(auto aa) const
   uint32_t deviceCount;
   aa( instance, &deviceCount, nullptr ) ;
 
-  // if constexpr(ENABLE_VALIDATION_LAYERS)
-  // {
-  //   setupDebugMessenger();
-  // }
  
-  // if ( deviceCount == 0 )
-  //   std::runtime_error( "Failed to find GPUs with Vulkan support" );
    std::vector<name> ppPhysicalDevicesdeviceCount(deviceCount);
 
   std::cout <<  "Enumerate Physical Device"  << "\n";
@@ -318,14 +263,7 @@ uint32_t transferFamily;
   PQ.flags            = 0;
   PQ.pNext            = VK_NULL_HANDLE;
   
-  // VkDeviceQueueCreateInfo PRQ{};
-
-  // PQ.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-  // PQ.queueFamilyIndex = 0;
-  // PQ.queueCount       = 1;
-  // PQ.pQueuePriorities = &priority;
-  // PQ.flags            = 0;
-  // PQ.pNext            = VK_NULL_HANDLE;
+  
 
   const auto queueCreateInfos = { GQ, PQ };
 
