@@ -5,6 +5,7 @@
 #include "Pipeline2.hpp"
 
 
+#include <iostream>
 #include <pthread.h>
 
 #include <unistd.h>
@@ -112,7 +113,21 @@ int WinMain(HINSTANCE instance, int v)
     std::cout <<(base_pod::tA(2))<< "\n";
     // VkInit give_me_a_name{VkInit::init(), VkInit::createInstance(), VkInit::createSurface(), VkInit::doPhysicalDevice(), VkInit::doDevice()};
     // int r =  pthread_create( &sys, nullptr, Sysm, nullptr );
+  mat4x m4;
+  mat4x m5;
+  // float a = m4[0];
+  // m4[0]=a;
 
+  m4.identity();
+  std::cout << &m4 << "\n";
+  for(auto a =0; a<sizeof(m4)/sizeof(float); a++)
+  {
+    if(!(a&3))
+    {
+      std::cout  << "\n";
+    }
+    std::cout << m4[a];
+  }
    static const VkInit VKI(instance);
    Vks::Device=VKI.tst();
   static const SwapChain SW(VKI.physdevice, VKI.surface);
