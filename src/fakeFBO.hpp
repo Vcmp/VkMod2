@@ -23,6 +23,6 @@ struct fakeFBO
     void doCommndRec(uint32_t, clock_t) const;
 
     
-} __attribute__((aligned(64)));
+} __attribute__((aligned(128)));
 
 

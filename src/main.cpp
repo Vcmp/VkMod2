@@ -5,10 +5,13 @@
 #include "Pipeline2.hpp"
 
 
+#include <cstdint>
 #include <iostream>
 #include <pthread.h>
 
+#include <type_traits>
 #include <unistd.h>
+#include <vulkan/vulkan_core.h>
 #include <windef.h>
 #include <winnt.h>
 #include <winuser.h>
@@ -21,6 +24,7 @@ inline namespace
   bool a = true;
    uint32_t aa = 0;
    uint32_t tmSecs = 0;
+  static constexpr uint32_t tmOut = 1000;
   // static mat4x m4;
  
 }
@@ -95,6 +99,7 @@ constexpr void chkTst(VkResult buh) noexcept
         case VK_THREAD_DONE_KHR: std::cout <<"VK_THREAD_DONE_KHR" << "\n"; break;
         case VK_OPERATION_DEFERRED_KHR: std::cout <<"VK_OPERATION_DEFERRED_KHR" << "\n"; break;
         case VK_OPERATION_NOT_DEFERRED_KHR: std::cout <<"VK_OPERATION_NOT_DEFERRED_KHR" << "\n"; break;
+        case VK_ERROR_COMPRESSION_EXHAUSTED_EXT: std::cout <<"VK_ERROR_COMPRESSION_EXHAUSTED_EXT" << "\n"; break;
       
         default: return;
         // case VK_SUCCESS: { return;}
@@ -106,7 +111,7 @@ constexpr void chkTst(VkResult buh) noexcept
 }
 
 constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
-int WinMain(HINSTANCE instance, int v)
+[[gnu::pure, gnu::noreturn]] void WinMain(HINSTANCE instance, int v)
 {
     printf("-->");
     std::cout <<(dp.i)<< "\n";
@@ -137,7 +142,7 @@ int WinMain(HINSTANCE instance, int v)
     const auto pi1 = PX2.genPipeline({VsMCI3temp, VsMCI2}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
     const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
 
-    static const fakeFBO fFBO
+    fakeFBO fFBO
     {
       pi2, 
       PX2.commandPool, 
@@ -148,7 +153,7 @@ int WinMain(HINSTANCE instance, int v)
       PX2.commandBuffer
     };
     // auto x = PX2.genCommPool();
-static const fakeFBO fFBO1
+fakeFBO fFBO1
     {
       pi1, 
       PX2.commandPool, 
@@ -170,26 +175,22 @@ static const fakeFBO fFBO1
     std::cout << "fakeFBO" <<std::is_standard_layout_v<fakeFBO> << "\n";
     std::cout << "fakeFBO" <<std::is_trivially_copyable_v<fakeFBO> << "\n";
     std::cout << "fakeFBO" <<std::is_trivially_constructible_v<fakeFBO> << "\n";
+    std::cout << "fakeFBO" <<std::is_trivially_move_constructible_v<fakeFBO> << "\n";
+    std::cout << "fakeFBO" <<std::is_pod_v<fakeFBO> << "\n";
+    std::cout << "fakeFBO" <<std::is_move_assignable_v<fakeFBO> << "\n";
+    std::cout << "fakeFBO" <<std::is_copy_assignable_v<fakeFBO> << "\n";
 
-      
+
     while(IsWindow(VKI.window))
     {
       static LPMSG msg;
       static DWORD prevTime;
-     
+     const fakeFBO SFBO=(tmSecs%10==0) ? fFBO : fFBO1;
         const auto x = clock();
-        if(tmSecs%10==0)
-        {
-        fFBO.doCommndRec(renderer2::currentFrame, x);
-        chkTst(vkResetFences(VKI.device, 1, &R2.fence[renderer2::currentFrame]));
-          R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
-        }
-        else 
-        {
-        fFBO1.doCommndRec(renderer2::currentFrame, x);
-        chkTst(vkResetFences(VKI.device, 1, &R2.fence[renderer2::currentFrame]));
-          R2.drawFrame(VKI, SW, {fFBO1.commandBuffers[renderer2::currentFrame]});
-        }
+        
+         SFBO.doCommndRec(renderer2::currentFrame, x);
+         vkResetFences(VKI.tst(), 1, &R2.fence[renderer2::currentFrame]);
+         R2.drawFrame(VKI, SW, {SFBO.commandBuffers[renderer2::currentFrame]});
         aa++;
         
           PeekMessageA(msg, VKI.window, WM_KEYFIRST, WM_MOVING, PM_REMOVE);
@@ -211,27 +212,16 @@ static const fakeFBO fFBO1
 
 
 
-constexpr void renderer2::drawFrame(VkInit const &__restrict__ VKI, SwapChain const &__restrict__ SW, std::initializer_list<VkCommandBuffer> commandBuffer) const
+void renderer2::drawFrame(VkInit const &__restrict__ VKI, SwapChain const &__restrict__ SW, std::initializer_list<VkCommandBuffer> commandBuffer) const
 {
   // m4.loadAligned( &m5 );
-  if(IsHungAppWindow(VKI.window))
-  {
-    std::cout << "HUNG!" << "\n";
-  }
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, 1000, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
+  // if(IsHungAppWindow(VKI.window))
+  // {
+  //   std::cout << "HUNG!" << "\n";
+  // }
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, tmOut, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
   
   
-  // __builtin_prefetch( BuffersX::data );
-  // __builtin_prefetch( &viewproj2x );
-//  textTemp2.voidrecComBufferSub(currentFrame);
-  // renderer2::updateUniformBuffer(); 
-
-    // vkResetCommandPool(Queues::device, Queues::commandPool, VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
-
-
-    // PipelineX::recCmdBuffer(currentFrame);
-
-      // R2.info.pCommandBuffers =commandBuffer.data();
 constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
       const  VkSubmitInfo           info{
               .sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -256,9 +246,9 @@ constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
  chkTst(vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 ));
 
-          chkTst(vkWaitForFences(VKI.device, 1, &fence[currentFrame], false, -1)); //This is Unstable and 1000 TiemOut+ all efnce wait only work/wfunctions/behaves rleibly of the Swapchian dpeth is at the Maixmum supprtted at 8 FrameChain?SwapChian?faremBuffer Dpeth/ Octule/OctupleBuffered
-  currentFrame++;
-  currentFrame&=0x7;
+          chkTst(vkWaitForFences(VKI.device, 1, &fence[currentFrame], false, tmOut));
+  // currentFrame++;
+  currentFrame=(currentFrame++&0x7); //Should be notiably faster than modulus if it isn't optimised out by the compiler]: Also allows for the ability to correctly mask the currentFrameincrement against the maxFrameBuffer/Depth/SwapChainImages to ne efefctviley reset to zero wqithout the need to utilsie modulus at all
 }
 
 

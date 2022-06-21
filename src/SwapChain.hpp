@@ -32,4 +32,4 @@ struct SwapChain
     [[nodiscard]] auto createRenderPass(VkImageLayout, bool) -> VkRenderPass;
     [[nodiscard]] auto getCurrentSwapChainSurfaceCapabilities() const -> VkExtent2D;
 
-};
+} __attribute__((aligned(128)));

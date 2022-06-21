@@ -26,7 +26,7 @@ struct Pipeline2
    [[nodiscard]] auto doGenCommnd(VkCommandPool) const -> std::array<VkCommandBuffer, Frames>;
    [[nodiscard]] auto genLayout() const -> VkPipelineLayout;
    [[nodiscard]] constexpr auto genShaderPiplineStage(VkShaderModuleCreateInfo, VkShaderStageFlagBits) const -> VkPipelineShaderStageCreateInfo;
-};
+} __attribute__((aligned(64)));
 
     constexpr auto Pipeline2::genShaderPiplineStage(VkShaderModuleCreateInfo a, VkShaderStageFlagBits stageFlag) const -> VkPipelineShaderStageCreateInfo
     {

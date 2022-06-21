@@ -34,7 +34,7 @@ struct renderer2// : Queues
       
   static constexpr float ah = 90.0F * static_cast<float>( 0.01745329251994329576923690768489 );
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
-  constexpr void            drawFrame(const VkInit&, const SwapChain&, std::initializer_list<VkCommandBuffer>) const;
+  [[gnu::pure, gnu::const, gnu::regcall, clang::preserve_all, gnu::hot]] void            drawFrame(const VkInit&, const SwapChain&, std::initializer_list<VkCommandBuffer>) const;
 
   static constinit inline uint32_t               currentFrame;
 
@@ -50,5 +50,5 @@ struct renderer2// : Queues
   static constexpr const uint32_t                TmUt = 1000000000;
 
  
-};
+} __attribute__((aligned(128)));
 
