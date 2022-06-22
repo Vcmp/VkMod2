@@ -74,3 +74,5 @@ shaderc/
 include/glslang/build_info.h
 *.i
 Vulkan-Headers/
+VulkanMemoryAllocator/
+stb/

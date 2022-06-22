@@ -36,7 +36,7 @@ struct renderer2// : Queues
   static constexpr void  setupRenderDraw() __attribute__( ( cold ) );
   [[gnu::pure, gnu::const, gnu::regcall, clang::preserve_all, gnu::hot]] void            drawFrame(const VkInit&, const SwapChain&, std::initializer_list<VkCommandBuffer>) const;
 
-  static constinit inline uint32_t               currentFrame;
+  static constinit inline uint8_t               currentFrame;
 
   constexpr static void memcpy2( __int256 *, __int256 const *, size_t ) __attribute__( ( __aligned__( 32 ), hot, flatten, preserve_all ) );
   

@@ -6,7 +6,17 @@
 #define VULKAN_HPP_SUPPORT_SPAN
 #define WIN32_LEAN_AND_MEAN
 #pragma once
-#include <volk.h>
+
+typedef unsigned long DWORD;
+		typedef const wchar_t* LPCWSTR;
+		typedef void* HANDLE;
+		typedef struct HINSTANCE__* HINSTANCE;
+		typedef struct HWND__* HWND;
+		typedef struct HMONITOR__* HMONITOR;
+		typedef struct _SECURITY_ATTRIBUTES SECURITY_ATTRIBUTES;
+    
+    
+#include <vk_mem_alloc.h>
 #include <vector>
 
 

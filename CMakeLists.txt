@@ -78,14 +78,15 @@ set(GLM_TEST_ENABLE_SIMD_AVX2 ON CACHE BOOL "" FORCE)
 
 include_directories(shaders)
 include_directories(Vulkan-Headers/include)
-target_include_directories(VkMod2 PUBLIC shaders Vulkan-Headers/include)
+include_directories(stb)
+target_include_directories(VkMod2 PUBLIC shaders Vulkan-Headers/include stb)
 # add_subdirectory(glfw EXCLUDE_FROM_ALL)
 add_subdirectory(glm)
-add_subdirectory(volk)
+add_subdirectory(VulkanMemoryAllocator)
 # add_subdirectory(Tracy)
 # add_subdirectory(sleef)
 # add_subdirectory(brcxxc EXCLUDE_FROM_ALL)
-target_link_libraries(VkMod2 PRIVATE volk glm)
+target_link_libraries(VkMod2 PRIVATE VulkanMemoryAllocator glm)
 
 # add_dependencies(VkMod2 Shaders)
 

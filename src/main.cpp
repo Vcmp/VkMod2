@@ -24,7 +24,7 @@ inline namespace
   bool a = true;
    uint32_t aa = 0;
    uint32_t tmSecs = 0;
-  static constexpr uint32_t tmOut = 1000;
+  static constexpr uint8_t tmOut = 255;
   // static mat4x m4;
  
 }
@@ -111,7 +111,7 @@ constexpr void chkTst(VkResult buh) noexcept
 }
 
 constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
-[[gnu::pure, gnu::noreturn]] void WinMain(HINSTANCE instance, int v)
+[[gnu::pure]] int WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
     printf("-->");
     std::cout <<(dp.i)<< "\n";
@@ -219,7 +219,7 @@ void renderer2::drawFrame(VkInit const &__restrict__ VKI, SwapChain const &__res
   // {
   //   std::cout << "HUNG!" << "\n";
   // }
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, tmOut, AvailableSemaphore[currentFrame], nullptr, &currentFrame ));
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, tmOut, AvailableSemaphore[currentFrame], nullptr, reinterpret_cast<uint32_t*>(&currentFrame) ));
   
   
 constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
@@ -238,7 +238,7 @@ constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
                                                                     .pWaitSemaphores=&FinishedSemaphore[currentFrame],
                                                                     .swapchainCount = 1,
                                                                     .pSwapchains    = &SW.swapChain,
-                                                                    .pImageIndices  = &currentFrame,
+                                                                    .pImageIndices  = reinterpret_cast<uint32_t*>(&currentFrame),
                                                                     .pResults       = nullptr };
 
 

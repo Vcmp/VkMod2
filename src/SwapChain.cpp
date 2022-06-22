@@ -55,7 +55,7 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
 auto SwapChain::getSwapChainImages(uint32_t size) -> std::array<VkImage, Frames>
 {
   std::array<VkImage, Frames> image;
-  vkGetSwapchainImagesKHR( volkGetLoadedDevice(), swapChain, &size, image.data());
+  vkGetSwapchainImagesKHR( Vks::Device, swapChain, &size, image.data());
   return image;
 }
 
@@ -90,9 +90,9 @@ auto SwapChain::createSwapChain(const VkSurfaceFormatKHR swapChainImageFormat) -
 
       .oldSwapchain = VK_NULL_HANDLE
     };
-    std::cout << volkGetLoadedDevice() << "\n";
+    std::cout << Vks::Device << "\n";
     VkSwapchainKHR swapChain;
-    vkCreateSwapchainKHR(volkGetLoadedDevice(), &createInfo, nullptr, &swapChain );
+    vkCreateSwapchainKHR(Vks::Device, &createInfo, nullptr, &swapChain );
     return swapChain;
     
   }

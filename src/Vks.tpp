@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <volk.h>
+#include <vk_mem_alloc.h>
 
 
 constexpr uint16_t width = 1280;
@@ -10,7 +10,7 @@ constexpr uint8_t Frames = 3;
 
 
 
-static union Vks 
+static struct Vks 
 {
     static inline VkDevice Device;
     template<typename type, typename ... fcn>

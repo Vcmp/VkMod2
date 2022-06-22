@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <minwindef.h>
+#include <vulkan/vulkan_win32.h>
 #include <windef.h>
 #include <winuser.h>
 #include <WindowsX.h>
@@ -84,7 +85,7 @@ auto VkInit::init(HINSTANCE instance) const -> HWND
 
  
 
-  volkInitialize();
+  
  WNDCLASS wc = { };
     wc.style=CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   = WindowProc;
@@ -169,7 +170,7 @@ auto VkInit::createInstance() const -> VkInstance
   
  
   vkCreateInstance(&InstCreateInfo, nullptr, &vki);
-  volkLoadInstanceOnly( vki );
+
   return vki;
  }
 template <typename name>
@@ -311,7 +312,15 @@ uint32_t transferFamily;
   
   
   vkCreateDevice( physdevice, &createInfo, VK_NULL_HANDLE, &device ) ;
-  volkLoadDevice( device );
+  VmaAllocatorCreateInfo VmaAllocationCreateInfo
+  {
+    .physicalDevice=physdevice,
+    .device=device,
+    .instance=instance,
+  };
+  VmaAllocator vmaAllocator;
+
+  vmaCreateAllocator(&VmaAllocationCreateInfo, &vmaAllocator);
 
   vkGetDeviceQueue(device, 0, 0, &GraphicsQueue );
   // vkGetDeviceQueue(device, 0, 0, &PresentQueue );
