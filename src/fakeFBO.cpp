@@ -1,12 +1,12 @@
 #include "fakeFBO.hpp"
-#include "glm/ext/vector_float2.hpp"
+#include "glm/ext/vector_int2.hpp"
 
 
 
 
 struct ITime
 {
-  glm::vec2 xy;
+  glm::ivec2 xy;
   float time;
   float stime;
 } __attribute__((aligned(16))) ;

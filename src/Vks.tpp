@@ -6,7 +6,7 @@
 
 constexpr uint16_t width = 1280;
 constexpr uint16_t height = 720;
-constexpr uint8_t Frames = 3;
+constexpr uint8_t Frames = 8;
 
 
 

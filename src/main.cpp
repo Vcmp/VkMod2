@@ -139,7 +139,6 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
   static const Pipeline2 PX2;
   static const renderer2 R2;                                   
   
-    const auto pi1 = PX2.genPipeline({VsMCI3temp, VsMCI2}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
     const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
 
     fakeFBO fFBO
@@ -153,16 +152,6 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
       PX2.commandBuffer
     };
     // auto x = PX2.genCommPool();
-fakeFBO fFBO1
-    {
-      pi1, 
-      PX2.commandPool, 
-      SW.renderpass, 
-      SW.frameBuffer, 
-      SW.imageViews,
-      PX2.vkLayout,
-      PX2.commandBuffer
-    };
 
 
     // fFBO.doCommBuffers();
@@ -185,12 +174,12 @@ fakeFBO fFBO1
     {
       static LPMSG msg;
       static DWORD prevTime;
-     const fakeFBO SFBO=(tmSecs%10==0) ? fFBO : fFBO1;
+    //  const fakeFBO SFBO=(tmSecs%10==0) ? fFBO : fFBO1;
         const auto x = clock();
         
-         SFBO.doCommndRec(renderer2::currentFrame, x);
+         fFBO.doCommndRec(renderer2::currentFrame, x);
          vkResetFences(VKI.tst(), 1, &R2.fence[renderer2::currentFrame]);
-         R2.drawFrame(VKI, SW, {SFBO.commandBuffers[renderer2::currentFrame]});
+         R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
         aa++;
         
           PeekMessageA(msg, VKI.window, WM_KEYFIRST, WM_MOVING, PM_REMOVE);
@@ -219,7 +208,7 @@ void renderer2::drawFrame(VkInit const &__restrict__ VKI, SwapChain const &__res
   // {
   //   std::cout << "HUNG!" << "\n";
   // }
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, tmOut, AvailableSemaphore[currentFrame], nullptr, reinterpret_cast<uint32_t*>(&currentFrame) ));
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, -1, AvailableSemaphore[currentFrame], nullptr, reinterpret_cast<uint32_t*>(&currentFrame) ));
   
   
 constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
@@ -246,7 +235,7 @@ constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
  chkTst(vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 ));
 
-          chkTst(vkWaitForFences(VKI.device, 1, &fence[currentFrame], false, tmOut));
+          chkTst(vkWaitForFences(VKI.device, 1, &fence[currentFrame], false, -1));
   // currentFrame++;
   currentFrame=(currentFrame++&0x7); //Should be notiably faster than modulus if it isn't optimised out by the compiler]: Also allows for the ability to correctly mask the currentFrameincrement against the maxFrameBuffer/Depth/SwapChainImages to ne efefctviley reset to zero wqithout the need to utilsie modulus at all
 }
