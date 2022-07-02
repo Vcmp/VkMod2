@@ -208,7 +208,7 @@ void renderer2::drawFrame(VkInit const &__restrict__ VKI, SwapChain const &__res
   // {
   //   std::cout << "HUNG!" << "\n";
   // }
- chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, -1, AvailableSemaphore[currentFrame], nullptr, reinterpret_cast<uint32_t*>(&currentFrame) ));
+ chkTst(vkAcquireNextImageKHR( VKI.tst(), SW.swapChain, -1, AvailableSemaphore[currentFrame], nullptr, reinterpret_cast<uint32_t*>(&imgIndx) ));
   
   
 constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
@@ -227,7 +227,7 @@ constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
                                                                     .pWaitSemaphores=&FinishedSemaphore[currentFrame],
                                                                     .swapchainCount = 1,
                                                                     .pSwapchains    = &SW.swapChain,
-                                                                    .pImageIndices  = reinterpret_cast<uint32_t*>(&currentFrame),
+                                                                    .pImageIndices  = reinterpret_cast<uint32_t*>(&imgIndx),
                                                                     .pResults       = nullptr };
 
 
@@ -236,7 +236,7 @@ constexpr VkPipelineStageFlags t=VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
  chkTst(vkQueuePresentKHR( VKI.GraphicsQueue, &VkPresentInfoKHR1 ));
 
           chkTst(vkWaitForFences(VKI.device, 1, &fence[currentFrame], false, -1));
-  // currentFrame++;
+  currentFrame++;
   currentFrame=(currentFrame++&0x7); //Should be notiably faster than modulus if it isn't optimised out by the compiler]: Also allows for the ability to correctly mask the currentFrameincrement against the maxFrameBuffer/Depth/SwapChainImages to ne efefctviley reset to zero wqithout the need to utilsie modulus at all
 }
 
