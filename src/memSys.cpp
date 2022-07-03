@@ -1,21 +1,21 @@
 #include "memSys.hpp"
 #include <cstdio>
+#include <vulkan/vulkan_core.h>
 
 constexpr auto getMaxBARSize(auto &mheaps) -> VkDeviceSize
 {
     auto xl=0;
-    for(const auto& memHeaps : mheaps)
+    
+    for(const auto memTypes : mheaps.memoryTypes)
    {
-    printf("Type %u, \n", memHeaps.flags);
-    printf("Size %llu, \n", memHeaps.size);
+    
+    printf("Type %u, \n", memTypes.heapIndex);
+    printf("Size %u, \n", memTypes.propertyFlags);
     //Windows for some reason does not allocate/provide the full 256MB allowed by the default BAR if Resizeable BAR is not enabled/Supported
-    if(memHeaps.flags==VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)
-    {
-        xl=(memHeaps.size&0xD6F4240) ? memHeaps.size : xl;
-    }
+    xl=(memTypes.propertyFlags==(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT)) ? memTypes.heapIndex : xl;
     
    }
-   return xl;
+   return mheaps.memoryHeaps[xl].size;
 }
 
 auto memSys::doAlloc(VkPhysicalDevice physdevice, VkDevice device , VkInstance instance) -> VmaAllocator
@@ -26,8 +26,8 @@ auto memSys::doAlloc(VkPhysicalDevice physdevice, VkDevice device , VkInstance i
     vkGetPhysicalDeviceMemoryProperties(physdevice, &vkPhysicalDeviceProperties);
 
    constexpr VkMemoryHeapFlags x={VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT};
-   const VkDeviceSize aa= {vkPhysicalDeviceProperties.memoryHeapCount}; VkDeviceSize MAX_BAR;
-   MAX_BAR=getMaxBARSize(vkPhysicalDeviceProperties.memoryHeaps);
+   const VkDeviceSize aa= {vkPhysicalDeviceProperties.memoryHeapCount}; 
+   VkDeviceSize MAX_BAR=getMaxBARSize(vkPhysicalDeviceProperties);
     printf("memHeap %llu, \n", MAX_BAR);
 auto xx= 0xFFFFFFFF;
    VmaVulkanFunctions vmaVulkanFunctions;
