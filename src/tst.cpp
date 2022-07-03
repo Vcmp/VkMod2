@@ -312,15 +312,6 @@ uint32_t transferFamily;
   
   
   vkCreateDevice( physdevice, &createInfo, VK_NULL_HANDLE, &device ) ;
-  VmaAllocatorCreateInfo VmaAllocationCreateInfo
-  {
-    .physicalDevice=physdevice,
-    .device=device,
-    .instance=instance,
-  };
-  VmaAllocator vmaAllocator;
-
-  vmaCreateAllocator(&VmaAllocationCreateInfo, &vmaAllocator);
 
   vkGetDeviceQueue(device, 0, 0, &GraphicsQueue );
   // vkGetDeviceQueue(device, 0, 0, &PresentQueue );

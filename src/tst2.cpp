@@ -16,7 +16,7 @@ void tst2::setupImagetest()
     {
         .sType=VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         .size=sizeof(limg),
+        .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT,
         .sharingMode=VK_SHARING_MODE_EXCLUSIVE,
-        // .usage
     };
 }

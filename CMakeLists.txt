@@ -63,6 +63,8 @@ message(STATUS ${CMAKE_CXX_FLAGS})
 			# "${CMAKE_CURRENT_SOURCE_DIR}/src/px.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/src/Swapchain.cpp"
 			"${CMAKE_CURRENT_SOURCE_DIR}/src/Pipeline2.cpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/src/memSys.hpp"
+			"${CMAKE_CURRENT_SOURCE_DIR}/src/memSys.cpp"
 	)  
 
 

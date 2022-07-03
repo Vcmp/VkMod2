@@ -21,8 +21,8 @@ struct SwapChain
     // VkExtent2D swapChainExtent=capabilities.currentExtent;
     VkFramebuffer frameBuffer=createFramebuffers(renderpass);
     VkSwapchainKHR swapChain=createSwapChain(swapChainImageFormat);;
-    std::array<VkImage, Frames> image = getSwapChainImages(Frames);
-     std::array<VkImageView, Frames> imageViews = createImageViews(image);
+    //std::array<VkImage, Frames> image = getSwapChainImages(Frames);
+     std::array<VkImageView, Frames> imageViews = createImageViews(getSwapChainImages(Frames));
     SwapChain(VkPhysicalDevice physdevice, VkSurfaceKHR surface):physdevice(physdevice), surface(surface){};
     auto setupImageFormats() -> VkSurfaceFormatKHR;
     [[nodiscard]] auto getSwapChainImages(uint32_t) -> std::array<VkImage, Frames>;
