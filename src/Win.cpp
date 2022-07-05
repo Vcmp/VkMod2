@@ -5,15 +5,15 @@
 #include <WindowsX.h>
 #include <iostream>
 
-static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Win::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
       std::cout <<std::hex <<"0x"<< uMsg << "OK!" << "\n";
       std::cout <<std::dec <<"wParam"<<"0x"<< wParam << "OK!" << "\n";
       std::cout <<std::left <<"lParam"<<"0x"<< lParam << "OK!" << "\n";
       std::cout <<std::dec <<"W"<< (GET_X_LPARAM(lParam)) << "OK!" << "\n";
       std::cout <<std::dec <<"H"<< (GET_Y_LPARAM(lParam)) << "OK!" << "\n";
-    //   VkInit::X=(GET_X_LPARAM(lParam));
-    //   VkInit::Y=(GET_Y_LPARAM(lParam));
+    //   X=(GET_X_LPARAM(lParam));
+    //   Y=(GET_Y_LPARAM(lParam));
 
   switch (uMsg)
     {
@@ -81,10 +81,10 @@ auto Win::init(HINSTANCE instance) const -> HWND
     // wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     // wc.hbrBackground = nullptr;//(HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszMenuName = NULL;
-    wc.lpszClassName = "main";
+    wc.lpszClassName = "Win";
     RegisterClass(&wc);
     auto w =CreateWindowEx(wc.style,
-                                           "main",
+                                           "Win",
                                            nullptr,
                                            NULL,
                                            0, 0,

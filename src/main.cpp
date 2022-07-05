@@ -5,6 +5,7 @@
 #include "Pipeline2.hpp"
 #include "memSys.hpp"
 #include "Win.hpp"
+#include "tst2.hpp"
 
 
 #include <cstdint>
@@ -88,7 +89,9 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
   static const SwapChain SW(VKI.physdevice, VKI.surface);
   static const Pipeline2 PX2;
   static const renderer2 R2;      
-  static const memSys memSysm(VKI.physdevice, VKI.device, VKI.instance);                             
+  static  memSys memSysm(VKI.physdevice, VKI.device, VKI.instance);                             
+  static  tst2 t2(VKI.GraphicsQueue, VkCommSet(), memSysm);
+  //t2.setupImagetest(memSysm);
   
     const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
 

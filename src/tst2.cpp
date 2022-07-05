@@ -1,8 +1,9 @@
+
 #include "tst2.hpp"
-#include "vk_mem_alloc.h"
-#include <cwchar>
+
+#include "imgLud.hpp"
 #include <vulkan/vulkan_core.h>
-#include "Vks.tpp"
+
 
 // VmaAllocationCreateInfo VmaAllocationCreateInfo1 //DUPE
 //   {
@@ -13,84 +14,48 @@
 //This Method/Function Sucks [Mostly/Primarily In terms of Layout]
 VkImage tst2::setupImagetest(memSys& memSysm)
 {
-    int x;
-    int y;
-    int cnls;
-    auto limg = stbi_load("tst.png", &x, &y, &cnls, STBI_rgb);
-
+    int x, y, cnls;
+    auto limg = tstA::loadImg(x, y, cnls);
+    std::cout << sizeof(limg) <<"--"<< x <<"--"<< y <<"--"<< cnls << "\n";
  
- 
-    void* pixel_ptr = limg;
-	VkDeviceSize imageSize = x * y * 3;
+	VkDeviceSize imageSize = x * y * cnls;
 
 	//Check if correct format as Framebuffer/ViImage.VkImageView is in UNORM and not SRGB
-	constexpr VkFormat image_format = VK_FORMAT_R8G8B8A8_SRGB;
+	constexpr VkFormat image_format = VK_FORMAT_R8G8B8A8_UNORM;
 
-	//allocate temporary buffer for holding texture data to upload
     VmaAllocation VmaAllocation;
-    stagingBuffer = memSysm.allocBuf(stagingBuffer, sizeof(limg), VmaAllocation);
+    stagingBuffer = memSysm.allocBuf(imageSize, VmaAllocation);
+	  memSysm.mapMem(limg, VmaAllocation, imageSize);
 
-	//copy data to buffer
-    // beginSingleTimeCommands(commandBufferSets.commandBuffer);
-
-    // vkCmdFillBuffer(commandBufferSets.commandBuffer, nullptr, 0, sizeof(limg), limg);
-	void* data;
-	vmaMapMemory(memSysm.vmaAllocator, VmaAllocation, &data);
-    {
-
-	    memcpy(data, pixel_ptr, imageSize);
-
-    }
-    vmaUnmapMemory(memSysm.vmaAllocator, VmaAllocation);
-	//we no longer need the loaded data, so we can free the pixels as they are now in the staging buffer
-	stbi_image_free(limg);
+	tstA::freeImg(limg);
 
 constexpr VkExtent3D extent = {.width=width, .height=height, .depth=1};
-   constexpr VkImageCreateInfo imageInfo = {
+   constexpr VkImageCreateInfo imageInfo 
+   {
         .sType             = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .imageType         = VK_IMAGE_TYPE_2D,
         .extent            = extent,
         .mipLevels         = 1,
         .arrayLayers       = 1,
         .format            = image_format,
-        .tiling            = VK_IMAGE_TILING_LINEAR,
-        .initialLayout     = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,
-        .usage             = VK_IMAGE_USAGE_SHADING_RATE_IMAGE_BIT_NV,
+        .tiling            = VK_IMAGE_TILING_OPTIMAL,
+        .initialLayout     = VK_IMAGE_LAYOUT_PREINITIALIZED,//VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL,: Check this correct Image Layout
+        .usage             = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
         .samples           = VK_SAMPLE_COUNT_1_BIT,
         .sharingMode       = VK_SHARING_MODE_EXCLUSIVE,
 };
 	constexpr VmaAllocationCreateInfo dimg_allocinfo = {.usage = VMA_MEMORY_USAGE_GPU_ONLY};
-auto vkImage = Vks::doPointerAlloc5<VkImage>( &imageInfo, vkCreateImage);
-//   constexpr VkMemoryDedicatedRequirementsKHR img2 = { VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS_KHR, nullptr };
+  auto vkImage = Vks::doPointerAlloc5<VkImage>( &imageInfo, vkCreateImage);
 
-//   VkMemoryRequirements2 memRequirements = {};
-//   vkGetImageMemoryRequirements( Vks::Device, vkImage, &memRequirements.memoryRequirements );
 
-//   VkMemoryAllocateInfo allocInfo = {};
-//   allocInfo.sType                = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-//   allocInfo.allocationSize       = memRequirements.memoryRequirements.size;
-// //   allocInfo.memoryTypeIndex =
-//     // BuffersX::findMemoryType( memRequirements.memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT );
-//   allocInfo.pNext = VK_NULL_HANDLE;
-
-//   if constexpr ( img2.prefersDedicatedAllocation | img2.requiresDedicatedAllocation )
-//   {
-//     std::cout << ( "Using Dedicated Memory Allocation" ) << "\n";
-//     VkMemoryDedicatedAllocateInfo dedicatedAllocateInfoKHR = {};
-//     dedicatedAllocateInfoKHR.sType                         = VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO;
-//     dedicatedAllocateInfoKHR.image                         = vkImage;
-
-//     allocInfo.pNext = &dedicatedAllocateInfoKHR;
-//   }
-
-    vmaCreateImage(memSysm.vmaAllocator, &imageInfo, &dimg_allocinfo, &vkImage, &VmaAllocation, nullptr);
+    chkTst(vmaCreateImage(memSysm.vmaAllocator, &imageInfo, &dimg_allocinfo, &vkImage, &VmaAllocation, nullptr));
     return vkImage;
 }
 
-void tst2::transitionImageLayout( VkInit &VKI, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout )
+void tst2::transitionImageLayout( VkQueue transferQueue, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout )
 {
     
-  beginSingleTimeCommands(commandBufferSets.commandBuffer);
+  commandBufferSets.beginSingleTimeCommands();
 
   VkImageMemoryBarrier barrier = {
     .sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -155,22 +120,18 @@ void tst2::transitionImageLayout( VkInit &VKI, VkFormat format, VkImageLayout ol
   }
 
   vkCmdPipelineBarrier( commandBufferSets.commandBuffer, sourceStage /* TODO */, destinationStage /* TODO */, 0, 0, VK_NULL_HANDLE, 0, VK_NULL_HANDLE, 1, &barrier );
-  endSingleTimeCommands(VKI.GraphicsQueue, commandBufferSets.commandBuffer);
+  commandBufferSets.endSingleTimeCommands(transferQueue);
 }
 
 
-auto tst2::copyImage(VkInit &VKI, VkExtent3D extent)
+auto tst2::copyImgToBuf(VkExtent3D extent)
 {
     constexpr VkBufferImageCopy copyRegion = {
 	    .bufferOffset = 0,
 	    .bufferRowLength = 0,
 	    .bufferImageHeight = 0,
 
-	    .imageSubresource={.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-	    .mipLevel = 0,
-	    .baseArrayLayer = 0,
-	    .layerCount = 1,
-        },
+	    .imageSubresource=subresource,
 	    .imageExtent = {width, height, 1},
 };
 	//copy the buffer into the image
@@ -179,8 +140,37 @@ auto tst2::copyImage(VkInit &VKI, VkExtent3D extent)
     return DstImg;
 }
 
-void tst2::vkRecImg(VkCommandBuffer commandBuffer)
+void tst2::vkRecImg(VkImageLayout srcImageLayout, VkImageLayout dstImageLayout)
 {
-  //  vkCmdBeginRenderPass(commandBufferSets.commandBuffer, nullptr, nullptr);
-  //  vkCmdBlitImage(commandBufferSets.commandBuffer);
+  VkImage DstImg;
+  
+  constexpr VkImageBlit imgBlt
+  {
+    .srcSubresource=subresource,
+    .srcOffsets={0,0,0},
+    .dstSubresource=subresource,
+    .dstOffsets={0,0,0}
+  };
+  //vkCmdBeginRenderPass(commandBufferSets.commandBuffer, nullptr, nullptr);
+  commandBufferSets.beginSingleTimeCommands();
+  vkCmdBlitImage(commandBufferSets.commandBuffer, image, srcImageLayout, DstImg, dstImageLayout, 1, &imgBlt, VK_FILTER_NEAREST);
+  commandBufferSets.endSingleTimeCommands(GraphicsQueue2);
+  
+}
+
+
+//ideally would use Buffalloc in function btu would require static struct.lcas. fucntion for MemSys (Which woudl get annying to initalise very Quickely)
+auto tst2::copyBufToImg(VkBuffer buffer, VkImage image, VkExtent3D extent)
+{
+  	const VkBufferImageCopy copyRegion = {
+	    .bufferOffset = 0,
+	    .bufferRowLength = 0,
+	    .bufferImageHeight = 0,
+
+	    .imageSubresource=subresource,
+	    .imageExtent = extent,
+    };
+    
+    vkCmdCopyImageToBuffer(commandBufferSets.commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer, 1, &copyRegion);
+    return buffer;
 }

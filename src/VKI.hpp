@@ -25,7 +25,7 @@ typedef unsigned long DWORD;
 // constexpr uint16_t height = 480;
 // constexpr uint8_t Frames = 8;
 
-constexpr bool ENABLE_VALIDATION_LAYERS = true;
+constexpr bool ENABLE_VALIDATION_LAYERS = false;
 
 
 constexpr char* validationLayers = "VK_LAYER_KHRONOS_validation";
@@ -39,10 +39,8 @@ struct VkInit
     VkSurfaceKHR surface;
     VkPhysicalDevice physdevice = doPhysicalDevice();
     VkDevice device = doDevice();
-    inline static uint16_t X;
-    inline static uint16_t Y;
-    uint32_t graphicsFamily;
-    uint32_t transferFamily;
+    // uint32_t graphicsFamily;
+    // uint32_t transferFamily;
     VkQueue GraphicsQueue;
     // VkQueue PresentQueue;
     VkQueue TransferQueue;
@@ -59,7 +57,7 @@ struct VkInit
      auto doDevice() -> VkDevice;
      template <typename name> auto vkEnumSet(auto a) const;
      template <typename name>  auto  vkEnumSet2(auto a) const -> std::vector<name>;
-     [[nodiscard, gnu::pure, gnu::const, clang::vectorcall]] constexpr auto tst() const noexcept -> VkDevice{ return this->device; };
+     [[nodiscard, gnu::pure, gnu::const, gnu::regcall]] constexpr auto tst() const noexcept -> VkDevice{ return this->device; };
 
 };
 // VkInit VkInit::VKI;

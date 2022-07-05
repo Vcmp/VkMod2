@@ -93,12 +93,6 @@ static struct Vks
  } Vks;
 
 
- constexpr void beginSingleTimeCommands(VkCommandBuffer &commandBuffer)
-{
-    constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-                                                    .flags = ( VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT) };
-  vkBeginCommandBuffer(commandBuffer, &beginInfo1);
-}
 
 
 
@@ -111,6 +105,12 @@ struct VkCommSet
      constexpr void beginSingleTimeCommands();
      constexpr void endSingleTimeCommands(VkQueue queue);
 };
+ constexpr void VkCommSet::beginSingleTimeCommands()
+{
+    constexpr VkCommandBufferBeginInfo beginInfo1 = { .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+                                                    .flags = ( VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT) };
+  vkBeginCommandBuffer(commandBuffer, &beginInfo1);
+}
 auto VkCommSet::doGenCommnd(VkCommandPool commandPool) const -> VkCommandBuffer
 {
   VkCommandBuffer PreTestBuffer;
@@ -131,11 +131,11 @@ constexpr auto VkCommSet::genCommPool() const -> VkCommandPool
     .flags=VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
     .queueFamilyIndex = 0,
   };
-  return Vks.doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool );
+  return Vks::doPointerAlloc5<VkCommandPool>( &poolInfo, vkCreateCommandPool );
  
 }
 
-constexpr void endSingleTimeCommands(VkQueue queue, VkCommandBuffer &commandBuffer)
+constexpr void VkCommSet::endSingleTimeCommands(VkQueue queue)
 {
   vkEndCommandBuffer( commandBuffer );
   const VkSubmitInfo       submitInfo1 = {

@@ -21,8 +21,8 @@ public:
 
 
   [[gnu::hot, gnu::pure]] __m256 lud( const float[] ) const __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
-  [[gnu::hot, gnu::pure, gnu::const, gnu::aligned(64), clang::preserve_all, clang::vectorcall]] __vectorcall constexpr auto operator=(auto  &__n) const -> float&;
-  [[gnu::hot, gnu::pure, gnu::const, gnu::aligned(64), clang::preserve_all, clang::vectorcall]] __vectorcall constexpr auto operator[](auto  __n) const noexcept -> float;
+  [[gnu::hot, gnu::pure, gnu::const, gnu::aligned(64), clang::preserve_all, gnu::regcall]] constexpr auto operator=(auto  &__n) const -> float&;
+  [[gnu::hot, gnu::pure, gnu::const, gnu::aligned(64), clang::preserve_all, gnu::regcall]] constexpr auto operator[](auto  __n) const noexcept -> float;
    constexpr void    toAddress(const __m256* a );
    void    loadAligned( const glm::mat4x4 &a ) __attribute__( ( preserve_most ) );
    void    loadAligned( const mat4x * a ) __attribute__( ( preserve_most ) );

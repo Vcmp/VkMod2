@@ -5,7 +5,7 @@
 #include <ios>
 #include <vector>
 #include <iostream>
-#include <minwindef.h>
+
 #include <vulkan/vulkan_win32.h>
 
 

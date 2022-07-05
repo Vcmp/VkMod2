@@ -1,8 +1,8 @@
 #include "memSys.hpp"
 #include "vk_mem_alloc.h"
+#include "Vks.tpp"
 #include <cstddef>
-#include <cstdio>
-#include <vulkan/vulkan_core.h>
+#include <cstdint>
 
 constexpr auto getMaxBARSize(auto &mheaps) -> VkDeviceSize
 {
@@ -37,8 +37,8 @@ auto xx= 0xFFFFFFFF;
   {
     .physicalDevice=physdevice,
     .device=device,
-    .preferredLargeHeapBlockSize=MAX_BAR,
-    .pHeapSizeLimit=&aa,
+    // .preferredLargeHeapBlockSize=0,
+    // .pHeapSizeLimit=&aa,
     //.pVulkanFunctions=&vmaVulkanFunctions,
     .instance=instance,
     .vulkanApiVersion=VK_API_VERSION_1_3,
@@ -48,9 +48,20 @@ auto xx= 0xFFFFFFFF;
   vmaCreateAllocator(&VmaAllocationCreateInfo, &vmaAllocator);
   return vmaAllocator;
 }
-
-VkBuffer memSys::allocBuf(VkBuffer buffer, size_t size, VmaAllocation &vmaAllocation)
+auto aAlloc(VkPhysicalDevice, VkDevice, VkInstance) -> VmaAllocator
 {
+  VmaAllocationCreateInfo VmaAllocationCreateInfo
+  {
+    .usage=VMA_MEMORY_USAGE_AUTO,
+    .memoryTypeBits=VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    
+  };
+}
+
+VkBuffer memSys::allocBuf(/* VkBuffer buffer,  */size_t size, VmaAllocation &vmaAllocation)
+{
+  constexpr uint32_t TransferQueCount=1U;
+  std::cout << "AllocateSize: " << size << "\n";
   VkBufferCreateInfo VkBufferCreateInfo
   {
     .sType=VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -58,15 +69,30 @@ VkBuffer memSys::allocBuf(VkBuffer buffer, size_t size, VmaAllocation &vmaAlloca
     .usage=VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
     .sharingMode=VK_SHARING_MODE_EXCLUSIVE,
     .queueFamilyIndexCount=1,
-    // .pQueueFamilyIndices=2UL,
+    .pQueueFamilyIndices=&TransferQueCount,
   };
   // VmaAllocation vmaAllocation;
   VmaAllocationCreateInfo VmaAllocationCreateInfo
   {
-    .usage=VMA_MEMORY_USAGE_AUTO,
-    .memoryTypeBits=VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    
+    .flags=VMA_ALLOCATION_CREATE_MAPPED_BIT|VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT,
+    .usage=VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+    .memoryTypeBits=0,
+    .pool=nullptr
   };
-  vmaCreateBuffer(vmaAllocator, &VkBufferCreateInfo, &VmaAllocationCreateInfo, &buffer, &vmaAllocation, nullptr);
+  VkBuffer buffer;
+  chkTst(vmaCreateBuffer(vmaAllocator, &VkBufferCreateInfo, &VmaAllocationCreateInfo, &buffer, &vmaAllocation, nullptr));
   //vmaBindImageMemory(vmaAllocator)
+  return buffer;
+}
+
+void memSys::mapMem(uint8_t *limg, VmaAllocation &VmaAllocation, uint32_t imageSize)
+{
+  void* data;
+	vmaMapMemory(vmaAllocator, VmaAllocation, &data);
+    {
+
+	    memcpy(data, limg, imageSize);
+
+    }
+    vmaUnmapMemory(vmaAllocator, VmaAllocation);
 }
