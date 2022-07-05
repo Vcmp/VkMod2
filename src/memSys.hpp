@@ -3,6 +3,7 @@
 
 
 #include "vk_mem_alloc.h"
+#include <cstddef>
 
 struct memSys
 {
@@ -10,5 +11,5 @@ struct memSys
     memSys(VkPhysicalDevice physdevice, VkDevice device , VkInstance instance): vmaAllocator(doAlloc(physdevice, device , instance)) {};
     
     auto doAlloc(VkPhysicalDevice, VkDevice, VkInstance) -> VmaAllocator;
-    auto allocBuf(VkBuffer) -> VkBuffer;
+    auto allocBuf(VkBuffer, size_t, VmaAllocation&) -> VkBuffer;
 };

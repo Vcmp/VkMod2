@@ -1,4 +1,6 @@
 #include "memSys.hpp"
+#include "vk_mem_alloc.h"
+#include <cstddef>
 #include <cstdio>
 #include <vulkan/vulkan_core.h>
 
@@ -45,4 +47,26 @@ auto xx= 0xFFFFFFFF;
 
   vmaCreateAllocator(&VmaAllocationCreateInfo, &vmaAllocator);
   return vmaAllocator;
+}
+
+VkBuffer memSys::allocBuf(VkBuffer buffer, size_t size, VmaAllocation &vmaAllocation)
+{
+  VkBufferCreateInfo VkBufferCreateInfo
+  {
+    .sType=VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+    .size=size,
+    .usage=VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    .sharingMode=VK_SHARING_MODE_EXCLUSIVE,
+    .queueFamilyIndexCount=1,
+    // .pQueueFamilyIndices=2UL,
+  };
+  // VmaAllocation vmaAllocation;
+  VmaAllocationCreateInfo VmaAllocationCreateInfo
+  {
+    .usage=VMA_MEMORY_USAGE_AUTO,
+    .memoryTypeBits=VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    
+  };
+  vmaCreateBuffer(vmaAllocator, &VkBufferCreateInfo, &VmaAllocationCreateInfo, &buffer, &vmaAllocation, nullptr);
+  //vmaBindImageMemory(vmaAllocator)
 }
