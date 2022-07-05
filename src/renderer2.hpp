@@ -26,7 +26,7 @@ constexpr std::array<type, Frames> doSet( auto &s, auto f)
 */
 typedef size_t __int256 __attribute__( ( __vector_size__( sizeof( mat4x ) ), __aligned__( 64 ) ) );
 
-struct renderer2// : Queues
+struct [[clang::trivial_abi]] renderer2// : Queues
 {
       static constexpr VkSemaphoreCreateInfo vkCreateCSemaphore{ .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO, .pNext = nullptr };
 

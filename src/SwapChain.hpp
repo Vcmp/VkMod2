@@ -10,7 +10,7 @@
 
 #pragma once
 
-struct SwapChain
+struct [[clang::trivial_abi]] SwapChain
 {
     VkPhysicalDevice physdevice;
     VkSurfaceKHR surface;

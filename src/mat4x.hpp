@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <immintrin.h>
 
-struct [[gnu::aligned(64)]] mat4x
+struct [[clang::trivial_abi, clang::vecreturn, gnu::aligned(64)]] mat4x
 {
 public:
   [[gnu::__const]] __m256 __a = {1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F};

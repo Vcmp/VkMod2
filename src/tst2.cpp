@@ -25,7 +25,8 @@ VkImage tst2::setupImagetest(memSys& memSysm)
 
     VmaAllocation VmaAllocation;
     stagingBuffer = memSysm.allocBuf(imageSize, VmaAllocation);
-	  memSysm.mapMem(limg, VmaAllocation, imageSize);
+    memSysm.addMappedSection(VmaAllocation, imageSize);
+	  memSysm.mapMem(limg, imageSize);
 
 	tstA::freeImg(limg);
 
@@ -48,7 +49,7 @@ constexpr VkExtent3D extent = {.width=width, .height=height, .depth=1};
   auto vkImage = Vks::doPointerAlloc5<VkImage>( &imageInfo, vkCreateImage);
 
 
-    chkTst(vmaCreateImage(memSysm.vmaAllocator, &imageInfo, &dimg_allocinfo, &vkImage, &VmaAllocation, nullptr));
+    chkTst(vmaCreateImage(memSysm.vmaAllocator, &imageInfo, &dimg_allocinfo, &vkImage, memSysm.reemptMappedSection, nullptr));
     return vkImage;
 }
 

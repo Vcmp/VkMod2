@@ -12,7 +12,7 @@ using DWORD = unsigned long;
   using LPARAM = long long;
   using LRESULT = long long;
   using UINT = unsigned int;
-struct Win
+struct [[clang::trivial_abi]] Win
 {
   HWND window;
   

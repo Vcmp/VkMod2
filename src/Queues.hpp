@@ -4,7 +4,7 @@
 
 
 #include "Vks.tpp"
-static struct Queues
+static [[clang::trivial_abi]] struct Queues
 {
   // static inline VkPhysicalDevice            physicalDevice;
   static inline VkCommandPool               commandPool;

@@ -30,7 +30,7 @@ constexpr bool ENABLE_VALIDATION_LAYERS = false;
 
 constexpr char* validationLayers = "VK_LAYER_KHRONOS_validation";
 
-struct VkInit
+struct [[clang::trivial_abi]] VkInit
 {
     // HINSTANCE inst;
     

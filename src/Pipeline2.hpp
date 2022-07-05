@@ -13,7 +13,7 @@ constexpr VkRect2D scissor{ .offset = { 0, 0 }, .extent{ width, height } };
 
 constexpr std::array<VkShaderModuleCreateInfo, 2> shaderStages2{VsMCI, VsMCI2};
 
-struct Pipeline2
+struct [[clang::trivial_abi]] Pipeline2
 {
      VkPipelineLayout vkLayout=genLayout();
     //  VkPipeline pipeline;

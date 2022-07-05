@@ -9,7 +9,7 @@
 
 
 //ideally will need to fix this abomination of a Constructor/InitialserList/Layout later
-struct fakeFBO
+struct [[clang::trivial_abi]] fakeFBO
 {
     VkPipeline pipeLine;
     VkCommandPool commandPool;

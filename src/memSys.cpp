@@ -3,6 +3,8 @@
 #include "Vks.tpp"
 #include <cstddef>
 #include <cstdint>
+#include <immintrin.h>
+#include <vulkan/vulkan_core.h>
 
 constexpr auto getMaxBARSize(auto &mheaps) -> VkDeviceSize
 {
@@ -85,14 +87,19 @@ VkBuffer memSys::allocBuf(/* VkBuffer buffer,  */size_t size, VmaAllocation &vma
   return buffer;
 }
 
-void memSys::mapMem(uint8_t *limg, VmaAllocation &VmaAllocation, uint32_t imageSize)
+void memSys::mapMem(uint8_t *limg, VkDeviceSize imageSize)
 {
-  void* data;
-	vmaMapMemory(vmaAllocator, VmaAllocation, &data);
+	
     {
 
 	    memcpy(data, limg, imageSize);
 
     }
-    vmaUnmapMemory(vmaAllocator, VmaAllocation);
+    // vmaUnmapMemory(vmaAllocator, VmaAllocation);
+}
+
+void memSys::addMappedSection(VmaAllocation& VmaAllocation, size_t)
+{
+  reemptMappedSection=&VmaAllocation;
+  vmaMapMemory(vmaAllocator, *reemptMappedSection, (&data));
 }
