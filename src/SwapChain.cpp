@@ -5,6 +5,11 @@ auto SwapChain::getCurrentSwapChainSurfaceCapabilities() const -> VkExtent2D
 {
    VkSurfaceCapabilitiesKHR capabilities;
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physdevice, surface, &capabilities );
+  std::cout <<"maxImageCount"<< capabilities.maxImageCount<<"\n";
+  std::cout <<"supportedUsageFlags"<< capabilities.supportedUsageFlags<<"\n";
+  printf("minExtent:Width, %i %i\n",capabilities.minImageExtent.width, capabilities.minImageExtent.height);
+  printf("maxExtent:Width, %i %i\n",capabilities.maxImageExtent.width, capabilities.maxImageExtent.height);
+  //std::cout <<"maxExtent"<< capabilities.maxImageExtent<<"\n";
   return capabilities.currentExtent;
 }
 

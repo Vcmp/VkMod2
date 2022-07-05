@@ -33,7 +33,8 @@ constexpr char* validationLayers = "VK_LAYER_KHRONOS_validation";
 struct VkInit
 {
     // HINSTANCE inst;
-    const HWND window;
+    
+    
     VkInstance instance=createInstance();
     VkSurfaceKHR surface;
     VkPhysicalDevice physdevice = doPhysicalDevice();
@@ -46,14 +47,15 @@ struct VkInit
     // VkQueue PresentQueue;
     VkQueue TransferQueue;
     // SwapChain SW;
-    explicit constexpr VkInit()= default;
-    explicit constexpr VkInit(HINSTANCE instance): window(init(instance)), surface(createSurface(instance)) {};
+   explicit VkInit(HINSTANCE instance, HWND window): surface(createSurface(instance, window)){};
+    
     VkInit(VkInit const &) = delete;
   VkInit& operator=(const VkInit&) = delete; 
-     [[nodiscard]] auto init(HINSTANCE) const -> HWND;
-     [[nodiscard]] auto  createInstance() const -> VkInstance;
+     
+  [[nodiscard]] auto  createInstance() const -> VkInstance;
+     [[nodiscard]] auto createSurface(HINSTANCE, HWND) const -> VkSurfaceKHR;
      [[nodiscard]] auto  doPhysicalDevice() const -> VkPhysicalDevice;
-     [[nodiscard]] auto createSurface(HINSTANCE) const -> VkSurfaceKHR;
+     
      auto doDevice() -> VkDevice;
      template <typename name> auto vkEnumSet(auto a) const;
      template <typename name>  auto  vkEnumSet2(auto a) const -> std::vector<name>;

@@ -4,6 +4,7 @@
 #include "SwapChain.hpp"
 #include "Pipeline2.hpp"
 #include "memSys.hpp"
+#include "Win.hpp"
 
 
 #include <cstdint>
@@ -81,7 +82,8 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
     }
     std::cout << m4[a];
   }
-   static const VkInit VKI(instance);
+  static const Win win(instance);
+  static const   VkInit VKI(instance, win.window);
    Vks::Device=VKI.tst();
   static const SwapChain SW(VKI.physdevice, VKI.surface);
   static const Pipeline2 PX2;
@@ -119,7 +121,7 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
     std::cout << "fakeFBO" <<std::is_copy_assignable_v<fakeFBO> << "\n";
 
 
-    while(IsWindow(VKI.window))
+    while(IsWindow(win.window))
     {
       static LPMSG msg;
       static DWORD prevTime;
@@ -131,7 +133,7 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
          R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
         aa++;
         
-          PeekMessageA(msg, VKI.window, WM_KEYFIRST, WM_MOVING, PM_REMOVE);
+          PeekMessageA(msg, win.window, WM_KEYFIRST, WM_MOVING, PM_REMOVE);
           
         if(prevTime+CLOCKS_PER_SEC<clock())
         {
