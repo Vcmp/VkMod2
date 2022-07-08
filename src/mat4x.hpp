@@ -33,7 +33,7 @@ public:
    [[gnu::pure]]constexpr void    identity();
    [[gnu::pure]]constexpr void    zero();
    [[gnu::pure]]auto    retCL(bool, uint8_t a);
-   [[gnu::pure]]auto    retCLx2(bool);
+   [[gnu::pure]]auto    retCLx2(bool, uint8_t cxl);
    [[gnu::pure]]auto    t(mat4x);
    [[gnu::pure]]auto    t2(mat4x);
    [[gnu::pure]]auto    retR(int c);
