@@ -75,14 +75,14 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
 
   m4.identity();
   std::cout << &m4 << "\n";
-  for(auto a =0; a<sizeof(m4)/sizeof(float); a++)
+  for(auto a =0; a<4; a++)
   {
-    if(!(a&3))
+    for (auto b =0; b<4; b++)
     {
-      std::cout  << "\n";
-    }
-    std::cout << m4[a];
+      std::cout << m4[b][a];
+    }std::cout  << "\n";
   }
+ 
   static const Win win(instance);
   static const   VkInit VKI(instance, win.window);
    Vks::Device=VKI.tst();

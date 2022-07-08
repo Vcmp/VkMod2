@@ -13,63 +13,44 @@
 #include <cstdint>
 #include <immintrin.h>
 
+using __float512 [[gnu::vector_size(64)]] = float;
+
+
+
 struct [[clang::trivial_abi, clang::vecreturn, gnu::aligned(64)]] mat4x
 {
 public:
-  [[gnu::__const]] __m256 __a = {1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F};
-  __m256 __b = {0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F };
+  [[gnu::__const]] __float512 __ab = {1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F };
 
 
   [[gnu::hot, gnu::pure]] __m256 lud( const float[] ) const __attribute__( ( __aligned__( sizeof( __m256 ) ) ) );
   [[gnu::hot, gnu::pure, gnu::const, gnu::aligned(64), clang::preserve_all, gnu::regcall]] constexpr auto operator=(auto  &__n) const -> float&;
-  [[gnu::hot, gnu::pure, gnu::const, gnu::aligned(64), clang::preserve_all, gnu::regcall]] constexpr auto operator[](auto  __n) const noexcept -> float;
+  [[gnu::hot, gnu::pure, gnu::const, gnu::aligned(64), clang::preserve_all, gnu::regcall]] constexpr __m128 operator[](auto  __n) noexcept;
    constexpr void    toAddress(const __m256* a );
    void    loadAligned( const glm::mat4x4 &a ) __attribute__( ( preserve_most ) );
    void    loadAligned( const mat4x * a ) __attribute__( ( preserve_most ) );
    void    doPerspective( float, float, float, float );
    [[gnu::pure]]constexpr void    identity();
    [[gnu::pure]]constexpr void    zero();
+   [[gnu::pure]]auto    retCL(bool, uint8_t a);
+   [[gnu::pure]]auto    retCLx2(bool);
+   [[gnu::pure]]auto    t(mat4x);
+   [[gnu::pure]]auto    t2(mat4x);
+   [[gnu::pure]]auto    retR(int c);
+   [[gnu::pure]]auto    retC(int r);
+   [[gnu::pure]]auto    retR2(uint8_t c);
+   [[gnu::pure]]auto    retC2(int r);
   ;
 }; 
 
-constexpr auto mat4x::operator=(auto &__n) const -> float&
+
+constexpr __m128 mat4x::operator[](auto __n) noexcept
 {
-  float ax;
-  assert(__n<16);
-  if(__n<8) 
+  assert(__n<4);
   {
-    ax = this->__a[__n];
+    __n*=4;
+    return __extension__(__m128){__ab[0+__n], __ab[1+__n], __ab[2+__n], __ab[3+__n]};
   } 
-  else 
-  {
-   ax = this->__b[__n&7];
-  }
-  
-  return *&ax;
-  
-}
-constexpr auto mat4x::operator[](auto __n) const noexcept -> float
-{
-  assert(__n<16);
-  if(__n<8) 
-  {
-    return this->__a[__n];
-  } 
-  else 
-  {
-   return this->__b[__n&7];
-  }
-}
-constexpr void mat4x::identity()
-{
-   this->__a = __extension__ (__m256){1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F};
-  this-> __b = __extension__ (__m256){0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F };
 
 }
 
-constexpr void mat4x::zero()
-{
-   this->__a = _mm256_xor_ps(__a, __a);
-  this-> __b = _mm256_xor_ps(__b, __b);
-
-}
