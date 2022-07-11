@@ -86,12 +86,12 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
   static const Win win(instance);
   static const   VkInit VKI(instance, win.window);
    Vks::Device=VKI.tst();
-  static const SwapChain SW(VKI.physdevice, VKI.surface);
+  static  SwapChain SW(VKI.physdevice, VKI.surface);
   static const Pipeline2 PX2;
   static const renderer2 R2;      
   static  memSys memSysm(VKI.physdevice, VKI.device, VKI.instance);                             
   static  tst2 t2(VKI.GraphicsQueue, VkCommSet(), memSysm);
-  //t2.setupImagetest(memSysm);
+  // t2.copyBufToImg(t2.stagingBuffer, t2.image, {width, height, 1});
   
     const auto pi2 = PX2.genPipeline({VsMCI3temp, VsMCI4temp}, SW.renderpass, VK_CULL_MODE_BACK_BIT, 1);
 
@@ -132,6 +132,7 @@ constexpr der_pod dp{ {base_pod::tA(10) , 2}, 3 };
         const auto x = clock();
         
          fFBO.doCommndRec(renderer2::currentFrame, x);
+        //  t2.vkRecImg(SW.image[renderer2::currentFrame], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
          vkResetFences(VKI.tst(), 1, &R2.fence[renderer2::currentFrame]);
          R2.drawFrame(VKI, SW, {fFBO.commandBuffers[renderer2::currentFrame]});
         aa++;

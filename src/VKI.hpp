@@ -25,7 +25,7 @@ typedef unsigned long DWORD;
 // constexpr uint16_t height = 480;
 // constexpr uint8_t Frames = 8;
 
-constexpr bool ENABLE_VALIDATION_LAYERS = false;
+constexpr bool ENABLE_VALIDATION_LAYERS = true;
 
 
 constexpr char* validationLayers = "VK_LAYER_KHRONOS_validation";
