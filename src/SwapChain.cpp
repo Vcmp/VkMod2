@@ -37,11 +37,8 @@ auto SwapChain::setupImageFormats() -> VkSurfaceFormatKHR
     // VkSurfaceFormatKHR surfaceFormat;
     for ( const VkSurfaceFormatKHR & surfaceFormat1 : surfaceFormats )
     {
-      if ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_UNORM && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-      {
-        swapChainImageFormat = surfaceFormat1;
-        break;
-      }
+      swapChainImageFormat= ( surfaceFormat1.format == VK_FORMAT_B8G8R8A8_UNORM && surfaceFormat1.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)?surfaceFormat1:surfaceFormats[0];
+    
     }
 
     for ( const VkPresentModeKHR & presentMode1 : presentModes )
